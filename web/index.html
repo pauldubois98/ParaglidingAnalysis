@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paragliding Thermal Heatmap — Arbas</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0f1a; color: #e0e8f0; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+    #canvas-container { width: 100vw; height: 100vh; position: relative; }
+    canvas { display: block; }
+
+    #ui-panel {
+      position: absolute;
+      top: 16px; right: 16px;
+      width: 260px;
+      background: rgba(10,15,30,0.85);
+      border: 1px solid rgba(100,160,255,0.3);
+      border-radius: 12px;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+    }
+    #ui-panel h2 {
+      font-size: 14px;
+      color: #7eb8ff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+    .control-group { margin-bottom: 12px; }
+    .control-group label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: #99b8d0;
+      margin-bottom: 4px;
+    }
+    .control-group label span { color: #7eb8ff; font-weight: bold; }
+    input[type="range"] {
+      width: 100%;
+      -webkit-appearance: none;
+      height: 4px;
+      background: rgba(100,160,255,0.2);
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px; height: 14px;
+      border-radius: 50%;
+      background: #7eb8ff;
+      cursor: pointer;
+    }
+    .scenario-btn {
+      display: inline-block;
+      padding: 4px 10px;
+      margin: 3px 2px;
+      font-size: 11px;
+      border: 1px solid rgba(100,160,255,0.4);
+      border-radius: 20px;
+      cursor: pointer;
+      color: #99b8d0;
+      background: transparent;
+      transition: all 0.2s;
+    }
+    .scenario-btn.active { background: #7eb8ff; color: #0a0f1a; border-color: #7eb8ff; }
+    #status {
+      position: absolute;
+      bottom: 16px; left: 16px;
+      font-size: 11px;
+      color: rgba(150,180,220,0.6);
+    }
+    #colorbars {
+      position: absolute;
+      bottom: 24px; right: 20px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+    .colorbar {
+      background: rgba(10,15,30,0.82);
+      border: 1px solid rgba(100,160,255,0.2);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+    .colorbar-title {
+      text-align: center;
+      margin-bottom: 6px;
+      font-weight: bold;
+      color: #7eb8ff;
+      font-size: 11px;
+    }
+    .colorbar-body {
+      display: flex;
+      gap: 6px;
+      align-items: stretch;
+    }
+    .colorbar-canvas { border-radius: 3px; }
+    .colorbar-labels {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 10px;
+      color: #99b8d0;
+      line-height: 1;
+    }
+    #loading {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: #7eb8ff;
+    }
+    #loading .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid rgba(126,184,255,0.2);
+      border-top-color: #7eb8ff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+<div id="canvas-container">
+  <div id="loading">
+    <div class="spinner"></div>
+    <div>Loading simulation data...</div>
+  </div>
+</div>
+
+<div id="ui-panel">
+  <h2>Arbas Thermals</h2>
+
+  <div class="control-group">
+    <label>Scenario</label>
+    <div id="scenario-buttons"></div>
+  </div>
+
+  <div class="control-group">
+    <label>Terrain opacity <span id="terrain-opacity-val">0.8</span></label>
+    <input type="range" id="terrain-opacity" min="0.1" max="1" step="0.05" value="0.8">
+  </div>
+
+  <div class="control-group">
+    <label>Heatmap opacity <span id="heatmap-opacity-val">0.7</span></label>
+    <input type="range" id="heatmap-opacity" min="0" max="1" step="0.05" value="0.7">
+  </div>
+
+  <div class="control-group" style="margin-top:8px; font-size:11px; color:#668; line-height:1.5">
+    Drag to rotate · Scroll to zoom · Right-drag to pan
+  </div>
+</div>
+
+<div id="colorbars">
+  <div class="colorbar">
+    <div class="colorbar-title">Elevation (m)</div>
+    <div class="colorbar-body">
+      <canvas class="colorbar-canvas" id="cb-elevation" width="20" height="180"></canvas>
+      <div class="colorbar-labels" id="cb-elevation-labels"></div>
+    </div>
+  </div>
+  <div class="colorbar">
+    <div class="colorbar-title">Thermal ΔT (K)</div>
+    <div class="colorbar-body">
+      <canvas class="colorbar-canvas" id="cb-thermal" width="20" height="180"></canvas>
+      <div class="colorbar-labels" id="cb-thermal-labels"></div>
+    </div>
+  </div>
+</div>
+
+<div id="status">Drag to orbit · Scroll to zoom</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ─── Scene setup ───────────────────────────────────────────────────────────
+const container = document.getElementById('canvas-container');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x040810);
+scene.fog = new THREE.Fog(0x040810, 8000, 18000);
+
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 10, 30000);
+camera.position.set(0, -2500, 2500);
+camera.up.set(0, 0, 1);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0, 800);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.minDistance = 200;
+controls.maxDistance = 12000;
+controls.maxPolarAngle = Math.PI * 0.48;
+
+// Lighting
+scene.add(new THREE.AmbientLight(0x1a2a3a, 2));
+const sun = new THREE.DirectionalLight(0xfff0dd, 3);
+sun.position.set(1000, -500, 2000);
+sun.castShadow = true;
+scene.add(sun);
+
+// ─── Data ──────────────────────────────────────────────────────────────────
+let simData = null;
+let currentScenario = 0;
+let terrainMesh = null;
+
+// ─── Load simulation data ───────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const resp = await fetch('../data/simulation.json');
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    simData = await resp.json();
+    document.getElementById('loading').style.display = 'none';
+    init();
+  } catch (e) {
+    document.getElementById('loading').innerHTML =
+      `<div style="color:#f66">Failed to load simulation.json<br><small>${e.message}</small><br><br>
+       <small>Run the notebook first, then serve from project root:<br>
+       <code>python -m http.server 8000</code></small></div>`;
+  }
+}
+
+// ─── Terrain mesh ───────────────────────────────────────────────────────────
+let terrainZMin = 0, terrainZMax = 1;
+
+function buildTerrain(terrainData) {
+  if (terrainMesh) { scene.remove(terrainMesh); terrainMesh.geometry.dispose(); }
+
+  const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+  const elev = elevation;
+
+  const geom = new THREE.PlaneGeometry(
+    x_extent[1] - x_extent[0],
+    y_extent[1] - y_extent[0],
+    nx - 1, ny - 1
+  );
+
+  const pos = geom.attributes.position;
+  for (let j = 0; j < ny; j++)
+    for (let i = 0; i < nx; i++)
+      pos.setZ(j * nx + i, elev[j][i]);
+  pos.needsUpdate = true;
+  geom.computeVertexNormals();
+
+  terrainZMin = Infinity; terrainZMax = -Infinity;
+  for (let i = 0; i < pos.count; i++) {
+    const z = pos.getZ(i);
+    if (z < terrainZMin) terrainZMin = z;
+    if (z > terrainZMax) terrainZMax = z;
+  }
+
+  geom.setAttribute('color', new THREE.BufferAttribute(new Float32Array(pos.count * 3), 3));
+
+  const mat = new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, opacity: 0.8 });
+  window._terrainMat = mat;
+
+  terrainMesh = new THREE.Mesh(geom, mat);
+  terrainMesh.position.set((x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0);
+  terrainMesh.receiveShadow = true;
+  scene.add(terrainMesh);
+
+  const meanElev = elev.flat().reduce((a, b) => a + b, 0) / (nx * ny);
+  controls.target.set(0, 0, meanElev);
+  camera.position.set(0, -3000, meanElev + 1500);
+  controls.update();
+}
+
+function applyElevationColors() {
+  if (!terrainMesh) return;
+  const pos = terrainMesh.geometry.attributes.position;
+  const arr = terrainMesh.geometry.attributes.color.array;
+  const c = new THREE.Color();
+  for (let i = 0; i < pos.count; i++) {
+    const t = (pos.getZ(i) - terrainZMin) / (terrainZMax - terrainZMin);
+    if (t < 0.35)      c.setRGB(0.15 + t * 0.4,  0.30 + t * 0.25, 0.08 + t * 0.05);
+    else if (t < 0.65) c.setRGB(0.28 + t * 0.3,  0.28 + t * 0.1,  0.15 + t * 0.2);
+    else               c.setRGB(0.55 + t * 0.45, 0.55 + t * 0.35, 0.55 + t * 0.45);
+    arr[i * 3] = c.r; arr[i * 3 + 1] = c.g; arr[i * 3 + 2] = c.b;
+  }
+  terrainMesh.geometry.attributes.color.needsUpdate = true;
+}
+
+// ─── Colorbars ───────────────────────────────────────────────────────────────
+function drawElevationColorbar() {
+  const canvas = document.getElementById('cb-elevation');
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  grad.addColorStop(0,    'rgb(230,230,230)');
+  grad.addColorStop(0.35, 'rgb(140,110,90)');
+  grad.addColorStop(0.65, 'rgb(100,80,50)');
+  grad.addColorStop(1,    'rgb(40,90,25)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const labelsDiv = document.getElementById('cb-elevation-labels');
+  labelsDiv.innerHTML = '';
+  for (let k = 0; k <= 5; k++) {
+    const val = terrainZMax - (k / 5) * (terrainZMax - terrainZMin);
+    const span = document.createElement('span');
+    span.textContent = val.toFixed(0);
+    labelsDiv.appendChild(span);
+  }
+}
+
+function drawThermalColorbar(maxDT) {
+  const canvas = document.getElementById('cb-thermal');
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  grad.addColorStop(0,    'rgb(255,255,255)');
+  grad.addColorStop(0.33, 'rgb(255,170,0)');
+  grad.addColorStop(0.67, 'rgb(180,20,0)');
+  grad.addColorStop(1,    'rgb(0,0,0)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  const labelsDiv = document.getElementById('cb-thermal-labels');
+  labelsDiv.innerHTML = '';
+  for (let k = 0; k <= 5; k++) {
+    const val = maxDT - (k / 5) * maxDT;
+    const span = document.createElement('span');
+    span.textContent = val.toFixed(1);
+    labelsDiv.appendChild(span);
+  }
+}
+
+// ─── Heatmap overlay ────────────────────────────────────────────────────────
+let heatmapMesh = null;
+
+function buildHeatmap(terrainData) {
+  if (heatmapMesh) { scene.remove(heatmapMesh); heatmapMesh.geometry.dispose(); heatmapMesh.material.dispose(); }
+
+  const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+
+  const geom = new THREE.PlaneGeometry(
+    x_extent[1] - x_extent[0],
+    y_extent[1] - y_extent[0],
+    nx - 1, ny - 1
+  );
+
+  // Match terrain elevation, lifted 3m to avoid z-fighting
+  const pos = geom.attributes.position;
+  for (let j = 0; j < ny; j++)
+    for (let i = 0; i < nx; i++)
+      pos.setZ(j * nx + i, elevation[j][i] + 3);
+  pos.needsUpdate = true;
+
+  const colors = new Float32Array(pos.count * 3);
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+  const mat = new THREE.MeshBasicMaterial({
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.7,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+    side: THREE.FrontSide,
+  });
+  window._heatmapMat = mat;
+
+  heatmapMesh = new THREE.Mesh(geom, mat);
+  heatmapMesh.position.set(
+    (x_extent[0] + x_extent[1]) / 2,
+    -(y_extent[0] + y_extent[1]) / 2,
+    0
+  );
+  scene.add(heatmapMesh);
+}
+
+// Blackbody colormap: black → dark red → orange → yellow → white
+function thermalColor(t) {
+  const r = Math.min(1, t * 3);
+  const g = Math.min(1, Math.max(0, t * 3 - 1));
+  const b = Math.min(1, Math.max(0, t * 3 - 2));
+  return [r, g, b];
+}
+
+function updateHeatmapColors(scenarioIndex) {
+  if (!heatmapMesh || !simData) return;
+  const sc = simData.scenarios[scenarioIndex];
+  const T = simData.terrain;
+  const dT = sc.ground_temp_anomaly;
+
+  let maxDT = 0;
+  for (let j = 0; j < T.ny; j++)
+    for (let i = 0; i < T.nx; i++)
+      if (dT[j][i] > maxDT) maxDT = dT[j][i];
+
+  const arr = heatmapMesh.geometry.attributes.color.array;
+  for (let j = 0; j < T.ny; j++) {
+    for (let i = 0; i < T.nx; i++) {
+      const idx = (j * T.nx + i) * 3;
+      const [r, g, b] = thermalColor(dT[j][i] / maxDT);
+      arr[idx] = r; arr[idx + 1] = g; arr[idx + 2] = b;
+    }
+  }
+  heatmapMesh.geometry.attributes.color.needsUpdate = true;
+  drawThermalColorbar(maxDT);
+}
+
+// ─── Waypoint markers ────────────────────────────────────────────────────────
+const MARKER_CONFIG = {
+  landing: { color: 0x00ff88, label: '▼ Landing',  poleColor: 0x00cc66 },
+  takeoff: { color: 0xff8800, label: '▲ Take-off', poleColor: 0xcc6600 },
+};
+
+const markerSprites = [];
+
+function buildMarkers(markersData) {
+  // Remove old markers
+  markerSprites.forEach(s => scene.remove(s));
+  markerSprites.length = 0;
+
+  markersData.forEach(m => {
+    const cfg = MARKER_CONFIG[m.type];
+    if (!cfg) return;
+
+    const elevation = m.z;
+
+    // Vertical pole
+    const poleH = 120;
+    const poleGeo = new THREE.CylinderGeometry(4, 4, poleH, 8);
+    const poleMat = new THREE.MeshLambertMaterial({ color: cfg.poleColor });
+    const pole = new THREE.Mesh(poleGeo, poleMat);
+    // CylinderGeometry is Y-up; we rotate so it stands along Z
+    pole.rotation.x = Math.PI / 2;
+    pole.position.set(m.x, -m.y, elevation + poleH / 2);
+    scene.add(pole);
+    markerSprites.push(pole);
+
+    // Flag / cone on top
+    const coneGeo = new THREE.ConeGeometry(40, 80, 12);
+    const coneMat = new THREE.MeshLambertMaterial({ color: cfg.color });
+    const cone = new THREE.Mesh(coneGeo, coneMat);
+    cone.rotation.x = Math.PI / 2;  // point upward along Z
+    cone.position.set(m.x, -m.y, elevation + poleH + 40);
+    scene.add(cone);
+    markerSprites.push(cone);
+
+    // HTML label overlay (positioned each frame in animate)
+    const div = document.createElement('div');
+    div.style.cssText = `
+      position: absolute; pointer-events: none;
+      background: rgba(10,15,30,0.82); border: 1px solid ${cfg.color === 0x00ff88 ? '#00ff88' : '#ff8800'};
+      color: ${cfg.color === 0x00ff88 ? '#00ff88' : '#ff8800'};
+      font-size: 12px; font-weight: bold; font-family: 'Segoe UI', sans-serif;
+      padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+      transform: translate(-50%, -100%); margin-top: -8px;
+    `;
+    div.textContent = `${cfg.label}  ${elevation.toFixed(0)}m`;
+    document.getElementById('canvas-container').appendChild(div);
+
+    // Store world position for projection each frame
+    cone._labelDiv = div;
+    cone._worldPos = new THREE.Vector3(m.x, -m.y, elevation + poleH + 90);
+  });
+}
+
+function updateMarkerLabels() {
+  markerSprites.forEach(obj => {
+    if (!obj._labelDiv) return;
+    const pos = obj._worldPos.clone().project(camera);
+    const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-pos.y * 0.5 + 0.5) * window.innerHeight;
+    obj._labelDiv.style.left = x + 'px';
+    obj._labelDiv.style.top  = y + 'px';
+    // Hide if behind camera
+    obj._labelDiv.style.display = pos.z > 1 ? 'none' : 'block';
+  });
+}
+
+
+// ─── Init ───────────────────────────────────────────────────────────────────
+function init() {
+  buildTerrain(simData.terrain);
+  applyElevationColors();
+  drawElevationColorbar();
+  buildHeatmap(simData.terrain);
+  updateHeatmapColors(0);
+  buildMarkers(simData.markers || []);
+  buildScenarioButtons();
+  animate();
+}
+
+function buildScenarioButtons() {
+  const container = document.getElementById('scenario-buttons');
+  container.innerHTML = '';
+  simData.scenarios.forEach((sc, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'scenario-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = sc.name.replace('_', ' ');
+    btn.onclick = () => {
+      currentScenario = i;
+      container.querySelectorAll('.scenario-btn').forEach((b, j) => {
+        b.classList.toggle('active', j === i);
+      });
+      updateHeatmapColors(i);
+    };
+    container.appendChild(btn);
+  });
+}
+
+// ─── UI controls ─────────────────────────────────────────────────────────
+document.getElementById('terrain-opacity').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('terrain-opacity-val').textContent = v.toFixed(2);
+  if (window._terrainMat) window._terrainMat.opacity = v;
+});
+document.getElementById('heatmap-opacity').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('heatmap-opacity-val').textContent = v.toFixed(2);
+  if (window._heatmapMat) window._heatmapMat.opacity = v;
+});
+
+// ─── Animate ────────────────────────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  updateMarkerLabels();
+  renderer.render(scene, camera);
+}
+
+// Resize
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+loadData();
+</script>
+</body>
+</html>
