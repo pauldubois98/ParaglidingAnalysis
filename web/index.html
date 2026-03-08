@@ -993,7 +993,7 @@ function buildClickMarker(x, y, z, elevM) {
     padding: 3px 8px; border-radius: 4px; white-space: nowrap;
     transform: translate(-50%, -100%); margin-top: -8px;
   `;
-  div.textContent = `Selected  ${elevM !== undefined ? elevM.toFixed(0) + 'm' : ''}`;
+  div.textContent = `▶ Selected ${elevM !== undefined ? elevM.toFixed(0) + 'm' : ''}`;
   document.getElementById('canvas-container').appendChild(div);
   cone._labelDiv = div;
   cone._worldPos = new THREE.Vector3(x, y, z + poleH + 90);
@@ -1042,7 +1042,7 @@ renderer.domElement.addEventListener('click', e => {
   const hits = raycaster.intersectObject(terrainMesh);
   if (!hits.length) {
     infoPanel.style.display = 'none';
-    if (clickMarker) { clickMarker.forEach(m => scene.remove(m)); clickMarker = null; }
+    if (clickMarker) { clickMarker.forEach(m => { scene.remove(m); if (m._labelDiv) m._labelDiv.remove(); }); clickMarker = null; }
     return;
   }
 
