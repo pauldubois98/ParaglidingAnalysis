@@ -13,7 +13,7 @@
     #ui-panel {
       position: absolute;
       top: 16px; right: 16px;
-      width: 260px;
+      width: 250px;
       background: rgba(10,15,30,0.85);
       border: 1px solid rgba(100,160,255,0.3);
       border-radius: 12px;
@@ -64,15 +64,9 @@
       transition: all 0.2s;
     }
     .scenario-btn.active { background: #7eb8ff; color: #0a0f1a; border-color: #7eb8ff; }
-    #status {
-      position: absolute;
-      bottom: 16px; left: 16px;
-      font-size: 11px;
-      color: rgba(150,180,220,0.6);
-    }
     #colorbars {
       position: absolute;
-      bottom: 24px; right: 20px;
+      bottom: 24px; left: 20px;
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
@@ -137,10 +131,47 @@
       margin: 0 auto 12px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    #info-panel {
+      position: absolute;
+      bottom: 16px; right: 16px;
+      width: 250px;
+      background: rgba(10,15,30,0.85);
+      border: 1px solid rgba(100,160,255,0.3);
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 12px;
+      color: #c8d8e8;
+      backdrop-filter: blur(8px);
+      display: none;
+    }
+    #info-panel h2 {
+      font-size: 14px;
+      color: #7eb8ff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    #info-panel .info-coords {
+      font-size: 10px;
+      color: #7eb8ff;
+      margin-bottom: 10px;
+    }
+    #info-panel .info-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 5px;
+      border-bottom: 1px solid rgba(100,160,255,0.08);
+      padding-bottom: 5px;
+    }
+    #info-panel .info-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    #info-panel .info-label { color: #6888a0; }
+    #info-panel .info-val   { color: #e0f0ff; font-weight: bold; text-align: right; }
   </style>
 </head>
 <body>
 <div id="canvas-container">
+  <div id="info-panel"></div>
   <div id="loading">
     <div class="spinner"></div>
     <div>Loading simulation data...</div>
@@ -176,7 +207,7 @@
   </div>
 
   <div class="control-group">
-    <label>Sun shading <span id="neutral-opacity-val">0.00</span></label>
+    <label>Neutral<span id="neutral-opacity-val">0.00</span></label>
     <input type="range" id="neutral-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
   </div>
 
@@ -230,8 +261,6 @@
     </div>
   </div>
 </div>
-
-<div id="status">Drag to orbit · Scroll to zoom</div>
 
 <script type="importmap">
 {
@@ -616,6 +645,7 @@ function buildAlbedoOverlay(terrainData) {
 // ─── Slope overlay ────────────────────────────────────────────────────────────
 let slopeMesh = null;
 let slopeMax  = 45;
+let slopeDegData = null;   // saved for point queries
 
 function buildSlopeOverlay(terrainData) {
   if (slopeMesh) { scene.remove(slopeMesh); slopeMesh.geometry.dispose(); slopeMesh.material.dispose(); }
@@ -631,7 +661,8 @@ function buildSlopeOverlay(terrainData) {
   pos.needsUpdate = true;
 
   // Compute slope (degrees) via central differences
-  const slopeDeg = new Float32Array(ny * nx);
+  slopeDegData = new Float32Array(ny * nx);
+  const slopeDeg = slopeDegData;
   slopeMax = 0;
   for (let j = 0; j < ny; j++) {
     for (let i = 0; i < nx; i++) {
@@ -763,7 +794,8 @@ function buildMarkers(markersData) {
 }
 
 function updateMarkerLabels() {
-  markerSprites.forEach(obj => {
+  const objs = [...markerSprites, ...(clickMarker || [])];
+  objs.forEach(obj => {
     if (!obj._labelDiv) return;
     const pos = obj._worldPos.clone().project(camera);
     const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
@@ -919,6 +951,111 @@ function setSlider(id, val) {
 document.addEventListener('input', e => {
   if (e.target.type === 'range' && !window._settingPreset) markModified();
 }, true /* capture phase — fires before individual listeners */);
+
+// ─── Point inspection ────────────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const _mouse    = new THREE.Vector2();
+const infoPanel = document.getElementById('info-panel');
+let _mouseDownX = 0, _mouseDownY = 0;
+let clickMarker = null;   // 3D marker at the last clicked point
+
+function buildClickMarker(x, y, z, elevM) {
+  if (clickMarker) {
+    clickMarker.forEach(m => {
+      scene.remove(m);
+      if (m._labelDiv) m._labelDiv.remove();
+    });
+  }
+  const color = 0x4488ff;
+  const poleH = 120;
+
+  const pole = new THREE.Mesh(
+    new THREE.CylinderGeometry(4, 4, poleH, 8),
+    new THREE.MeshLambertMaterial({ color })
+  );
+  pole.rotation.x = Math.PI / 2;
+  pole.position.set(x, y, z + poleH / 2);
+
+  const cone = new THREE.Mesh(
+    new THREE.ConeGeometry(40, 80, 12),
+    new THREE.MeshLambertMaterial({ color })
+  );
+  cone.rotation.x = Math.PI / 2;
+  cone.position.set(x, y, z + poleH + 40);
+
+  // HTML label
+  const div = document.createElement('div');
+  div.style.cssText = `
+    position: absolute; pointer-events: none;
+    background: rgba(10,15,30,0.82); border: 1px solid #4488ff;
+    color: #4488ff;
+    font-size: 12px; font-weight: bold; font-family: 'Segoe UI', sans-serif;
+    padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+    transform: translate(-50%, -100%); margin-top: -8px;
+  `;
+  div.textContent = `Selected  ${elevM !== undefined ? elevM.toFixed(0) + 'm' : ''}`;
+  document.getElementById('canvas-container').appendChild(div);
+  cone._labelDiv = div;
+  cone._worldPos = new THREE.Vector3(x, y, z + poleH + 90);
+
+  scene.add(pole, cone);
+  clickMarker = [pole, cone];
+}
+
+function updateInfoPanel(pt, gi, gj) {
+  const T      = simData.terrain;
+  const elev   = T.elevation[gj][gi];
+  const tf     = T.thermal_factor ? T.thermal_factor[gj][gi].toFixed(2) : '—';
+  const dT     = simData.scenarios[currentScenario].ground_temp_anomaly[gj][gi];
+  const slope  = slopeDegData ? slopeDegData[gj * T.nx + gi].toFixed(1) : '—';
+  const scName = simData.scenarios[currentScenario].name;
+
+  const R   = 6371000;
+  const lat = T.projection_origin.lat - (-pt.y) * 180 / (Math.PI * R);
+  const lon = T.projection_origin.lon +   pt.x  * 180 / (Math.PI * R * Math.cos(T.projection_origin.lat * Math.PI / 180));
+
+  infoPanel.innerHTML = `
+    <h2>Selected point</h2>
+    <div class="info-coords">${lat.toFixed(5)}° N &nbsp; ${lon.toFixed(5)}° E</div>
+    <div class="info-row"><span class="info-label">Elevation</span>      <span class="info-val">${elev.toFixed(0)} m</span></div>
+    <div class="info-row"><span class="info-label">Slope</span>          <span class="info-val">${slope}°</span></div>
+    <div class="info-row"><span class="info-label">Thermal factor</span> <span class="info-val">${tf}</span></div>
+    <div class="info-row"><span class="info-label">Thermal ΔT</span>     <span class="info-val">${dT.toFixed(1)} K</span></div>
+    <div class="info-row"><span class="info-label">Scenario</span>       <span class="info-val">${scName}</span></div>
+  `;
+  infoPanel.style.display = 'block';
+}
+
+renderer.domElement.addEventListener('mousedown', e => {
+  _mouseDownX = e.clientX; _mouseDownY = e.clientY;
+});
+
+renderer.domElement.addEventListener('click', e => {
+  if (Math.hypot(e.clientX - _mouseDownX, e.clientY - _mouseDownY) > 5) return;
+  if (!terrainMesh || !simData) return;
+
+  const rect = renderer.domElement.getBoundingClientRect();
+  _mouse.x =  ((e.clientX - rect.left) / rect.width)  * 2 - 1;
+  _mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(_mouse, camera);
+  const hits = raycaster.intersectObject(terrainMesh);
+  if (!hits.length) {
+    infoPanel.style.display = 'none';
+    if (clickMarker) { clickMarker.forEach(m => scene.remove(m)); clickMarker = null; }
+    return;
+  }
+
+  const pt = hits[0].point;
+  const T  = simData.terrain;
+  const gi = Math.round((pt.x - T.x_extent[0]) / T.dx);
+  const gj = Math.round((-pt.y - T.y_extent[0]) / T.dy);
+  if (gi < 0 || gi >= T.nx || gj < 0 || gj >= T.ny) return;
+
+  const elev = T.elevation[gj][gi];
+  buildClickMarker(pt.x, pt.y, elev, elev);
+  updateInfoPanel(pt, gi, gj);
+});
 
 // ─── Animate ────────────────────────────────────────────────────────────────
 function updateSunLabel() {
