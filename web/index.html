@@ -94,6 +94,18 @@
       transition: background 0.15s;
     }
     .reset-btn:hover { background: rgba(100,160,255,0.22); }
+    .mode-btn {
+      flex: 1;
+      padding: 4px 0;
+      font-size: 11px;
+      border: 1px solid rgba(100,160,255,0.35);
+      border-radius: 5px;
+      cursor: pointer;
+      color: #99b8d0;
+      background: transparent;
+      transition: all 0.15s;
+    }
+    .mode-btn.active { background: #7eb8ff; color: #0a0f1a; border-color: #7eb8ff; }
     .colorbar {
       background: rgba(10,15,30,0.82);
       border: 1px solid rgba(100,160,255,0.2);
@@ -153,6 +165,14 @@
   <div class="control-group">
     <label>Scenario</label>
     <div id="scenario-buttons"></div>
+  </div>
+
+  <div class="control-group">
+    <label>Terrain color</label>
+    <div style="display:flex; gap:5px; margin-top:3px">
+      <button class="mode-btn active" id="mode-elevation">Elevation</button>
+      <button class="mode-btn" id="mode-neutral">Neutral shading</button>
+    </div>
   </div>
 
   <div class="control-group">
@@ -244,6 +264,7 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 container.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -268,6 +289,16 @@ scene.add(ambientLight);
 const sun = new THREE.DirectionalLight(0xfff0dd, 3);
 sun.position.set(1000, -500, 2000);
 sun.castShadow = true;
+// Shadow map — high resolution, frustum tightly fitted to terrain extent
+sun.shadow.mapSize.width  = 4096;
+sun.shadow.mapSize.height = 4096;
+sun.shadow.camera.left   = -5500;
+sun.shadow.camera.right  =  5500;
+sun.shadow.camera.top    =  5500;
+sun.shadow.camera.bottom = -5500;
+sun.shadow.camera.near   = 100;
+sun.shadow.camera.far    = 18000;
+sun.shadow.bias          = -0.002;   // prevents shadow acne on large terrain
 scene.add(sun);
 
 // ─── Data ──────────────────────────────────────────────────────────────────
@@ -349,6 +380,23 @@ function applyElevationColors() {
     arr[i * 3] = c.r; arr[i * 3 + 1] = c.g; arr[i * 3 + 2] = c.b;
   }
   terrainMesh.geometry.attributes.color.needsUpdate = true;
+}
+
+let terrainColorMode = 'elevation'; // 'elevation' | 'neutral'
+
+function applyNeutralColors() {
+  if (!terrainMesh) return;
+  const arr = terrainMesh.geometry.attributes.color.array;
+  // Warm limestone/rock tone — neutral enough to show lighting clearly
+  for (let i = 0; i < arr.length; i += 3) {
+    arr[i] = 0.72; arr[i + 1] = 0.65; arr[i + 2] = 0.55;
+  }
+  terrainMesh.geometry.attributes.color.needsUpdate = true;
+}
+
+function applyTerrainColors() {
+  if (terrainColorMode === 'elevation') applyElevationColors();
+  else applyNeutralColors();
 }
 
 // ─── Colorbars ───────────────────────────────────────────────────────────────
@@ -567,6 +615,7 @@ function updateSunObject(scenarioIndex) {
 
   // Update directional light to come from same direction
   sun.position.copy(pos);
+  sun.shadow.camera.updateProjectionMatrix();
 
   // Update label text (position updated each frame in updateSunLabel)
   sunLabelDiv.textContent = `☀ ${sc.name}  el ${sc.sun_elevation}°`;
@@ -810,6 +859,19 @@ function buildScenarioButtons() {
 }
 
 // ─── UI controls ─────────────────────────────────────────────────────────
+document.getElementById('mode-elevation').addEventListener('click', () => {
+  terrainColorMode = 'elevation';
+  document.getElementById('mode-elevation').classList.add('active');
+  document.getElementById('mode-neutral').classList.remove('active');
+  applyElevationColors();
+});
+document.getElementById('mode-neutral').addEventListener('click', () => {
+  terrainColorMode = 'neutral';
+  document.getElementById('mode-neutral').classList.add('active');
+  document.getElementById('mode-elevation').classList.remove('active');
+  applyNeutralColors();
+});
+
 document.getElementById('terrain-opacity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
   document.getElementById('terrain-opacity-val').textContent = v.toFixed(2);
@@ -860,6 +922,11 @@ document.getElementById('reset-btn').addEventListener('click', () => {
     document.getElementById(id + '-val').textContent = cfg.display(cfg.val);
     cfg.apply(cfg.val);
   }
+  // Reset terrain color mode to elevation
+  terrainColorMode = 'elevation';
+  document.getElementById('mode-elevation').classList.add('active');
+  document.getElementById('mode-neutral').classList.remove('active');
+  applyElevationColors();
 });
 
 // ─── Animate ────────────────────────────────────────────────────────────────
