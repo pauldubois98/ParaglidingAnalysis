@@ -80,32 +80,19 @@
       justify-content: flex-end;
       max-width: 420px;
     }
-    .reset-btn {
-      width: 100%;
-      margin-top: 6px;
-      padding: 6px;
-      background: rgba(100,160,255,0.08);
-      border: 1px solid rgba(100,160,255,0.35);
-      border-radius: 6px;
-      color: #7eb8ff;
-      cursor: pointer;
-      font-size: 12px;
-      letter-spacing: 0.5px;
-      transition: background 0.15s;
-    }
-    .reset-btn:hover { background: rgba(100,160,255,0.22); }
-    .mode-btn {
-      flex: 1;
-      padding: 4px 0;
+    .preset-btn {
+      display: inline-block;
+      padding: 4px 9px;
+      margin: 3px 2px;
       font-size: 11px;
-      border: 1px solid rgba(100,160,255,0.35);
-      border-radius: 5px;
+      border: 1px solid rgba(255,200,80,0.4);
+      border-radius: 20px;
       cursor: pointer;
-      color: #99b8d0;
+      color: #d0b870;
       background: transparent;
-      transition: all 0.15s;
+      transition: all 0.2s;
     }
-    .mode-btn.active { background: #7eb8ff; color: #0a0f1a; border-color: #7eb8ff; }
+    .preset-btn.active { background: #c8a040; color: #0a0f1a; border-color: #c8a040; }
     .colorbar {
       background: rgba(10,15,30,0.82);
       border: 1px solid rgba(100,160,255,0.2);
@@ -168,11 +155,8 @@
   </div>
 
   <div class="control-group">
-    <label>Terrain color</label>
-    <div style="display:flex; gap:5px; margin-top:3px">
-      <button class="mode-btn active" id="mode-elevation">Elevation</button>
-      <button class="mode-btn" id="mode-neutral">Neutral shading</button>
-    </div>
+    <label>Preset</label>
+    <div id="preset-buttons"></div>
   </div>
 
   <div class="control-group">
@@ -205,7 +189,10 @@
     <input type="range" id="slope-opacity" min="0" max="1" step="0.05" value="0">
   </div>
 
-  <button class="reset-btn" id="reset-btn">↺ Reset defaults</button>
+  <div class="control-group">
+    <label>Sun shading opacity <span id="neutral-opacity-val">0.00</span></label>
+    <input type="range" id="neutral-opacity" min="0" max="1" step="0.05" value="0">
+  </div>
 
   <div class="control-group" style="margin-top:10px; font-size:11px; color:#668; line-height:1.5">
     Drag to rotate · Scroll to zoom · Right-drag to pan
@@ -309,14 +296,19 @@ let terrainMesh = null;
 // ─── Load simulation data ───────────────────────────────────────────────────
 async function loadData() {
   try {
-    const resp = await fetch('../data/simulation.json');
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    simData = await resp.json();
+    const [simResp, presetsResp] = await Promise.all([
+      fetch('../data/simulation.json'),
+      fetch('presets.json'),
+    ]);
+    if (!simResp.ok) throw new Error(`simulation.json: HTTP ${simResp.status}`);
+    if (!presetsResp.ok) throw new Error(`presets.json: HTTP ${presetsResp.status}`);
+    simData = await simResp.json();
+    window._presetsData = await presetsResp.json();
     document.getElementById('loading').style.display = 'none';
     init();
   } catch (e) {
     document.getElementById('loading').innerHTML =
-      `<div style="color:#f66">Failed to load simulation.json<br><small>${e.message}</small><br><br>
+      `<div style="color:#f66">Failed to load data<br><small>${e.message}</small><br><br>
        <small>Run the notebook first, then serve from project root:<br>
        <code>python -m http.server 8000</code></small></div>`;
   }
@@ -380,23 +372,6 @@ function applyElevationColors() {
     arr[i * 3] = c.r; arr[i * 3 + 1] = c.g; arr[i * 3 + 2] = c.b;
   }
   terrainMesh.geometry.attributes.color.needsUpdate = true;
-}
-
-let terrainColorMode = 'elevation'; // 'elevation' | 'neutral'
-
-function applyNeutralColors() {
-  if (!terrainMesh) return;
-  const arr = terrainMesh.geometry.attributes.color.array;
-  // Warm limestone/rock tone — neutral enough to show lighting clearly
-  for (let i = 0; i < arr.length; i += 3) {
-    arr[i] = 0.72; arr[i + 1] = 0.65; arr[i + 2] = 0.55;
-  }
-  terrainMesh.geometry.attributes.color.needsUpdate = true;
-}
-
-function applyTerrainColors() {
-  if (terrainColorMode === 'elevation') applyElevationColors();
-  else applyNeutralColors();
 }
 
 // ─── Colorbars ───────────────────────────────────────────────────────────────
@@ -751,6 +726,40 @@ function buildSlopeOverlay(terrainData) {
   drawSlopeColorbar(slopeMax);
 }
 
+// ─── Neutral shading overlay (Lambert — responds to directional light) ────────
+let neutralMesh = null;
+
+function buildNeutralOverlay(terrainData) {
+  if (neutralMesh) { scene.remove(neutralMesh); neutralMesh.geometry.dispose(); neutralMesh.material.dispose(); }
+
+  const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+  const geom = new THREE.PlaneGeometry(
+    x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+  );
+  const pos = geom.attributes.position;
+  for (let j = 0; j < ny; j++)
+    for (let i = 0; i < nx; i++)
+      pos.setZ(j * nx + i, elevation[j][i] + 1);
+  pos.needsUpdate = true;
+  geom.computeVertexNormals();
+
+  // MeshLambertMaterial: lit by the directional sun — slopes facing away go dark
+  const mat = new THREE.MeshLambertMaterial({
+    color: 0xc8b89a,          // warm limestone/sandstone tone
+    transparent: true,
+    opacity: 0,
+    depthWrite: false,
+  });
+  window._neutralMat = mat;
+
+  neutralMesh = new THREE.Mesh(geom, mat);
+  neutralMesh.receiveShadow = true;
+  neutralMesh.position.set(
+    (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+  );
+  scene.add(neutralMesh);
+}
+
 // ─── Waypoint markers ────────────────────────────────────────────────────────
 const MARKER_CONFIG = {
   landing: { color: 0x00ff88, label: '▼ Landing',  poleColor: 0x00cc66 },
@@ -833,10 +842,51 @@ function init() {
   buildMarkers(simData.markers || []);
   buildAlbedoOverlay(simData.terrain);
   buildSlopeOverlay(simData.terrain);
+  buildNeutralOverlay(simData.terrain);
   buildSunObject();
   updateSunObject(0);
+  buildPresetButtons();
+  // Apply first preset values silently (meshes already built at those opacities)
+  if (window._presetsData && window._presetsData.length > 0) {
+    for (const [id, val] of Object.entries(window._presetsData[0].sliders)) setSlider(id, val);
+  }
   buildScenarioButtons();
   animate();
+}
+
+// ─── Presets ──────────────────────────────────────────────────────────────────
+function markManual() {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  const m = document.getElementById('preset-manual');
+  if (m) m.classList.add('active');
+}
+
+function buildPresetButtons() {
+  const presets = window._presetsData || [];
+  const container = document.getElementById('preset-buttons');
+  container.innerHTML = '';
+
+  presets.forEach((preset, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = preset.label;
+    btn.title = preset.tip || '';
+    btn.onclick = () => {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      for (const [id, val] of Object.entries(preset.sliders)) setSlider(id, val);
+    };
+    container.appendChild(btn);
+  });
+
+  // "Manual" entry — activates automatically when any slider is changed by hand
+  const manualBtn = document.createElement('button');
+  manualBtn.className = 'preset-btn';
+  manualBtn.id = 'preset-manual';
+  manualBtn.textContent = 'Manual';
+  manualBtn.title = 'Custom slider values';
+  manualBtn.onclick = () => {}; // clicking it does nothing; it just shows current state
+  container.appendChild(manualBtn);
 }
 
 function buildScenarioButtons() {
@@ -859,19 +909,6 @@ function buildScenarioButtons() {
 }
 
 // ─── UI controls ─────────────────────────────────────────────────────────
-document.getElementById('mode-elevation').addEventListener('click', () => {
-  terrainColorMode = 'elevation';
-  document.getElementById('mode-elevation').classList.add('active');
-  document.getElementById('mode-neutral').classList.remove('active');
-  applyElevationColors();
-});
-document.getElementById('mode-neutral').addEventListener('click', () => {
-  terrainColorMode = 'neutral';
-  document.getElementById('mode-neutral').classList.add('active');
-  document.getElementById('mode-elevation').classList.remove('active');
-  applyNeutralColors();
-});
-
 document.getElementById('terrain-opacity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
   document.getElementById('terrain-opacity-val').textContent = v.toFixed(2);
@@ -906,28 +943,29 @@ document.getElementById('slope-opacity').addEventListener('input', e => {
   if (window._slopeMat) window._slopeMat.opacity = v;
   document.getElementById('cb-slope-wrap').style.display = v > 0 ? 'block' : 'none';
 });
-
-const DEFAULTS = {
-  'terrain-opacity':   { val: 0.8,  display: v => v.toFixed(2), apply: v => { if (window._terrainMat) window._terrainMat.opacity = v; document.getElementById('cb-elevation-wrap').style.display = v > 0 ? 'block' : 'none'; } },
-  'heatmap-opacity':   { val: 0.7,  display: v => v.toFixed(2), apply: v => { if (window._heatmapMat) window._heatmapMat.opacity = v; document.getElementById('cb-thermal-wrap').style.display  = v > 0 ? 'block' : 'none'; } },
-  'ambient-intensity': { val: 2.0,  display: v => v.toFixed(1), apply: v => { ambientLight.intensity = v; } },
-  'sun-intensity':     { val: 3.0,  display: v => v.toFixed(1), apply: v => { sun.intensity = v; } },
-  'albedo-opacity':    { val: 0,    display: v => v.toFixed(2), apply: v => { if (window._albedoMat) window._albedoMat.opacity = v; document.getElementById('cb-albedo-wrap').style.display = v > 0 ? 'block' : 'none'; } },
-  'slope-opacity':     { val: 0,    display: v => v.toFixed(2), apply: v => { if (window._slopeMat)  window._slopeMat.opacity  = v; document.getElementById('cb-slope-wrap').style.display  = v > 0 ? 'block' : 'none'; } },
-};
-document.getElementById('reset-btn').addEventListener('click', () => {
-  for (const [id, cfg] of Object.entries(DEFAULTS)) {
-    const el = document.getElementById(id);
-    el.value = cfg.val;
-    document.getElementById(id + '-val').textContent = cfg.display(cfg.val);
-    cfg.apply(cfg.val);
-  }
-  // Reset terrain color mode to elevation
-  terrainColorMode = 'elevation';
-  document.getElementById('mode-elevation').classList.add('active');
-  document.getElementById('mode-neutral').classList.remove('active');
-  applyElevationColors();
+document.getElementById('neutral-opacity').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('neutral-opacity-val').textContent = v.toFixed(2);
+  if (window._neutralMat) window._neutralMat.opacity = v;
 });
+
+// ─── Slider helpers ───────────────────────────────────────────────────────────
+// Flag: true while setSlider is programmatically changing a value,
+// so the global 'input' listener doesn't wrongly mark it as Manual.
+window._settingPreset = false;
+
+function setSlider(id, val) {
+  window._settingPreset = true;
+  const el = document.getElementById(id);
+  el.value = val;
+  el.dispatchEvent(new Event('input'));
+  window._settingPreset = false;
+}
+
+// Any manual interaction with a slider → switch active preset to "Manual"
+document.addEventListener('input', e => {
+  if (e.target.type === 'range' && !window._settingPreset) markManual();
+}, true /* capture phase — fires before individual listeners */);
 
 // ─── Animate ────────────────────────────────────────────────────────────────
 function updateSunLabel() {

@@ -1,0 +1,67 @@
+[
+  {
+    "label": "Elevation",
+    "tip": "Terrain coloured by altitude, no overlays",
+    "sliders": {
+      "terrain-opacity":   0.95,
+      "heatmap-opacity":   0,
+      "albedo-opacity":    0,
+      "slope-opacity":     0,
+      "neutral-opacity":   0,
+      "ambient-intensity": 2.0,
+      "sun-intensity":     3.0
+    }
+  },
+  {
+    "label": "Thermals",
+    "tip": "Heatmap overlay showing ground temperature anomaly per scenario",
+    "sliders": {
+      "terrain-opacity":   0,
+      "heatmap-opacity":   0.95,
+      "albedo-opacity":    0,
+      "slope-opacity":     0,
+      "neutral-opacity":   0.2,
+      "ambient-intensity": 2.0,
+      "sun-intensity":     3.0
+    }
+  },
+  {
+    "label": "Albedo",
+    "tip": "Land-cover thermal factor — how fast each surface heats up",
+    "sliders": {
+      "terrain-opacity":   0,
+      "heatmap-opacity":   0,
+      "albedo-opacity":    0.8,
+      "slope-opacity":     0,
+      "neutral-opacity":   0.3,
+      "ambient-intensity": 2.0,
+      "sun-intensity":     3.0
+    }
+  },
+  {
+    "label": "Slope",
+    "tip": "Terrain steepness — steep south-facing slopes trigger thermals",
+    "sliders": {
+      "terrain-opacity":   0,
+      "heatmap-opacity":   0,
+      "albedo-opacity":    0,
+      "slope-opacity":     0.90,
+      "neutral-opacity":   0.25,
+      "ambient-intensity": 2.0,
+      "sun-intensity":     3.0
+    }
+  },
+  {
+    "label": "Sun shading",
+    "tip": "Neutral terrain lit only by directional sun — shows sunlit vs shadowed slopes",
+    "sliders": {
+      "terrain-opacity":   0,
+      "heatmap-opacity":   0,
+      "albedo-opacity":    0,
+      "slope-opacity":     0,
+      "neutral-opacity":   1.0,
+      "ambient-intensity": 0.25,
+      "sun-intensity":     7.0
+    }
+  }
+]
