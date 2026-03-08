@@ -93,6 +93,7 @@
       transition: all 0.2s;
     }
     .preset-btn.active { background: #c8a040; color: #0a0f1a; border-color: #c8a040; }
+    .preset-btn.active.modified { background: rgba(140,110,30,0.35); color: #b89840; border-color: rgba(180,150,50,0.5); }
     .colorbar {
       background: rgba(10,15,30,0.82);
       border: 1px solid rgba(100,160,255,0.2);
@@ -160,16 +161,6 @@
   </div>
 
   <div class="control-group">
-    <label>Terrain opacity <span id="terrain-opacity-val">0.8</span></label>
-    <input type="range" id="terrain-opacity" min="0" max="1" step="0.05" value="0.8">
-  </div>
-
-  <div class="control-group">
-    <label>Heatmap opacity <span id="heatmap-opacity-val">0.7</span></label>
-    <input type="range" id="heatmap-opacity" min="0" max="1" step="0.05" value="0.7">
-  </div>
-
-  <div class="control-group">
     <label>Ambient light <span id="ambient-intensity-val">2.0</span></label>
     <input type="range" id="ambient-intensity" min="0" max="6" step="0.1" value="2.0">
   </div>
@@ -180,18 +171,28 @@
   </div>
 
   <div class="control-group">
-    <label>Albedo opacity <span id="albedo-opacity-val">0.00</span></label>
+    <label>Terrain (elevation) <span id="terrain-opacity-val">0.8</span></label>
+    <input type="range" id="terrain-opacity" min="0" max="1" step="0.05" value="0.8">
+  </div>
+
+  <div class="control-group">
+    <label>Sun shading <span id="neutral-opacity-val">0.00</span></label>
+    <input type="range" id="neutral-opacity" min="0" max="1" step="0.05" value="0">
+  </div>
+
+  <div class="control-group">
+    <label>Thermals (ΔT) <span id="heatmap-opacity-val">0.7</span></label>
+    <input type="range" id="heatmap-opacity" min="0" max="1" step="0.05" value="0.7">
+  </div>
+
+  <div class="control-group">
+    <label>Albedo <span id="albedo-opacity-val">0.00</span></label>
     <input type="range" id="albedo-opacity" min="0" max="1" step="0.05" value="0">
   </div>
 
   <div class="control-group">
-    <label>Slope opacity <span id="slope-opacity-val">0.00</span></label>
+    <label>Slope <span id="slope-opacity-val">0.00</span></label>
     <input type="range" id="slope-opacity" min="0" max="1" step="0.05" value="0">
-  </div>
-
-  <div class="control-group">
-    <label>Sun shading opacity <span id="neutral-opacity-val">0.00</span></label>
-    <input type="range" id="neutral-opacity" min="0" max="1" step="0.05" value="0">
   </div>
 
   <div class="control-group" style="margin-top:10px; font-size:11px; color:#668; line-height:1.5">
@@ -855,10 +856,9 @@ function init() {
 }
 
 // ─── Presets ──────────────────────────────────────────────────────────────────
-function markManual() {
-  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
-  const m = document.getElementById('preset-manual');
-  if (m) m.classList.add('active');
+function markModified() {
+  const active = document.querySelector('.preset-btn.active');
+  if (active) active.classList.add('modified');
 }
 
 function buildPresetButtons() {
@@ -872,21 +872,12 @@ function buildPresetButtons() {
     btn.textContent = preset.label;
     btn.title = preset.tip || '';
     btn.onclick = () => {
-      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active', 'modified'));
       btn.classList.add('active');
       for (const [id, val] of Object.entries(preset.sliders)) setSlider(id, val);
     };
     container.appendChild(btn);
   });
-
-  // "Manual" entry — activates automatically when any slider is changed by hand
-  const manualBtn = document.createElement('button');
-  manualBtn.className = 'preset-btn';
-  manualBtn.id = 'preset-manual';
-  manualBtn.textContent = 'Manual';
-  manualBtn.title = 'Custom slider values';
-  manualBtn.onclick = () => {}; // clicking it does nothing; it just shows current state
-  container.appendChild(manualBtn);
 }
 
 function buildScenarioButtons() {
@@ -962,9 +953,9 @@ function setSlider(id, val) {
   window._settingPreset = false;
 }
 
-// Any manual interaction with a slider → switch active preset to "Manual"
+// Any manual slider interaction → shade the active preset to show it's been modified
 document.addEventListener('input', e => {
-  if (e.target.type === 'range' && !window._settingPreset) markManual();
+  if (e.target.type === 'range' && !window._settingPreset) markModified();
 }, true /* capture phase — fires before individual listeners */);
 
 // ─── Animate ────────────────────────────────────────────────────────────────
