@@ -363,17 +363,40 @@ function buildTerrain(terrainData) {
   controls.update();
 }
 
+// Shared elevation colour stops — used by both vertex colours and the colorbar.
+// Each entry: [t, [r, g, b]] with t in [0,1], RGB in [0,1].
+const ELEV_STOPS = [
+  [0.00, [0.13, 0.35, 0.12]],   // deep valley — dark green
+  [0.18, [0.25, 0.48, 0.18]],   // low slopes — green
+  [0.38, [0.42, 0.40, 0.20]],   // mid slopes — olive
+  [0.55, [0.48, 0.35, 0.22]],   // upper slopes — brown
+  [0.72, [0.58, 0.52, 0.46]],   // sub-alpine — grey-brown
+  [0.88, [0.75, 0.72, 0.70]],   // rocky — light grey
+  [1.00, [0.92, 0.91, 0.92]],   // summit — near white
+];
+
+function elevColor(t) {
+  t = Math.max(0, Math.min(1, t));
+  let lo = ELEV_STOPS[0], hi = ELEV_STOPS[ELEV_STOPS.length - 1];
+  for (let i = 0; i < ELEV_STOPS.length - 1; i++) {
+    if (t <= ELEV_STOPS[i + 1][0]) { lo = ELEV_STOPS[i]; hi = ELEV_STOPS[i + 1]; break; }
+  }
+  const s = (hi[0] === lo[0]) ? 0 : (t - lo[0]) / (hi[0] - lo[0]);
+  return [
+    lo[1][0] + s * (hi[1][0] - lo[1][0]),
+    lo[1][1] + s * (hi[1][1] - lo[1][1]),
+    lo[1][2] + s * (hi[1][2] - lo[1][2]),
+  ];
+}
+
 function applyElevationColors() {
   if (!terrainMesh) return;
   const pos = terrainMesh.geometry.attributes.position;
   const arr = terrainMesh.geometry.attributes.color.array;
-  const c = new THREE.Color();
   for (let i = 0; i < pos.count; i++) {
     const t = (pos.getZ(i) - terrainZMin) / (terrainZMax - terrainZMin);
-    if (t < 0.35)      c.setRGB(0.15 + t * 0.4,  0.30 + t * 0.25, 0.08 + t * 0.05);
-    else if (t < 0.65) c.setRGB(0.28 + t * 0.3,  0.28 + t * 0.1,  0.15 + t * 0.2);
-    else               c.setRGB(0.55 + t * 0.45, 0.55 + t * 0.35, 0.55 + t * 0.45);
-    arr[i * 3] = c.r; arr[i * 3 + 1] = c.g; arr[i * 3 + 2] = c.b;
+    const [r, g, b] = elevColor(t);
+    arr[i * 3] = r; arr[i * 3 + 1] = g; arr[i * 3 + 2] = b;
   }
   terrainMesh.geometry.attributes.color.needsUpdate = true;
 }
@@ -382,13 +405,20 @@ function applyElevationColors() {
 function drawElevationColorbar() {
   const canvas = document.getElementById('cb-elevation');
   const ctx = canvas.getContext('2d');
-  const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  grad.addColorStop(0,    'rgb(230,230,230)');
-  grad.addColorStop(0.35, 'rgb(140,110,90)');
-  grad.addColorStop(0.65, 'rgb(100,80,50)');
-  grad.addColorStop(1,    'rgb(40,90,25)');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Draw pixel-by-pixel using the same elevColor() function — guaranteed match
+  const img = ctx.createImageData(canvas.width, canvas.height);
+  for (let py = 0; py < canvas.height; py++) {
+    const t = 1 - py / (canvas.height - 1);   // top = high elevation
+    const [r, g, b] = elevColor(t);
+    for (let px = 0; px < canvas.width; px++) {
+      const idx = (py * canvas.width + px) * 4;
+      img.data[idx]     = Math.round(r * 255);
+      img.data[idx + 1] = Math.round(g * 255);
+      img.data[idx + 2] = Math.round(b * 255);
+      img.data[idx + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
 
   const labelsDiv = document.getElementById('cb-elevation-labels');
   labelsDiv.innerHTML = '';
