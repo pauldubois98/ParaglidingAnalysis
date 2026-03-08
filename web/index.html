@@ -148,6 +148,16 @@
     <input type="range" id="heatmap-opacity" min="0" max="1" step="0.05" value="0.7">
   </div>
 
+  <div class="control-group">
+    <label>Ambient light <span id="ambient-intensity-val">2.0</span></label>
+    <input type="range" id="ambient-intensity" min="0" max="6" step="0.1" value="2.0">
+  </div>
+
+  <div class="control-group">
+    <label>Sun intensity <span id="sun-intensity-val">3.0</span></label>
+    <input type="range" id="sun-intensity" min="0" max="8" step="0.1" value="3.0">
+  </div>
+
   <div class="control-group" style="margin-top:8px; font-size:11px; color:#668; line-height:1.5">
     Drag to rotate · Scroll to zoom · Right-drag to pan
   </div>
@@ -210,7 +220,8 @@ controls.maxDistance = 12000;
 controls.maxPolarAngle = Math.PI * 0.48;
 
 // Lighting
-scene.add(new THREE.AmbientLight(0x1a2a3a, 2));
+const ambientLight = new THREE.AmbientLight(0x1a2a3a, 2);
+scene.add(ambientLight);
 const sun = new THREE.DirectionalLight(0xfff0dd, 3);
 sun.position.set(1000, -500, 2000);
 sun.castShadow = true;
@@ -414,6 +425,67 @@ function updateHeatmapColors(scenarioIndex) {
   drawThermalColorbar(maxDT);
 }
 
+// ─── Sun object ──────────────────────────────────────────────────────────────
+let sunSphere = null;
+let sunGlow   = null;
+let sunLabelDiv = null;
+const SUN_R = 7500; // distance from terrain centre to place sun sphere
+
+function sunWorldPos(azDeg, elDeg, terrainCentreZ) {
+  const az = azDeg * Math.PI / 180;
+  // Cap display elevation so the sun stays visible without looking straight up
+  const el = Math.min(elDeg, 50) * Math.PI / 180;
+  return new THREE.Vector3(
+    SUN_R * Math.sin(az) * Math.cos(el),
+   -SUN_R * Math.cos(az) * Math.cos(el),    // -North → Three.js Y
+    terrainCentreZ + SUN_R * Math.sin(el)
+  );
+}
+
+function buildSunObject() {
+  // Sphere
+  const geo  = new THREE.SphereGeometry(160, 16, 16);
+  const mat  = new THREE.MeshBasicMaterial({ color: 0xffee88 });
+  sunSphere  = new THREE.Mesh(geo, mat);
+  scene.add(sunSphere);
+
+  // Soft glow (larger transparent sphere around it)
+  const glowGeo = new THREE.SphereGeometry(320, 16, 16);
+  const glowMat = new THREE.MeshBasicMaterial({
+    color: 0xffcc44, transparent: true, opacity: 0.18,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  });
+  sunGlow = new THREE.Mesh(glowGeo, glowMat);
+  scene.add(sunGlow);
+
+  // HTML label
+  sunLabelDiv = document.createElement('div');
+  sunLabelDiv.style.cssText = `
+    position: absolute; pointer-events: none;
+    background: rgba(10,15,30,0.75); border: 1px solid #ffcc44;
+    color: #ffee88; font-size: 11px; font-family: 'Segoe UI', sans-serif;
+    padding: 2px 7px; border-radius: 4px; white-space: nowrap;
+    transform: translate(-50%, -130%);
+  `;
+  document.getElementById('canvas-container').appendChild(sunLabelDiv);
+}
+
+function updateSunObject(scenarioIndex) {
+  if (!simData) return;
+  const sc = simData.scenarios[scenarioIndex];
+  const cz = (terrainZMin + terrainZMax) / 2;
+  const pos = sunWorldPos(sc.sun_azimuth, sc.sun_elevation, cz);
+
+  sunSphere.position.copy(pos);
+  sunGlow.position.copy(pos);
+
+  // Update directional light to come from same direction
+  sun.position.copy(pos);
+
+  // Update label text (position updated each frame in updateSunLabel)
+  sunLabelDiv.textContent = `☀ ${sc.name}  el ${sc.sun_elevation}°`;
+}
+
 // ─── Waypoint markers ────────────────────────────────────────────────────────
 const MARKER_CONFIG = {
   landing: { color: 0x00ff88, label: '▼ Landing',  poleColor: 0x00cc66 },
@@ -494,6 +566,8 @@ function init() {
   buildHeatmap(simData.terrain);
   updateHeatmapColors(0);
   buildMarkers(simData.markers || []);
+  buildSunObject();
+  updateSunObject(0);
   buildScenarioButtons();
   animate();
 }
@@ -511,6 +585,7 @@ function buildScenarioButtons() {
         b.classList.toggle('active', j === i);
       });
       updateHeatmapColors(i);
+      updateSunObject(i);
     };
     container.appendChild(btn);
   });
@@ -527,12 +602,33 @@ document.getElementById('heatmap-opacity').addEventListener('input', e => {
   document.getElementById('heatmap-opacity-val').textContent = v.toFixed(2);
   if (window._heatmapMat) window._heatmapMat.opacity = v;
 });
+document.getElementById('ambient-intensity').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('ambient-intensity-val').textContent = v.toFixed(1);
+  ambientLight.intensity = v;
+});
+document.getElementById('sun-intensity').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('sun-intensity-val').textContent = v.toFixed(1);
+  sun.intensity = v;
+});
 
 // ─── Animate ────────────────────────────────────────────────────────────────
+function updateSunLabel() {
+  if (!sunSphere || !sunLabelDiv) return;
+  const projected = sunSphere.position.clone().project(camera);
+  const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
+  const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
+  sunLabelDiv.style.left = x + 'px';
+  sunLabelDiv.style.top  = y + 'px';
+  sunLabelDiv.style.display = projected.z > 1 ? 'none' : 'block';
+}
+
 function animate() {
   requestAnimationFrame(animate);
   controls.update();
   updateMarkerLabels();
+  updateSunLabel();
   renderer.render(scene, camera);
 }
 
