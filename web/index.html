@@ -462,7 +462,6 @@ function buildHeatmap(terrainData) {
     vertexColors: true,
     transparent: true,
     opacity: 0.7,
-    blending: THREE.AdditiveBlending,
     depthWrite: false,
     side: THREE.FrontSide,
   });
@@ -602,7 +601,7 @@ function buildAlbedoOverlay(terrainData) {
 
   const mat = new THREE.MeshBasicMaterial({
     vertexColors: true, transparent: true, opacity: 0,
-    blending: THREE.AdditiveBlending, depthWrite: false,
+    depthWrite: false,
   });
   window._albedoMat = mat;
 
@@ -659,7 +658,7 @@ function buildSlopeOverlay(terrainData) {
 
   const mat = new THREE.MeshBasicMaterial({
     vertexColors: true, transparent: true, opacity: 0,
-    blending: THREE.AdditiveBlending, depthWrite: false,
+    depthWrite: false,
   });
   window._slopeMat = mat;
 
