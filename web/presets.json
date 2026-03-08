@@ -9,7 +9,8 @@
       "slope-opacity":     0,
       "neutral-opacity":   0,
       "ambient-intensity": 2.0,
-      "sun-intensity":     3.0
+      "sun-intensity":     3.0,
+      "shadow-darkness":   0.70
     }
   },
   {
@@ -22,7 +23,8 @@
       "slope-opacity":     0,
       "neutral-opacity":   0.2,
       "ambient-intensity": 2.0,
-      "sun-intensity":     3.0
+      "sun-intensity":     3.0,
+      "shadow-darkness":   0.70
     }
   },
   {
@@ -35,7 +37,8 @@
       "slope-opacity":     0,
       "neutral-opacity":   0.3,
       "ambient-intensity": 2.0,
-      "sun-intensity":     3.0
+      "sun-intensity":     3.0,
+      "shadow-darkness":   0.70
     }
   },
   {
@@ -48,12 +51,13 @@
       "slope-opacity":     0.90,
       "neutral-opacity":   0.25,
       "ambient-intensity": 2.0,
-      "sun-intensity":     3.0
+      "sun-intensity":     3.0,
+      "shadow-darkness":   0.70
     }
   },
   {
     "label": "Sun shading",
-    "tip": "Neutral terrain lit only by directional sun — shows sunlit vs shadowed slopes",
+    "tip": "Neutral terrain lit by directional sun, with DEM horizon shadows",
     "sliders": {
       "terrain-opacity":   0,
       "heatmap-opacity":   0,
@@ -61,7 +65,8 @@
       "slope-opacity":     0,
       "neutral-opacity":   1.0,
       "ambient-intensity": 0.25,
-      "sun-intensity":     7.0
+      "sun-intensity":     7.0,
+      "shadow-darkness":   0.85
     }
   }
 ]

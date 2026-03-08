@@ -226,6 +226,11 @@
     <input type="range" id="slope-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
   </div>
 
+  <div class="control-group">
+    <label>Shadow darkness <span id="shadow-darkness-val">0.70</span></label>
+    <input type="range" id="shadow-darkness" min="0" max="1" step="0.05" value="0.7" data-decimals="2">
+  </div>
+
   <div class="control-group" style="margin-top:10px; font-size:11px; color:#668; line-height:1.5">
     Drag to rotate · Scroll to zoom · Right-drag to pan
   </div>
@@ -541,7 +546,7 @@ function sunWorldPos(azDeg, elDeg, terrainCentreZ) {
   const el = Math.min(elDeg, 50) * Math.PI / 180;
   return new THREE.Vector3(
     SUN_R * Math.sin(az) * Math.cos(el),
-   -SUN_R * Math.cos(az) * Math.cos(el),    // -North → Three.js Y
+    SUN_R * Math.cos(az) * Math.cos(el),     // North → Three.js Y
     terrainCentreZ + SUN_R * Math.sin(el)
   );
 }
@@ -735,6 +740,62 @@ function buildNeutralOverlay(terrainData) {
   scene.add(neutralMesh);
 }
 
+// ─── Shadow overlay (MultiplyBlending — darkens terrain where DEM casts shadow) ─
+let shadowMesh = null;
+
+function buildShadowOverlay(terrainData) {
+  if (shadowMesh) { scene.remove(shadowMesh); shadowMesh.geometry.dispose(); shadowMesh.material.dispose(); }
+
+  const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+  const geom = new THREE.PlaneGeometry(
+    x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+  );
+  const pos = geom.attributes.position;
+  for (let j = 0; j < ny; j++)
+    for (let i = 0; i < nx; i++)
+      pos.setZ(j * nx + i, elevation[j][i] + 15);
+  pos.needsUpdate = true;
+
+  // Vertex colors: lit = (1,1,1) = multiply by 1 (invisible), shadow = (dark,dark,dark)
+  const colors = new Float32Array(nx * ny * 3).fill(1);
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+  const mat = new THREE.MeshBasicMaterial({
+    vertexColors: true,
+    blending: THREE.MultiplyBlending,
+    depthWrite: false,
+    transparent: false,
+  });
+
+  shadowMesh = new THREE.Mesh(geom, mat);
+  shadowMesh.position.set(
+    (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+  );
+  scene.add(shadowMesh);
+}
+
+function updateShadowColors(scenarioIndex) {
+  if (!shadowMesh || !simData) return;
+  const sc   = simData.scenarios[scenarioIndex];
+  const T    = simData.terrain;
+  const mask = sc.shadow_mask;
+  if (!mask) return;
+
+  const darkness = parseFloat(document.getElementById('shadow-darkness').value);
+  const litVal   = 1.0;
+  const shadVal  = 1.0 - darkness * 0.75;   // max 75 % darkening at slider = 1
+
+  const arr = shadowMesh.geometry.attributes.color.array;
+  for (let j = 0; j < T.ny; j++) {
+    for (let i = 0; i < T.nx; i++) {
+      const idx = (j * T.nx + i) * 3;
+      const v   = mask[j][i] ? shadVal : litVal;
+      arr[idx] = arr[idx + 1] = arr[idx + 2] = v;
+    }
+  }
+  shadowMesh.geometry.attributes.color.needsUpdate = true;
+}
+
 // ─── Waypoint markers ────────────────────────────────────────────────────────
 const MARKER_CONFIG = {
   landing: { color: 0x00ff88, label: '▼ Landing',  poleColor: 0x00cc66 },
@@ -819,8 +880,10 @@ function init() {
   buildAlbedoOverlay(simData.terrain);
   buildSlopeOverlay(simData.terrain);
   buildNeutralOverlay(simData.terrain);
+  buildShadowOverlay(simData.terrain);
   buildSunObject();
   updateSunObject(0);
+  updateShadowColors(0);
   applySettings();
   buildPresetButtons();
   // Apply first preset values silently (meshes already built at those opacities)
@@ -870,6 +933,7 @@ function buildScenarioButtons() {
       });
       updateHeatmapColors(i);
       updateSunObject(i);
+      updateShadowColors(i);
     };
     container.appendChild(btn);
   });
@@ -916,6 +980,11 @@ document.getElementById('neutral-opacity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
   document.getElementById('neutral-opacity-val').textContent = fmt(e.target, v);
   if (window._neutralMat) window._neutralMat.opacity = v;
+});
+document.getElementById('shadow-darkness').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('shadow-darkness-val').textContent = fmt(e.target, v);
+  updateShadowColors(currentScenario);
 });
 
 // ─── Settings (min/max/step/decimals from settings.json) ─────────────────────
