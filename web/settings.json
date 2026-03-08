@@ -1,0 +1,9 @@
+{
+  "ambient-intensity": { "min": 0, "max": 25,  "step": 0.1,  "decimals": 1 },
+  "sun-intensity":     { "min": 0, "max": 10,  "step": 0.1,  "decimals": 1 },
+  "terrain-opacity":   { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 },
+  "neutral-opacity":   { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 },
+  "heatmap-opacity":   { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 },
+  "albedo-opacity":    { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 },
+  "slope-opacity":     { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 }
+}

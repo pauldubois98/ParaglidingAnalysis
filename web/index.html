@@ -162,37 +162,37 @@
 
   <div class="control-group">
     <label>Ambient light <span id="ambient-intensity-val">2.0</span></label>
-    <input type="range" id="ambient-intensity" min="0" max="6" step="0.1" value="2.0">
+    <input type="range" id="ambient-intensity" min="0" max="6" step="0.1" value="2.0" data-decimals="1">
   </div>
 
   <div class="control-group">
     <label>Sun intensity <span id="sun-intensity-val">3.0</span></label>
-    <input type="range" id="sun-intensity" min="0" max="8" step="0.1" value="3.0">
+    <input type="range" id="sun-intensity" min="0" max="8" step="0.1" value="3.0" data-decimals="1">
   </div>
 
   <div class="control-group">
-    <label>Terrain (elevation) <span id="terrain-opacity-val">0.8</span></label>
-    <input type="range" id="terrain-opacity" min="0" max="1" step="0.05" value="0.8">
+    <label>Terrain (elevation) <span id="terrain-opacity-val">0.80</span></label>
+    <input type="range" id="terrain-opacity" min="0" max="1" step="0.05" value="0.8" data-decimals="2">
   </div>
 
   <div class="control-group">
     <label>Sun shading <span id="neutral-opacity-val">0.00</span></label>
-    <input type="range" id="neutral-opacity" min="0" max="1" step="0.05" value="0">
+    <input type="range" id="neutral-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
   </div>
 
   <div class="control-group">
-    <label>Thermals (ΔT) <span id="heatmap-opacity-val">0.7</span></label>
-    <input type="range" id="heatmap-opacity" min="0" max="1" step="0.05" value="0.7">
+    <label>Thermals (ΔT) <span id="heatmap-opacity-val">0.70</span></label>
+    <input type="range" id="heatmap-opacity" min="0" max="1" step="0.05" value="0.7" data-decimals="2">
   </div>
 
   <div class="control-group">
     <label>Albedo <span id="albedo-opacity-val">0.00</span></label>
-    <input type="range" id="albedo-opacity" min="0" max="1" step="0.05" value="0">
+    <input type="range" id="albedo-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
   </div>
 
   <div class="control-group">
     <label>Slope <span id="slope-opacity-val">0.00</span></label>
-    <input type="range" id="slope-opacity" min="0" max="1" step="0.05" value="0">
+    <input type="range" id="slope-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
   </div>
 
   <div class="control-group" style="margin-top:10px; font-size:11px; color:#668; line-height:1.5">
@@ -297,14 +297,17 @@ let terrainMesh = null;
 // ─── Load simulation data ───────────────────────────────────────────────────
 async function loadData() {
   try {
-    const [simResp, presetsResp] = await Promise.all([
+    const [simResp, presetsResp, settingsResp] = await Promise.all([
       fetch('../data/simulation.json'),
       fetch('presets.json'),
+      fetch('settings.json'),
     ]);
     if (!simResp.ok) throw new Error(`simulation.json: HTTP ${simResp.status}`);
     if (!presetsResp.ok) throw new Error(`presets.json: HTTP ${presetsResp.status}`);
+    if (!settingsResp.ok) throw new Error(`settings.json: HTTP ${settingsResp.status}`);
     simData = await simResp.json();
-    window._presetsData = await presetsResp.json();
+    window._presetsData  = await presetsResp.json();
+    window._settingsData = await settingsResp.json();
     document.getElementById('loading').style.display = 'none';
     init();
   } catch (e) {
@@ -846,6 +849,7 @@ function init() {
   buildNeutralOverlay(simData.terrain);
   buildSunObject();
   updateSunObject(0);
+  applySettings();
   buildPresetButtons();
   // Apply first preset values silently (meshes already built at those opacities)
   if (window._presetsData && window._presetsData.length > 0) {
@@ -900,45 +904,63 @@ function buildScenarioButtons() {
 }
 
 // ─── UI controls ─────────────────────────────────────────────────────────
+function fmt(el, v) { return v.toFixed(parseInt(el.dataset.decimals ?? '2')); }
+
 document.getElementById('terrain-opacity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
-  document.getElementById('terrain-opacity-val').textContent = v.toFixed(2);
+  document.getElementById('terrain-opacity-val').textContent = fmt(e.target, v);
   if (window._terrainMat) window._terrainMat.opacity = v;
   document.getElementById('cb-elevation-wrap').style.display = v > 0 ? 'block' : 'none';
 });
 document.getElementById('heatmap-opacity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
-  document.getElementById('heatmap-opacity-val').textContent = v.toFixed(2);
+  document.getElementById('heatmap-opacity-val').textContent = fmt(e.target, v);
   if (window._heatmapMat) window._heatmapMat.opacity = v;
   document.getElementById('cb-thermal-wrap').style.display = v > 0 ? 'block' : 'none';
 });
 document.getElementById('ambient-intensity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
-  document.getElementById('ambient-intensity-val').textContent = v.toFixed(1);
+  document.getElementById('ambient-intensity-val').textContent = fmt(e.target, v);
   ambientLight.intensity = v;
 });
 document.getElementById('sun-intensity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
-  document.getElementById('sun-intensity-val').textContent = v.toFixed(1);
+  document.getElementById('sun-intensity-val').textContent = fmt(e.target, v);
   sun.intensity = v;
 });
 document.getElementById('albedo-opacity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
-  document.getElementById('albedo-opacity-val').textContent = v.toFixed(2);
+  document.getElementById('albedo-opacity-val').textContent = fmt(e.target, v);
   if (window._albedoMat) window._albedoMat.opacity = v;
   document.getElementById('cb-albedo-wrap').style.display = v > 0 ? 'block' : 'none';
 });
 document.getElementById('slope-opacity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
-  document.getElementById('slope-opacity-val').textContent = v.toFixed(2);
+  document.getElementById('slope-opacity-val').textContent = fmt(e.target, v);
   if (window._slopeMat) window._slopeMat.opacity = v;
   document.getElementById('cb-slope-wrap').style.display = v > 0 ? 'block' : 'none';
 });
 document.getElementById('neutral-opacity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
-  document.getElementById('neutral-opacity-val').textContent = v.toFixed(2);
+  document.getElementById('neutral-opacity-val').textContent = fmt(e.target, v);
   if (window._neutralMat) window._neutralMat.opacity = v;
 });
+
+// ─── Settings (min/max/step/decimals from settings.json) ─────────────────────
+function applySettings() {
+  const settings = window._settingsData;
+  if (!settings) return;
+  window._settingPreset = true;
+  for (const [id, cfg] of Object.entries(settings)) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    if (cfg.min      !== undefined) el.min              = cfg.min;
+    if (cfg.max      !== undefined) el.max              = cfg.max;
+    if (cfg.step     !== undefined) el.step             = cfg.step;
+    if (cfg.decimals !== undefined) el.dataset.decimals = cfg.decimals;
+  }
+  window._settingPreset = false;
+}
 
 // ─── Slider helpers ───────────────────────────────────────────────────────────
 // Flag: true while setSlider is programmatically changing a value,
