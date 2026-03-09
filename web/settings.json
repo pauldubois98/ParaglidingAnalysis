@@ -6,5 +6,7 @@
   "heatmap-opacity":   { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 },
   "albedo-opacity":    { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 },
   "slope-opacity":     { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 },
-  "shadow-darkness":   { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 }
+  "shadow-darkness":     { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 },
+  "thermal-top-opacity": { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 },
+  "elr":                 { "min": 3, "max": 9,   "step": 0.1,  "decimals": 1 }
 }

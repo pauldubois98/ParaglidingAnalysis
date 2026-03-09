@@ -232,6 +232,16 @@
     <input type="range" id="shadow-darkness" min="0" max="1" step="0.05" value="0.7" data-decimals="2">
   </div>
 
+  <div class="control-group">
+    <label>Thermal top <span id="thermal-top-opacity-val">0.00</span></label>
+    <input type="range" id="thermal-top-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
+  </div>
+
+  <div class="control-group">
+    <label>ELR <span id="elr-val">6.5</span> K/km</label>
+    <input type="range" id="elr" min="3" max="9" step="0.1" value="6.5" data-decimals="1">
+  </div>
+
   <div class="control-group" style="margin-top:10px; font-size:11px; color:#668; line-height:1.5">
     Drag to rotate · Scroll to zoom · Right-drag to pan
   </div>
@@ -264,6 +274,13 @@
     <div class="colorbar-body">
       <canvas class="colorbar-canvas" id="cb-slope" width="20" height="180"></canvas>
       <div class="colorbar-labels" id="cb-slope-labels"></div>
+    </div>
+  </div>
+  <div class="colorbar" id="cb-thermal-top-wrap" style="display:none">
+    <div class="colorbar-title">Thermal top AGL (m)</div>
+    <div class="colorbar-body">
+      <canvas class="colorbar-canvas" id="cb-thermal-top" width="20" height="180"></canvas>
+      <div class="colorbar-labels" id="cb-thermal-top-labels"></div>
     </div>
   </div>
 </div>
@@ -797,6 +814,67 @@ function updateShadowColors(scenarioIndex) {
   shadowMesh.geometry.attributes.color.needsUpdate = true;
 }
 
+// ─── Thermal top overlay ─────────────────────────────────────────────────────
+// Computed in JS from ground_temp_anomaly + ELR slider — no Python re-run needed.
+// h_top(i,j) = dT(i,j) / (DALR − ELR)   [metres AGL]
+const DALR_JS = 0.0098;   // K/m — fixed by thermodynamics
+const HTOP_MAX = 3000;     // m — colormap ceiling (cells above saturate to top colour)
+
+let thermalTopMesh = null;
+
+function buildThermalTopOverlay(terrainData) {
+  if (thermalTopMesh) { scene.remove(thermalTopMesh); thermalTopMesh.geometry.dispose(); thermalTopMesh.material.dispose(); }
+
+  const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+  const geom = new THREE.PlaneGeometry(
+    x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+  );
+  const pos = geom.attributes.position;
+  for (let j = 0; j < ny; j++)
+    for (let i = 0; i < nx; i++)
+      pos.setZ(j * nx + i, elevation[j][i] + 18);
+  pos.needsUpdate = true;
+
+  const colors = new Float32Array(nx * ny * 3);
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+  const mat = new THREE.MeshBasicMaterial({
+    vertexColors: true, transparent: true, opacity: 0, depthWrite: false,
+  });
+  window._thermalTopMat = mat;
+
+  thermalTopMesh = new THREE.Mesh(geom, mat);
+  thermalTopMesh.position.set(
+    (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+  );
+  scene.add(thermalTopMesh);
+}
+
+function updateThermalTopColors(scenarioIndex) {
+  if (!thermalTopMesh || !simData) return;
+  const sc   = simData.scenarios[scenarioIndex];
+  const T    = simData.terrain;
+  const dT   = sc.ground_temp_anomaly;
+  const ELR  = parseFloat(document.getElementById('elr').value) / 1000;  // K/km → K/m
+  const dLapse = DALR_JS - ELR;
+  if (dLapse <= 0) return;  // neutral/unstable atmosphere — no finite thermal top
+
+  const stops = (window._colormapsData || {})['thermal-top'] || [];
+  const arr   = thermalTopMesh.geometry.attributes.color.array;
+
+  for (let j = 0; j < T.ny; j++) {
+    for (let i = 0; i < T.nx; i++) {
+      const idx  = (j * T.nx + i) * 3;
+      const hTop = dT[j][i] > 0 ? dT[j][i] / dLapse : 0;
+      const [r, g, b] = sampleColormap(stops, hTop / HTOP_MAX);
+      arr[idx] = r; arr[idx + 1] = g; arr[idx + 2] = b;
+    }
+  }
+  thermalTopMesh.geometry.attributes.color.needsUpdate = true;
+  drawColorbar('cb-thermal-top', 'cb-thermal-top-labels', 'thermal-top',
+               0, HTOP_MAX, v => v.toFixed(0) + ' m');
+}
+
 // ─── Waypoint markers ────────────────────────────────────────────────────────
 const MARKER_CONFIG = {
   landing: { color: 0x00ff88, label: '▼ Landing',  poleColor: 0x00cc66 },
@@ -882,9 +960,11 @@ function init() {
   buildSlopeOverlay(simData.terrain);
   buildNeutralOverlay(simData.terrain);
   buildShadowOverlay(simData.terrain);
+  buildThermalTopOverlay(simData.terrain);
   buildSunObject();
   updateSunObject(0);
   updateShadowColors(0);
+  updateThermalTopColors(0);
   applySettings();
   buildPresetButtons();
   // Apply first preset values silently (meshes already built at those opacities)
@@ -934,6 +1014,7 @@ function buildTimeSlider() {
     updateHeatmapColors(i);
     updateSunObject(i);
     updateShadowColors(i);
+    updateThermalTopColors(i);
   }
 
   slider.addEventListener('input', e => applyScenario(parseInt(e.target.value)));
@@ -986,6 +1067,17 @@ document.getElementById('shadow-darkness').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
   document.getElementById('shadow-darkness-val').textContent = fmt(e.target, v);
   updateShadowColors(currentScenario);
+});
+document.getElementById('thermal-top-opacity').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('thermal-top-opacity-val').textContent = fmt(e.target, v);
+  if (window._thermalTopMat) window._thermalTopMat.opacity = v;
+  document.getElementById('cb-thermal-top-wrap').style.display = v > 0 ? 'block' : 'none';
+});
+document.getElementById('elr').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('elr-val').textContent = fmt(e.target, v);
+  updateThermalTopColors(currentScenario);
 });
 
 // ─── Settings (min/max/step/decimals from settings.json) ─────────────────────

@@ -3,70 +3,96 @@
     "label": "Elevation",
     "tip": "Terrain coloured by altitude, no overlays",
     "sliders": {
-      "terrain-opacity":   0.95,
-      "heatmap-opacity":   0,
-      "albedo-opacity":    0,
-      "slope-opacity":     0,
-      "neutral-opacity":   0,
-      "ambient-intensity": 2.0,
-      "sun-intensity":     3.0,
-      "shadow-darkness":   0.70
+      "terrain-opacity":     0.95,
+      "heatmap-opacity":     0,
+      "albedo-opacity":      0,
+      "slope-opacity":       0,
+      "neutral-opacity":     0,
+      "thermal-top-opacity": 0,
+      "ambient-intensity":   2.0,
+      "sun-intensity":       3.0,
+      "shadow-darkness":     0.70,
+      "elr":                 6.5
     }
   },
   {
     "label": "Thermals",
     "tip": "Heatmap overlay showing ground temperature anomaly per scenario",
     "sliders": {
-      "terrain-opacity":   0,
-      "heatmap-opacity":   0.95,
-      "albedo-opacity":    0,
-      "slope-opacity":     0,
-      "neutral-opacity":   0.2,
-      "ambient-intensity": 2.0,
-      "sun-intensity":     3.0,
-      "shadow-darkness":   0.70
+      "terrain-opacity":     0,
+      "heatmap-opacity":     0.95,
+      "albedo-opacity":      0,
+      "slope-opacity":       0,
+      "neutral-opacity":     0.2,
+      "thermal-top-opacity": 0,
+      "ambient-intensity":   2.0,
+      "sun-intensity":       3.0,
+      "shadow-darkness":     0.70,
+      "elr":                 6.5
+    }
+  },
+  {
+    "label": "Thermal top",
+    "tip": "Thermal ceiling height AGL — how high you can climb per cell. Adjust ELR for atmospheric stability.",
+    "sliders": {
+      "terrain-opacity":     0,
+      "heatmap-opacity":     0,
+      "albedo-opacity":      0,
+      "slope-opacity":       0,
+      "neutral-opacity":     0.15,
+      "thermal-top-opacity": 0.85,
+      "ambient-intensity":   2.0,
+      "sun-intensity":       3.0,
+      "shadow-darkness":     0.60,
+      "elr":                 6.5
     }
   },
   {
     "label": "Albedo",
     "tip": "Land-cover thermal factor — how fast each surface heats up",
     "sliders": {
-      "terrain-opacity":   0,
-      "heatmap-opacity":   0,
-      "albedo-opacity":    0.8,
-      "slope-opacity":     0,
-      "neutral-opacity":   0.3,
-      "ambient-intensity": 2.0,
-      "sun-intensity":     3.0,
-      "shadow-darkness":   0.70
+      "terrain-opacity":     0,
+      "heatmap-opacity":     0,
+      "albedo-opacity":      0.8,
+      "slope-opacity":       0,
+      "neutral-opacity":     0.3,
+      "thermal-top-opacity": 0,
+      "ambient-intensity":   2.0,
+      "sun-intensity":       3.0,
+      "shadow-darkness":     0.70,
+      "elr":                 6.5
     }
   },
   {
     "label": "Slope",
     "tip": "Terrain steepness — steep south-facing slopes trigger thermals",
     "sliders": {
-      "terrain-opacity":   0,
-      "heatmap-opacity":   0,
-      "albedo-opacity":    0,
-      "slope-opacity":     0.90,
-      "neutral-opacity":   0.25,
-      "ambient-intensity": 2.0,
-      "sun-intensity":     3.0,
-      "shadow-darkness":   0.70
+      "terrain-opacity":     0,
+      "heatmap-opacity":     0,
+      "albedo-opacity":      0,
+      "slope-opacity":       0.90,
+      "neutral-opacity":     0.25,
+      "thermal-top-opacity": 0,
+      "ambient-intensity":   2.0,
+      "sun-intensity":       3.0,
+      "shadow-darkness":     0.70,
+      "elr":                 6.5
     }
   },
   {
     "label": "Sun shading",
     "tip": "Neutral terrain lit by directional sun, with DEM horizon shadows",
     "sliders": {
-      "terrain-opacity":   0,
-      "heatmap-opacity":   0,
-      "albedo-opacity":    0,
-      "slope-opacity":     0,
-      "neutral-opacity":   1.0,
-      "ambient-intensity": 0.25,
-      "sun-intensity":     7.0,
-      "shadow-darkness":   0.85
+      "terrain-opacity":     0,
+      "heatmap-opacity":     0,
+      "albedo-opacity":      0,
+      "slope-opacity":       0,
+      "neutral-opacity":     1.0,
+      "thermal-top-opacity": 0,
+      "ambient-intensity":   0.25,
+      "sun-intensity":       7.0,
+      "shadow-darkness":     0.85,
+      "elr":                 6.5
     }
   }
 ]
