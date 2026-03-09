@@ -538,6 +538,21 @@ function buildHeatmap(terrainData) {
   scene.add(heatmapMesh);
 }
 
+// Global dT max across all scenarios — computed once so the colorbar scale
+// stays fixed throughout the day and scenarios can be directly compared.
+let globalMaxDT = 0;
+
+function computeGlobalMaxDT() {
+  if (!simData) return;
+  const T = simData.terrain;
+  globalMaxDT = 0;
+  for (const sc of simData.scenarios)
+    for (let j = 0; j < T.ny; j++)
+      for (let i = 0; i < T.nx; i++)
+        if (sc.ground_temp_anomaly[j][i] > globalMaxDT)
+          globalMaxDT = sc.ground_temp_anomaly[j][i];
+}
+
 function updateHeatmapColors(scenarioIndex) {
   if (!heatmapMesh || !simData) return;
   const sc        = simData.scenarios[scenarioIndex];
@@ -545,11 +560,7 @@ function updateHeatmapColors(scenarioIndex) {
   const dT        = sc.ground_temp_anomaly;
   const stops     = (window._colormapsData || {}).thermal || [];
   const threshold = parseFloat(document.getElementById('trigger-threshold').value);
-
-  let maxDT = 0;
-  for (let j = 0; j < T.ny; j++)
-    for (let i = 0; i < T.nx; i++)
-      if (dT[j][i] > maxDT) maxDT = dT[j][i];
+  const maxDT     = globalMaxDT || 1;
 
   const arr = heatmapMesh.geometry.attributes.color.array;
   for (let j = 0; j < T.ny; j++) {
@@ -947,10 +958,7 @@ function updateFlowArrows(scenarioIndex) {
   const dT        = sc.ground_temp_anomaly;
   const stops     = (window._colormapsData || {}).thermal || [];
 
-  let maxDT = 0;
-  for (let j = 0; j < T.ny; j++)
-    for (let i = 0; i < T.nx; i++)
-      if (dT[j][i] > maxDT) maxDT = dT[j][i];
+  const maxDT = globalMaxDT || 1;
 
   const pos = flowArrows.geometry.attributes.position.array;
   const col = flowArrows.geometry.attributes.color.array;
@@ -1089,6 +1097,7 @@ function updateMarkerLabels() {
 
 // ─── Init ───────────────────────────────────────────────────────────────────
 function init() {
+  computeGlobalMaxDT();
   buildTerrain(simData.terrain);
   applyElevationColors();
   drawElevationColorbar();
