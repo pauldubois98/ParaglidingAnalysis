@@ -242,6 +242,16 @@
     <input type="range" id="elr" min="3" max="9" step="0.1" value="6.5" data-decimals="1">
   </div>
 
+  <div class="control-group">
+    <label>Trigger threshold <span id="trigger-threshold-val">1.5</span> K</label>
+    <input type="range" id="trigger-threshold" min="0" max="5" step="0.1" value="1.5" data-decimals="1">
+  </div>
+
+  <div class="control-group">
+    <label>Flow arrows <span id="flow-opacity-val">0.00</span></label>
+    <input type="range" id="flow-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
+  </div>
+
   <div class="control-group" style="margin-top:10px; font-size:11px; color:#668; line-height:1.5">
     Drag to rotate · Scroll to zoom · Right-drag to pan
   </div>
@@ -530,10 +540,11 @@ function buildHeatmap(terrainData) {
 
 function updateHeatmapColors(scenarioIndex) {
   if (!heatmapMesh || !simData) return;
-  const sc    = simData.scenarios[scenarioIndex];
-  const T     = simData.terrain;
-  const dT    = sc.ground_temp_anomaly;
-  const stops = (window._colormapsData || {}).thermal || [];
+  const sc        = simData.scenarios[scenarioIndex];
+  const T         = simData.terrain;
+  const dT        = sc.ground_temp_anomaly;
+  const stops     = (window._colormapsData || {}).thermal || [];
+  const threshold = parseFloat(document.getElementById('trigger-threshold').value);
 
   let maxDT = 0;
   for (let j = 0; j < T.ny; j++)
@@ -543,8 +554,9 @@ function updateHeatmapColors(scenarioIndex) {
   const arr = heatmapMesh.geometry.attributes.color.array;
   for (let j = 0; j < T.ny; j++) {
     for (let i = 0; i < T.nx; i++) {
-      const idx = (j * T.nx + i) * 3;
-      const [r, g, b] = sampleColormap(stops, dT[j][i] / maxDT);
+      const idx    = (j * T.nx + i) * 3;
+      const dT_eff = Math.max(0, dT[j][i] - threshold);
+      const [r, g, b] = sampleColormap(stops, dT_eff / maxDT);
       arr[idx] = r; arr[idx + 1] = g; arr[idx + 2] = b;
     }
   }
@@ -852,11 +864,12 @@ function buildThermalTopOverlay(terrainData) {
 
 function updateThermalTopColors(scenarioIndex) {
   if (!thermalTopMesh || !simData) return;
-  const sc   = simData.scenarios[scenarioIndex];
-  const T    = simData.terrain;
-  const dT   = sc.ground_temp_anomaly;
-  const ELR  = parseFloat(document.getElementById('elr').value) / 1000;  // K/km → K/m
-  const dLapse = DALR_JS - ELR;
+  const sc        = simData.scenarios[scenarioIndex];
+  const T         = simData.terrain;
+  const dT        = sc.ground_temp_anomaly;
+  const ELR       = parseFloat(document.getElementById('elr').value) / 1000;  // K/km → K/m
+  const threshold = parseFloat(document.getElementById('trigger-threshold').value);
+  const dLapse    = DALR_JS - ELR;
   if (dLapse <= 0) return;  // neutral/unstable atmosphere — no finite thermal top
 
   const stops = (window._colormapsData || {})['thermal-top'] || [];
@@ -864,8 +877,9 @@ function updateThermalTopColors(scenarioIndex) {
 
   for (let j = 0; j < T.ny; j++) {
     for (let i = 0; i < T.nx; i++) {
-      const idx  = (j * T.nx + i) * 3;
-      const hTop = dT[j][i] > 0 ? dT[j][i] / dLapse : 0;
+      const idx    = (j * T.nx + i) * 3;
+      const dT_eff = Math.max(0, dT[j][i] - threshold);
+      const hTop   = dT_eff > 0 ? dT_eff / dLapse : 0;
       const [r, g, b] = sampleColormap(stops, hTop / HTOP_MAX);
       arr[idx] = r; arr[idx + 1] = g; arr[idx + 2] = b;
     }
@@ -873,6 +887,131 @@ function updateThermalTopColors(scenarioIndex) {
   thermalTopMesh.geometry.attributes.color.needsUpdate = true;
   drawColorbar('cb-thermal-top', 'cb-thermal-top-labels', 'thermal-top',
                0, HTOP_MAX, v => v.toFixed(0) + ' m');
+}
+
+// ─── Orographic flow arrows ──────────────────────────────────────────────────
+// LineSegments: 3 segments per arrow (shaft + 2 head wings) = 6 vertices each.
+// Arrows are placed at downsampled grid points (arrow_step spacing).
+// u_surface = eastward component (K-weighted), v_surface = southward component.
+
+let flowArrows = null;
+const FLOW_SCALE = 25;  // world units (metres) per K of smoothed flow magnitude
+
+function buildFlowArrows(terrainData) {
+  if (flowArrows) {
+    scene.remove(flowArrows);
+    flowArrows.geometry.dispose();
+    flowArrows.material.dispose();
+    flowArrows = null;
+  }
+  if (!simData || !simData.scenarios[0] || !simData.scenarios[0].u_surface) return;
+
+  const T    = terrainData;
+  const step = T.arrow_step || 8;
+
+  // Build the index lists — same formula used in Python export
+  const jIdx = [], iIdx = [];
+  for (let j = Math.floor(step / 2); j < T.ny; j += step) jIdx.push(j);
+  for (let i = Math.floor(step / 2); i < T.nx; i += step) iIdx.push(i);
+  window._flowJIndices = jIdx;
+  window._flowIIndices = iIdx;
+
+  const numArrows = jIdx.length * iIdx.length;
+  const positions = new Float32Array(numArrows * 6 * 3);  // 6 verts × 3 floats
+  const colors    = new Float32Array(numArrows * 6 * 3);
+
+  const geom = new THREE.BufferGeometry();
+  geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geom.setAttribute('color',    new THREE.BufferAttribute(colors,    3));
+
+  const mat = new THREE.LineBasicMaterial({
+    vertexColors: true, transparent: true, opacity: 0, depthWrite: false,
+  });
+  window._flowMat = mat;
+
+  flowArrows = new THREE.LineSegments(geom, mat);
+  scene.add(flowArrows);
+}
+
+function updateFlowArrows(scenarioIndex) {
+  if (!flowArrows || !simData) return;
+  const sc = simData.scenarios[scenarioIndex];
+  if (!sc.u_surface || !sc.v_surface) return;
+
+  const T         = simData.terrain;
+  const threshold = parseFloat(document.getElementById('trigger-threshold').value);
+  const jIdx      = window._flowJIndices;
+  const iIdx      = window._flowIIndices;
+  const U         = sc.u_surface;   // [jj][ii], eastward K
+  const V         = sc.v_surface;   // [jj][ii], southward K
+  const dT        = sc.ground_temp_anomaly;
+  const stops     = (window._colormapsData || {}).thermal || [];
+
+  let maxDT = 0;
+  for (let j = 0; j < T.ny; j++)
+    for (let i = 0; i < T.nx; i++)
+      if (dT[j][i] > maxDT) maxDT = dT[j][i];
+
+  const pos = flowArrows.geometry.attributes.position.array;
+  const col = flowArrows.geometry.attributes.color.array;
+  let vi = 0;  // vertex counter
+
+  for (let jj = 0; jj < jIdx.length; jj++) {
+    const j = jIdx[jj];
+    for (let ii = 0; ii < iIdx.length; ii++) {
+      const i = iIdx[ii];
+
+      // World-space base position (on terrain surface + small lift)
+      const wx = T.x_extent[0] + i * T.dx;
+      const wy = -(T.y_extent[0] + j * T.dy);
+      const wz = T.elevation[j][i] + 25;
+
+      // Flow vector: East → +x, South → −y in Three.js
+      const dx_w = U[jj][ii] * FLOW_SCALE;
+      const dy_w = -V[jj][ii] * FLOW_SCALE;
+      const shaftLen = Math.sqrt(dx_w * dx_w + dy_w * dy_w);
+
+      const tx = wx + dx_w;
+      const ty = wy + dy_w;
+
+      // Color by threshold-adjusted dT at this cell
+      const dT_eff = Math.max(0, dT[j][i] - threshold);
+      const [cr, cg, cb] = sampleColormap(stops, maxDT > 0 ? dT_eff / maxDT : 0);
+
+      // Helper: write one vertex
+      function writeVert(px, py) {
+        pos[vi * 3] = px; pos[vi * 3 + 1] = py; pos[vi * 3 + 2] = wz;
+        col[vi * 3] = cr; col[vi * 3 + 1] = cg; col[vi * 3 + 2] = cb;
+        vi++;
+      }
+
+      // Shaft: base → tip
+      writeVert(wx, wy);
+      writeVert(tx, ty);
+
+      if (shaftLen < 0.5) {
+        // Degenerate (zero-flow) arrow — collapse head wings to same point
+        writeVert(wx, wy); writeVert(wx, wy);
+        writeVert(wx, wy); writeVert(wx, wy);
+      } else {
+        // Arrow-head wings: ±25° from backward direction at tip
+        const ang = 25 * Math.PI / 180;
+        const ux = dx_w / shaftLen, uy = dy_w / shaftLen;  // unit forward
+        const headLen = Math.min(shaftLen * 0.40, 80);
+        // Rotate unit-backward (−ux, −uy) by ±ang
+        const lx = tx + headLen * (-ux * Math.cos(ang) + uy * Math.sin(ang));
+        const ly = ty + headLen * (-ux * Math.sin(ang) - uy * Math.cos(ang));
+        const rx = tx + headLen * (-ux * Math.cos(ang) - uy * Math.sin(ang));
+        const ry = ty + headLen * ( ux * Math.sin(ang) - uy * Math.cos(ang));
+
+        writeVert(tx, ty); writeVert(lx, ly);
+        writeVert(tx, ty); writeVert(rx, ry);
+      }
+    }
+  }
+
+  flowArrows.geometry.attributes.position.needsUpdate = true;
+  flowArrows.geometry.attributes.color.needsUpdate    = true;
 }
 
 // ─── Waypoint markers ────────────────────────────────────────────────────────
@@ -961,10 +1100,12 @@ function init() {
   buildNeutralOverlay(simData.terrain);
   buildShadowOverlay(simData.terrain);
   buildThermalTopOverlay(simData.terrain);
+  buildFlowArrows(simData.terrain);
   buildSunObject();
   updateSunObject(0);
   updateShadowColors(0);
   updateThermalTopColors(0);
+  updateFlowArrows(0);
   applySettings();
   buildPresetButtons();
   // Apply first preset values silently (meshes already built at those opacities)
@@ -1015,6 +1156,7 @@ function buildTimeSlider() {
     updateSunObject(i);
     updateShadowColors(i);
     updateThermalTopColors(i);
+    updateFlowArrows(i);
   }
 
   slider.addEventListener('input', e => applyScenario(parseInt(e.target.value)));
@@ -1078,6 +1220,18 @@ document.getElementById('elr').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
   document.getElementById('elr-val').textContent = fmt(e.target, v);
   updateThermalTopColors(currentScenario);
+});
+document.getElementById('trigger-threshold').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('trigger-threshold-val').textContent = fmt(e.target, v);
+  updateHeatmapColors(currentScenario);
+  updateThermalTopColors(currentScenario);
+  updateFlowArrows(currentScenario);
+});
+document.getElementById('flow-opacity').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('flow-opacity-val').textContent = fmt(e.target, v);
+  if (window._flowMat) window._flowMat.opacity = v;
 });
 
 // ─── Settings (min/max/step/decimals from settings.json) ─────────────────────

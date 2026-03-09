@@ -9,10 +9,12 @@
       "slope-opacity":       0,
       "neutral-opacity":     0,
       "thermal-top-opacity": 0,
+      "flow-opacity":        0,
       "ambient-intensity":   2.0,
       "sun-intensity":       3.0,
       "shadow-darkness":     0.70,
-      "elr":                 6.5
+      "elr":                 6.5,
+      "trigger-threshold":   1.5
     }
   },
   {
@@ -25,10 +27,12 @@
       "slope-opacity":       0,
       "neutral-opacity":     0.2,
       "thermal-top-opacity": 0,
+      "flow-opacity":        0.75,
       "ambient-intensity":   2.0,
       "sun-intensity":       3.0,
       "shadow-darkness":     0.70,
-      "elr":                 6.5
+      "elr":                 6.5,
+      "trigger-threshold":   1.5
     }
   },
   {
@@ -41,10 +45,12 @@
       "slope-opacity":       0,
       "neutral-opacity":     0.15,
       "thermal-top-opacity": 0.85,
+      "flow-opacity":        0,
       "ambient-intensity":   2.0,
       "sun-intensity":       3.0,
       "shadow-darkness":     0.60,
-      "elr":                 6.5
+      "elr":                 6.5,
+      "trigger-threshold":   1.5
     }
   },
   {
@@ -57,10 +63,12 @@
       "slope-opacity":       0,
       "neutral-opacity":     0.3,
       "thermal-top-opacity": 0,
+      "flow-opacity":        0,
       "ambient-intensity":   2.0,
       "sun-intensity":       3.0,
       "shadow-darkness":     0.70,
-      "elr":                 6.5
+      "elr":                 6.5,
+      "trigger-threshold":   1.5
     }
   },
   {
@@ -73,10 +81,12 @@
       "slope-opacity":       0.90,
       "neutral-opacity":     0.25,
       "thermal-top-opacity": 0,
+      "flow-opacity":        0,
       "ambient-intensity":   2.0,
       "sun-intensity":       3.0,
       "shadow-darkness":     0.70,
-      "elr":                 6.5
+      "elr":                 6.5,
+      "trigger-threshold":   1.5
     }
   },
   {
@@ -89,10 +99,12 @@
       "slope-opacity":       0,
       "neutral-opacity":     1.0,
       "thermal-top-opacity": 0,
+      "flow-opacity":        0,
       "ambient-intensity":   0.25,
       "sun-intensity":       7.0,
       "shadow-darkness":     0.85,
-      "elr":                 6.5
+      "elr":                 6.5,
+      "trigger-threshold":   1.5
     }
   }
 ]
