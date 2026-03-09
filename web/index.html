@@ -1678,10 +1678,14 @@ function buildClickMarker(x, y, z, elevM) {
 let _lastGi = null, _lastGj = null, _lastPt = null;
 
 // ─── Thermal plume profile ────────────────────────────────────────────────────
-// Shape: r(z) = r_max * 5.38*(z/H)*(1-z/H)^1.5  — peaks at 40% of h_top
-// f(z)=z^α*(1-z)^β peaks at α/(α+β); α=1,β=1.5 → 40%.  Norm = 1/(0.4*0.6^1.5)≈5.38
-// Temperature: linear decay dT(z) = dT0 * (1 - z/H)
-// H = thermal top AGL = dT0 / (DALR - ELR)
+// Width encodes vertical speed (buoyancy, simple parcel theory, no entrainment):
+//   w(z)² = 2·(g/T₀)·ΔT(z)·z_agl,  ΔT(z) = dT_eff·(1−z/H)
+//   w(z)/w_max = 2·√(zFrac·(1−zFrac))  — peaks at zFrac = 0.5 (midpoint)
+//   w_max = √(0.5·(g/T₀)·dT_eff·H)
+// Temperature: linear decay dT(z) = dT_eff·(1−z/H)  — used for fill colour.
+// H = thermal top AGL = dT_eff / (DALR − ELR)
+const G_OVER_T0 = 9.81 / 293.15;   // ≈ 0.03349 m/s² per K
+
 function drawPlumeProfile(gi, gj) {
   const plumeSection = document.getElementById('plume-section');
   const canvas  = document.getElementById('plume-canvas');
@@ -1741,20 +1745,31 @@ function drawPlumeProfile(gi, gj) {
   const rMaxFrac = 0.42 * (dT_eff / (globalMaxDT || 1));
   const rMaxPx   = (W / 2 - PAD_LR) * rMaxFrac;
 
+  // Peak vertical speed: w_max = √(0.5·g/T₀·dT_eff·H), occurs at zFrac = 0.5
+  const w_max = zTop > 0 ? Math.sqrt(0.5 * G_OVER_T0 * dT_eff * zTop) : 0;
+
   if (zTop > 0) {
-    // Draw plume row by row in MSL coordinates
+    // Draw plume row by row in MSL coordinates.
+    // Width = w(z)/w_max = 2·√(zFrac·(1−zFrac)), so the outline IS the speed profile.
     for (let py = 0; py < drawH; py++) {
       const altMSL = axisTop - (py / drawH) * axisSpan;
       const z_agl  = altMSL - elev;              // AGL from this cell's ground
       if (z_agl <= 0 || z_agl > zTop) continue;  // below ground or above ceiling
       const zFrac = z_agl / zTop;
       const dTz   = dT_eff * (1 - zFrac);
-      const rFrac = 5.38 * zFrac * Math.pow(1 - zFrac, 1.5);
+      const rFrac = 2 * Math.sqrt(zFrac * (1 - zFrac));  // = w(z)/w_max
       const rPx   = rMaxPx * rFrac;
       const [r, g, b] = sampleColormap(stops, dTz / (globalMaxDT || 1));
       ctx.fillStyle = `rgba(${(r*255)|0},${(g*255)|0},${(b*255)|0},0.85)`;
       ctx.fillRect(cx - rPx, PAD_TOP + py, rPx * 2, 1);
     }
+
+    // w_max label at the widest point (zFrac = 0.5, i.e. mid-height)
+    const peakY = altToY(elev + zTop * 0.5);
+    ctx.fillStyle = 'rgba(220,240,255,0.95)';
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(`↑ ${w_max.toFixed(1)} m/s`, cx, peakY - 4);
 
     // Thermal ceiling dashed line
     const ceilY = altToY(elev + zTop);
