@@ -3,6 +3,7 @@
     "label": "Elevation",
     "tip": "Terrain coloured by altitude, no overlays",
     "sliders_visible": [
+      "time-slider",
       "terrain-opacity",
       "ambient-intensity",
       "shadow-darkness",
@@ -28,6 +29,7 @@
     "label": "Thermal heat",
     "tip": "Heatmap overlay showing ground temperature anomaly per scenario",
     "sliders_visible": [
+      "time-slider",
       "heatmap-opacity",
       "trigger-threshold",
       "ambient-intensity",
@@ -54,6 +56,7 @@
     "label": "Thermal flow",
     "tip": "Flow overlay showing ground temperature anomaly per scenario",
     "sliders_visible": [
+      "time-slider",
       "neutral-opacity",
       "trigger-threshold",
       "flow-opacity",
@@ -80,6 +83,7 @@
     "label": "Thermal top",
     "tip": "Thermal ceiling height AGL — how high you can climb per cell. Adjust ELR for atmospheric stability.",
     "sliders_visible": [
+      "time-slider",
       "thermal-top-opacity",
       "elr",
       "trigger-threshold",
@@ -107,8 +111,7 @@
     "tip": "Cumulative thermal energy integrated over all daylight hours — shows which cells are reliable thermic sources",
     "sliders_visible": [
       "heat-accum-opacity",
-      "trigger-threshold",
-      "ambient-intensity"
+      "trigger-threshold"
     ],
     "sliders": {
       "terrain-opacity":     0,
@@ -130,13 +133,14 @@
     "label": "Albedo",
     "tip": "Land-cover thermal factor — how fast each surface heats up",
     "sliders_visible": [
+      "time-slider",
       "albedo-opacity",
-      "ambient-intensity"
+      "shadow-darkness"
     ],
     "sliders": {
       "terrain-opacity":     0,
       "heatmap-opacity":     0,
-      "albedo-opacity":      0.95,
+      "albedo-opacity":      0.75,
       "slope-opacity":       0,
       "neutral-opacity":     0,
       "thermal-top-opacity": 0,
@@ -144,7 +148,7 @@
       "flow-opacity":        0,
       "ambient-intensity":   0,
       "sun-intensity":       0,
-      "shadow-darkness":     0,
+      "shadow-darkness":     0.7,
       "elr":                 6.5,
       "trigger-threshold":   1.5
     }
@@ -153,6 +157,7 @@
     "label": "Slope",
     "tip": "Terrain steepness — steep south-facing slopes trigger thermals",
     "sliders_visible": [
+      "time-slider",
       "slope-opacity",
       "shadow-darkness"
     ],
@@ -176,6 +181,7 @@
     "label": "Sun shading",
     "tip": "Neutral terrain lit by directional sun, with DEM horizon shadows",
     "sliders_visible": [
+      "time-slider",
       "neutral-opacity",
       "shadow-darkness",
       "ambient-intensity",
