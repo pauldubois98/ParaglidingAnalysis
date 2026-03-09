@@ -241,15 +241,15 @@ SVF = (1 + cos(slope)) / 2   ← sky view factor</div>
   <ul>
     <li><strong>Land-cover thermal factor</strong> <span class="tag tag-yes">modelled</span> — different surfaces heat at different rates depending on albedo and thermal inertia. Based on ESA WorldCover 2021 classes:
       <table>
-        <thead><tr><th>Surface</th><th>Thermal factor</th><th>Reason</th></tr></thead>
+        <thead><tr><th>Surface</th><th>Thermal factor</th><th>τ (h)</th><th>Reason</th></tr></thead>
         <tbody>
-          <tr><td>Bare rock / scree</td><td>1.80</td><td>Low albedo, negligible heat capacity</td></tr>
-          <tr><td>Built-up</td><td>1.30</td><td>Concrete / tarmac</td></tr>
-          <tr><td>Grassland</td><td>1.00</td><td>Reference</td></tr>
-          <tr><td>Cropland</td><td>0.85</td><td>Moderate inertia</td></tr>
-          <tr><td>Shrubland</td><td>0.70</td><td>Partial canopy</td></tr>
-          <tr><td>Tree cover</td><td>0.45</td><td>High inertia, canopy evaporation</td></tr>
-          <tr><td>Permanent water</td><td>0.03</td><td>Very high heat capacity</td></tr>
+          <tr><td>Bare rock / scree</td><td>1.80</td><td>0.5</td><td>Low albedo, negligible heat capacity — spikes at noon</td></tr>
+          <tr><td>Built-up</td><td>1.30</td><td>0.75</td><td>Concrete / tarmac</td></tr>
+          <tr><td>Grassland</td><td>1.00</td><td>1.5</td><td>Reference</td></tr>
+          <tr><td>Cropland</td><td>0.85</td><td>1.3</td><td>Moderate inertia</td></tr>
+          <tr><td>Shrubland</td><td>0.70</td><td>2.0</td><td>Partial canopy</td></tr>
+          <tr><td>Tree cover</td><td>0.45</td><td>3.75</td><td>High inertia, canopy evaporation — peaks in early afternoon</td></tr>
+          <tr><td>Permanent water</td><td>0.03</td><td>22.5</td><td>Very high heat capacity — nearly constant temperature</td></tr>
         </tbody>
       </table>
     </li>
@@ -279,7 +279,7 @@ ELR  = adjustable via slider (standard: 6.5 K/km)</div>
     <li><strong>No fluid dynamics</strong> <span class="tag tag-part">simplified</span> — the model is purely diagnostic. It computes where and when the ground heats up, but does not solve the Navier-Stokes equations. There is no pressure field, no mass conservation, and no atmospheric convection feedback. The orographic flow is a proxy, not a CFD result.</li>
     <li><strong>Always clear sky</strong> <span class="tag tag-part">simplified</span> — cloud cover is not modelled. The simulation represents a theoretical ideal clear-sky day for the chosen date. Real days will be affected by cumulus, morning fog, etc.</li>
     <li><strong>Fixed ELR</strong> <span class="tag tag-part">simplified</span> — the Environmental Lapse Rate is a single value for the whole domain and the whole day. In reality it varies with altitude, time, and atmospheric sounding. The slider allows manual adjustment.</li>
-    <li><strong>Uniform thermal inertia</strong> <span class="tag tag-part">simplified</span> — the relaxation time constant τ = 1.5 h is the same for all land-cover types. In reality, bare rock responds in minutes while lakes respond over days. This affects the timing of peak thermals.</li>
+    <li><strong>Thermal inertia by land-cover type</strong> <span class="tag tag-yes">modelled</span> — each cell has its own relaxation time constant τ derived from its ESA WorldCover class. Bare rock (τ ≈ 0.5 h) heats and cools rapidly, peaking sharply at solar noon. Dense forest (τ ≈ 3.75 h) responds slowly and stays warm well into the afternoon. Water (τ ≈ 22 h) barely changes temperature within a single day. Grassland (τ = 1.5 h) is the reference. The per-cell decay factor is applied at every time step: <code>dT(t) = dT(t−1) × exp(−dt/τ) + dT_instant × (1 − exp(−dt/τ))</code>. The τ values are estimates — soil moisture, vegetation density, and slope aspect all affect the true value.</li>
     <li><strong>Isotropic diffuse sky</strong> <span class="tag tag-part">simplified</span> — diffuse radiation is assumed to come uniformly from the entire sky hemisphere. In reality it is brighter near the sun (circumsolar region) and near the horizon. A more accurate model (Perez) would require additional parameters.</li>
     <li><strong>ERA5 calibration resolution</strong> <span class="tag tag-part">simplified</span> — ERA5 has ~28 km resolution. The calibration gives the correct domain-average amplitude, but individual cells can exceed this by a factor related to their thermal factor (e.g. bare rock × 1.8).</li>
     <li><strong>No intra-day air temperature variation</strong> <span class="tag tag-part">simplified</span> — the model uses a single <em>max_heat</em> value for the whole day. In reality, air temperature rises through the afternoon, slightly reducing dT in the late afternoon relative to the morning at the same insolation level.</li>
