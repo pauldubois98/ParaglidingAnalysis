@@ -592,6 +592,7 @@ function buildHeatmap(terrainData) {
     transparent: true,
     opacity: 0.7,
     depthWrite: false,
+    depthTest: false,
     side: THREE.FrontSide,
   });
   window._heatmapMat = mat;
@@ -742,7 +743,7 @@ function buildAlbedoOverlay(terrainData) {
 
   const mat = new THREE.MeshBasicMaterial({
     vertexColors: true, transparent: true, opacity: 0,
-    depthWrite: false,
+    depthWrite: false, depthTest: false,
   });
   window._albedoMat = mat;
 
@@ -801,7 +802,7 @@ function buildSlopeOverlay(terrainData) {
 
   const mat = new THREE.MeshBasicMaterial({
     vertexColors: true, transparent: true, opacity: 0,
-    depthWrite: false,
+    depthWrite: false, depthTest: false,
   });
   window._slopeMat = mat;
 
@@ -935,7 +936,8 @@ function buildThermalTopOverlay(terrainData) {
   geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
   const mat = new THREE.MeshBasicMaterial({
-    vertexColors: true, transparent: true, opacity: 0, depthWrite: false,
+    vertexColors: true, transparent: true, opacity: 0,
+    depthWrite: false, depthTest: false,
   });
   window._thermalTopMat = mat;
 
@@ -997,7 +999,8 @@ function buildHeatAccumOverlay(terrainData) {
   const colors = new Float32Array(nx * ny * 3);
   geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
   const mat = new THREE.MeshBasicMaterial({
-    vertexColors: true, transparent: true, opacity: 0, depthWrite: false,
+    vertexColors: true, transparent: true, opacity: 0,
+    depthWrite: false, depthTest: false,
   });
   window._heatAccumMat = mat;
   heatAccumMesh = new THREE.Mesh(geom, mat);
@@ -1042,6 +1045,31 @@ function updateHeatAccumColors() {
 // LineSegments: 3 segments per arrow (shaft + 2 head wings) = 6 vertices each.
 // Arrows are placed at downsampled grid points (arrow_step spacing).
 // u_surface = eastward component (K-weighted), v_surface = southward component.
+
+// ─── Pick mesh (invisible sim-grid mesh for fast raycasting) ─────────────────
+// The visual terrain uses ~1 M+ triangles (7 m DEM). Raycasting it on every
+// click is too slow. This coarse sim-grid mesh (30 m, ~133 K triangles) is
+// invisible and used only for hit-testing; the actual grid lookup then reads
+// coordinates from simData.terrain just as before.
+let pickMesh = null;
+
+function buildPickMesh(terrainData) {
+  if (pickMesh) { scene.remove(pickMesh); pickMesh.geometry.dispose(); pickMesh.material.dispose(); }
+  const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+  const geom = new THREE.PlaneGeometry(
+    x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+  );
+  const pos = geom.attributes.position;
+  for (let j = 0; j < ny; j++)
+    for (let i = 0; i < nx; i++)
+      pos.setZ(j * nx + i, elevation[j][i]);
+  pos.needsUpdate = true;
+  pickMesh = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ visible: false }));
+  pickMesh.position.set(
+    (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+  );
+  scene.add(pickMesh);
+}
 
 let flowArrows = null;
 const FLOW_SCALE = 25;  // world units (metres) per K of smoothed flow magnitude
@@ -1238,6 +1266,7 @@ function init() {
   try {
   computeGlobalMaxDT();
   buildTerrain(simData.terrain);
+  buildPickMesh(simData.terrain);
   applyElevationColors();
   drawElevationColorbar();
   buildHeatmap(simData.terrain);
@@ -1492,7 +1521,8 @@ function buildClickMarker(x, y, z, elevM) {
 let _lastGi = null, _lastGj = null, _lastPt = null;
 
 // ─── Thermal plume profile ────────────────────────────────────────────────────
-// Shape: spindle (thermal bubble) — r(z) = r_max * 4*(z/H)*(1-z/H)
+// Shape: r(z) = r_max * 5.38*(z/H)*(1-z/H)^1.5  — peaks at 40% of h_top
+// f(z)=z^α*(1-z)^β peaks at α/(α+β); α=1,β=1.5 → 40%.  Norm = 1/(0.4*0.6^1.5)≈5.38
 // Temperature: linear decay dT(z) = dT0 * (1 - z/H)
 // H = thermal top AGL = dT0 / (DALR - ELR)
 function drawPlumeProfile(gi, gj) {
@@ -1562,7 +1592,7 @@ function drawPlumeProfile(gi, gj) {
       if (z_agl <= 0 || z_agl > zTop) continue;  // below ground or above ceiling
       const zFrac = z_agl / zTop;
       const dTz   = dT_eff * (1 - zFrac);
-      const rFrac = 4 * zFrac * (1 - zFrac);
+      const rFrac = 5.38 * zFrac * Math.pow(1 - zFrac, 1.5);
       const rPx   = rMaxPx * rFrac;
       const [r, g, b] = sampleColormap(stops, dTz / (globalMaxDT || 1));
       ctx.fillStyle = `rgba(${(r*255)|0},${(g*255)|0},${(b*255)|0},0.85)`;
@@ -1652,7 +1682,7 @@ renderer.domElement.addEventListener('click', e => {
   _mouse.y = -((e.clientY - rect.top)  / rect.height) * 2 + 1;
 
   raycaster.setFromCamera(_mouse, camera);
-  const hits = raycaster.intersectObject(terrainMesh);
+  const hits = raycaster.intersectObject(pickMesh);
   if (!hits.length) {
     infoPanel.style.display = 'none';
     if (clickMarker) { clickMarker.forEach(m => { scene.remove(m); if (m._labelDiv) m._labelDiv.remove(); }); clickMarker = null; }
