@@ -76,7 +76,7 @@
       "sun-intensity":       3.0,
       "shadow-darkness":     0,
       "elr":                 6.5,
-      "trigger-threshold":   0
+      "trigger-threshold":   1.5
     }
   },
   {

@@ -168,11 +168,52 @@
     #info-panel .info-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
     #info-panel .info-label { color: #6888a0; }
     #info-panel .info-val   { color: #e0f0ff; font-weight: bold; text-align: right; }
+    #plume-section {
+      margin-top: 12px;
+      border-top: 1px solid rgba(100,160,255,0.15);
+      padding-top: 10px;
+    }
+    #plume-section h3 {
+      font-size: 11px;
+      color: #6888a0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 0 0 8px;
+    }
+    #plume-wrap {
+      display: flex;
+      gap: 6px;
+      align-items: stretch;
+    }
+    #plume-alt-labels {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 9px;
+      color: #5577aa;
+      text-align: right;
+      min-width: 36px;
+      padding-bottom: 18px; /* align with canvas bottom (room for x-label) */
+    }
+    #plume-canvas {
+      flex: 1;
+      height: 360px;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
 <div id="canvas-container">
-  <div id="info-panel"></div>
+  <div id="info-panel">
+    <div id="info-rows"></div>
+    <div id="plume-section" style="display:none">
+      <h3>Thermal plume profile</h3>
+      <div id="plume-wrap">
+        <div id="plume-alt-labels"></div>
+        <canvas id="plume-canvas" width="180" height="360"></canvas>
+      </div>
+    </div>
+  </div>
   <div id="loading">
     <div class="spinner"></div>
     <div>Loading simulation data...</div>
@@ -1260,6 +1301,7 @@ function buildTimeSlider() {
     updateShadowColors(i);
     updateThermalTopColors(i);
     updateFlowArrows(i);
+    if (_lastGi !== null) drawPlumeProfile(_lastGi, _lastGj);
   }
 
   slider.addEventListener('input', e => applyScenario(parseInt(e.target.value)));
@@ -1323,6 +1365,7 @@ document.getElementById('elr').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
   document.getElementById('elr-val').textContent = fmt(e.target, v);
   updateThermalTopColors(currentScenario);
+  if (_lastGi !== null) drawPlumeProfile(_lastGi, _lastGj);
 });
 document.getElementById('trigger-threshold').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
@@ -1331,6 +1374,7 @@ document.getElementById('trigger-threshold').addEventListener('input', e => {
   updateThermalTopColors(currentScenario);
   updateHeatAccumColors();
   updateFlowArrows(currentScenario);
+  if (_lastGi !== null) drawPlumeProfile(_lastGi, _lastGj);
 });
 document.getElementById('heat-accum-opacity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
@@ -1427,7 +1471,132 @@ function buildClickMarker(x, y, z, elevM) {
   clickMarker = [pole, cone];
 }
 
+let _lastGi = null, _lastGj = null, _lastPt = null;
+
+// ─── Thermal plume profile ────────────────────────────────────────────────────
+// Shape: spindle (thermal bubble) — r(z) = r_max * 4*(z/H)*(1-z/H)
+// Temperature: linear decay dT(z) = dT0 * (1 - z/H)
+// H = thermal top AGL = dT0 / (DALR - ELR)
+function drawPlumeProfile(gi, gj) {
+  const plumeSection = document.getElementById('plume-section');
+  const canvas  = document.getElementById('plume-canvas');
+  const labelsEl = document.getElementById('plume-alt-labels');
+  if (!canvas || !simData) return;
+
+  const T   = simData.terrain;
+  const dT0 = simData.scenarios[currentScenario].ground_temp_anomaly[gj][gi];
+  const ELR = parseFloat(document.getElementById('elr').value) / 1000;
+  const dLapse = DALR_JS - ELR;
+  const threshold = parseFloat(document.getElementById('trigger-threshold').value);
+  const dT_eff = Math.max(0, dT0 - threshold);
+  const zTop = (dLapse > 0 && dT_eff > 0) ? dT_eff / dLapse : 0;
+
+  const elev = simData.terrain.elevation[gj][gi];
+
+  // Fixed Y axis (MSL) — same regardless of which cell is selected
+  // Bottom = lowest terrain point on map, top = highest terrain + tallest thermal
+  const zAxisMax = (dLapse > 0 && globalMaxDT > threshold)
+    ? Math.max(0, globalMaxDT - threshold) / dLapse
+    : (zTop > 0 ? zTop : 1000);
+  const axisBottom = terrainZMin;
+  const axisTop    = terrainZMax + zAxisMax;
+  const axisSpan   = axisTop - axisBottom;
+
+  // Helper: MSL altitude → canvas Y pixel
+  const altToY = alt => PAD_TOP + (1 - (alt - axisBottom) / axisSpan) * drawH;
+
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const PAD_TOP = 8, PAD_BTM = 4, PAD_LR = 4;
+  const drawH = H - PAD_TOP - PAD_BTM;
+  const cx = W / 2;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background
+  ctx.fillStyle = 'rgba(8,12,24,0.9)';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid lines at round MSL altitudes
+  ctx.strokeStyle = 'rgba(80,120,160,0.2)';
+  ctx.lineWidth = 1;
+  const gridStep = Math.pow(10, Math.floor(Math.log10(axisSpan / 4)));
+  const gridStart = Math.ceil(axisBottom / gridStep) * gridStep;
+  for (let alt = gridStart; alt <= axisTop; alt += gridStep) {
+    const y = altToY(alt);
+    ctx.beginPath(); ctx.moveTo(PAD_LR, y); ctx.lineTo(W - PAD_LR, y); ctx.stroke();
+  }
+
+  // Centre axis
+  ctx.strokeStyle = 'rgba(80,120,160,0.4)';
+  ctx.beginPath(); ctx.moveTo(cx, PAD_TOP); ctx.lineTo(cx, PAD_TOP + drawH); ctx.stroke();
+
+  const stops = (window._colormapsData || {}).thermal || [];
+
+  const rMaxFrac = 0.42 * (dT_eff / (globalMaxDT || 1));
+  const rMaxPx   = (W / 2 - PAD_LR) * rMaxFrac;
+
+  if (zTop > 0) {
+    // Draw plume row by row in MSL coordinates
+    for (let py = 0; py < drawH; py++) {
+      const altMSL = axisTop - (py / drawH) * axisSpan;
+      const z_agl  = altMSL - elev;              // AGL from this cell's ground
+      if (z_agl <= 0 || z_agl > zTop) continue;  // below ground or above ceiling
+      const zFrac = z_agl / zTop;
+      const dTz   = dT_eff * (1 - zFrac);
+      const rFrac = 4 * zFrac * (1 - zFrac);
+      const rPx   = rMaxPx * rFrac;
+      const [r, g, b] = sampleColormap(stops, dTz / (globalMaxDT || 1));
+      ctx.fillStyle = `rgba(${(r*255)|0},${(g*255)|0},${(b*255)|0},0.85)`;
+      ctx.fillRect(cx - rPx, PAD_TOP + py, rPx * 2, 1);
+    }
+
+    // Thermal ceiling dashed line
+    const ceilY = altToY(elev + zTop);
+    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = 'rgba(180,220,255,0.6)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(PAD_LR, ceilY); ctx.lineTo(W - PAD_LR, ceilY); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(180,220,255,0.8)';
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${(elev + zTop).toFixed(0)} m`, PAD_LR + 2, ceilY - 2);
+    ctx.fillStyle = 'rgba(120,160,200,0.6)';
+    ctx.fillText(`+${zTop.toFixed(0)} AGL`, PAD_LR + 2, ceilY + 8);
+  } else {
+    ctx.fillStyle = 'rgba(80,100,120,0.7)';
+    ctx.font = '11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('No thermal', cx, PAD_TOP + drawH / 2);
+  }
+
+  // Ground level dotted line for this cell
+  const groundY = altToY(elev);
+  ctx.setLineDash([2, 4]);
+  ctx.strokeStyle = 'rgba(140,180,100,0.7)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD_LR, groundY); ctx.lineTo(W - PAD_LR, groundY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(140,180,100,0.8)';
+  ctx.font = '9px monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText(`${elev.toFixed(0)} m`, W - PAD_LR - 2, groundY - 2);
+
+  // Altitude labels on left (fixed MSL axis)
+  labelsEl.innerHTML = '';
+  const nLabels = 5;
+  for (let k = 0; k <= nLabels; k++) {
+    const span = document.createElement('span');
+    span.textContent = (axisTop - (k / nLabels) * axisSpan).toFixed(0);
+    labelsEl.appendChild(span);
+  }
+
+  plumeSection.style.display = '';
+}
+
 function updateInfoPanel(pt, gi, gj) {
+  _lastGi = gi; _lastGj = gj; _lastPt = pt;
   const T      = simData.terrain;
   const elev   = T.elevation[gj][gi];
   const tf     = T.thermal_factor ? T.thermal_factor[gj][gi].toFixed(2) : '—';
@@ -1439,7 +1608,7 @@ function updateInfoPanel(pt, gi, gj) {
   const lat = T.projection_origin.lat - (-pt.y) * 180 / (Math.PI * R);
   const lon = T.projection_origin.lon +   pt.x  * 180 / (Math.PI * R * Math.cos(T.projection_origin.lat * Math.PI / 180));
 
-  infoPanel.innerHTML = `
+  document.getElementById('info-rows').innerHTML = `
     <h2>Selected point</h2>
     <div class="info-coords">${lat.toFixed(5)}° N &nbsp; ${lon.toFixed(5)}° E</div>
     <div class="info-row"><span class="info-label">Elevation</span>      <span class="info-val">${elev.toFixed(0)} m</span></div>
@@ -1449,6 +1618,7 @@ function updateInfoPanel(pt, gi, gj) {
     <div class="info-row"><span class="info-label">Scenario</span>       <span class="info-val">${scName}</span></div>
   `;
   infoPanel.style.display = 'block';
+  drawPlumeProfile(gi, gj);
 }
 
 renderer.domElement.addEventListener('mousedown', e => {
