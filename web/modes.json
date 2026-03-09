@@ -32,8 +32,6 @@
       "time-slider",
       "heatmap-opacity",
       "trigger-threshold",
-      "ambient-intensity",
-      "sun-intensity",
       "elr"
     ],
     "sliders": {
@@ -57,18 +55,16 @@
     "tip": "Flow overlay showing ground temperature anomaly per scenario",
     "sliders_visible": [
       "time-slider",
-      "neutral-opacity",
-      "trigger-threshold",
       "flow-opacity",
-      "ambient-intensity",
-      "sun-intensity"
+      "trigger-threshold",
+      "elr"
     ],
     "sliders": {
       "terrain-opacity":     0,
       "heatmap-opacity":     0,
       "albedo-opacity":      0,
       "slope-opacity":       0,
-      "neutral-opacity":     0.25,
+      "neutral-opacity":     0.5,
       "thermal-top-opacity": 0,
       "heat-accum-opacity":  0,
       "flow-opacity":        0.95,
@@ -85,10 +81,8 @@
     "sliders_visible": [
       "time-slider",
       "thermal-top-opacity",
-      "elr",
       "trigger-threshold",
-      "ambient-intensity",
-      "sun-intensity"
+      "elr"
     ],
     "sliders": {
       "terrain-opacity":     0,
@@ -111,7 +105,8 @@
     "tip": "Cumulative thermal energy integrated over all daylight hours — shows which cells are reliable thermic sources",
     "sliders_visible": [
       "heat-accum-opacity",
-      "trigger-threshold"
+      "trigger-threshold",
+      "elr"
     ],
     "sliders": {
       "terrain-opacity":     0,
