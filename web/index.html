@@ -182,8 +182,9 @@
   <h2>Arbas Thermals</h2>
 
   <div class="control-group">
-    <label>Scenario</label>
-    <div id="scenario-buttons"></div>
+    <label>Time of day <span id="time-display" style="color:#7eb8ff;font-weight:bold">—</span></label>
+    <input type="range" id="time-slider" min="0" max="0" step="1" value="0" style="width:100%;margin-top:4px">
+    <div id="sun-pos-info" style="font-size:10px;color:#556677;margin-top:3px">—</div>
   </div>
 
   <div class="control-group">
@@ -593,7 +594,7 @@ function updateSunObject(scenarioIndex) {
   sun.shadow.camera.updateProjectionMatrix();
 
   // Update label text (position updated each frame in updateSunLabel)
-  sunLabelDiv.textContent = `☀ ${sc.name}  el ${sc.sun_elevation}°`;
+  sunLabelDiv.textContent = `☀ ${sc.local_time || sc.name}  el ${sc.sun_elevation.toFixed(0)}°`;
 }
 
 // ─── Albedo overlay ──────────────────────────────────────────────────────────
@@ -789,7 +790,7 @@ function updateShadowColors(scenarioIndex) {
   for (let j = 0; j < T.ny; j++) {
     for (let i = 0; i < T.nx; i++) {
       const idx = (j * T.nx + i) * 3;
-      const v   = mask[j][i] ? shadVal : litVal;
+      const v   = mask[j * T.nx + i] ? shadVal : litVal;  // flat 1-D array
       arr[idx] = arr[idx + 1] = arr[idx + 2] = v;
     }
   }
@@ -890,7 +891,7 @@ function init() {
   if (window._presetsData && window._presetsData.length > 0) {
     for (const [id, val] of Object.entries(window._presetsData[0].sliders)) setSlider(id, val);
   }
-  buildScenarioButtons();
+  buildTimeSlider();
   animate();
 }
 
@@ -919,24 +920,24 @@ function buildPresetButtons() {
   });
 }
 
-function buildScenarioButtons() {
-  const container = document.getElementById('scenario-buttons');
-  container.innerHTML = '';
-  simData.scenarios.forEach((sc, i) => {
-    const btn = document.createElement('button');
-    btn.className = 'scenario-btn' + (i === 0 ? ' active' : '');
-    btn.textContent = sc.name.replace('_', ' ');
-    btn.onclick = () => {
-      currentScenario = i;
-      container.querySelectorAll('.scenario-btn').forEach((b, j) => {
-        b.classList.toggle('active', j === i);
-      });
-      updateHeatmapColors(i);
-      updateSunObject(i);
-      updateShadowColors(i);
-    };
-    container.appendChild(btn);
-  });
+function buildTimeSlider() {
+  const slider = document.getElementById('time-slider');
+  slider.max   = simData.scenarios.length - 1;
+  slider.value = 0;
+
+  function applyScenario(i) {
+    currentScenario = i;
+    const sc = simData.scenarios[i];
+    document.getElementById('time-display').textContent = sc.local_time || sc.name;
+    document.getElementById('sun-pos-info').textContent =
+      `az ${sc.sun_azimuth.toFixed(0)}°  ·  el ${sc.sun_elevation.toFixed(0)}°  ·  ${simData.simulation_date || ''}`;
+    updateHeatmapColors(i);
+    updateSunObject(i);
+    updateShadowColors(i);
+  }
+
+  slider.addEventListener('input', e => applyScenario(parseInt(e.target.value)));
+  applyScenario(0);
 }
 
 // ─── UI controls ─────────────────────────────────────────────────────────
