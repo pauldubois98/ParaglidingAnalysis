@@ -209,7 +209,8 @@
     <div class="pipeline-step"><span class="num">4</span><span class="desc"><strong>Solar heating</strong> — direct beam + diffuse radiation per cell, with shadow ray-casting</span></div>
     <div class="pipeline-step"><span class="num">5</span><span class="desc"><strong>Thermal inertia</strong> — ground temperature accumulates across time steps with a relaxation constant</span></div>
     <div class="pipeline-step"><span class="num">6</span><span class="desc"><strong>Orographic flow</strong> — anabatic upslope wind field derived from temperature gradient</span></div>
-    <div class="pipeline-step"><span class="num">7</span><span class="desc"><strong>Export</strong> — all scenarios packed into a JSON file served to the Three.js viewer</span></div>
+    <div class="pipeline-step"><span class="num">7</span><span class="desc"><strong>Trigger factor</strong> — static map combining terrain convexity (∇²Z) and land-cover boundary gradient; identifies where thermals preferentially release</span></div>
+    <div class="pipeline-step"><span class="num">8</span><span class="desc"><strong>Export</strong> — all scenarios + static fields packed into a JSON file served to the Three.js viewer</span></div>
   </div>
 
   <!-- ─── Effects taken into account ──────────────────────────────────── -->
@@ -267,6 +268,7 @@ decay = exp(−dt / τ),   τ = 1.5 h</div>
 DALR = 9.8 K/km (fixed by thermodynamics)
 ELR  = adjustable via slider (standard: 6.5 K/km)</div>
     </li>
+    <li><strong>Collector and trigger zones</strong> <span class="tag tag-yes">modelled</span> — a <em>collector</em> is a broad area that accumulates heat (visible in the Thermal heat and Daily heat maps). A <em>trigger</em> is the specific terrain or boundary feature where that heat detaches as a thermal. The <em>Trigger zones</em> overlay combines terrain convexity (negated Laplacian −∇²Z — ridges and peaks have ∇²Z &lt; 0) with land-cover boundary gradient (abrupt surface transitions) into a single static score, blended 60/40. Bright spots on the trigger map at warm locations on the heat map identify the best thermal sources.</li>
     <li><strong>Orographic / anabatic flow</strong> <span class="tag tag-yes">modelled</span> — warm air tends to rise along slopes (anabatic wind). The flow direction is the terrain gradient weighted by local temperature anomaly, then Gaussian-smoothed. Cross-valley components cancel, leaving valley-channelled flow.</li>
     <li><strong>Trigger threshold</strong> <span class="tag tag-yes">modelled</span> — a user-adjustable minimum temperature anomaly below which no thermal is triggered. Represents the energy needed to break a surface inversion.</li>
   </ul>

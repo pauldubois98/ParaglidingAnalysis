@@ -274,6 +274,11 @@
     <input type="range" id="slope-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
   </div>
 
+  <div class="control-group" data-for="trigger-opacity">
+    <label>Trigger zones <span id="trigger-opacity-val">0.00</span></label>
+    <input type="range" id="trigger-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
+  </div>
+
   <div class="control-group" data-for="shadow-darkness">
     <label>Shadow darkness <span id="shadow-darkness-val">0.70</span></label>
     <input type="range" id="shadow-darkness" min="0" max="1" step="0.05" value="0.7" data-decimals="2">
@@ -351,6 +356,13 @@
     <div class="colorbar-body">
       <canvas class="colorbar-canvas" id="cb-heat-accum" width="20" height="180"></canvas>
       <div class="colorbar-labels" id="cb-heat-accum-labels"></div>
+    </div>
+  </div>
+  <div class="colorbar" id="cb-trigger-wrap" style="display:none">
+    <div class="colorbar-title">Trigger factor</div>
+    <div class="colorbar-body">
+      <canvas class="colorbar-canvas" id="cb-trigger" width="20" height="180"></canvas>
+      <div class="colorbar-labels" id="cb-trigger-labels"></div>
     </div>
   </div>
 </div>
@@ -814,6 +826,49 @@ function buildSlopeOverlay(terrainData) {
   drawColorbar('cb-slope', 'cb-slope-labels', 'slope', 0, slopeMax, v => v.toFixed(0) + '°');
 }
 
+// ─── Trigger zones overlay (static — terrain convexity + land-cover boundary) ─
+let triggerMesh = null;
+
+function buildTriggerOverlay(terrainData) {
+  if (triggerMesh) { scene.remove(triggerMesh); triggerMesh.geometry.dispose(); triggerMesh.material.dispose(); }
+  if (!terrainData.trigger_factor) return;
+
+  const { nx, ny, elevation, x_extent, y_extent, trigger_factor } = terrainData;
+  const geom = new THREE.PlaneGeometry(
+    x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+  );
+  const pos = geom.attributes.position;
+  for (let j = 0; j < ny; j++)
+    for (let i = 0; i < nx; i++)
+      pos.setZ(j * nx + i, elevation[j][i] + 21);
+  pos.needsUpdate = true;
+
+  const stops  = (window._colormapsData || {}).trigger || [];
+  const colors = new Float32Array(nx * ny * 3);
+  for (let j = 0; j < ny; j++) {
+    for (let i = 0; i < nx; i++) {
+      const idx = (j * nx + i) * 3;
+      const [r, g, b] = sampleColormap(stops, trigger_factor[j][i]);
+      colors[idx] = r; colors[idx + 1] = g; colors[idx + 2] = b;
+    }
+  }
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+  const mat = new THREE.MeshBasicMaterial({
+    vertexColors: true, transparent: true, opacity: 0,
+    depthWrite: false, depthTest: false,
+  });
+  window._triggerMat = mat;
+
+  triggerMesh = new THREE.Mesh(geom, mat);
+  triggerMesh.position.set(
+    (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+  );
+  scene.add(triggerMesh);
+  drawColorbar('cb-trigger', 'cb-trigger-labels', 'trigger', 0, 1,
+               v => v.toFixed(2));
+}
+
 // ─── Neutral shading overlay (Lambert — responds to directional light) ────────
 let neutralMesh = null;
 
@@ -1274,6 +1329,7 @@ function init() {
   buildMarkers(simData.markers || []);
   buildAlbedoOverlay(simData.terrain);
   buildSlopeOverlay(simData.terrain);
+  buildTriggerOverlay(simData.terrain);
   buildNeutralOverlay(simData.terrain);
   buildShadowOverlay(simData.terrain);
   buildThermalTopOverlay(simData.terrain);
@@ -1433,6 +1489,12 @@ document.getElementById('flow-opacity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
   document.getElementById('flow-opacity-val').textContent = fmt(e.target, v);
   if (window._flowMat) window._flowMat.opacity = v;
+});
+document.getElementById('trigger-opacity').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('trigger-opacity-val').textContent = fmt(e.target, v);
+  if (window._triggerMat) window._triggerMat.opacity = v;
+  document.getElementById('cb-trigger-wrap').style.display = v > 0 ? 'block' : 'none';
 });
 
 // ─── Settings (min/max/step/decimals from settings.json) ─────────────────────
