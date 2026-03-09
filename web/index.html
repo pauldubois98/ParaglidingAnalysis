@@ -192,62 +192,67 @@
     <div id="sun-pos-info" style="font-size:10px;color:#556677;margin-top:3px">—</div>
   </div>
 
-  <div class="control-group">
+  <div class="control-group" data-for="ambient-intensity">
     <label>Ambient light <span id="ambient-intensity-val">2.0</span></label>
     <input type="range" id="ambient-intensity" min="0" max="6" step="0.1" value="2.0" data-decimals="1">
   </div>
 
-  <div class="control-group">
+  <div class="control-group" data-for="sun-intensity">
     <label>Sun intensity <span id="sun-intensity-val">3.0</span></label>
     <input type="range" id="sun-intensity" min="0" max="8" step="0.1" value="3.0" data-decimals="1">
   </div>
 
-  <div class="control-group">
+  <div class="control-group" data-for="terrain-opacity">
     <label>Terrain (elevation) <span id="terrain-opacity-val">0.80</span></label>
     <input type="range" id="terrain-opacity" min="0" max="1" step="0.05" value="0.8" data-decimals="2">
   </div>
 
-  <div class="control-group">
-    <label>Neutral<span id="neutral-opacity-val">0.00</span></label>
+  <div class="control-group" data-for="neutral-opacity">
+    <label>Neutral <span id="neutral-opacity-val">0.00</span></label>
     <input type="range" id="neutral-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
   </div>
 
-  <div class="control-group">
+  <div class="control-group" data-for="heatmap-opacity">
     <label>Thermals (ΔT) <span id="heatmap-opacity-val">0.70</span></label>
     <input type="range" id="heatmap-opacity" min="0" max="1" step="0.05" value="0.7" data-decimals="2">
   </div>
 
-  <div class="control-group">
+  <div class="control-group" data-for="heat-accum-opacity">
+    <label>Daily heat accum. <span id="heat-accum-opacity-val">0.00</span></label>
+    <input type="range" id="heat-accum-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
+  </div>
+
+  <div class="control-group" data-for="albedo-opacity">
     <label>Albedo <span id="albedo-opacity-val">0.00</span></label>
     <input type="range" id="albedo-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
   </div>
 
-  <div class="control-group">
+  <div class="control-group" data-for="slope-opacity">
     <label>Slope <span id="slope-opacity-val">0.00</span></label>
     <input type="range" id="slope-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
   </div>
 
-  <div class="control-group">
+  <div class="control-group" data-for="shadow-darkness">
     <label>Shadow darkness <span id="shadow-darkness-val">0.70</span></label>
     <input type="range" id="shadow-darkness" min="0" max="1" step="0.05" value="0.7" data-decimals="2">
   </div>
 
-  <div class="control-group">
+  <div class="control-group" data-for="thermal-top-opacity">
     <label>Thermal top <span id="thermal-top-opacity-val">0.00</span></label>
     <input type="range" id="thermal-top-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
   </div>
 
-  <div class="control-group">
+  <div class="control-group" data-for="elr">
     <label>ELR <span id="elr-val">6.5</span> K/km</label>
     <input type="range" id="elr" min="3" max="9" step="0.1" value="6.5" data-decimals="1">
   </div>
 
-  <div class="control-group">
+  <div class="control-group" data-for="trigger-threshold">
     <label>Trigger threshold <span id="trigger-threshold-val">1.5</span> K</label>
     <input type="range" id="trigger-threshold" min="0" max="5" step="0.1" value="1.5" data-decimals="1">
   </div>
 
-  <div class="control-group">
+  <div class="control-group" data-for="flow-opacity">
     <label>Flow arrows <span id="flow-opacity-val">0.00</span></label>
     <input type="range" id="flow-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
   </div>
@@ -291,6 +296,13 @@
     <div class="colorbar-body">
       <canvas class="colorbar-canvas" id="cb-thermal-top" width="20" height="180"></canvas>
       <div class="colorbar-labels" id="cb-thermal-top-labels"></div>
+    </div>
+  </div>
+  <div class="colorbar" id="cb-heat-accum-wrap" style="display:none">
+    <div class="colorbar-title">Daily heat (K·h)</div>
+    <div class="colorbar-body">
+      <canvas class="colorbar-canvas" id="cb-heat-accum" width="20" height="180"></canvas>
+      <div class="colorbar-labels" id="cb-heat-accum-labels"></div>
     </div>
   </div>
 </div>
@@ -438,6 +450,7 @@ function hexToRgb01(hex) {
 }
 
 function sampleColormap(stops, t) {
+  if (!stops || stops.length === 0) return [0, 0, 0];
   t = Math.max(0, Math.min(1, t));
   let lo = stops[0], hi = stops[stops.length - 1];
   for (let i = 0; i < stops.length - 1; i++) {
@@ -805,10 +818,11 @@ function buildShadowOverlay(terrainData) {
     vertexColors: true,
     blending: THREE.MultiplyBlending,
     depthWrite: false,
-    transparent: false,
+    transparent: true,
   });
 
   shadowMesh = new THREE.Mesh(geom, mat);
+  shadowMesh.renderOrder = 10;  // render after all overlays so MultiplyBlending darkens them
   shadowMesh.position.set(
     (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
   );
@@ -898,6 +912,71 @@ function updateThermalTopColors(scenarioIndex) {
   thermalTopMesh.geometry.attributes.color.needsUpdate = true;
   drawColorbar('cb-thermal-top', 'cb-thermal-top-labels', 'thermal-top',
                0, HTOP_MAX, v => v.toFixed(0) + ' m');
+}
+
+// ─── Daily heat accumulation overlay ─────────────────────────────────────────
+// Σ max(0, dT[scenario][j][i] − threshold) × interval_hours across all scenarios.
+// Threshold-dependent — recomputes when trigger-threshold slider changes.
+
+let heatAccumMesh = null;
+
+function buildHeatAccumOverlay(terrainData) {
+  if (heatAccumMesh) {
+    scene.remove(heatAccumMesh);
+    heatAccumMesh.geometry.dispose();
+    heatAccumMesh.material.dispose();
+  }
+  const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+  const geom = new THREE.PlaneGeometry(
+    x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+  );
+  const pos = geom.attributes.position;
+  for (let j = 0; j < ny; j++)
+    for (let i = 0; i < nx; i++)
+      pos.setZ(j * nx + i, elevation[j][i] + 12);
+  pos.needsUpdate = true;
+  const colors = new Float32Array(nx * ny * 3);
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const mat = new THREE.MeshBasicMaterial({
+    vertexColors: true, transparent: true, opacity: 0, depthWrite: false,
+  });
+  window._heatAccumMat = mat;
+  heatAccumMesh = new THREE.Mesh(geom, mat);
+  heatAccumMesh.position.set(
+    (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+  );
+  scene.add(heatAccumMesh);
+}
+
+function updateHeatAccumColors() {
+  if (!heatAccumMesh || !simData) return;
+  const T         = simData.terrain;
+  const threshold = parseFloat(document.getElementById('trigger-threshold').value);
+  const intervalH = (simData.interval_min || 30) / 60;
+  const stops     = (window._colormapsData || {})['heat-accum'] || [];
+
+  const accum = new Float32Array(T.ny * T.nx);
+  for (const sc of simData.scenarios) {
+    const dT = sc.ground_temp_anomaly;
+    for (let j = 0; j < T.ny; j++)
+      for (let i = 0; i < T.nx; i++)
+        accum[j * T.nx + i] += Math.max(0, dT[j][i] - threshold);
+  }
+  let maxAccum = 0;
+  for (let k = 0; k < accum.length; k++) {
+    accum[k] *= intervalH;
+    if (accum[k] > maxAccum) maxAccum = accum[k];
+  }
+  if (maxAccum === 0) maxAccum = 1;
+
+  const arr = heatAccumMesh.geometry.attributes.color.array;
+  for (let k = 0; k < T.ny * T.nx; k++) {
+    const [r, g, b] = sampleColormap(stops, accum[k] / maxAccum);
+    arr[k * 3] = r; arr[k * 3 + 1] = g; arr[k * 3 + 2] = b;
+  }
+  heatAccumMesh.geometry.attributes.color.needsUpdate = true;
+  drawColorbar('cb-heat-accum', 'cb-heat-accum-labels', 'heat-accum',
+               0, maxAccum, v => v.toFixed(1) + ' K·h');
 }
 
 // ─── Orographic flow arrows ──────────────────────────────────────────────────
@@ -1097,6 +1176,7 @@ function updateMarkerLabels() {
 
 // ─── Init ───────────────────────────────────────────────────────────────────
 function init() {
+  try {
   computeGlobalMaxDT();
   buildTerrain(simData.terrain);
   applyElevationColors();
@@ -1109,19 +1189,24 @@ function init() {
   buildNeutralOverlay(simData.terrain);
   buildShadowOverlay(simData.terrain);
   buildThermalTopOverlay(simData.terrain);
+  buildHeatAccumOverlay(simData.terrain);
   buildFlowArrows(simData.terrain);
   buildSunObject();
   updateSunObject(0);
   updateShadowColors(0);
   updateThermalTopColors(0);
+  updateHeatAccumColors();
   updateFlowArrows(0);
   applySettings();
   buildmodeButtons();
-  // Apply first mode values silently (meshes already built at those opacities)
+  // Apply first mode values + visibility silently
   if (window._modesData && window._modesData.length > 0) {
-    for (const [id, val] of Object.entries(window._modesData[0].sliders)) setSlider(id, val);
+    const firstMode = window._modesData[0];
+    for (const [id, val] of Object.entries(firstMode.sliders)) setSlider(id, val);
+    applySliderVisibility(firstMode);
   }
   buildTimeSlider();
+  } catch (e) { console.error('init() error:', e); }
   animate();
 }
 
@@ -1129,6 +1214,14 @@ function init() {
 function markModified() {
   const active = document.querySelector('.mode-btn.active');
   if (active) active.classList.add('modified');
+}
+
+// Show only the control-groups listed in mode.sliders_visible; hide the rest.
+function applySliderVisibility(mode) {
+  const visible = new Set(mode.sliders_visible || []);
+  document.querySelectorAll('.control-group[data-for]').forEach(group => {
+    group.style.display = visible.has(group.dataset.for) ? '' : 'none';
+  });
 }
 
 function buildmodeButtons() {
@@ -1145,6 +1238,7 @@ function buildmodeButtons() {
       document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active', 'modified'));
       btn.classList.add('active');
       for (const [id, val] of Object.entries(mode.sliders)) setSlider(id, val);
+      applySliderVisibility(mode);
     };
     container.appendChild(btn);
   });
@@ -1235,7 +1329,14 @@ document.getElementById('trigger-threshold').addEventListener('input', e => {
   document.getElementById('trigger-threshold-val').textContent = fmt(e.target, v);
   updateHeatmapColors(currentScenario);
   updateThermalTopColors(currentScenario);
+  updateHeatAccumColors();
   updateFlowArrows(currentScenario);
+});
+document.getElementById('heat-accum-opacity').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('heat-accum-opacity-val').textContent = fmt(e.target, v);
+  if (window._heatAccumMat) window._heatAccumMat.opacity = v;
+  document.getElementById('cb-heat-accum-wrap').style.display = v > 0 ? 'block' : 'none';
 });
 document.getElementById('flow-opacity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);
@@ -1267,8 +1368,7 @@ window._settingmode = false;
 function setSlider(id, val) {
   window._settingmode = true;
   const el = document.getElementById(id);
-  el.value = val;
-  el.dispatchEvent(new Event('input'));
+  if (el) { el.value = val; el.dispatchEvent(new Event('input')); }
   window._settingmode = false;
 }
 

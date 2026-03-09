@@ -2,6 +2,12 @@
   {
     "label": "Elevation",
     "tip": "Terrain coloured by altitude, no overlays",
+    "sliders_visible": [
+      "terrain-opacity",
+      "ambient-intensity",
+      "shadow-darkness",
+      "sun-intensity"
+    ],
     "sliders": {
       "terrain-opacity":     0.95,
       "heatmap-opacity":     0,
@@ -9,6 +15,7 @@
       "slope-opacity":       0,
       "neutral-opacity":     0,
       "thermal-top-opacity": 0,
+      "heat-accum-opacity":  0,
       "flow-opacity":        0,
       "ambient-intensity":   2.0,
       "sun-intensity":       3.0,
@@ -18,37 +25,103 @@
     }
   },
   {
-    "label": "Thermals",
+    "label": "Thermal heat",
     "tip": "Heatmap overlay showing ground temperature anomaly per scenario",
+    "sliders_visible": [
+      "heatmap-opacity",
+      "trigger-threshold",
+      "ambient-intensity",
+      "sun-intensity",
+      "elr"
+    ],
     "sliders": {
       "terrain-opacity":     0,
       "heatmap-opacity":     0.95,
       "albedo-opacity":      0,
       "slope-opacity":       0,
-      "neutral-opacity":     0.2,
+      "neutral-opacity":     0,
       "thermal-top-opacity": 0,
-      "flow-opacity":        0.75,
+      "heat-accum-opacity":  0,
+      "flow-opacity":        0,
       "ambient-intensity":   2.0,
       "sun-intensity":       3.0,
-      "shadow-darkness":     0.70,
+      "shadow-darkness":     0,
       "elr":                 6.5,
       "trigger-threshold":   1.5
     }
   },
   {
-    "label": "Thermal top",
-    "tip": "Thermal ceiling height AGL — how high you can climb per cell. Adjust ELR for atmospheric stability.",
+    "label": "Thermal flow",
+    "tip": "Flow overlay showing ground temperature anomaly per scenario",
+    "sliders_visible": [
+      "neutral-opacity",
+      "trigger-threshold",
+      "flow-opacity",
+      "ambient-intensity",
+      "sun-intensity"
+    ],
     "sliders": {
       "terrain-opacity":     0,
       "heatmap-opacity":     0,
       "albedo-opacity":      0,
       "slope-opacity":       0,
-      "neutral-opacity":     0.15,
+      "neutral-opacity":     0.25,
+      "thermal-top-opacity": 0,
+      "heat-accum-opacity":  0,
+      "flow-opacity":        0.95,
+      "ambient-intensity":   2.0,
+      "sun-intensity":       3.0,
+      "shadow-darkness":     0,
+      "elr":                 6.5,
+      "trigger-threshold":   0
+    }
+  },
+  {
+    "label": "Thermal top",
+    "tip": "Thermal ceiling height AGL — how high you can climb per cell. Adjust ELR for atmospheric stability.",
+    "sliders_visible": [
+      "thermal-top-opacity",
+      "elr",
+      "trigger-threshold",
+      "ambient-intensity",
+      "sun-intensity"
+    ],
+    "sliders": {
+      "terrain-opacity":     0,
+      "heatmap-opacity":     0,
+      "albedo-opacity":      0,
+      "slope-opacity":       0,
+      "neutral-opacity":     0,
       "thermal-top-opacity": 0.85,
+      "heat-accum-opacity":  0,
       "flow-opacity":        0,
       "ambient-intensity":   2.0,
       "sun-intensity":       3.0,
-      "shadow-darkness":     0.60,
+      "shadow-darkness":     0,
+      "elr":                 6.5,
+      "trigger-threshold":   1.5
+    }
+  },
+  {
+    "label": "Daily heat",
+    "tip": "Cumulative thermal energy integrated over all daylight hours — shows which cells are reliable thermic sources",
+    "sliders_visible": [
+      "heat-accum-opacity",
+      "trigger-threshold",
+      "ambient-intensity"
+    ],
+    "sliders": {
+      "terrain-opacity":     0,
+      "heatmap-opacity":     0,
+      "albedo-opacity":      0,
+      "slope-opacity":       0,
+      "neutral-opacity":     0,
+      "thermal-top-opacity": 0,
+      "heat-accum-opacity":  0.90,
+      "flow-opacity":        0,
+      "ambient-intensity":   0,
+      "sun-intensity":       0,
+      "shadow-darkness":     0,
       "elr":                 6.5,
       "trigger-threshold":   1.5
     }
@@ -56,17 +129,22 @@
   {
     "label": "Albedo",
     "tip": "Land-cover thermal factor — how fast each surface heats up",
+    "sliders_visible": [
+      "albedo-opacity",
+      "ambient-intensity"
+    ],
     "sliders": {
       "terrain-opacity":     0,
       "heatmap-opacity":     0,
-      "albedo-opacity":      0.8,
+      "albedo-opacity":      0.95,
       "slope-opacity":       0,
-      "neutral-opacity":     0.3,
+      "neutral-opacity":     0,
       "thermal-top-opacity": 0,
+      "heat-accum-opacity":  0,
       "flow-opacity":        0,
-      "ambient-intensity":   2.0,
-      "sun-intensity":       3.0,
-      "shadow-darkness":     0.70,
+      "ambient-intensity":   0,
+      "sun-intensity":       0,
+      "shadow-darkness":     0,
       "elr":                 6.5,
       "trigger-threshold":   1.5
     }
@@ -74,16 +152,21 @@
   {
     "label": "Slope",
     "tip": "Terrain steepness — steep south-facing slopes trigger thermals",
+    "sliders_visible": [
+      "slope-opacity",
+      "shadow-darkness"
+    ],
     "sliders": {
       "terrain-opacity":     0,
       "heatmap-opacity":     0,
       "albedo-opacity":      0,
-      "slope-opacity":       0.90,
-      "neutral-opacity":     0.25,
+      "slope-opacity":       0.75,
+      "neutral-opacity":     0,
       "thermal-top-opacity": 0,
+      "heat-accum-opacity":  0,
       "flow-opacity":        0,
-      "ambient-intensity":   2.0,
-      "sun-intensity":       3.0,
+      "ambient-intensity":   0,
+      "sun-intensity":       0,
       "shadow-darkness":     0.70,
       "elr":                 6.5,
       "trigger-threshold":   1.5
@@ -92,13 +175,20 @@
   {
     "label": "Sun shading",
     "tip": "Neutral terrain lit by directional sun, with DEM horizon shadows",
+    "sliders_visible": [
+      "neutral-opacity",
+      "shadow-darkness",
+      "ambient-intensity",
+      "sun-intensity"
+    ],
     "sliders": {
       "terrain-opacity":     0,
       "heatmap-opacity":     0,
       "albedo-opacity":      0,
       "slope-opacity":       0,
-      "neutral-opacity":     1.0,
+      "neutral-opacity":     0.9,
       "thermal-top-opacity": 0,
+      "heat-accum-opacity":  0,
       "flow-opacity":        0,
       "ambient-intensity":   0.25,
       "sun-intensity":       7.0,
