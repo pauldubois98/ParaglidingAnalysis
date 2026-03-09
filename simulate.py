@@ -12,12 +12,13 @@ Pipeline:
 """
 
 # ── Imports ───────────────────────────────────────────────────────────────────
+import gzip
 import json
 import math
 import os
+import shutil
 import urllib.request
-from datetime import datetime, timezone, timedelta
-from datetime import datetime as _dt, timedelta as _td
+from datetime import datetime, datetime as _dt, timezone, timedelta, timedelta as _td
 
 import numpy as np
 import rasterio
@@ -25,12 +26,11 @@ from rasterio.crs import CRS
 from rasterio.merge import merge as rasterio_merge
 from rasterio.transform import from_origin
 from rasterio.warp import reproject, Resampling, calculate_default_transform
-from rasterio.windows import from_bounds
-from rasterio.windows import from_bounds as win_from_bounds
+from rasterio.windows import from_bounds, from_bounds as win_from_bounds
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import BoundaryNorm, ListedColormap
 from matplotlib.patches import Patch
+import requests
 from scipy.ndimage import gaussian_filter
 from scipy.ndimage import zoom as ndimage_zoom
 from pysolar.solar import get_altitude, get_azimuth
@@ -70,8 +70,6 @@ LANDCOVER = {
 
 def fetch_srtm_tile(min_lon, min_lat, max_lon, max_lat, output_path):
     """Download SRTM1 tiles (30m) and merge+clip to bounding box."""
-    import requests, gzip, shutil
-
     lat_tiles = range(int(np.floor(min_lat)), int(np.floor(max_lat)) + 1)
     lon_tiles = range(int(np.floor(min_lon)), int(np.floor(max_lon)) + 1)
 
@@ -111,7 +109,6 @@ def fetch_srtm_tile(min_lon, min_lat, max_lon, max_lat, output_path):
         for ds in datasets:
             ds.close()
 
-    import io
     with rasterio.MemoryFile() as memfile:
         profile = {
             'driver': 'GTiff', 'dtype': src_dtype,
@@ -725,7 +722,7 @@ def main():
     TIF_HIGHRES = 'data/arbas_highres.tif'     # ~7 m — used for terrain mesh only
 
     if not os.path.exists(TIF_PATH):
-        elevation_raw, transform = fetch_srtm_tile(
+        elevation_raw, _ = fetch_srtm_tile(
             BBOX['min_lon'], BBOX['min_lat'], BBOX['max_lon'], BBOX['max_lat'], TIF_PATH
         )
         print(f'Fetched SRTM → {TIF_PATH}')
@@ -733,7 +730,7 @@ def main():
         print(f'Using cached {TIF_PATH}')
 
     if not os.path.exists(TIF_HIGHRES):
-        print(f'Fetching high-res DEM (zoom=14, ~7 m) …')
+        print('Fetching high-res DEM (zoom=14, ~7 m) …')
         fetch_highres_dem(
             BBOX['min_lon'], BBOX['min_lat'], BBOX['max_lon'], BBOX['max_lat'], TIF_HIGHRES
         )
@@ -742,12 +739,10 @@ def main():
 
     with rasterio.open(TIF_PATH) as src:
         elevation_raw = src.read(1).astype(np.float32)
-        transform     = src.transform
         crs           = src.crs
 
     with rasterio.open(TIF_HIGHRES) as src:
         elevation_highres = src.read(1).astype(np.float32)
-        transform_highres = src.transform
 
     print(f'\nSRTM   shape: {elevation_raw.shape}   range: {elevation_raw.min():.0f}–{elevation_raw.max():.0f} m')
     print(f'HiRes  shape: {elevation_highres.shape}   range: {elevation_highres.min():.0f}–{elevation_highres.max():.0f} m')
@@ -767,7 +762,7 @@ def main():
 
     # High-resolution mesh grid (AWS Terrarium ~7 m)
     # Used only for the visual terrain mesh; simulation stays on the 30 m SRTM grid.
-    X_mesh, Y_mesh, Z_mesh, lons_mesh, lats_mesh, _, _ = extract_3d_terrain(TIF_HIGHRES)
+    X_mesh, Y_mesh, Z_mesh, _, _, _, _ = extract_3d_terrain(TIF_HIGHRES)
 
     MESH_NX = Z_mesh.shape[1]
     MESH_NY = Z_mesh.shape[0]
@@ -779,7 +774,7 @@ def main():
     print(f'  Z range: {Z_mesh.min():.0f} – {Z_mesh.max():.0f} m')
 
     # ── Visualise terrain ─────────────────────────────────────────────────────
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    _, axes = plt.subplots(1, 2, figsize=(14, 5))
 
     # With origin='upper', row 0 is at the top of the image (northernmost).
     # extent=[left, right, bottom, top] — swap Y so top=Y.min (north), bottom=Y.max (south).
@@ -788,7 +783,8 @@ def main():
     im = axes[0].imshow(Z, cmap='terrain', origin='upper', extent=extent)
     plt.colorbar(im, ax=axes[0], label='Elevation (m)')
     axes[0].set_title('Arbas Terrain — Elevation Map')
-    axes[0].set_xlabel('East (m)'); axes[0].set_ylabel('North (m)')
+    axes[0].set_xlabel('East (m)')
+    axes[0].set_ylabel('North (m)')
 
     for wp, color, marker in [(LANDING, 'lime', 'v'), (TAKEOFF, 'orange', '^')]:
         axes[0].plot(wp['x'], wp['y'], marker=marker, color=color, ms=10, label=wp['name'])
@@ -829,10 +825,8 @@ def main():
         print(f'  {c:3d}  {label:<25s}  thermal factor={factor:.2f}  ({count/lc_raw.size*100:.1f}%)')
 
     # ── Visualise landcover ───────────────────────────────────────────────────
-    codes   = sorted(LANDCOVER.keys())
-    labels  = [LANDCOVER[c][0]   for c in codes]
-    colors  = [LANDCOVER[c][1]   for c in codes]
-    factors = [LANDCOVER[c][2]   for c in codes]
+    codes  = sorted(LANDCOVER.keys())
+    colors = [LANDCOVER[c][1] for c in codes]
 
     cmap_lc = ListedColormap(colors)
     bounds  = [c - 0.5 for c in codes] + [codes[-1] + 0.5]
@@ -849,10 +843,10 @@ def main():
     # Thermal factor raster (for visual inspection)
     factor_grid = np.vectorize(lambda c: LANDCOVER.get(c, ('', '', 1.0))[2])(lc_raw)
 
-    fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+    _, axes = plt.subplots(1, 2, figsize=(15, 6))
 
-    im_lc = axes[0].imshow(lc_raw, cmap=cmap_lc, norm=norm_lc,
-                            origin='upper', extent=lc_extent)
+    axes[0].imshow(lc_raw, cmap=cmap_lc, norm=norm_lc,
+                   origin='upper', extent=lc_extent)
     for wp, color, marker in [(LANDING, 'lime', 'v'), (TAKEOFF, 'white', '^')]:
         axes[0].plot(wp['x'], wp['y'], marker=marker, color=color,
                      ms=10, markeredgecolor='k', label=wp['name'])
@@ -864,7 +858,8 @@ def main():
                                    markeredgecolor='k', markersize=9, label='Take-off')]
     axes[0].legend(handles=legend_patches, fontsize=8, loc='upper right')
     axes[0].set_title('ESA WorldCover 2021 — Arbas (10 m)')
-    axes[0].set_xlabel('East (m)'); axes[0].set_ylabel('North (m)')
+    axes[0].set_xlabel('East (m)')
+    axes[0].set_ylabel('North (m)')
 
     im_tf = axes[1].imshow(factor_grid, cmap='RdYlGn_r', vmin=0, vmax=2,
                             origin='upper', extent=lc_extent)
@@ -980,7 +975,7 @@ def main():
         print(f'  {s["local_time"]}  {s["utc_time"]}  {s["sun_azimuth"]:6.1f}°  {s["sun_elevation"]:5.1f}°')
 
     # Thermal field sanity check
-    u, v, w = compute_thermal_field(Z_sim, dT_ground)
+    _, _, w = compute_thermal_field(Z_sim, dT_ground)
     print(f'Thermal field: w range {w.min():.2f} – {w.max():.2f} m/s')
 
     # Show profile shape at the strongest cell to verify peak location
@@ -993,7 +988,7 @@ def main():
         z_agl = zf * h_b
         wr = g * beta * dT_b * (1.0 / (0.4 * 0.6**1.5)) * zf * (1 - zf)**1.5
         print(f'  {zf:7.1f}  {z_agl:10.0f}  {wr:8.3f}')
-    print(f'  (peak expected at z_frac = 0.40)')
+    print('  (peak expected at z_frac = 0.40)')
 
     d_lapse = DALR - ELR
     h_top_field = np.where(dT_ground > 0, dT_ground / d_lapse, 0.0)
@@ -1071,7 +1066,7 @@ def main():
               f'(should be on ridges, not in valleys)')
 
     # Quick sanity: plot trigger factor
-    fig, axes = plt.subplots(1, 3, figsize=(17, 5))
+    _, axes = plt.subplots(1, 3, figsize=(17, 5))
     extent = [X.min(), X.max(), Y.max(), Y.min()]
     for ax, data, title, cmap in [
         (axes[0], convexity_norm,     'Terrain convexity (−∇²Z)', 'hot'),
