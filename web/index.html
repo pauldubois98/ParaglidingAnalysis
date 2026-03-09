@@ -74,7 +74,7 @@
       justify-content: flex-end;
       max-width: 420px;
     }
-    .preset-btn {
+    .mode-btn {
       display: inline-block;
       padding: 4px 9px;
       margin: 3px 2px;
@@ -86,8 +86,8 @@
       background: transparent;
       transition: all 0.2s;
     }
-    .preset-btn.active { background: #c8a040; color: #0a0f1a; border-color: #c8a040; }
-    .preset-btn.active.modified { background: rgba(140,110,30,0.35); color: #b89840; border-color: rgba(180,150,50,0.5); }
+    .mode-btn.active { background: #c8a040; color: #0a0f1a; border-color: #c8a040; }
+    .mode-btn.active.modified { background: rgba(140,110,30,0.35); color: #b89840; border-color: rgba(180,150,50,0.5); }
     .colorbar {
       background: rgba(10,15,30,0.82);
       border: 1px solid rgba(100,160,255,0.2);
@@ -182,14 +182,14 @@
   <h2>Arbas Thermals</h2>
 
   <div class="control-group">
-    <label>Time of day <span id="time-display" style="color:#7eb8ff;font-weight:bold">—</span></label>
-    <input type="range" id="time-slider" min="0" max="0" step="1" value="0" style="width:100%;margin-top:4px">
-    <div id="sun-pos-info" style="font-size:10px;color:#556677;margin-top:3px">—</div>
+    <label>Mode</label>
+    <div id="mode-buttons"></div>
   </div>
 
   <div class="control-group">
-    <label>Preset</label>
-    <div id="preset-buttons"></div>
+    <label>Time of day <span id="time-display" style="color:#7eb8ff;font-weight:bold">—</span></label>
+    <input type="range" id="time-slider" min="0" max="0" step="1" value="0" style="width:100%;margin-top:4px">
+    <div id="sun-pos-info" style="font-size:10px;color:#556677;margin-top:3px">—</div>
   </div>
 
   <div class="control-group">
@@ -359,18 +359,18 @@ let terrainMesh = null;
 // ─── Load simulation data ───────────────────────────────────────────────────
 async function loadData() {
   try {
-    const [simResp, presetsResp, settingsResp, cmapsResp] = await Promise.all([
+    const [simResp, modesResp, settingsResp, cmapsResp] = await Promise.all([
       fetch('../data/simulation.json'),
-      fetch('presets.json'),
+      fetch('modes.json'),
       fetch('settings.json'),
       fetch('colormaps.json'),
     ]);
     if (!simResp.ok)     throw new Error(`simulation.json: HTTP ${simResp.status}`);
-    if (!presetsResp.ok) throw new Error(`presets.json: HTTP ${presetsResp.status}`);
+    if (!modesResp.ok) throw new Error(`modes.json: HTTP ${modesResp.status}`);
     if (!settingsResp.ok)throw new Error(`settings.json: HTTP ${settingsResp.status}`);
     if (!cmapsResp.ok)   throw new Error(`colormaps.json: HTTP ${cmapsResp.status}`);
     simData = await simResp.json();
-    window._presetsData   = await presetsResp.json();
+    window._modesData   = await modesResp.json();
     window._settingsData  = await settingsResp.json();
     window._colormapsData = await cmapsResp.json();
     document.getElementById('loading').style.display = 'none';
@@ -1116,35 +1116,35 @@ function init() {
   updateThermalTopColors(0);
   updateFlowArrows(0);
   applySettings();
-  buildPresetButtons();
-  // Apply first preset values silently (meshes already built at those opacities)
-  if (window._presetsData && window._presetsData.length > 0) {
-    for (const [id, val] of Object.entries(window._presetsData[0].sliders)) setSlider(id, val);
+  buildmodeButtons();
+  // Apply first mode values silently (meshes already built at those opacities)
+  if (window._modesData && window._modesData.length > 0) {
+    for (const [id, val] of Object.entries(window._modesData[0].sliders)) setSlider(id, val);
   }
   buildTimeSlider();
   animate();
 }
 
-// ─── Presets ──────────────────────────────────────────────────────────────────
+// ─── modes ──────────────────────────────────────────────────────────────────
 function markModified() {
-  const active = document.querySelector('.preset-btn.active');
+  const active = document.querySelector('.mode-btn.active');
   if (active) active.classList.add('modified');
 }
 
-function buildPresetButtons() {
-  const presets = window._presetsData || [];
-  const container = document.getElementById('preset-buttons');
+function buildmodeButtons() {
+  const modes = window._modesData || [];
+  const container = document.getElementById('mode-buttons');
   container.innerHTML = '';
 
-  presets.forEach((preset, i) => {
+  modes.forEach((mode, i) => {
     const btn = document.createElement('button');
-    btn.className = 'preset-btn' + (i === 0 ? ' active' : '');
-    btn.textContent = preset.label;
-    btn.title = preset.tip || '';
+    btn.className = 'mode-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = mode.label;
+    btn.title = mode.tip || '';
     btn.onclick = () => {
-      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active', 'modified'));
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active', 'modified'));
       btn.classList.add('active');
-      for (const [id, val] of Object.entries(preset.sliders)) setSlider(id, val);
+      for (const [id, val] of Object.entries(mode.sliders)) setSlider(id, val);
     };
     container.appendChild(btn);
   });
@@ -1247,7 +1247,7 @@ document.getElementById('flow-opacity').addEventListener('input', e => {
 function applySettings() {
   const settings = window._settingsData;
   if (!settings) return;
-  window._settingPreset = true;
+  window._settingmode = true;
   for (const [id, cfg] of Object.entries(settings)) {
     const el = document.getElementById(id);
     if (!el) continue;
@@ -1256,25 +1256,25 @@ function applySettings() {
     if (cfg.step     !== undefined) el.step             = cfg.step;
     if (cfg.decimals !== undefined) el.dataset.decimals = cfg.decimals;
   }
-  window._settingPreset = false;
+  window._settingmode = false;
 }
 
 // ─── Slider helpers ───────────────────────────────────────────────────────────
 // Flag: true while setSlider is programmatically changing a value,
 // so the global 'input' listener doesn't wrongly mark it as Manual.
-window._settingPreset = false;
+window._settingmode = false;
 
 function setSlider(id, val) {
-  window._settingPreset = true;
+  window._settingmode = true;
   const el = document.getElementById(id);
   el.value = val;
   el.dispatchEvent(new Event('input'));
-  window._settingPreset = false;
+  window._settingmode = false;
 }
 
-// Any manual slider interaction → shade the active preset to show it's been modified
+// Any manual slider interaction → shade the active mode to show it's been modified
 document.addEventListener('input', e => {
-  if (e.target.type === 'range' && !window._settingPreset) markModified();
+  if (e.target.type === 'range' && !window._settingmode) markModified();
 }, true /* capture phase — fires before individual listeners */);
 
 // ─── Point inspection ────────────────────────────────────────────────────────
