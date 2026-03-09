@@ -596,8 +596,7 @@ const SUN_R = 7500; // distance from terrain centre to place sun sphere
 
 function sunWorldPos(azDeg, elDeg, terrainCentreZ) {
   const az = azDeg * Math.PI / 180;
-  // Cap display elevation so the sun stays visible without looking straight up
-  const el = Math.min(elDeg, 50) * Math.PI / 180;
+  const el = elDeg * Math.PI / 180;
   return new THREE.Vector3(
     SUN_R * Math.sin(az) * Math.cos(el),
     SUN_R * Math.cos(az) * Math.cos(el),     // North → Three.js Y
