@@ -592,7 +592,7 @@ def compute_orographic_flow(Z_grid, dT_ground, dx, dy, smooth_sigma=5.0):
     # Gaussian smooth: cross-valley vectors cancel → valley-channelled result
     u = gaussian_filter(u_raw, sigma=smooth_sigma).astype(np.float32)
     v = gaussian_filter(v_raw, sigma=smooth_sigma).astype(np.float32)
-    return u, v
+    return u, v, grad_mag.astype(np.float32)
 
 
 def fetch_era5_dT_obs(lat, lon, date_str, window_days=7, years=None):
@@ -997,7 +997,7 @@ def main():
 
     # Orographic flow sanity check
     _dT_mid = compute_solar_heating(Z_sim, 180, 65, thermal_factor=thermal_factor_sim)
-    _u, _v  = compute_orographic_flow(Z_sim, _dT_mid, dx, dy)
+    _u, _v, _ = compute_orographic_flow(Z_sim, _dT_mid, dx, dy)
     print(f'Orographic flow magnitude range: {np.sqrt(_u**2 + _v**2).min():.2f} – '
           f'{np.sqrt(_u**2 + _v**2).max():.2f} K')
 
@@ -1137,12 +1137,17 @@ def main():
     # u_flow/v_flow are normalised to the per-step global maximum and then scaled
     # to V_ADVECT m/h.  First-order upwind scheme with adaptive sub-stepping
     # ensures CFL ≤ 0.9 at all times.
-    V_ADVECT = 1000   # m/h — peak anabatic advection speed
+    # V_ADVECT is computed dynamically each step from slope steepness and heating:
+    #   V ∝ sqrt(mean_slope / REF_SLOPE  ×  mean_dT / MAX_HEAT)
+    # Physical basis: anabatic speed ∝ sqrt(buoyancy × slope) — weak at dawn,
+    # peaks at midday, tapers in the evening.
+    V_ADVECT_MAX = 1000   # m/h — calibrated ceiling (reached at full heating + ref slope)
+    REF_SLOPE    = 0.30   # dimensionless rise/run ≈ tan(17°), characteristic Arbas slope
 
     print(f'Thermal inertia: τ_ref={TAU_HOURS} h (grassland), dt={DT_INTERVAL} h')
     print(f'  decay range: {decay_grid.min():.3f} (bare rock) – {decay_grid.max():.3f} (water)')
     print(f'Thermal release: K={K_RELEASE} h⁻¹, threshold={RELEASE_THRESHOLD} K')
-    print(f'Heat advection:  V_ADVECT={V_ADVECT} m/h, CFL target ≤ 0.9')
+    print(f'Heat advection:  V_ADVECT_MAX={V_ADVECT_MAX} m/h, REF_SLOPE={REF_SLOPE}, CFL target ≤ 0.9')
     print(f'max_heat = {MAX_HEAT:.2f} K  (ERA5-calibrated)')
     print(f'Terrain mesh (high-res): {MESH_NX} × {MESH_NY}')
     print(f'Terrain sim  (30 m SRTM): {SIM_NX} × {SIM_NY}')
@@ -1155,7 +1160,8 @@ def main():
         'max_heat':        MAX_HEAT,
         'k_release':       K_RELEASE,
         'release_threshold': RELEASE_THRESHOLD,
-        'v_advect':        V_ADVECT,
+        'v_advect_max':    V_ADVECT_MAX,
+        'ref_slope':       REF_SLOPE,
         'terrain': {
             # Simulation grid (30 m SRTM) — used for all physics overlays
             'nx': SIM_NX, 'ny': SIM_NY,
@@ -1191,10 +1197,12 @@ def main():
     convergence_sum = np.zeros((SIM_NY, SIM_NX), dtype=np.float64)
     dT_weight_sum   = np.zeros((SIM_NY, SIM_NX), dtype=np.float64)
 
+    V_ADVECT = V_ADVECT_MAX   # initialised; will be recomputed dynamically each step
+
     for i, sc in enumerate(SCENARIOS):
         print(f"[{i+1:2d}/{len(SCENARIOS)}] {sc['local_time']}  "
               f"az={sc['sun_azimuth']:.1f}°  el={sc['sun_elevation']:.1f}°  "
-              f"carry_max={dT_carry.max():.1f} K")
+              f"carry_max={dT_carry.max():.1f} K  v_advect={V_ADVECT:.0f} m/h")
 
         shadow  = compute_shadow_mask(Z_sim, dx, dy, sc['sun_azimuth'], sc['sun_elevation'])
         dT_inst = compute_solar_heating(Z_sim, sc['sun_azimuth'], sc['sun_elevation'],
@@ -1210,9 +1218,22 @@ def main():
         dT_carry = np.maximum(dT_carry - release, 0.0)
 
         # Orographic flow field (frozen coefficient for sub-stepping below)
-        u_flow, v_flow = compute_orographic_flow(Z_sim, dT_carry, dx, dy, smooth_sigma=5.0)
+        u_flow, v_flow, grad_mag = compute_orographic_flow(Z_sim, dT_carry, dx, dy, smooth_sigma=5.0)
 
         # Phase 2: heat advection along orographic flow
+        # Dynamic V_ADVECT: scales with sqrt(slope × heating) so the advection
+        # speed is weak at dawn and peaks around solar noon.
+        mean_slope = float(np.percentile(grad_mag, 75))   # 75th pct avoids flat-valley bias
+        active = dT_carry[dT_carry > 0]
+        mean_dT = float(active.mean()) if active.size else 0.0
+        V_ADVECT = float(np.clip(
+            V_ADVECT_MAX * np.sqrt(
+                np.clip(mean_slope / REF_SLOPE, 0.0, 4.0) *
+                np.clip(mean_dT   / MAX_HEAT,   0.0, 4.0)
+            ),
+            50, V_ADVECT_MAX
+        ))
+
         # Normalise u/v by per-step global max so the fastest cell reaches V_ADVECT m/h.
         flow_max = float(max(np.abs(u_flow).max(), np.abs(v_flow).max(), 1e-6))
         u_vel = (u_flow / flow_max) * V_ADVECT   # m/h
@@ -1259,6 +1280,7 @@ def main():
             'u_surface':           u_ds,
             'v_surface':           v_ds,
             'advect_n_sub':        N_sub,
+            'v_advect':            V_ADVECT,
         })
 
     # Heat-weighted mean convergence, normalised to [0, 1]
