@@ -276,7 +276,7 @@ ELR  = adjustable via slider (standard: 6.5 K/km)</div>
       </ul>
     </li>
     <li><strong>Orographic / anabatic flow</strong> <span class="tag tag-yes">modelled</span> — warm air tends to rise along slopes (anabatic wind). The flow direction is the terrain gradient weighted by local temperature anomaly, then Gaussian-smoothed. Cross-valley components cancel, leaving valley-channelled flow.</li>
-    <li><strong>Trigger threshold</strong> <span class="tag tag-yes">modelled</span> — a user-adjustable minimum temperature anomaly below which no thermal is triggered. Represents the energy needed to break a surface inversion.</li>
+    <li><strong>Trigger threshold</strong> <span class="tag tag-yes">modelled</span> — a user-adjustable minimum temperature anomaly (in K) used as a <em>display filter</em>, not a physical barrier. The simulation computes ground temperature anomalies independently of this value; the threshold is applied afterwards in the browser as <code>max(0, ΔT − threshold)</code> when colouring the Thermal heat, Thermal top, Daily heat, and Collecting zones maps. Raising it masks out weakly heated cells and shows only the strongest sources — it does <strong>not</strong> cause heat to accumulate and release at a higher level. Think of it as a confidence cutoff: "only show zones warmer than X K above the local mean".</li>
   </ul>
 
 
