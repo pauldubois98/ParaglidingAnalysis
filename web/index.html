@@ -274,6 +274,11 @@
     <input type="range" id="slope-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
   </div>
 
+  <div class="control-group" data-for="collector-opacity">
+    <label>Collecting zones <span id="collector-opacity-val">0.00</span></label>
+    <input type="range" id="collector-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
+  </div>
+
   <div class="control-group" data-for="trigger-opacity">
     <label>Trigger zones <span id="trigger-opacity-val">0.00</span></label>
     <input type="range" id="trigger-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
@@ -356,6 +361,13 @@
     <div class="colorbar-body">
       <canvas class="colorbar-canvas" id="cb-heat-accum" width="20" height="180"></canvas>
       <div class="colorbar-labels" id="cb-heat-accum-labels"></div>
+    </div>
+  </div>
+  <div class="colorbar" id="cb-collector-wrap" style="display:none">
+    <div class="colorbar-title">Collector score (K·h·conv)</div>
+    <div class="colorbar-body">
+      <canvas class="colorbar-canvas" id="cb-collector" width="20" height="180"></canvas>
+      <div class="colorbar-labels" id="cb-collector-labels"></div>
     </div>
   </div>
   <div class="colorbar" id="cb-trigger-wrap" style="display:none">
@@ -869,6 +881,80 @@ function buildTriggerOverlay(terrainData) {
                v => v.toFixed(2));
 }
 
+// ─── Collecting zones overlay ─────────────────────────────────────────────────
+// collector_score[j][i] = terrain.convergence[j][i] × heat_accum[j][i]
+// terrain.convergence is the heat-weighted mean flow convergence (exported from Python).
+// heat_accum is threshold-dependent (same as Daily heat). Recomputes on threshold change.
+
+let collectorMesh = null;
+
+function buildCollectorOverlay(terrainData) {
+  if (collectorMesh) {
+    scene.remove(collectorMesh);
+    collectorMesh.geometry.dispose();
+    collectorMesh.material.dispose();
+  }
+  if (!terrainData.convergence) return;
+  const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+  const geom = new THREE.PlaneGeometry(
+    x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+  );
+  const pos = geom.attributes.position;
+  for (let j = 0; j < ny; j++)
+    for (let i = 0; i < nx; i++)
+      pos.setZ(j * nx + i, elevation[j][i] + 14);
+  pos.needsUpdate = true;
+  const colors = new Float32Array(nx * ny * 3);
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  const mat = new THREE.MeshBasicMaterial({
+    vertexColors: true, transparent: true, opacity: 0,
+    depthWrite: false, depthTest: false,
+  });
+  window._collectorMat = mat;
+  collectorMesh = new THREE.Mesh(geom, mat);
+  collectorMesh.position.set(
+    (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+  );
+  scene.add(collectorMesh);
+}
+
+function updateCollectorColors() {
+  if (!collectorMesh || !simData) return;
+  const T         = simData.terrain;
+  if (!T.convergence) return;
+  const threshold = parseFloat(document.getElementById('trigger-threshold').value);
+  const intervalH = (simData.interval_min || 30) / 60;
+  const stops     = (window._colormapsData || {}).collector || [];
+
+  const accum = new Float32Array(T.ny * T.nx);
+  for (const sc of simData.scenarios) {
+    const dT = sc.ground_temp_anomaly;
+    for (let j = 0; j < T.ny; j++)
+      for (let i = 0; i < T.nx; i++)
+        accum[j * T.nx + i] += Math.max(0, dT[j][i] - threshold);
+  }
+
+  let maxScore = 0;
+  const score = new Float32Array(T.ny * T.nx);
+  for (let j = 0; j < T.ny; j++) {
+    for (let i = 0; i < T.nx; i++) {
+      const k = j * T.nx + i;
+      score[k] = accum[k] * intervalH * T.convergence[j][i];
+      if (score[k] > maxScore) maxScore = score[k];
+    }
+  }
+  if (maxScore === 0) maxScore = 1;
+
+  const arr = collectorMesh.geometry.attributes.color.array;
+  for (let k = 0; k < T.ny * T.nx; k++) {
+    const [r, g, b] = sampleColormap(stops, score[k] / maxScore);
+    arr[k * 3] = r; arr[k * 3 + 1] = g; arr[k * 3 + 2] = b;
+  }
+  collectorMesh.geometry.attributes.color.needsUpdate = true;
+  drawColorbar('cb-collector', 'cb-collector-labels', 'collector',
+               0, maxScore, v => v.toFixed(2));
+}
+
 // ─── Neutral shading overlay (Lambert — responds to directional light) ────────
 let neutralMesh = null;
 
@@ -1330,6 +1416,7 @@ function init() {
   buildAlbedoOverlay(simData.terrain);
   buildSlopeOverlay(simData.terrain);
   buildTriggerOverlay(simData.terrain);
+  buildCollectorOverlay(simData.terrain);
   buildNeutralOverlay(simData.terrain);
   buildShadowOverlay(simData.terrain);
   buildThermalTopOverlay(simData.terrain);
@@ -1340,6 +1427,7 @@ function init() {
   updateShadowColors(0);
   updateThermalTopColors(0);
   updateHeatAccumColors();
+  updateCollectorColors();
   updateFlowArrows(0);
   applySettings();
   buildmodeButtons();
@@ -1476,6 +1564,7 @@ document.getElementById('trigger-threshold').addEventListener('input', e => {
   updateHeatmapColors(currentScenario);
   updateThermalTopColors(currentScenario);
   updateHeatAccumColors();
+  updateCollectorColors();
   updateFlowArrows(currentScenario);
   if (_lastGi !== null) drawPlumeProfile(_lastGi, _lastGj);
 });
@@ -1484,6 +1573,12 @@ document.getElementById('heat-accum-opacity').addEventListener('input', e => {
   document.getElementById('heat-accum-opacity-val').textContent = fmt(e.target, v);
   if (window._heatAccumMat) window._heatAccumMat.opacity = v;
   document.getElementById('cb-heat-accum-wrap').style.display = v > 0 ? 'block' : 'none';
+});
+document.getElementById('collector-opacity').addEventListener('input', e => {
+  const v = parseFloat(e.target.value);
+  document.getElementById('collector-opacity-val').textContent = fmt(e.target, v);
+  if (window._collectorMat) window._collectorMat.opacity = v;
+  document.getElementById('cb-collector-wrap').style.display = v > 0 ? 'block' : 'none';
 });
 document.getElementById('flow-opacity').addEventListener('input', e => {
   const v = parseFloat(e.target.value);

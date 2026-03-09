@@ -12,5 +12,6 @@
   "heat-accum-opacity":  { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 },
   "trigger-threshold":   { "min": 0, "max": 5,   "step": 0.1,  "decimals": 1 },
   "flow-opacity":        { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 },
-  "trigger-opacity":     { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 }
+  "trigger-opacity":     { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 },
+  "collector-opacity":   { "min": 0, "max": 1,   "step": 0.05, "decimals": 2 }
 }
