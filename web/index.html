@@ -449,8 +449,14 @@ let terrainZMin = 0, terrainZMax = 1;
 function buildTerrain(terrainData) {
   if (terrainMesh) { scene.remove(terrainMesh); terrainMesh.geometry.dispose(); }
 
-  const { nx, ny, elevation, x_extent, y_extent } = terrainData;
-  const elev = elevation;
+  const { x_extent, y_extent } = terrainData;
+
+  // Use high-res mesh if available (AWS Terrarium ~7 m), else fall back to sim grid (30 m)
+  const hasMesh = terrainData.mesh_elevation && terrainData.mesh_nx && terrainData.mesh_ny;
+  const elev = hasMesh ? terrainData.mesh_elevation : terrainData.elevation;
+  const nx   = hasMesh ? terrainData.mesh_nx        : terrainData.nx;
+  const ny   = hasMesh ? terrainData.mesh_ny        : terrainData.ny;
+  if (hasMesh) console.log(`Using high-res mesh: ${nx}×${ny} vertices (~${terrainData.mesh_dx?.toFixed(0)} m)`);
 
   const geom = new THREE.PlaneGeometry(
     x_extent[1] - x_extent[0],
@@ -813,14 +819,20 @@ let neutralMesh = null;
 function buildNeutralOverlay(terrainData) {
   if (neutralMesh) { scene.remove(neutralMesh); neutralMesh.geometry.dispose(); neutralMesh.material.dispose(); }
 
-  const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+  const { x_extent, y_extent } = terrainData;
+  // Use high-res mesh for normals so shading matches the visual terrain exactly
+  const hasMesh = terrainData.mesh_elevation && terrainData.mesh_nx && terrainData.mesh_ny;
+  const elev = hasMesh ? terrainData.mesh_elevation : terrainData.elevation;
+  const nx   = hasMesh ? terrainData.mesh_nx        : terrainData.nx;
+  const ny   = hasMesh ? terrainData.mesh_ny        : terrainData.ny;
+
   const geom = new THREE.PlaneGeometry(
     x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
   );
   const pos = geom.attributes.position;
   for (let j = 0; j < ny; j++)
     for (let i = 0; i < nx; i++)
-      pos.setZ(j * nx + i, elevation[j][i] + 1);
+      pos.setZ(j * nx + i, elev[j][i] + 1);
   pos.needsUpdate = true;
   geom.computeVertexNormals();
 

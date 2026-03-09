@@ -192,7 +192,7 @@
     <h1>Arbas Thermals — How the simulation works</h1>
     <p>
       Site: Arbas, Pyrenees, France &nbsp;·&nbsp;
-      Terrain: SRTM 30 m &nbsp;·&nbsp;
+      Terrain: SRTM 30 m (sim) + AWS Terrarium ~7 m (mesh) &nbsp;·&nbsp;
       Land cover: ESA WorldCover 2021 &nbsp;·&nbsp;
       Calibration: ERA5 reanalysis (Open-Meteo)
     </p>
@@ -203,7 +203,7 @@
   <!-- ─── Pipeline ─────────────────────────────────────────────────────── -->
   <h2>Pipeline overview</h2>
   <div class="pipeline">
-    <div class="pipeline-step"><span class="num">1</span><span class="desc"><strong>Terrain</strong> — SRTM 30 m DEM clipped to the Arbas bounding box</span></div>
+    <div class="pipeline-step"><span class="num">1</span><span class="desc"><strong>Terrain (dual-resolution)</strong> — SRTM 30 m DEM for simulation physics; AWS Terrarium ~7 m tiles for the visual mesh</span></div>
     <div class="pipeline-step"><span class="num">2</span><span class="desc"><strong>Land cover</strong> — ESA WorldCover 2021 (10 m) resampled to terrain grid, converted to thermal factors</span></div>
     <div class="pipeline-step"><span class="num">3</span><span class="desc"><strong>Sun positions</strong> — real astronomical ephemeris (pysolar) every 30 min during daylight</span></div>
     <div class="pipeline-step"><span class="num">4</span><span class="desc"><strong>Solar heating</strong> — direct beam + diffuse radiation per cell, with shadow ray-casting</span></div>
@@ -305,14 +305,34 @@ ELR  = adjustable via slider (standard: 6.5 K/km)</div>
   <!-- ─── Data sources ─────────────────────────────────────────────────── -->
   <h2>Data sources</h2>
   <table>
-    <thead><tr><th>Dataset</th><th>Source</th><th>Resolution</th></tr></thead>
+    <thead><tr><th>Dataset</th><th>Used for</th><th>Source</th><th>Resolution</th></tr></thead>
     <tbody>
-      <tr><td>Elevation (DEM)</td><td>SRTM via AWS elevation tiles</td><td>~30 m</td></tr>
-      <tr><td>Land cover</td><td>ESA WorldCover 2021</td><td>10 m</td></tr>
-      <tr><td>Sun position</td><td>pysolar (astronomical algorithm)</td><td>—</td></tr>
-      <tr><td>Calibration temperature</td><td>ERA5 reanalysis via Open-Meteo</td><td>~28 km</td></tr>
+      <tr><td>Elevation — simulation</td><td>Shadow casting, slope normals, thermal tops, orographic flow</td><td>SRTM via AWS elevation tiles (Mapzen/Tilezen)</td><td>~30 m</td></tr>
+      <tr><td>Elevation — visual mesh</td><td>3-D terrain surface rendered in the browser</td><td>AWS Terrain Tiles, Terrarium RGB encoding (IGN RGE Alti source for France)</td><td>~7 m</td></tr>
+      <tr><td>Land cover</td><td>Thermal factor per cell</td><td>ESA WorldCover 2021</td><td>10 m</td></tr>
+      <tr><td>Sun position</td><td>Azimuth + elevation at each time step</td><td>pysolar (USNO astronomical algorithm)</td><td>—</td></tr>
+      <tr><td>Calibration temperature</td><td>max_heat scale factor</td><td>ERA5 reanalysis via Open-Meteo archive API</td><td>~28 km</td></tr>
     </tbody>
   </table>
+
+  <h3>Dual-resolution elevation strategy</h3>
+  <p>
+    The simulation and the visual terrain use different DEM sources.
+    The <strong>SRTM 30 m</strong> grid (194 × 344 cells for the Arbas bbox) is used for all physics computations:
+    slope normals, shadow ray-casting, thermal tops, and orographic flow.
+    A coarser grid keeps the computation and the exported JSON compact (15 time steps × 66 k cells).
+  </p>
+  <p>
+    The <strong>AWS Terrarium ~7 m</strong> tiles are fetched once and used only to build the visual terrain mesh in Three.js.
+    At zoom level 14, the underlying source for France is IGN RGE Alti (LiDAR-derived), giving approximately 4–5× higher
+    surface detail than SRTM. The tiles are RGB-encoded PNGs: <code>elevation = R×256 + G + B/256 − 32768</code>,
+    delivered in Web Mercator (EPSG:3857) and reprojected to WGS84 (EPSG:4326) before use.
+    The mesh elevation is exported once into the JSON alongside the simulation data.
+  </p>
+  <p>
+    Physics overlays (heatmap, thermal flow, etc.) are rendered on the coarser 30 m grid but are visually correct
+    because they cover the same geographic extent and use <code>depthWrite: false</code>, floating just above the terrain surface.
+  </p>
 
   <footer>
     Arbas Thermals · Paragliding thermal simulation · Pyrenees, France
