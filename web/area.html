@@ -425,9 +425,10 @@ function updateCenterAndSize() {
   if ([minLat, maxLat, minLon, maxLon].some(isNaN)) return;
   const cLat = (minLat + maxLat) / 2, cLon = (minLon + maxLon) / 2;
   document.getElementById('in-center').value = `${cLat.toFixed(6)}, ${cLon.toFixed(6)}`;
-  const wKm = haversineKm(cLat, minLon, cLat, maxLon).toFixed(1);
-  const hKm = haversineKm(minLat, cLon, maxLat, cLon).toFixed(1);
-  document.getElementById('info-size').textContent = `${wKm} × ${hKm} km`;
+  const wKm = haversineKm(cLat, minLon, cLat, maxLon);
+  const hKm = haversineKm(minLat, cLon, maxLat, cLon);
+  const areaKm2 = (wKm * hKm).toFixed(1);
+  document.getElementById('info-size').textContent = `${wKm.toFixed(1)} × ${hKm.toFixed(1)} km  (${areaKm2} km²)`;
 }
 
 function bboxFromFields() {
