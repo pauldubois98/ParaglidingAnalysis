@@ -146,7 +146,7 @@
       backdrop-filter: blur(8px);
       display: none;
     }
-    #info-panel h2 {
+    #info-panel h3 {
       font-size: 14px;
       color: #7eb8ff;
       text-transform: uppercase;
@@ -174,7 +174,7 @@
       border-top: 1px solid rgba(100,160,255,0.15);
       padding-top: 10px;
     }
-    #plume-section h3 {
+    #plume-section h4 {
       font-size: 11px;
       color: #6888a0;
       text-transform: uppercase;
@@ -208,7 +208,7 @@
   <div id="info-panel">
     <div id="info-rows"></div>
     <div id="plume-section" style="display:none">
-      <h3>Thermal plume profile</h3>
+      <h4>Thermal plume profile</h4>
       <div id="plume-wrap">
         <div id="plume-alt-labels"></div>
         <canvas id="plume-canvas" width="180" height="360"></canvas>
@@ -222,7 +222,7 @@
 </div>
 
 <div id="ui-panel">
-  <h2>Paragliding thermal simulations</h2>
+  <h2> @@@### Paragliding thermal simulations</h2>
 
   <div class="control-group">
     <label>Mode</label>
@@ -1872,7 +1872,7 @@ function updateInfoPanel(pt, gi, gj) {
   const lon = T.projection_origin.lon +   pt.x  * 180 / (Math.PI * R * Math.cos(T.projection_origin.lat * Math.PI / 180));
 
   document.getElementById('info-rows').innerHTML = `
-    <h2>Selected point</h2>
+    <h3>Selected point</h3>
     <div class="info-coords">${lat.toFixed(5)}° N &nbsp; ${lon.toFixed(5)}° E</div>
     <div class="info-row"><span class="info-label">Elevation</span>      <span class="info-val">${elev.toFixed(0)} m</span></div>
     <div class="info-row"><span class="info-label">Slope</span>          <span class="info-val">${slope}°</span></div>
