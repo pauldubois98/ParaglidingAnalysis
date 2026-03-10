@@ -617,7 +617,7 @@ def fetch_era5_dT_obs(lat, lon, date_str, window_days=7, years=None):
             continue
 
         url = (
-            'https://archive.open-meteo.com/v1/archive'
+            'https://historical-forecast-api.open-meteo.com/v1/forecast'
             f'?latitude={lat:.4f}&longitude={lon:.4f}'
             f'&start_date={start.strftime("%Y-%m-%d")}'
             f'&end_date={end.strftime("%Y-%m-%d")}'
