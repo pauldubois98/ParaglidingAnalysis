@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="../icons/favicon-up4.svg">
   <title>Thermals</title>
-  <link rel="icon" type="image/svg+xml" href="../icons/favicon.svg">
   <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js"></script>
   <style>
@@ -144,9 +144,7 @@
       flex-shrink: 0;
     }
     #panel-header h2 {
-      display: flex;
-      align-items: center;
-      font-size: 21px;
+      font-size: 14px;
       color: #7eb8ff;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -242,13 +240,6 @@
     .btn-dl    { background: #1a2a4a; color: #7eb8ff; border: 1px solid rgba(100,160,255,0.3); display:none; }
     .btn-map   { background: #50320a; color: #f0b840; border: 1px solid rgba(240,180,60,0.4); }
     .btn:not(:disabled):hover { opacity: 0.8; }
-
-    .favicon{
-      display: inline;
-      height: 40px;
-      margin: 0 10px;
-      filter: invert(.75) sepia() saturate(1000%) hue-rotate(170deg);
-    }
   </style>
 </head>
 <body>
@@ -301,7 +292,7 @@
 <!-- ═══════════════════ RIGHT PANEL ═══════════════════ -->
 <div id="ui-panel">
   <div id="panel-header">
-    <h2> <img src="" alt="favicon-simulation" class="favicon" id="header-favicon"> Run Simulation</h2>
+    <h2>Run Simulation</h2>
     <div class="header-links">
       <a href="area.html">Area selection</a>
       <a href="about.html">About</a>
@@ -1937,22 +1928,6 @@ async function openVisualizationTool() {
     log(`Could not save to IndexedDB (${e.message}). Try downloading the JSON and placing it at data/simulation.json.`, 'error');
   }
 }
-
-// Random favicon selection
-(function() {
-  const pageType = 'simulation';
-  const icons = ['1', '2', '3', '4'];
-  const n = icons[Math.floor(Math.random() * icons.length)];
-  // Set random favicon
-  const faviconName = `favicon-${pageType}${n}.svg`;
-  // Update header favicon image after DOM loads
-  document.addEventListener('DOMContentLoaded', function() {
-    const headerImg = document.getElementById('header-favicon');
-    if (headerImg) {
-      headerImg.src = '../icons/' + faviconName;
-    }
-  });
-})();
 </script>
 </body>
 </html>
