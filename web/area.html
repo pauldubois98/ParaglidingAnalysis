@@ -275,6 +275,7 @@
     </div>
   </div>
   <div class="info-row">Size: <span id="info-size">—</span></div>
+  <div id="size-warning" style="display:none;margin-top:4px;font-size:11px;padding:4px 8px;border-radius:6px;"></div>
 
   <div class="section-title" style="margin-top:12px">Actions</div>
   <button class="btn" id="btn-draw">Draw bbox on map</button>
@@ -427,8 +428,24 @@ function updateCenterAndSize() {
   document.getElementById('in-center').value = `${cLat.toFixed(6)}, ${cLon.toFixed(6)}`;
   const wKm = haversineKm(cLat, minLon, cLat, maxLon);
   const hKm = haversineKm(minLat, cLon, maxLat, cLon);
-  const areaKm2 = (wKm * hKm).toFixed(1);
-  document.getElementById('info-size').textContent = `${wKm.toFixed(1)} × ${hKm.toFixed(1)} km  (${areaKm2} km²)`;
+  const area = wKm * hKm;
+  document.getElementById('info-size').textContent = `${wKm.toFixed(1)} × ${hKm.toFixed(1)} km  (${area.toFixed(1)} km²)`;
+  const warn = document.getElementById('size-warning');
+  if (area < 10) {
+    warn.style.display = 'block';
+    warn.style.background = 'rgba(255,160,0,0.15)';
+    warn.style.color = '#ffaa00';
+    warn.style.border = '1px solid rgba(255,160,0,0.3)';
+    warn.textContent = '⚠ Area too small — simulation will lack detail.';
+  } else if (area > 200) {
+    warn.style.display = 'block';
+    warn.style.background = 'rgba(255,80,80,0.12)';
+    warn.style.color = '#ff6060';
+    warn.style.border = '1px solid rgba(255,80,80,0.3)';
+    warn.textContent = '⚠ Area very large — simulation will be slow.';
+  } else {
+    warn.style.display = 'none';
+  }
 }
 
 function bboxFromFields() {
