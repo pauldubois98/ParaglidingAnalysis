@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simulate — Paragliding Thermal Heatmap</title>
   <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -431,6 +432,7 @@ fetch('config.json').then(r => r.json()).then(cfg => {
   setVal('v_advect_max',      cfg.advection.v_advect_max);
   setVal('ref_slope',         cfg.advection.ref_slope);
   setVal('arrow_step',        cfg.output.arrow_step);
+  setVal('domainH',           cfg.simulation.domain_height_m);
 
   // Override with GET params from area.html (if present)
   const p = new URLSearchParams(window.location.search);
@@ -753,53 +755,76 @@ async function fetchDEM(bbox, zoom, logFn) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-//  LAND-COVER FETCHING (WorldCover WMS with fallback)
+//  LAND-COVER FETCHING (ESA WorldCover 2021, same as Python)
 // ═══════════════════════════════════════════════════════════════════
+
+/**
+ * Fetches ESA WorldCover 2021 COG via the local proxy server (server.py),
+ * which forwards HTTP Range requests to the ESA S3 bucket server-side,
+ * bypassing browser CORS restrictions.
+ * Falls back to slope heuristic if the proxy or COG is unavailable.
+ */
+
+async function parseCOGWindow(tiff, min_lon, max_lon, min_lat, max_lat, nx, ny) {
+  const image = await tiff.getImage();
+  const [originX, originY] = image.getOrigin();    // [west-lon, north-lat]
+  const [resX, resY]       = image.getResolution(); // resX > 0, resY < 0
+  const imgW = image.getWidth(), imgH = image.getHeight();
+
+  const left   = Math.max(0,    Math.floor((min_lon - originX) / resX));
+  const top    = Math.max(0,    Math.floor((max_lat - originY) / resY));
+  const right  = Math.min(imgW, Math.ceil( (max_lon - originX) / resX));
+  const bottom = Math.min(imgH, Math.ceil( (min_lat - originY) / resY));
+
+  if (left >= right || top >= bottom) throw new Error('Bbox outside GeoTIFF extent.');
+
+  log(`Reading ${right - left}×${bottom - top} px window…`);
+  await yieldUI();
+
+  const rasters = await image.readRasters({ window: [left, top, right, bottom] });
+  const raw = rasters[0];
+  const rawW = right - left, rawH = bottom - top;
+
+  // Nearest-neighbour resample to sim grid — matches Python's ndimage_zoom order=0
+  const lc = new Int16Array(ny * nx);
+  for (let j = 0; j < ny; j++) {
+    for (let i = 0; i < nx; i++) {
+      const srcI = Math.min(rawW - 1, Math.round(i / (nx - 1) * (rawW - 1)));
+      const srcJ = Math.min(rawH - 1, Math.round(j / (ny - 1) * (rawH - 1)));
+      lc[j * nx + i] = raw[srcJ * rawW + srcI];
+    }
+  }
+  return { lc, rawW, rawH };
+}
 
 async function fetchLandcover(bbox, Z, nx, ny, dx, dy) {
   const { min_lat, max_lat, min_lon, max_lon } = bbox;
-  const W = 512, H = 512;
-  const url = 'https://services.terrascope.be/wms/v2?' +
-    `SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap` +
-    `&LAYERS=WORLDCOVER_2021_MAP&CRS=EPSG:4326` +
-    `&BBOX=${min_lat},${min_lon},${max_lat},${max_lon}` +
-    `&WIDTH=${W}&HEIGHT=${H}&FORMAT=image/png`;
 
-  let lcRaw = null;
-
+  // ── ESA WorldCover S3 COG via local proxy ─────────────────────────
   try {
-    lcRaw = await new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        const c = document.createElement('canvas');
-        c.width = W; c.height = H;
-        const ctx = c.getContext('2d');
-        ctx.drawImage(img, 0, 0);
-        try {
-          const px = ctx.getImageData(0, 0, W, H).data;
-          const codes = new Int16Array(ny * nx);
-          for (let j = 0; j < ny; j++) {
-            for (let i = 0; i < nx; i++) {
-              const pxI = Math.round(i / nx * W);
-              const pxJ = Math.round(j / ny * H);
-              const idx = (pxJ * W + pxI) * 4;
-              codes[j * nx + i] = nearestLcClass(px[idx], px[idx+1], px[idx+2]);
-            }
-          }
-          resolve(codes);
-        } catch (e) { reject(e); }
-      };
-      img.onerror = reject;
-      img.src = url;
-    });
-    log('WorldCover WMS fetched successfully.', 'success');
-  } catch (e) {
-    log(`WorldCover WMS unavailable (CORS?), using slope heuristic. (${e.message || e})`, 'warn');
-    lcRaw = slopeHeuristicLandcover(Z, ny, nx, dx, dy);
-  }
+    const tileLatSW = Math.floor(min_lat / 3) * 3;
+    const tileLonSW = Math.floor(min_lon / 3) * 3;
+    if (Math.floor(max_lat / 3) * 3 !== tileLatSW ||
+        Math.floor(max_lon / 3) * 3 !== tileLonSW) {
+      throw new Error('Bbox spans multiple WorldCover tiles.');
+    }
+    const latStr = (tileLatSW >= 0 ? 'N' : 'S') + String(Math.abs(tileLatSW)).padStart(2, '0');
+    const lonStr = (tileLonSW >= 0 ? 'E' : 'W') + String(Math.abs(tileLonSW)).padStart(3, '0');
+    const s3url    = `https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/` +
+                     `ESA_WorldCover_10m_2021_v200_${latStr}${lonStr}_Map.tif`;
+    const proxyUrl = `/proxy?url=` + encodeURIComponent(s3url);
 
-  return lcRaw;
+    log(`Fetching ESA WorldCover COG (${latStr}${lonStr}) via local proxy…`);
+    const tiff = await GeoTIFF.fromUrl(proxyUrl, { allowFullFile: false });
+    const { lc, rawW, rawH } = await parseCOGWindow(
+      tiff, min_lon, max_lon, min_lat, max_lat, nx, ny);
+    log(`ESA WorldCover COG: ${rawW}×${rawH} px → ${nx}×${ny}.`, 'success');
+    return lc;
+
+  } catch (e) {
+    log(`ESA WorldCover COG unavailable (${e.message || e}) — using slope heuristic.`, 'warn');
+    return slopeHeuristicLandcover(Z, ny, nx, dx, dy);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1046,57 +1071,54 @@ async function computeTriggerFactor(Z, nx, ny, thermalFactor) {
 
 async function fetchERA5dT(lat, lon, dateStr, windowDays) {
   const target = new Date(dateStr + 'T12:00:00Z');
-  const records = [];
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, k) => currentYear - 5 + k);
+  const fmt = d => d.toISOString().slice(0, 10);
 
-  for (const year of years) {
-    const tgt = new Date(target);
-    tgt.setFullYear(year);
+  // ERA5 lags ~5 days behind present
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 5);
 
-    const start = new Date(tgt); start.setDate(start.getDate() - windowDays);
-    const end   = new Date(tgt); end.setDate(end.getDate() + windowDays);
-
-    // ERA5 lags ~5-6 days behind present
-    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 6);
+  // Build one request per year and fire all in parallel
+  const requests = years.map(year => {
+    const tgt   = new Date(target); tgt.setFullYear(year);
+    const start = new Date(tgt);    start.setDate(start.getDate() - windowDays);
+    const end   = new Date(tgt);    end.setDate(end.getDate() + windowDays);
     if (end > cutoff) end.setTime(cutoff.getTime());
-    if (start >= end) continue;
+    if (start >= end) return Promise.resolve({ year, rows: [] });
 
-    const fmt = d => d.toISOString().slice(0, 10);
-    const url = `https://archive.open-meteo.com/v1/archive` +
+    const apiUrl = `https://historical-forecast-api.open-meteo.com/v1/forecast` +
       `?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}` +
       `&start_date=${fmt(start)}&end_date=${fmt(end)}` +
       `&hourly=temperature_2m,surface_temperature,direct_radiation` +
-      `&timezone=Europe%2FParis`;
+      `&timezone=Europe/Paris`;
+    const url = `/proxy?url=` + encodeURIComponent(apiUrl);
 
-    try {
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.json();
-      const h = data.hourly || {};
-      const times = h.time || [];
-      const t2m   = h.temperature_2m || [];
-      const tskin = h.surface_temperature || [];
-      const drad  = h.direct_radiation || [];
+    return fetch(url)
+      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+      .then(data => {
+        const h = data.hourly || {};
+        const times = h.time || [], t2m = h.temperature_2m || [];
+        const tskin = h.surface_temperature || [], drad = h.direct_radiation || [];
+        const rows = [];
+        for (let k = 0; k < times.length; k++) {
+          if (t2m[k] == null || tskin[k] == null || drad[k] == null) continue;
+          const hour = parseInt(times[k].slice(11, 13));
+          if (hour < 11 || hour > 14) continue;
+          if (drad[k] < 600) continue;
+          rows.push(tskin[k] - t2m[k]);
+        }
+        return { year, rows };
+      })
+      .catch(e => { log(`ERA5 year ${year}: fetch failed (${e.message})`, 'warn'); return { year, rows: [] }; });
+  });
 
-      for (let k = 0; k < times.length; k++) {
-        if (t2m[k] == null || tskin[k] == null || drad[k] == null) continue;
-        const hour = parseInt(times[k].slice(11, 13));
-        if (hour < 11 || hour > 14) continue;
-        if (drad[k] < 600) continue;
-        records.push(tskin[k] - t2m[k]);
-      }
-    } catch (e) {
-      log(`ERA5 year ${year}: fetch failed (${e.message})`, 'warn');
-    }
-    await yieldUI();
-  }
+  const results = await Promise.all(requests);
+  const records = results.flatMap(r => r.rows);
   return records;
 }
 
-async function calibrateMaxHeat(lat, lon, dateStr, scenarios, Z, nx, ny, dx, dy, thermalFactor, windowDays, diffuseFrac) {
+async function calibrateMaxHeat(records, scenarios, Z, nx, ny, dx, dy, thermalFactor, diffuseFrac) {
   log('Calibrating max_heat from ERA5…');
-  const records = await fetchERA5dT(lat, lon, dateStr, windowDays);
 
   if (!records.length) {
     log('No ERA5 data returned — using fallback max_heat=15.0', 'warn');
@@ -1133,9 +1155,10 @@ async function calibrateMaxHeat(lat, lon, dateStr, scenarios, Z, nx, ny, dx, dy,
 
 function elevAtLatLon(lat, lon, Z, nx, ny, bbox) {
   const { min_lat, max_lat, min_lon, max_lon } = bbox;
-  const if_ = (lon - min_lon) / (max_lon - min_lon) * (nx - 1);
-  const jf  = (max_lat - lat) / (max_lat - min_lat) * (ny - 1);  // j=0 is northernmost
-  return bilinearSample(Z, ny, nx, jf, if_);
+  // Nearest-neighbour — matches Python's argmin grid lookup
+  const i = Math.min(nx - 1, Math.max(0, Math.round((lon - min_lon) / (max_lon - min_lon) * (nx - 1))));
+  const j = Math.min(ny - 1, Math.max(0, Math.round((max_lat - lat) / (max_lat - min_lat) * (ny - 1))));
+  return Z[j * nx + i];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1177,13 +1200,27 @@ async function runFetch() {
     setProgress(0.75);
 
     // ── Fetch land cover ───────────────────────────────────────────
-    setStatus('Fetching land cover…');
-    log('Fetching WorldCover land cover…');
+    setStatus('Fetching land cover (ESA WorldCover COG)…');
     const lcCodes = await fetchLandcover(bbox, sim.Z, sim.nx, sim.ny, sim.dx, sim.dy);
-    log(`Land cover fetched: ${sim.nx}×${sim.ny} cells.`, 'success');
+    log(`Land cover grid: ${sim.nx}×${sim.ny} cells.`, 'success');
     setProgress(0.95);
 
-    fetchedData = { sim, mesh, lcCodes, bbox };
+    // ── Fetch ERA5 calibration data ────────────────────────────────
+    setStatus('Fetching ERA5 calibration data…');
+    const dateStr    = document.getElementById('sim_date').value;
+    const windowDays = parseInt(document.getElementById('era5_window').value);
+    const centerLat  = (bbox.min_lat + bbox.max_lat) / 2;
+    const centerLon  = (bbox.min_lon + bbox.max_lon) / 2;
+    log('Fetching ERA5 calibration data (5 years, parallel)…');
+    const era5Records = await fetchERA5dT(centerLat, centerLon, dateStr, windowDays);
+    if (era5Records.length) {
+      log(`ERA5: ${era5Records.length} clear-sky midday observations collected.`, 'success');
+    } else {
+      log('ERA5: no data returned — max_heat will use manual/fallback value.', 'warn');
+    }
+    setProgress(0.98);
+
+    fetchedData = { sim, mesh, lcCodes, bbox, era5Records };
     log('All data fetched. Ready to run simulation.', 'success');
     setProgress(1.0);
     setStatus('Data ready.');
@@ -1224,9 +1261,8 @@ async function runSim() {
     const vAdvectMax    = parseFloat(document.getElementById('v_advect_max').value);
     const refSlope      = parseFloat(document.getElementById('ref_slope').value);
     const arrowStep     = parseInt(document.getElementById('arrow_step').value);
-    const era5Auto      = document.getElementById('era5_auto').checked;
-    const era5Window    = parseInt(document.getElementById('era5_window').value);
-    const diffuseFrac   = parseFloat(document.getElementById('diffuse_frac').value);
+    const era5Auto    = document.getElementById('era5_auto').checked;
+    const diffuseFrac = parseFloat(document.getElementById('diffuse_frac').value);
     const DT_INTERVAL   = intervalMin / 60;  // hours per step
 
     // ── Build thermal factor grid ──────────────────────────────────
@@ -1253,12 +1289,12 @@ async function runSim() {
     log(`${scenarios.length} scenarios generated.`, 'success');
     if (!scenarios.length) throw new Error('No sun scenarios (sun always below min elevation?)');
 
-    // ── ERA5 calibration ───────────────────────────────────────────
+    // ── ERA5 calibration (data pre-fetched during Fetch Data phase) ──
     let MAX_HEAT;
     if (era5Auto) {
       setStatus('Calibrating max_heat from ERA5…');
-      MAX_HEAT = await calibrateMaxHeat(centerLat, centerLon, dateStr, scenarios,
-                                         Z, nx, ny, dx, dy, thermal_factor, era5Window, diffuseFrac);
+      MAX_HEAT = await calibrateMaxHeat(fetchedData.era5Records, scenarios,
+                                         Z, nx, ny, dx, dy, thermal_factor, diffuseFrac);
     } else {
       MAX_HEAT = parseFloat(document.getElementById('max_heat').value);
       log(`max_heat (manual): ${MAX_HEAT} K`);
@@ -1308,7 +1344,7 @@ async function runSim() {
       terrain: {
         nx, ny,
         x_extent, y_extent,
-        z_extent: [zMin, zMin + 2000],
+        z_extent: [zMin, zMin + 2_000],
         dx, dy,
         arrow_step: arrowStep,
         elevation:      float32ToNested(Z, ny, nx),
