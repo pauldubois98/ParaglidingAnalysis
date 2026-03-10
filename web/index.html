@@ -450,21 +450,53 @@ let simData = null;
 let currentScenario = 0;
 let terrainMesh = null;
 
+// ─── IndexedDB helper ───────────────────────────────────────────────────────
+function idbGet() {
+  return new Promise((resolve) => {
+    const req = indexedDB.open('paragliding', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('sim');
+    req.onerror = () => resolve(null);
+    req.onsuccess = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('sim')) { resolve(null); return; }
+      const tx = db.transaction('sim', 'readwrite');
+      const store = tx.objectStore('sim');
+      const getReq = store.get('latest');
+      getReq.onsuccess = () => {
+        const raw = getReq.result;
+        if (raw) store.delete('latest'); // consume once
+        try {
+          resolve(raw ? JSON.parse(raw) : null);
+        } catch (e) {
+          resolve(null);
+        }
+      };
+      getReq.onerror = () => resolve(null);
+    };
+  });
+}
+
 // ─── Load simulation data ───────────────────────────────────────────────────
 async function loadData() {
   try {
-    const [simResp, modesResp, settingsResp, cmapsResp] = await Promise.all([
-      fetch('../data/simulation.json'),
+    // Prefer simulation result saved by simulate.html (via IndexedDB)
+    let simJson = await idbGet();
+    if (!simJson) {
+      const simResp = await fetch('../data/simulation.json');
+      if (!simResp.ok) throw new Error(`simulation.json: HTTP ${simResp.status}`);
+      simJson = await simResp.json();
+    }
+
+    const [modesResp, settingsResp, cmapsResp] = await Promise.all([
       fetch('modes.json'),
       fetch('settings.json'),
       fetch('colormaps.json'),
     ]);
-    if (!simResp.ok)     throw new Error(`simulation.json: HTTP ${simResp.status}`);
-    if (!modesResp.ok) throw new Error(`modes.json: HTTP ${modesResp.status}`);
-    if (!settingsResp.ok)throw new Error(`settings.json: HTTP ${settingsResp.status}`);
+    if (!modesResp.ok)   throw new Error(`modes.json: HTTP ${modesResp.status}`);
+    if (!settingsResp.ok) throw new Error(`settings.json: HTTP ${settingsResp.status}`);
     if (!cmapsResp.ok)   throw new Error(`colormaps.json: HTTP ${cmapsResp.status}`);
-    simData = await simResp.json();
-    window._modesData   = await modesResp.json();
+    simData = simJson;  // either from IndexedDB (simulate.html) or data/simulation.json
+    window._modesData     = await modesResp.json();
     window._settingsData  = await settingsResp.json();
     window._colormapsData = await cmapsResp.json();
     document.getElementById('loading').style.display = 'none';
@@ -472,7 +504,7 @@ async function loadData() {
   } catch (e) {
     document.getElementById('loading').innerHTML =
       `<div style="color:#f66">Failed to load data<br><small>${e.message}</small><br><br>
-       <small>Run the notebook first, then serve from project root:<br>
+       <small>Run the simulation first (<a href="simulate.html" style="color:#7eb8ff">simulate.html</a>), or serve from project root:<br>
        <code>python -m http.server 8000</code></small></div>`;
   }
 }

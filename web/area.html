@@ -304,6 +304,9 @@
   </div>
   <button class="btn" id="btn-place-to" style="margin-top:6px">Place take-off on map</button>
   <button class="btn" id="btn-place-la">Place landing on map</button>
+
+  <div class="section-title" style="margin-top:12px">Next step</div>
+  <button class="btn" id="btn-simulate" style="background:rgba(30,180,100,0.18);border-color:rgba(30,200,100,0.5);color:#50e898">Run simulation with this area →</button>
 </div>
 
 <!-- ── Legend ── -->
@@ -589,6 +592,20 @@ map.fitBounds(
   [[DEFAULTS.bbox.min_lat, DEFAULTS.bbox.min_lon],[DEFAULTS.bbox.max_lat, DEFAULTS.bbox.max_lon]],
   { padding: [40, 40] }
 );
+
+// ── Go to simulate.html with current coordinates as GET params ────────────────
+document.getElementById('btn-simulate').addEventListener('click', () => {
+  const b = bboxFromFields();
+  const toLat = getField('in-to-lat'), toLon = getField('in-to-lon');
+  const laLat = getField('in-la-lat'), laLon = getField('in-la-lon');
+  const params = new URLSearchParams({
+    min_lat: b.min_lat, max_lat: b.max_lat,
+    min_lon: b.min_lon, max_lon: b.max_lon,
+    takeoff_lat: toLat,  takeoff_lon: toLon,
+    landing_lat: laLat,  landing_lon: laLon,
+  });
+  window.location.href = 'simulate.html?' + params.toString();
+});
 </script>
 </body>
 </html>

@@ -184,6 +184,7 @@
     .btn-blue  { background: #1e4a80; color: #a0ceff; border: 1px solid rgba(100,160,255,0.4); }
     .btn-green { background: #0f5030; color: #60e0a0; border: 1px solid rgba(60,200,120,0.4); }
     .btn-dl    { background: #1a2a4a; color: #7eb8ff; border: 1px solid rgba(100,160,255,0.3); }
+    .btn-map   { background: rgba(80,50,10,0.5); color: #f0b840; border: 1px solid rgba(240,180,60,0.4); }
     .btn:not(:disabled):hover { opacity: 0.8; }
   </style>
 </head>
@@ -356,6 +357,7 @@
     <button class="btn btn-blue" id="btn-fetch" onclick="runFetch()">Fetch Data</button>
     <button class="btn btn-green" id="btn-sim" onclick="runSim()" disabled>Run Simulation</button>
     <button class="btn btn-dl" id="btn-dl" onclick="downloadJSON()" disabled>↓ JSON</button>
+    <button class="btn btn-map" id="btn-map" onclick="viewInMap()" disabled>View in map →</button>
   </div>
 </div>
 
@@ -429,6 +431,17 @@ fetch('config.json').then(r => r.json()).then(cfg => {
   setVal('v_advect_max',      cfg.advection.v_advect_max);
   setVal('ref_slope',         cfg.advection.ref_slope);
   setVal('arrow_step',        cfg.output.arrow_step);
+
+  // Override with GET params from area.html (if present)
+  const p = new URLSearchParams(window.location.search);
+  const overrides = {
+    min_lat: 'min_lat', max_lat: 'max_lat', min_lon: 'min_lon', max_lon: 'max_lon',
+    takeoff_lat: 'takeoff_lat', takeoff_lon: 'takeoff_lon',
+    landing_lat: 'landing_lat', landing_lon: 'landing_lon',
+  };
+  for (const [param, id] of Object.entries(overrides)) {
+    if (p.has(param)) setVal(id, p.get(param));
+  }
 }).catch(e => console.warn('config.json not loaded:', e));
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1133,6 +1146,7 @@ async function runFetch() {
   document.getElementById('btn-fetch').disabled = true;
   document.getElementById('btn-sim').disabled = true;
   document.getElementById('btn-dl').disabled = true;
+  document.getElementById('btn-map').disabled = true;
   fetchedData = null; simResult = null;
   setProgress(0);
 
@@ -1192,6 +1206,7 @@ async function runSim() {
   document.getElementById('btn-sim').disabled = true;
   document.getElementById('btn-fetch').disabled = true;
   document.getElementById('btn-dl').disabled = true;
+  document.getElementById('btn-map').disabled = true;
   simResult = null;
   setProgress(0);
 
@@ -1473,8 +1488,9 @@ async function runSim() {
 
     simResult = output;
     setProgress(1.0);
-    setStatus('Simulation complete. Click "Download simulation.json" to compare with Python output.');
+    setStatus('Simulation complete.');
     document.getElementById('btn-dl').disabled = false;
+    document.getElementById('btn-map').disabled = false;
   } catch (e) {
     log(`SIMULATION ERROR: ${e.message || e}`, 'error');
     console.error(e);
@@ -1505,6 +1521,34 @@ function downloadJSON() {
   URL.revokeObjectURL(url);
   const kb = (json.length / 1024).toFixed(0);
   log(`simulation.json downloaded (${kb} KB, pretty-printed).`, 'success');
+}
+
+function idbPut(json) {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open('paragliding', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('sim');
+    req.onerror = () => reject(req.error);
+    req.onsuccess = e => {
+      const db = e.target.result;
+      const tx = db.transaction('sim', 'readwrite');
+      const putReq = tx.objectStore('sim').put(json, 'latest');
+      putReq.onerror = () => reject(putReq.error);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    };
+  });
+}
+
+async function viewInMap() {
+  if (!simResult) { log('No simulation result.', 'error'); return; }
+  try {
+    // Serialize to JSON string before storing — avoids structured-clone issues
+    // with large or complex objects and guarantees the data is always readable.
+    await idbPut(JSON.stringify(simResult));
+    window.location.href = 'index.html';
+  } catch (e) {
+    log(`Could not save to IndexedDB (${e.message}). Try downloading the JSON and placing it at data/simulation.json.`, 'error');
+  }
 }
 </script>
 </body>
