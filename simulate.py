@@ -35,34 +35,31 @@ from scipy.ndimage import gaussian_filter
 from scipy.ndimage import zoom as ndimage_zoom
 from pysolar.solar import get_altitude, get_azimuth
 
-# ── Constants / site definition ───────────────────────────────────────────────
+# ── Load config ───────────────────────────────────────────────────────────────
+_CFG_PATH = os.path.join(os.path.dirname(__file__), 'web/config.json')
+with open(_CFG_PATH) as _f:
+    _CFG = json.load(_f)
+
+# ── Constants / site definition (from config.json) ────────────────────────────
+_bbox_raw = _CFG['area']['bbox']
 BBOX = {
-    'min_lon': 0.8384807238737125,
-    'max_lon': 0.933902446260169,
-    'min_lat': 42.96106090862103,
-    'max_lat': 43.014963556361636,
-    'center_lat': 42.99565929402203,
-    'center_lon': 0.9054050088740738
+    'min_lon':    _bbox_raw['min_lon'],
+    'max_lon':    _bbox_raw['max_lon'],
+    'min_lat':    _bbox_raw['min_lat'],
+    'max_lat':    _bbox_raw['max_lat'],
+    'center_lat': (_bbox_raw['min_lat'] + _bbox_raw['max_lat']) / 2,
+    'center_lon': (_bbox_raw['min_lon'] + _bbox_raw['max_lon']) / 2,
 }
 
-LANDING = {'lat': 42.99216012970225,  'lon': 0.9039819278411977,  'name': 'Landing'}
-TAKEOFF = {'lat': 42.96939867981149,  'lon': 0.8859389033562173,  'name': 'Take-off'}
+LANDING = {**_CFG['area']['landing']}
+TAKEOFF = {**_CFG['area']['takeoff']}
 
 # ── Land-cover classes: code → (label, hex colour, thermal factor) ────────────
 # Thermal factor: relative ground temperature anomaly vs grassland (=1.0).
 # Encodes both thermal inertia (low = heats fast) and albedo (high = reflects more).
 LANDCOVER = {
-    10:  ('Tree cover',          '#1a7a1a', 0.45),  # dense canopy, high inertia
-    20:  ('Shrubland',           '#8db34a', 0.70),
-    30:  ('Grassland',           '#c8d980', 1.00),  # reference
-    40:  ('Cropland',            '#e8c84a', 0.85),
-    50:  ('Built-up',            '#d03020', 1.30),  # concrete / low inertia
-    60:  ('Bare / sparse veg',   '#a08060', 1.80),  # rock & scree, very low inertia
-    70:  ('Snow and ice',        '#f0f0ff', 0.08),  # very high albedo
-    80:  ('Permanent water',     '#1a50d0', 0.03),  # highest thermal inertia
-    90:  ('Herbaceous wetland',  '#50a0a0', 0.35),
-    95:  ('Mangrove',            '#008080', 0.50),
-    100: ('Moss and lichen',     '#90c090', 0.60),
+    int(k): (v['label'], v['color'], v['thermal_factor'])
+    for k, v in _CFG['landcover'].items()
 }
 
 
@@ -875,28 +872,40 @@ def main():
     plt.show()
     print('Saved data/landcover_visualization.png')
 
-    # ── Simulation params ─────────────────────────────────────────────────────
+    # ── Simulation params (all from config.json) ──────────────────────────────
     # Physical constants
-    g    = 9.81
-    beta = 0.0034
-    T0   = 293.15
+    g    = _CFG['physics']['g']
+    beta = _CFG['physics']['beta']
+    T0   = _CFG['physics']['T0']
+    DALR = _CFG['physics']['dalr']   # Dry Adiabatic Lapse Rate — fixed by thermodynamics
 
-    # Atmospheric lapse rates (K/m)
-    DALR = 0.0098   # Dry Adiabatic Lapse Rate — fixed by thermodynamics
-    ELR  = 0.0065   # Environmental Lapse Rate  — standard ICAO atmosphere
-                    # Increase → less stable → higher thermal tops (good flying)
-                    # Decrease → more stable  → lower  thermal tops (poor flying)
+    # Simulation settings
+    SIMULATION_DATE    = _CFG['simulation']['date']
+    TZ_OFFSET          = _CFG['simulation']['tz_offset']
+    INTERVAL_MIN       = _CFG['simulation']['interval_min']
+    MIN_ELEVATION_DEG  = _CFG['simulation']['min_elevation_deg']
+    DOMAIN_H           = _CFG['simulation']['domain_height_m']
 
-    # Thermal inertia time constant (hours)
-    # Ground temperature relaxes toward the current-sun equilibrium with this lag.
-    # Smaller → fast response (bare rock/gravel); Larger → slow (dense forest/water).
-    # ~1 h for bare rock, ~1.5 h mixed terrain, ~3 h for forest/water.
-    TAU_HOURS = 1.5
+    # Heating
+    ELR              = _CFG['heating']['elr_per_km'] / 1000.0  # K/m
+    TAU_HOURS        = _CFG['heating']['tau_hours']
+    DIFFUSE_FRACTION = _CFG['heating']['diffuse_fraction']
+    ERA5_WINDOW_DAYS = _CFG['heating']['era5_window_days']
+
+    # Release
+    K_RELEASE         = _CFG['release']['k_release']
+    RELEASE_THRESHOLD = _CFG['release']['release_threshold']
+
+    # Advection
+    V_ADVECT_MAX = _CFG['advection']['v_advect_max']
+    REF_SLOPE    = _CFG['advection']['ref_slope']
+
+    # Output
+    ARROW_STEP = _CFG['output']['arrow_step']
 
     # Match simulation grid exactly to terrain resolution — no downsampling
     SIM_NY, SIM_NX = Z.shape          # 194 × 344
-    SIM_NZ  = 32
-    DOMAIN_H = 2000
+    SIM_NZ = _CFG['sim_nz']
 
     Z_sim = Z.copy()                   # no zoom needed
     X_sim = X[0, :]                    # (SIM_NX,)
@@ -959,17 +968,15 @@ def main():
           f'({_sm.mean()*100:.1f}% of {_sm.size:,})')
 
     # ── Sun scenarios preview ─────────────────────────────────────────────────
-    SIMULATION_DATE = '2024-07-15'
-    TZ_OFFSET       = 2          # CEST (UTC+2)
-    INTERVAL_MIN    = 60         # minutes between steps
 
     preview = generate_sun_scenarios(
         BBOX['center_lat'], BBOX['center_lon'],
         date_str=SIMULATION_DATE,
         tz_offset_hours=TZ_OFFSET,
         interval_minutes=INTERVAL_MIN,
+        min_elevation_deg=MIN_ELEVATION_DEG,
     )
-    print(f'{len(preview)} scenarios on {SIMULATION_DATE} (CEST, el > 10°):')
+    print(f'{len(preview)} scenarios on {SIMULATION_DATE} (el > {MIN_ELEVATION_DEG}°):')
     print(f'  {"Local":6s}  {"UTC":5s}  {"Az":>6s}  {"El":>5s}')
     for s in preview:
         print(f'  {s["local_time"]}  {s["utc_time"]}  {s["sun_azimuth"]:6.1f}°  {s["sun_elevation"]:5.1f}°')
@@ -1091,6 +1098,7 @@ def main():
         date_str=SIMULATION_DATE,
         tz_offset_hours=TZ_OFFSET,
         interval_minutes=INTERVAL_MIN,
+        min_elevation_deg=MIN_ELEVATION_DEG,
     )
 
     MAX_HEAT = calibrate_max_heat(
@@ -1098,41 +1106,25 @@ def main():
         SIMULATION_DATE,
         SCENARIOS,
         Z_sim, thermal_factor_sim,
+        window_days=ERA5_WINDOW_DAYS,
     )
 
     # ── Precompute scenarios ───────────────────────────────────────────────────
-    ARROW_STEP = 8   # downsample arrows: every N-th grid cell
-
     # Arrow grid indices (same formula as JS so both sides agree)
     arrow_js = list(range(ARROW_STEP // 2, SIM_NY, ARROW_STEP))
     arrow_is = list(range(ARROW_STEP // 2, SIM_NX, ARROW_STEP))
 
     DT_INTERVAL = INTERVAL_MIN / 60   # hours per scenario step
 
-    # Per-cell thermal inertia
-    TAU_FACTOR = {
-        10:  2.50,   # Tree cover      — dense canopy slows response
-        20:  1.30,   # Shrubland
-        30:  1.00,   # Grassland       — reference
-        40:  0.85,   # Cropland
-        50:  0.50,   # Built-up        — concrete / asphalt
-        60:  0.35,   # Bare / sparse   — rock and scree, heats and cools very fast
-        70:  1.50,   # Snow and ice
-        80: 15.00,   # Permanent water — enormous heat capacity
-        90:  1.50,   # Herbaceous wetland
-        95:  2.00,   # Mangrove
-       100:  1.00,   # Moss and lichen
-    }
+    # Per-cell thermal inertia (from config)
+    TAU_FACTOR = {int(k): v for k, v in _CFG['tau_factor'].items()}
 
     tau_grid   = np.vectorize(
         lambda c: TAU_FACTOR.get(int(c), 1.0)
     )(lc_sim).astype(np.float32) * TAU_HOURS
     decay_grid = np.exp(-DT_INTERVAL / tau_grid)
 
-    # Phase 1: thermal release at trigger zones
-    K_RELEASE        = 0.3   # h⁻¹  — release rate
-    RELEASE_THRESHOLD = 1.5  # K    — minimum anomaly before release kicks in
-
+    # Phase 1: thermal release at trigger zones — K_RELEASE, RELEASE_THRESHOLD from config
     # Phase 2: heat advection along orographic flow
     # u_flow/v_flow are normalised to the per-step global maximum and then scaled
     # to V_ADVECT m/h.  First-order upwind scheme with adaptive sub-stepping
@@ -1141,8 +1133,7 @@ def main():
     #   V ∝ sqrt(mean_slope / REF_SLOPE  ×  mean_dT / MAX_HEAT)
     # Physical basis: anabatic speed ∝ sqrt(buoyancy × slope) — weak at dawn,
     # peaks at midday, tapers in the evening.
-    V_ADVECT_MAX = 1000   # m/h — calibrated ceiling (reached at full heating + ref slope)
-    REF_SLOPE    = 0.30   # dimensionless rise/run ≈ tan(17°), characteristic Arbas slope
+    # V_ADVECT_MAX, REF_SLOPE from config
 
     print(f'Thermal inertia: τ_ref={TAU_HOURS} h (grassland), dt={DT_INTERVAL} h')
     print(f'  decay range: {decay_grid.min():.3f} (bare rock) – {decay_grid.max():.3f} (water)')
@@ -1208,14 +1199,14 @@ def main():
         dT_inst = compute_solar_heating(Z_sim, sc['sun_azimuth'], sc['sun_elevation'],
                                         thermal_factor=thermal_factor_sim,
                                         max_heat=MAX_HEAT,
-                                        shadow_mask=shadow)
+                                        shadow_mask=shadow,
+                                        diffuse_fraction=DIFFUSE_FRACTION)
 
         dT_carry = dT_carry * decay_grid + dT_inst * (1.0 - decay_grid)
 
         # Phase 1: thermal release — trigger zones bleed excess heat
         excess   = np.maximum(dT_carry - RELEASE_THRESHOLD, 0.0)
-        release  = trigger_factor_sim * excess * (K_RELEASE * DT_INTERVAL)
-        dT_carry = np.maximum(dT_carry - release, 0.0)
+        dT_carry = np.maximum(dT_carry - trigger_factor_sim * excess * (K_RELEASE * DT_INTERVAL), 0.0)
 
         # Orographic flow field (frozen coefficient for sub-stepping below)
         u_flow, v_flow, grad_mag = compute_orographic_flow(Z_sim, dT_carry, dx, dy, smooth_sigma=5.0)
