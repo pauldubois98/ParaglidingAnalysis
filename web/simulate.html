@@ -184,8 +184,8 @@
     .btn:disabled { opacity: 0.35; cursor: not-allowed; }
     .btn-blue  { background: #1e4a80; color: #a0ceff; border: 1px solid rgba(100,160,255,0.4); }
     .btn-green { background: #0f5030; color: #60e0a0; border: 1px solid rgba(60,200,120,0.4); }
-    .btn-dl    { background: #1a2a4a; color: #7eb8ff; border: 1px solid rgba(100,160,255,0.3); }
-    .btn-map   { background: rgba(80,50,10,0.5); color: #f0b840; border: 1px solid rgba(240,180,60,0.4); }
+    .btn-dl    { background: #1a2a4a; color: #7eb8ff; border: 1px solid rgba(100,160,255,0.3); display:none; }
+    .btn-map   { background: #50320a; color: #f0b840; border: 1px solid rgba(240,180,60,0.4); }
     .btn:not(:disabled):hover { opacity: 0.8; }
   </style>
 </head>
@@ -205,7 +205,7 @@
   <div id="panel-header">
     <h2>Run Simulation</h2>
     <div class="header-links">
-      <a href="index.html">← Map</a>
+      <a href="area.html">Area selection</a>
       <a href="about.html">About</a>
     </div>
   </div>
@@ -434,7 +434,20 @@ fetch('config.json').then(r => r.json()).then(cfg => {
   setVal('arrow_step',        cfg.output.arrow_step);
   setVal('domainH',           cfg.simulation.domain_height_m);
 
-  // Override with GET params from area.html (if present)
+  // Override with saved area state from area.html (if present)
+  try {
+    const saved = JSON.parse(localStorage.getItem('paragliding_area') || 'null');
+    if (saved) {
+      if (saved.bbox) {
+        setVal('min_lat', saved.bbox.min_lat); setVal('max_lat', saved.bbox.max_lat);
+        setVal('min_lon', saved.bbox.min_lon); setVal('max_lon', saved.bbox.max_lon);
+      }
+      if (saved.takeoff) { setVal('takeoff_lat', saved.takeoff.lat); setVal('takeoff_lon', saved.takeoff.lon); }
+      if (saved.landing) { setVal('landing_lat', saved.landing.lat); setVal('landing_lon', saved.landing.lon); }
+    }
+  } catch(e) {}
+
+  // Override with GET params from area.html (highest priority)
   const p = new URLSearchParams(window.location.search);
   const overrides = {
     min_lat: 'min_lat', max_lat: 'max_lat', min_lon: 'min_lon', max_lon: 'max_lon',
@@ -1581,7 +1594,7 @@ async function viewInMap() {
     // Serialize to JSON string before storing — avoids structured-clone issues
     // with large or complex objects and guarantees the data is always readable.
     await idbPut(JSON.stringify(simResult));
-    window.location.href = 'index.html';
+    window.location.href = 'view.html';
   } catch (e) {
     log(`Could not save to IndexedDB (${e.message}). Try downloading the JSON and placing it at data/simulation.json.`, 'error');
   }

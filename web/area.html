@@ -28,7 +28,7 @@
     }
     .leaflet-tile { filter: brightness(0.72) saturate(0.55) hue-rotate(195deg); }
 
-    /* ── Floating panel (top-right, matches index.html style) ── */
+    /* ── Floating panel (top-right, matches view.html style) ── */
     #panel {
       position: absolute;
       top: 16px;
@@ -249,7 +249,7 @@
   <h2>
     Area of Interest
     <span style="display:flex;gap:8px">
-      <a href="index.html">← Map</a>
+      <a href="view.html">← Map</a>
       <a href="simulate.html">Run sim</a>
     </span>
   </h2>
@@ -334,6 +334,23 @@
 <div id="toast"></div>
 
 <script>
+// ── Persistent state ──────────────────────────────────────────────────────────
+const STORAGE_KEY = 'paragliding_area';
+
+function saveAreaState() {
+  const state = {
+    bbox: bboxFromFields(),
+    takeoff: { lat: getField('in-to-lat'), lon: getField('in-to-lon') },
+    landing: { lat: getField('in-la-lat'), lon: getField('in-la-lon') },
+  };
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+}
+
+function loadAreaState() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); }
+  catch(e) { return null; }
+}
+
 // ── Defaults ──────────────────────────────────────────────────────────────────
 const DEFAULTS = {
   bbox: {
@@ -375,11 +392,13 @@ takeoffMarker.on('dragend', () => {
   const ll = takeoffMarker.getLatLng();
   setField('in-to-lat', ll.lat, 8);
   setField('in-to-lon', ll.lng, 8);
+  saveAreaState();
 });
 landingMarker.on('dragend', () => {
   const ll = landingMarker.getLatLng();
   setField('in-la-lat', ll.lat, 8);
   setField('in-la-lon', ll.lng, 8);
+  saveAreaState();
 });
 
 // ── Rectangles ────────────────────────────────────────────────────────────────
@@ -437,31 +456,34 @@ function applyLanding(lat, lon) {
   landingMarker.setLatLng([lat, lon]);
 }
 
-// ── Init fields ───────────────────────────────────────────────────────────────
-applyBbox(DEFAULTS.bbox);
-applyTakeoff(DEFAULTS.takeoff.lat, DEFAULTS.takeoff.lon);
-applyLanding(DEFAULTS.landing.lat, DEFAULTS.landing.lon);
+// ── Init fields (restore saved state, fall back to defaults) ──────────────────
+const _saved = loadAreaState();
+applyBbox(_saved?.bbox    || DEFAULTS.bbox);
+applyTakeoff((_saved?.takeoff || DEFAULTS.takeoff).lat, (_saved?.takeoff || DEFAULTS.takeoff).lon);
+applyLanding((_saved?.landing || DEFAULTS.landing).lat, (_saved?.landing || DEFAULTS.landing).lon);
 
 // ── Live field editing → update rect ─────────────────────────────────────────
 ['in-min-lat','in-max-lat','in-min-lon','in-max-lon'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     updateCenterAndSize();
     const b = bboxFromFields();
-    if (b.min_lat < b.max_lat && b.min_lon < b.max_lon && [b.min_lat,b.max_lat,b.min_lon,b.max_lon].every(v => !isNaN(v)))
+    if (b.min_lat < b.max_lat && b.min_lon < b.max_lon && [b.min_lat,b.max_lat,b.min_lon,b.max_lon].every(v => !isNaN(v))) {
       setSelRect(b);
+      saveAreaState();
+    }
   });
 });
 
 ['in-to-lat','in-to-lon'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     const lat = getField('in-to-lat'), lon = getField('in-to-lon');
-    if (!isNaN(lat) && !isNaN(lon)) takeoffMarker.setLatLng([lat, lon]);
+    if (!isNaN(lat) && !isNaN(lon)) { takeoffMarker.setLatLng([lat, lon]); saveAreaState(); }
   });
 });
 ['in-la-lat','in-la-lon'].forEach(id => {
   document.getElementById(id).addEventListener('input', () => {
     const lat = getField('in-la-lat'), lon = getField('in-la-lon');
-    if (!isNaN(lat) && !isNaN(lon)) landingMarker.setLatLng([lat, lon]);
+    if (!isNaN(lat) && !isNaN(lon)) { landingMarker.setLatLng([lat, lon]); saveAreaState(); }
   });
 });
 
@@ -492,6 +514,7 @@ document.getElementById('btn-draw').addEventListener('click', () => {
 
 document.getElementById('btn-reset').addEventListener('click', () => {
   exitDraw(); exitPlace();
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
   applyBbox(DEFAULTS.bbox);
   applyTakeoff(DEFAULTS.takeoff.lat, DEFAULTS.takeoff.lon);
   applyLanding(DEFAULTS.landing.lat, DEFAULTS.landing.lon);
@@ -556,11 +579,13 @@ map.on('mouseup', e => {
     }
     applyBbox(b);
     exitDraw();
+    saveAreaState();
     setStatus('Bbox set. Edit the fields to fine-tune the coordinates.');
   } else if (placeMode) {
     if (placeMode === 'takeoff') applyTakeoff(e.latlng.lat, e.latlng.lng);
     else applyLanding(e.latlng.lat, e.latlng.lng);
     exitPlace();
+    saveAreaState();
   }
 });
 
@@ -588,8 +613,9 @@ function showToast(msg) {
 }
 
 // ── Initial map fit ───────────────────────────────────────────────────────────
+const _initBbox = _saved?.bbox || DEFAULTS.bbox;
 map.fitBounds(
-  [[DEFAULTS.bbox.min_lat, DEFAULTS.bbox.min_lon],[DEFAULTS.bbox.max_lat, DEFAULTS.bbox.max_lon]],
+  [[_initBbox.min_lat, _initBbox.min_lon],[_initBbox.max_lat, _initBbox.max_lon]],
   { padding: [40, 40] }
 );
 
