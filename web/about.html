@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="../icons/favicon-up4.svg">
-  <title>Arbas Thermals — How the simulation works</title>
+  <title>Thermals</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -190,9 +190,8 @@
 <div class="page">
 
   <header>
-    <h1>Arbas Thermals — How the simulation works</h1>
+    <h1>Paragliding thermal simulations — How the simulation works</h1>
     <p>
-      Site: Arbas, Pyrenees, France &nbsp;·&nbsp;
       Terrain: SRTM 30 m (sim) + AWS Terrarium ~7 m (mesh) &nbsp;·&nbsp;
       Land cover: ESA WorldCover 2021 &nbsp;·&nbsp;
       Calibration: ERA5 reanalysis (Open-Meteo)
@@ -224,7 +223,7 @@
 
   <h3>Sun position &amp; geometry</h3>
   <ul>
-    <li><strong>Real astronomical ephemeris</strong> <span class="tag tag-yes">modelled</span> — pysolar computes exact azimuth and elevation for Arbas at every time step, for any chosen date.</li>
+    <li><strong>Real astronomical ephemeris</strong> <span class="tag tag-yes">modelled</span> — pysolar computes exact azimuth and elevation for the center of the selected region at every time step, for any chosen date.</li>
     <li><strong>Slope-aspect incidence angle</strong> <span class="tag tag-yes">modelled</span> — surface normals are derived from the DEM gradient. A south-facing 30° slope receives more direct beam than a flat or north-facing surface. Formula: cos(θ) = <em>n</em> · <em>s</em> (dot product of surface normal and sun direction).</li>
     <li><strong>DEM horizon shadowing</strong> <span class="tag tag-yes">modelled</span> — for every cell, a ray is cast toward the sun. If any terrain point along that ray is higher than the sun ray, the cell is in terrain shadow and receives no direct beam.</li>
   </ul>
@@ -285,7 +284,7 @@ ELR  = adjustable via slider (standard: 6.5 K/km)</div>
       <div class="formula">V_advect = V_max × √( clip(slope_75th / slope_ref)  ×  clip(mean_dT / max_heat) )
 
 V_max      = 1 000 m/h   — calibrated ceiling
-slope_ref  = 0.30        — characteristic Arbas slope (tan 17°)
+slope_ref  = 0.30        — characteristic slope (tan 17°)
 slope_75th = 75th-percentile terrain gradient (avoids flat-valley bias)
 mean_dT    = mean temperature anomaly over heated cells
 V_advect   ∈ [50, 1 000] m/h</div>
@@ -347,7 +346,7 @@ V_advect   ∈ [50, 1 000] m/h</div>
   <h3>Dual-resolution elevation strategy</h3>
   <p>
     The simulation and the visual terrain use different DEM sources.
-    The <strong>SRTM 30 m</strong> grid (194 × 344 cells for the Arbas bbox) is used for all physics computations:
+    The <strong>SRTM 30 m</strong> grid is used for all physics computations:
     slope normals, shadow ray-casting, thermal tops, and orographic flow.
     A coarser grid keeps the computation and the exported JSON compact (15 time steps × 66 k cells).
   </p>
@@ -364,7 +363,7 @@ V_advect   ∈ [50, 1 000] m/h</div>
   </p>
 
   <footer>
-    Arbas Thermals · Paragliding thermal simulation · Pyrenees, France
+    Paragliding thermal simulation
   </footer>
 
 </div>
