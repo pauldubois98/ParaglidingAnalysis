@@ -100,6 +100,16 @@
       border-radius: 4px;
     }
 
+    /* ── Simulation plots ── */
+    #sim-plots-area {
+      display: none;
+      flex-direction: row;
+      gap: 10px;
+      margin-top: 10px;
+      height: 170px;
+      flex-shrink: 0;
+    }
+
     /* ── Status bar ── */
     #status-bar {
       position: absolute;
@@ -252,6 +262,28 @@
     <div class="plot-box">
       <div class="plot-title">ERA5 dT Distribution</div>
       <canvas id="plot-era5"></canvas>
+    </div>
+  </div>
+  <div id="sim-plots-area">
+    <div class="plot-box">
+      <div class="plot-title">Slope</div>
+      <canvas id="plot-sim-slope"></canvas>
+    </div>
+    <div class="plot-box">
+      <div class="plot-title">Thermal Factor</div>
+      <canvas id="plot-sim-tf"></canvas>
+    </div>
+    <div class="plot-box">
+      <div class="plot-title">Trigger Zones</div>
+      <canvas id="plot-sim-trigger"></canvas>
+    </div>
+    <div class="plot-box">
+      <div class="plot-title">Convergence</div>
+      <canvas id="plot-sim-conv"></canvas>
+    </div>
+    <div class="plot-box">
+      <div class="plot-title">Daily Heat</div>
+      <canvas id="plot-sim-heat"></canvas>
     </div>
   </div>
 </div>
@@ -1358,6 +1390,96 @@ function showPlotsArea() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+//  SIMULATION PLOTS
+// ═══════════════════════════════════════════════════════════════════
+
+let _simPlots = null; // set by runSim before renderSimPlots()
+
+/** Generic canvas renderer: arr is Float32Array, colorFn maps [0,1]→[r,g,b] */
+function renderGridPlot(canvas, arr, nx, ny, colorFn, label) {
+  canvas.width = nx; canvas.height = ny;
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(nx, ny);
+  let vMin = Infinity, vMax = -Infinity;
+  for (let i = 0; i < arr.length; i++) { if (arr[i] < vMin) vMin = arr[i]; if (arr[i] > vMax) vMax = arr[i]; }
+  const range = vMax - vMin + 1e-9;
+  for (let idx = 0; idx < ny * nx; idx++) {
+    const t = (arr[idx] - vMin) / range;
+    const [r, g, b] = colorFn(t);
+    img.data[idx*4]   = r;
+    img.data[idx*4+1] = g;
+    img.data[idx*4+2] = b;
+    img.data[idx*4+3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+  if (label) {
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(0, ny - 14, nx, 14);
+    ctx.fillStyle = '#e0e8f0';
+    ctx.font = '9px monospace';
+    ctx.fillText(label, 2, ny - 3);
+  }
+}
+
+// slope: white (flat) → yellow → red (steep)
+function cmapSlope(t) {
+  if (t < 0.5) { const s = t / 0.5; return [255, Math.round(255 - s*80), Math.round(255 - s*220)]; }
+  const s = (t - 0.5) / 0.5;
+  return [255, Math.round(175 - s*175), Math.round(35 - s*35)];
+}
+
+// thermal factor: blue (low/water) → green → orange → red (bare rock)
+function cmapThermalFactor(t) {
+  if (t < 0.33) { const s = t/0.33; return [Math.round(s*50), Math.round(60+s*140), Math.round(200-s*150)]; }
+  if (t < 0.66) { const s = (t-0.33)/0.33; return [Math.round(50+s*190), Math.round(200-s*100), Math.round(50-s*30)]; }
+  const s = (t-0.66)/0.34;
+  return [Math.round(240+s*15), Math.round(100-s*100), 20];
+}
+
+// trigger zones: near-black → deep blue → cyan → white
+function cmapTrigger(t) {
+  if (t < 0.5) { const s = t/0.5; return [Math.round(s*40), Math.round(s*160), Math.round(s*220)]; }
+  const s = (t-0.5)/0.5;
+  return [Math.round(40+s*215), Math.round(160+s*95), Math.round(220+s*35)];
+}
+
+// convergence: near-black → teal → bright lime-yellow
+function cmapConvergence(t) {
+  if (t < 0.5) { const s = t/0.5; return [0, Math.round(s*200), Math.round(s*100)]; }
+  const s = (t-0.5)/0.5;
+  return [Math.round(s*220), Math.round(200+s*55), Math.round(100-s*100)];
+}
+
+// daily heat: dark purple → blue → green → yellow → red (plasma-like)
+function cmapHeat(t) {
+  if (t < 0.25) { const s = t/0.25; return [Math.round(80+s*70), 0, Math.round(120+s*100)]; }
+  if (t < 0.50) { const s = (t-0.25)/0.25; return [Math.round(150+s*70), Math.round(s*80), Math.round(220-s*170)]; }
+  if (t < 0.75) { const s = (t-0.50)/0.25; return [Math.round(220+s*35), Math.round(80+s*130), 50]; }
+  const s = (t-0.75)/0.25;
+  return [255, Math.round(210+s*45), Math.round(50+s*50)];
+}
+
+function renderSimPlots() {
+  if (!_simPlots) return;
+  const { Z, thermal_factor, trigger_factor, conv_field, dailyHeat, nx, ny, dx, dy } = _simPlots;
+
+  // Slope magnitude (capped at tan 55°)
+  const dzdx = gradientAxisI(Z, ny, nx);
+  const dzdy = gradientAxisJ(Z, ny, nx);
+  const slope = new Float32Array(ny * nx);
+  for (let idx = 0; idx < ny*nx; idx++)
+    slope[idx] = Math.min(1.43, Math.sqrt((dzdx[idx]/dx)**2 + (dzdy[idx]/dy)**2));
+
+  renderGridPlot(document.getElementById('plot-sim-slope'),   slope,          nx, ny, cmapSlope,         'Slope');
+  renderGridPlot(document.getElementById('plot-sim-tf'),      thermal_factor, nx, ny, cmapThermalFactor, 'Thermal factor');
+  renderGridPlot(document.getElementById('plot-sim-trigger'), trigger_factor, nx, ny, cmapTrigger,       'Trigger zones');
+  renderGridPlot(document.getElementById('plot-sim-conv'),    conv_field,     nx, ny, cmapConvergence,   'Convergence');
+  renderGridPlot(document.getElementById('plot-sim-heat'),    dailyHeat,      nx, ny, cmapHeat,          'Daily heat (K)');
+
+  document.getElementById('sim-plots-area').style.display = 'flex';
+}
+
+// ═══════════════════════════════════════════════════════════════════
 //  MAIN PIPELINE: FETCH DATA
 // ═══════════════════════════════════════════════════════════════════
 
@@ -1446,6 +1568,8 @@ async function runSim() {
   document.getElementById('btn-dl').disabled = true;
   document.getElementById('btn-map').disabled = true;
   simResult = null;
+  _simPlots = null;
+  document.getElementById('sim-plots-area').style.display = 'none';
   setProgress(0);
 
   try {
@@ -1571,6 +1695,7 @@ async function runSim() {
     const dT_carry = new Float32Array(ny * nx);  // start at 0
     const convergence_sum    = new Float64Array(ny * nx);
     const dT_weight_sum      = new Float64Array(ny * nx);
+    const dT_sum             = new Float32Array(ny * nx);
     let V_ADVECT = vAdvectMax;
 
     for (let si = 0; si < scenarios.length; si++) {
@@ -1678,6 +1803,7 @@ async function runSim() {
         const w = Math.max(dT_carry[idx], 0);
         convergence_sum[idx]  += conv * w;
         dT_weight_sum[idx]    += w;
+        dT_sum[idx]           += dT_carry[idx];
       }
 
       // Downsample flow arrows
@@ -1723,7 +1849,14 @@ async function runSim() {
     log('Note: values differ from Python due to different DEM source (Terrarium vs SRTM) ' +
         'and sun position library (SunCalc vs pysolar). Structure is identical.', 'warn');
 
+    // Daily heat: time-average of dT_carry across all steps
+    const dailyHeat = dT_sum;
+    const nsc = scenarios.length;
+    for (let idx = 0; idx < ny * nx; idx++) dailyHeat[idx] /= nsc;
+
     simResult = output;
+    _simPlots = { Z, thermal_factor, trigger_factor, conv_field, dailyHeat, nx, ny, dx, dy };
+    renderSimPlots();
     setProgress(1.0);
     setStatus('Simulation complete.');
     document.getElementById('btn-dl').disabled = false;
