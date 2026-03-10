@@ -144,6 +144,8 @@
       flex-shrink: 0;
     }
     #panel-header h2 {
+      display: flex;
+      align-items: center;
       font-size: 14px;
       color: #7eb8ff;
       text-transform: uppercase;
@@ -240,6 +242,13 @@
     .btn-dl    { background: #1a2a4a; color: #7eb8ff; border: 1px solid rgba(100,160,255,0.3); display:none; }
     .btn-map   { background: #50320a; color: #f0b840; border: 1px solid rgba(240,180,60,0.4); }
     .btn:not(:disabled):hover { opacity: 0.8; }
+
+    .favicon{
+      display: inline;
+      height: 25px;
+      margin: 0 5px;
+      filter: invert(.75) sepia() saturate(1000%) hue-rotate(170deg);
+    }
   </style>
 </head>
 <body>
@@ -292,7 +301,7 @@
 <!-- ═══════════════════ RIGHT PANEL ═══════════════════ -->
 <div id="ui-panel">
   <div id="panel-header">
-    <h2>Run Simulation</h2>
+    <h2> <img src="../icons/favicon-simulation1.svg" alt="favicon-simulation" class="favicon"> Run Simulation</h2>
     <div class="header-links">
       <a href="area.html">Area selection</a>
       <a href="about.html">About</a>
