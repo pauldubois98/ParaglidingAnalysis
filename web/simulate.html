@@ -1459,9 +1459,12 @@ function cmapHeat(t) {
   return [255, Math.round(210+s*45), Math.round(50+s*50)];
 }
 
-function renderSimPlots() {
+async function renderSimPlots() {
   if (!_simPlots) return;
   const { Z, thermal_factor, trigger_factor, conv_field, dailyHeat, nx, ny, dx, dy } = _simPlots;
+
+  document.getElementById('sim-plots-area').style.display = 'flex';
+  await yieldUI();
 
   // Slope magnitude (capped at tan 55°)
   const dzdx = gradientAxisI(Z, ny, nx);
@@ -1469,14 +1472,19 @@ function renderSimPlots() {
   const slope = new Float32Array(ny * nx);
   for (let idx = 0; idx < ny*nx; idx++)
     slope[idx] = Math.min(1.43, Math.sqrt((dzdx[idx]/dx)**2 + (dzdy[idx]/dy)**2));
+  renderGridPlot(document.getElementById('plot-sim-slope'), slope, nx, ny, cmapSlope, 'Slope');
+  await yieldUI();
 
-  renderGridPlot(document.getElementById('plot-sim-slope'),   slope,          nx, ny, cmapSlope,         'Slope');
-  renderGridPlot(document.getElementById('plot-sim-tf'),      thermal_factor, nx, ny, cmapThermalFactor, 'Thermal factor');
-  renderGridPlot(document.getElementById('plot-sim-trigger'), trigger_factor, nx, ny, cmapTrigger,       'Trigger zones');
-  renderGridPlot(document.getElementById('plot-sim-conv'),    conv_field,     nx, ny, cmapConvergence,   'Convergence');
-  renderGridPlot(document.getElementById('plot-sim-heat'),    dailyHeat,      nx, ny, cmapHeat,          'Daily heat (K)');
+  renderGridPlot(document.getElementById('plot-sim-tf'), thermal_factor, nx, ny, cmapThermalFactor, 'Thermal factor');
+  await yieldUI();
 
-  document.getElementById('sim-plots-area').style.display = 'flex';
+  renderGridPlot(document.getElementById('plot-sim-trigger'), trigger_factor, nx, ny, cmapTrigger, 'Trigger zones');
+  await yieldUI();
+
+  renderGridPlot(document.getElementById('plot-sim-conv'), conv_field, nx, ny, cmapConvergence, 'Convergence');
+  await yieldUI();
+
+  renderGridPlot(document.getElementById('plot-sim-heat'), dailyHeat, nx, ny, cmapHeat, 'Daily heat (K)');
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1856,7 +1864,7 @@ async function runSim() {
 
     simResult = output;
     _simPlots = { Z, thermal_factor, trigger_factor, conv_field, dailyHeat, nx, ny, dx, dy };
-    renderSimPlots();
+    await renderSimPlots();
     setProgress(1.0);
     setStatus('Simulation complete.');
     document.getElementById('btn-dl').disabled = false;
