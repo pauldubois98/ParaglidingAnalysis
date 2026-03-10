@@ -166,23 +166,24 @@
       border-top: 1px solid rgba(100,160,255,0.15);
       flex-shrink: 0;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       gap: 6px;
     }
     .btn {
-      width: 100%;
-      padding: 8px 12px;
+      flex: 1;
+      padding: 8px 6px;
       border: none;
       border-radius: 7px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       transition: opacity 0.2s;
+      white-space: nowrap;
     }
     .btn:disabled { opacity: 0.35; cursor: not-allowed; }
     .btn-blue  { background: #1e4a80; color: #a0ceff; border: 1px solid rgba(100,160,255,0.4); }
     .btn-green { background: #0f5030; color: #60e0a0; border: 1px solid rgba(60,200,120,0.4); }
-    .btn-dl    { background: #1a2a4a; color: #7eb8ff; border: 1px solid rgba(100,160,255,0.3); display: none; }
+    .btn-dl    { background: #1a2a4a; color: #7eb8ff; border: 1px solid rgba(100,160,255,0.3); }
     .btn:not(:disabled):hover { opacity: 0.8; }
   </style>
 </head>
@@ -268,7 +269,7 @@
       </div>
     </div>
     <label class="field-label">Min sun elevation (°)</label>
-    <input type="number" id="min_elevation" step="1" min="0" max="20" value="5">
+    <input type="number" id="min_elevation" step="1" min="0" max="20" value="0">
     <div class="field-hint">Scenarios with sun below this angle are skipped.</div>
 
     <!-- Terrain -->
@@ -354,7 +355,7 @@
   <div id="panel-footer">
     <button class="btn btn-blue" id="btn-fetch" onclick="runFetch()">Fetch Data</button>
     <button class="btn btn-green" id="btn-sim" onclick="runSim()" disabled>Run Simulation</button>
-    <button class="btn btn-dl" id="btn-dl" onclick="downloadJSON()">Download simulation.json</button>
+    <button class="btn btn-dl" id="btn-dl" onclick="downloadJSON()" disabled>↓ JSON</button>
   </div>
 </div>
 
@@ -1100,7 +1101,7 @@ function elevAtLatLon(lat, lon, Z, nx, ny, bbox) {
 async function runFetch() {
   document.getElementById('btn-fetch').disabled = true;
   document.getElementById('btn-sim').disabled = true;
-  document.getElementById('btn-dl').style.display = 'none';
+  document.getElementById('btn-dl').disabled = true;
   fetchedData = null; simResult = null;
   setProgress(0);
 
@@ -1159,7 +1160,7 @@ async function runSim() {
   if (!fetchedData) { log('No data fetched yet.', 'error'); return; }
   document.getElementById('btn-sim').disabled = true;
   document.getElementById('btn-fetch').disabled = true;
-  document.getElementById('btn-dl').style.display = 'none';
+  document.getElementById('btn-dl').disabled = true;
   simResult = null;
   setProgress(0);
 
@@ -1433,11 +1434,16 @@ async function runSim() {
 
     log(`Convergence: max=${Math.max(...conv_field).toFixed(3)}`, 'success');
     log('Simulation complete!', 'success');
+    log(`Output structure: ${output.scenarios.length} scenarios · ` +
+        `sim grid ${nx}×${ny} · mesh ${MESH_NX}×${MESH_NY} · ` +
+        `${Object.keys(output.terrain).length} terrain fields`, 'success');
+    log('Note: values differ from Python due to different DEM source (Terrarium vs SRTM) ' +
+        'and sun position library (SunCalc vs pysolar). Structure is identical.', 'warn');
 
     simResult = output;
     setProgress(1.0);
-    setStatus('Simulation complete. Ready to download.');
-    document.getElementById('btn-dl').style.display = '';
+    setStatus('Simulation complete. Click "Download simulation.json" to compare with Python output.');
+    document.getElementById('btn-dl').disabled = false;
   } catch (e) {
     log(`SIMULATION ERROR: ${e.message || e}`, 'error');
     console.error(e);
@@ -1454,7 +1460,10 @@ async function runSim() {
 
 function downloadJSON() {
   if (!simResult) { log('No simulation result to download.', 'error'); return; }
-  const blob = new Blob([JSON.stringify(simResult)], { type: 'application/json' });
+  // Pretty-print with 2-space indent so the file can be diffed against the
+  // Python output with standard tools (diff, jq, VS Code JSON diff, etc.)
+  const json = JSON.stringify(simResult, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href = url;
@@ -1463,7 +1472,8 @@ function downloadJSON() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  log('simulation.json downloaded.', 'success');
+  const kb = (json.length / 1024).toFixed(0);
+  log(`simulation.json downloaded (${kb} KB, pretty-printed).`, 'success');
 }
 </script>
 </body>
