@@ -21,7 +21,7 @@
     /* ── Main console area ── */
     #console-area {
       position: absolute;
-      inset: 0 296px 28px 0;
+      inset: 0 366px 28px 0;
       display: flex;
       flex-direction: column;
       padding: 16px;
@@ -59,6 +59,47 @@
       border-radius: 3px;
     }
 
+    /* ── Fetch plots ── */
+    #plots-area {
+      display: none;
+      flex-direction: row;
+      gap: 10px;
+      margin-top: 10px;
+      height: 170px;
+      flex-shrink: 0;
+    }
+    .plot-box {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: rgba(5,8,18,0.7);
+      border: 1px solid rgba(100,160,255,0.15);
+      border-radius: 8px;
+      padding: 6px 6px 4px;
+      overflow: hidden;
+      min-width: 0;
+    }
+    .plot-title {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #3a6080;
+      margin-bottom: 4px;
+      flex-shrink: 0;
+      text-align: center;
+    }
+    .plot-box canvas {
+      max-width: 100%;
+      max-height: 140px;
+      width: auto;
+      height: auto;
+      display: block;
+      image-rendering: pixelated;
+      border-radius: 4px;
+    }
+
     /* ── Status bar ── */
     #status-bar {
       position: absolute;
@@ -77,7 +118,7 @@
     #ui-panel {
       position: absolute;
       top: 16px; right: 16px;
-      width: 280px;
+      width: 350px;
       bottom: 32px;
       background: rgba(10,15,30,0.88);
       border: 1px solid rgba(100,160,255,0.3);
@@ -199,6 +240,20 @@
     <div class="log-info"><span class="log-ts">00:00:00</span>Ready — configure settings and click <strong>Fetch Data</strong>.</div>
   </div>
   <div id="progress-wrap"><div id="progress-bar"></div></div>
+  <div id="plots-area">
+    <div class="plot-box">
+      <div class="plot-title">Elevation (DEM)</div>
+      <canvas id="plot-elev"></canvas>
+    </div>
+    <div class="plot-box">
+      <div class="plot-title">Land Cover</div>
+      <canvas id="plot-lc"></canvas>
+    </div>
+    <div class="plot-box">
+      <div class="plot-title">ERA5 dT Distribution</div>
+      <canvas id="plot-era5"></canvas>
+    </div>
+  </div>
 </div>
 <div id="status-bar">Idle</div>
 
@@ -358,8 +413,8 @@
   <div id="panel-footer">
     <button class="btn btn-blue" id="btn-fetch" onclick="runFetch()">Fetch Data</button>
     <button class="btn btn-green" id="btn-sim" onclick="runSim()" disabled>Run Simulation</button>
-    <button class="btn btn-dl" id="btn-dl" onclick="downloadJSON()" disabled>↓ JSON</button>
-    <button class="btn btn-map" id="btn-map" onclick="viewInMap()" disabled>View in map →</button>
+    <button class="btn btn-dl" id="btn-dl" onclick="downloadJSON()" disabled>Download JSON simulation cache</button>
+    <button class="btn btn-map" id="btn-map" onclick="openVisualizationTool()" disabled>Visualization Tool</button>
   </div>
 </div>
 
@@ -1167,6 +1222,142 @@ function elevAtLatLon(lat, lon, Z, nx, ny, bbox) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+//  2D FETCH PLOTS
+// ═══════════════════════════════════════════════════════════════════
+
+function elevToColor(z, zMin, zMax) {
+  const t = Math.max(0, Math.min(1, (z - zMin) / (zMax - zMin + 1e-9)));
+  if (t < 0.25) {
+    const s = t / 0.25;
+    return [Math.round(30 + s*30), Math.round(60 + s*120), Math.round(140 - s*60)];
+  } else if (t < 0.55) {
+    const s = (t - 0.25) / 0.30;
+    return [Math.round(60 + s*100), Math.round(180 - s*60), Math.round(80 - s*40)];
+  } else if (t < 0.80) {
+    const s = (t - 0.55) / 0.25;
+    return [Math.round(160 + s*80), Math.round(120 + s*60), Math.round(40 + s*60)];
+  } else {
+    const s = (t - 0.80) / 0.20;
+    return [Math.round(240 + s*15), Math.round(180 + s*75), Math.round(100 + s*155)];
+  }
+}
+
+function renderElevationPlot(canvas, Z, nx, ny) {
+  canvas.width = nx; canvas.height = ny;
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(nx, ny);
+  let zMin = Infinity, zMax = -Infinity;
+  for (let i = 0; i < Z.length; i++) { if (Z[i] < zMin) zMin = Z[i]; if (Z[i] > zMax) zMax = Z[i]; }
+  for (let j = 0; j < ny; j++) {
+    for (let i = 0; i < nx; i++) {
+      const idx = j * nx + i;
+      const [r, g, b] = elevToColor(Z[idx], zMin, zMax);
+      img.data[idx*4]   = r;
+      img.data[idx*4+1] = g;
+      img.data[idx*4+2] = b;
+      img.data[idx*4+3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillRect(0, ny - 14, nx, 14);
+  ctx.fillStyle = '#e0e8f0';
+  ctx.font = '9px monospace';
+  ctx.fillText(`${Math.round(zMin)} – ${Math.round(zMax)} m`, 2, ny - 3);
+}
+
+function renderLandcoverPlot(canvas, lcCodes, nx, ny) {
+  canvas.width = nx; canvas.height = ny;
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(nx, ny);
+  for (let j = 0; j < ny; j++) {
+    for (let i = 0; i < nx; i++) {
+      const idx = j * nx + i;
+      const lc = LANDCOVER[lcCodes[idx]] || LANDCOVER[30];
+      img.data[idx*4]   = lc.color[0];
+      img.data[idx*4+1] = lc.color[1];
+      img.data[idx*4+2] = lc.color[2];
+      img.data[idx*4+3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+function renderERA5Plot(canvas, records) {
+  const W = 300, H = 140;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, W, H);
+
+  if (!records || !records.length) {
+    ctx.fillStyle = '#3a6080';
+    ctx.font = '10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('No ERA5 data', W / 2, H / 2);
+    return;
+  }
+
+  const sorted = [...records].sort((a, b) => a - b);
+  const rMin = sorted[0], rMax = sorted[sorted.length - 1];
+  const BINS = 24;
+  const counts = new Array(BINS).fill(0);
+  for (const v of records) {
+    const bin = Math.min(BINS - 1, Math.floor((v - rMin) / (rMax - rMin + 1e-9) * BINS));
+    counts[bin]++;
+  }
+  const maxCount = Math.max(...counts);
+  const pad = { l: 28, r: 8, t: 8, b: 22 };
+  const plotW = W - pad.l - pad.r;
+  const plotH = H - pad.t - pad.b;
+  const binW = plotW / BINS;
+
+  // Bars
+  for (let b = 0; b < BINS; b++) {
+    const barH = (counts[b] / maxCount) * plotH;
+    ctx.fillStyle = `rgba(62,130,195,${0.5 + 0.5 * counts[b] / maxCount})`;
+    ctx.fillRect(pad.l + b * binW, pad.t + plotH - barH, Math.max(1, binW - 1), barH);
+  }
+
+  // Axes
+  ctx.strokeStyle = '#334455';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad.l, pad.t);
+  ctx.lineTo(pad.l, pad.t + plotH);
+  ctx.lineTo(pad.l + plotW, pad.t + plotH);
+  ctx.stroke();
+
+  // X-axis labels
+  ctx.fillStyle = '#5588aa';
+  ctx.font = '8px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(rMin.toFixed(1), pad.l, pad.t + plotH + 10);
+  ctx.fillText(rMax.toFixed(1), pad.l + plotW, pad.t + plotH + 10);
+  const mid = (rMin + rMax) / 2;
+  ctx.fillText(mid.toFixed(1) + ' K', pad.l + plotW / 2, pad.t + plotH + 10);
+
+  // Median line
+  const med = sorted[Math.floor(sorted.length / 2)];
+  const medX = pad.l + ((med - rMin) / (rMax - rMin + 1e-9)) * plotW;
+  ctx.strokeStyle = '#7eb8ff';
+  ctx.setLineDash([2, 3]);
+  ctx.beginPath();
+  ctx.moveTo(medX, pad.t); ctx.lineTo(medX, pad.t + plotH);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Bottom label
+  ctx.fillStyle = '#7eb8ff';
+  ctx.font = '8px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText(`median ${med.toFixed(1)} K  (n=${records.length})`, W / 2, pad.t + plotH + 20);
+}
+
+function showPlotsArea() {
+  document.getElementById('plots-area').style.display = 'flex';
+}
+
+// ═══════════════════════════════════════════════════════════════════
 //  MAIN PIPELINE: FETCH DATA
 // ═══════════════════════════════════════════════════════════════════
 
@@ -1176,6 +1367,7 @@ async function runFetch() {
   document.getElementById('btn-dl').disabled = true;
   document.getElementById('btn-map').disabled = true;
   fetchedData = null; simResult = null;
+  document.getElementById('plots-area').style.display = 'none';
   setProgress(0);
 
   try {
@@ -1196,6 +1388,8 @@ async function runFetch() {
     const sim = await fetchDEM(bbox, simZoom, msg => log(msg));
     log(`Sim DEM: ${sim.nx}×${sim.ny}, dx=${sim.dx.toFixed(1)}m dy=${sim.dy.toFixed(1)}m`, 'success');
     setProgress(0.45);
+    showPlotsArea();
+    renderElevationPlot(document.getElementById('plot-elev'), sim.Z, sim.nx, sim.ny);
 
     // ── Fetch mesh DEM ─────────────────────────────────────────────
     setStatus('Fetching mesh DEM…');
@@ -1209,6 +1403,7 @@ async function runFetch() {
     const lcCodes = await fetchLandcover(bbox, sim.Z, sim.nx, sim.ny, sim.dx, sim.dy);
     log(`Land cover grid: ${sim.nx}×${sim.ny} cells.`, 'success');
     setProgress(0.95);
+    renderLandcoverPlot(document.getElementById('plot-lc'), lcCodes, sim.nx, sim.ny);
 
     // ── Fetch ERA5 calibration data ────────────────────────────────
     setStatus('Fetching ERA5 calibration data…');
@@ -1224,6 +1419,7 @@ async function runFetch() {
       log('ERA5: no data returned — max_heat will use manual/fallback value.', 'warn');
     }
     setProgress(0.98);
+    renderERA5Plot(document.getElementById('plot-era5'), era5Records);
 
     fetchedData = { sim, mesh, lcCodes, bbox, era5Records };
     log('All data fetched. Ready to run simulation.', 'success');
@@ -1580,7 +1776,7 @@ function idbPut(json) {
   });
 }
 
-async function viewInMap() {
+async function openVisualizationTool() {
   if (!simResult) { log('No simulation result.', 'error'); return; }
   try {
     // Serialize to JSON string before storing — avoids structured-clone issues
