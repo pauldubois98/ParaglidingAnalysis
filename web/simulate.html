@@ -448,16 +448,7 @@ fetch('config.json').then(r => r.json()).then(cfg => {
     }
   } catch(e) {}
 
-  // Override with GET params from area.html (highest priority)
-  const p = new URLSearchParams(window.location.search);
-  const overrides = {
-    min_lat: 'min_lat', max_lat: 'max_lat', min_lon: 'min_lon', max_lon: 'max_lon',
-    takeoff_lat: 'takeoff_lat', takeoff_lon: 'takeoff_lon',
-    landing_lat: 'landing_lat', landing_lon: 'landing_lon',
-  };
-  for (const [param, id] of Object.entries(overrides)) {
-    if (p.has(param)) setVal(id, p.get(param));
-  }
+
 }).catch(e => console.warn('config.json not loaded:', e));
 
 // ═══════════════════════════════════════════════════════════════════

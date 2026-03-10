@@ -249,10 +249,6 @@
 <div id="panel">
   <h2>
     Area of Interest
-    <span style="display:flex;gap:8px">
-      <a href="view.html">← Map</a>
-      <a href="simulate.html">Run sim</a>
-    </span>
   </h2>
 
   <div class="section-title">Bounding box</div>
@@ -620,18 +616,10 @@ map.fitBounds(
   { padding: [40, 40] }
 );
 
-// ── Go to simulate.html with current coordinates as GET params ────────────────
+// ── Go to simulate.html (state already persisted via localStorage) ────────────
 document.getElementById('btn-simulate').addEventListener('click', () => {
-  const b = bboxFromFields();
-  const toLat = getField('in-to-lat'), toLon = getField('in-to-lon');
-  const laLat = getField('in-la-lat'), laLon = getField('in-la-lon');
-  const params = new URLSearchParams({
-    min_lat: b.min_lat, max_lat: b.max_lat,
-    min_lon: b.min_lon, max_lon: b.max_lon,
-    takeoff_lat: toLat,  takeoff_lon: toLon,
-    landing_lat: laLat,  landing_lon: laLon,
-  });
-  window.location.href = 'simulate.html?' + params.toString();
+  saveAreaState();
+  window.location.href = 'simulate.html';
 });
 </script>
 </body>
