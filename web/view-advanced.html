@@ -586,17 +586,17 @@ function init() {
     document.getElementById('ew-mode-btn').addEventListener('click', () => {
       ewMode = ewMode === 'theta' ? 'w' : 'theta';
       document.getElementById('ew-mode-btn').textContent = ewMode === 'theta' ? "θ'" : 'w';
-      recolorSlice('ew');
+      recolorSlice('ew'); updateColorbars();
     });
     document.getElementById('ns-mode-btn').addEventListener('click', () => {
       nsMode = nsMode === 'theta' ? 'w' : 'theta';
       document.getElementById('ns-mode-btn').textContent = nsMode === 'theta' ? "θ'" : 'w';
-      recolorSlice('ns');
+      recolorSlice('ns'); updateColorbars();
     });
     document.getElementById('z-mode-btn').addEventListener('click', () => {
       zMode = zMode === 'theta' ? 'w' : 'theta';
       document.getElementById('z-mode-btn').textContent = zMode === 'theta' ? "θ'" : 'w';
-      recolorSlice('z');
+      recolorSlice('z'); updateColorbars();
     });
   }
 
@@ -618,24 +618,21 @@ function init() {
       setter(parseFloat(el.value));
     });
   }
-  bindOp('terrain-op','terrain-op-val', v => { if(terrainMat) terrainMat.opacity=v; });
-  bindOp('theta-op',  'theta-op-val',  v => { if(thetaMat) thetaMat.opacity=v; });
-  bindOp('wvel-op',   'wvel-op-val',   v => { if(wvelMat) wvelMat.opacity=v;  });
+  bindOp('terrain-op','terrain-op-val', v => { if(terrainMat) terrainMat.opacity=v; updateColorbars(); });
+  bindOp('theta-op',  'theta-op-val',  v => { if(thetaMat) thetaMat.opacity=v;     updateColorbars(); });
+  bindOp('wvel-op',   'wvel-op-val',   v => { if(wvelMat) wvelMat.opacity=v;       updateColorbars(); });
   bindOp('conv-op',   'conv-op-val',   v => { if(convMat) convMat.opacity=v;  toggleCb('cb-conv-wrap', v>0); });
   bindOp('wind-op',   'wind-op-val',   v => { if(windGroup) { windGroup.visible = v>0; windGroup.children.forEach(c=>c.material&&(c.material.opacity=v)); } });
-  bindOp('ew-op',     'ew-op-val',     v => { if(ewSliceMat) ewSliceMat.opacity=v; });
-  bindOp('ns-op',     'ns-op-val',     v => { if(nsSliceMat) nsSliceMat.opacity=v; });
-  bindOp('z-op',      'z-op-val',      v => { if(zSliceMat)  zSliceMat.opacity=v;  });
+  bindOp('ew-op',     'ew-op-val',     v => { if(ewSliceMat) ewSliceMat.opacity=v; updateColorbars(); });
+  bindOp('ns-op',     'ns-op-val',     v => { if(nsSliceMat) nsSliceMat.opacity=v; updateColorbars(); });
+  bindOp('z-op',      'z-op-val',      v => { if(zSliceMat)  zSliceMat.opacity=v;  updateColorbars(); });
   bindOp('amb',       'amb-val',       v => { ambientLight.intensity=v; });
   bindOp('sun-int',   'sun-val',       v => { sun.intensity=v; });
 
   // Initial scenario
   updateScenario(0);
 
-  // Colorbars — θ' and w always shown (shared by surface overlays + all slices)
-  toggleCb('cb-elev-wrap',  true);
-  toggleCb('cb-theta-wrap', true);
-  toggleCb('cb-wvel-wrap',  true);
+  // Colorbars — drawn once, visibility driven by updateColorbars()
   drawColorbar('cb-elev',  'cb-elev-labels',  elevColor,           terrainZMin,      terrainZMax,      v=>v.toFixed(0)+'m');
   drawColorbar('cb-theta', 'cb-theta-labels', t=>divergingColor(t), -globalMaxTheta, globalMaxTheta,   v=>v.toFixed(2)+'K');
   drawColorbar('cb-wvel',  'cb-wvel-labels',  t=>divergingColor(t), -globalMaxW,     globalMaxW,       v=>v.toFixed(2)+'m/s');
@@ -647,6 +644,27 @@ function init() {
 
 function toggleCb(id, show) {
   document.getElementById(id).classList.toggle('show', show);
+}
+
+function updateColorbars() {
+  const v = id => parseFloat(document.getElementById(id).value);
+  const terrOp  = v('terrain-op');
+  const thetaOp = v('theta-op');
+  const wvelOp  = v('wvel-op');
+  const ewOp    = v('ew-op');
+  const nsOp    = v('ns-op');
+  const zOp     = v('z-op');
+  const thetaVis = thetaOp > 0
+    || (ewOp > 0 && ewMode === 'theta')
+    || (nsOp > 0 && nsMode === 'theta')
+    || (zOp  > 0 && zMode  === 'theta');
+  const wVis = wvelOp > 0
+    || (ewOp > 0 && ewMode === 'w')
+    || (nsOp > 0 && nsMode === 'w')
+    || (zOp  > 0 && zMode  === 'w');
+  toggleCb('cb-elev-wrap',  terrOp > 0);
+  toggleCb('cb-theta-wrap', thetaVis);
+  toggleCb('cb-wvel-wrap',  wVis);
 }
 
 // ── Terrain ───────────────────────────────────────────────────────────────────
