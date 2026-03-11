@@ -31,11 +31,11 @@
     "era5_window_days":  7
   },
   "release": {
-    "k_release":         0.3,
+    "k_release":         0.5,
     "release_threshold": 1.5
   },
   "advection": {
-    "v_advect_max":      1000,
+    "v_advect_max":      1500,
     "ref_slope":         0.30,
     "k_collect":         1.0
   },
