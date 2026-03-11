@@ -463,6 +463,9 @@
       </div>
     </div>
     <div class="field-hint">Anabatic flow speed ceiling and reference slope (tan angle).</div>
+    <label class="field-label">K_collect (collector suction)</label>
+    <input type="number" id="k_collect" step="0.25" min="0" max="10" value="1.0">
+    <div class="field-hint">Strength of dT-gradient suction: collectors bleed heat toward trigger zones. 0 = pure orographic flow; higher = stronger collector→trigger funnelling.</div>
 
     <!-- Output -->
     <div class="section-title">Output</div>
@@ -738,6 +741,7 @@ fetch('config.json').then(r => r.json()).then(cfg => {
   setVal('release_threshold', cfg.release.release_threshold);
   setVal('v_advect_max',      cfg.advection.v_advect_max);
   setVal('ref_slope',         cfg.advection.ref_slope);
+  setVal('k_collect',         cfg.advection.k_collect ?? 1.0);
   setVal('arrow_step',        cfg.output.arrow_step);
   setVal('domainH',           cfg.simulation.domain_height_m);
 
@@ -1284,7 +1288,7 @@ function computeSolarHeating(Z, nx, ny, dx, dy, azDeg, elDeg, thermalFactor, max
 //  OROGRAPHIC FLOW
 // ═══════════════════════════════════════════════════════════════════
 
-function computeOrographicFlow(Z, dTcarry, nx, ny, dx, dy) {
+function computeOrographicFlow(Z, dTcarry, nx, ny, dx, dy, kCollect = 0) {
   const dZdx = gradientAxisI(Z, ny, nx);
   const dZdy = gradientAxisJ(Z, ny, nx);
 
@@ -1292,13 +1296,17 @@ function computeOrographicFlow(Z, dTcarry, nx, ny, dx, dy) {
   const v_raw = new Float32Array(ny * nx);
   const grad_mag = new Float32Array(ny * nx);
 
+  // dT-gradient suction: flow down the dT gradient (collectors → triggers)
+  const dTdx = kCollect > 0 ? gradientAxisI(dTcarry, ny, nx) : null;
+  const dTdy = kCollect > 0 ? gradientAxisJ(dTcarry, ny, nx) : null;
+
   for (let idx = 0; idx < ny * nx; idx++) {
     const gx = dZdx[idx] / dx, gy = dZdy[idx] / dy;
     const mag = Math.sqrt(gx*gx + gy*gy);
     grad_mag[idx] = mag;
     const safeMag = Math.max(mag, 1e-6);
-    u_raw[idx] = (gx / safeMag) * dTcarry[idx];
-    v_raw[idx] = (gy / safeMag) * dTcarry[idx];
+    u_raw[idx] = (gx / safeMag) * dTcarry[idx] - (kCollect > 0 ? kCollect * dTdx[idx] : 0);
+    v_raw[idx] = (gy / safeMag) * dTcarry[idx] - (kCollect > 0 ? kCollect * dTdy[idx] : 0);
   }
 
   const u = gaussianFilter2D(u_raw, ny, nx, 5);
@@ -1840,6 +1848,7 @@ async function runSim() {
     const relThreshold  = parseFloat(document.getElementById('release_threshold').value);
     const vAdvectMax    = parseFloat(document.getElementById('v_advect_max').value);
     const refSlope      = parseFloat(document.getElementById('ref_slope').value);
+    const kCollect      = parseFloat(document.getElementById('k_collect').value);
     const arrowStep     = parseInt(document.getElementById('arrow_step').value);
     const weatherMode = getWeatherMode();
     const diffuseFrac = parseFloat(document.getElementById('diffuse_frac').value);
@@ -1943,6 +1952,7 @@ async function runSim() {
       release_threshold: relThreshold,
       v_advect_max:     vAdvectMax,
       ref_slope:        refSlope,
+      k_collect:        kCollect,
       terrain: {
         nx, ny,
         x_extent, y_extent,
@@ -1998,8 +2008,8 @@ async function runSim() {
         dT_carry[idx] = Math.max(dT_carry[idx] - release, 0);
       }
 
-      // Orographic flow
-      const { u: u_flow, v: v_flow, grad_mag } = computeOrographicFlow(Z, dT_carry, nx, ny, dx, dy);
+      // Orographic flow + collector suction
+      const { u: u_flow, v: v_flow, grad_mag } = computeOrographicFlow(Z, dT_carry, nx, ny, dx, dy, kCollect);
       await yieldUI();
 
       // Dynamic V_ADVECT

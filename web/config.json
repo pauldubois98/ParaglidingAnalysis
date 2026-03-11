@@ -36,7 +36,8 @@
   },
   "advection": {
     "v_advect_max":      1000,
-    "ref_slope":         0.30
+    "ref_slope":         0.30,
+    "k_collect":         1.0
   },
   "output": {
     "arrow_step":        8
