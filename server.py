@@ -48,7 +48,18 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path.startswith('/proxy?') or self.path == '/proxy':
             self._handle_proxy()
+        elif self.path == '/web/' or self.path == '/web':
+            self.send_response(301)
+            self.send_header('Location', '/web/home')
+            self.end_headers()
         else:
+            # Serve extensionless URLs by trying <path>.html
+            import os
+            path = self.path.split('?')[0]
+            if '.' not in os.path.basename(path):
+                candidate = os.path.join(self.directory if hasattr(self, 'directory') else '.', path.lstrip('/') + '.html')
+                if os.path.isfile(candidate):
+                    self.path = path + '.html'
             super().do_GET()
 
     # ── Proxy handler ─────────────────────────────────────────────────

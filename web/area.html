@@ -333,12 +333,12 @@
 <body>
 
 <nav id="header-nav">
-  <a href="index.html" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+  <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
   <div class="nav-sep"></div>
-  <a href="area.html" class="nav-link nav-active">Area</a>
-  <a href="simulate.html" class="nav-link">Simulate</a>
-  <a href="view.html" class="nav-link">View</a>
-  <a href="about.html" class="nav-link">About</a>
+  <a href="area" class="nav-link nav-active">Area</a>
+  <a href="simulate" class="nav-link">Simulate</a>
+  <a href="view" class="nav-link">View</a>
+  <a href="about" class="nav-link">About</a>
 </nav>
 
 <div id="map"></div>
@@ -780,11 +780,11 @@ map.fitBounds(
 // ── Go to simulate.html (state already persisted via localStorage) ────────────
 document.getElementById('btn-simulate').addEventListener('click', () => {
   saveAreaState();
-  window.location.href = 'simulate.html';
+  window.location.href = 'simulate';
 });
 
 document.getElementById('btn-home').addEventListener('click', () => {
-  window.location.href = 'index.html';
+  window.location.href = 'index';
 });
 
 </script>

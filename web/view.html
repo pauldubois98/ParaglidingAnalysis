@@ -435,12 +435,12 @@
 </div>
 
 <nav id="header-nav">
-  <a href="index.html" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+  <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
   <div class="nav-sep"></div>
-  <a href="area.html" class="nav-link">Area</a>
-  <a href="simulate.html" class="nav-link">Simulate</a>
-  <a href="view.html" class="nav-link nav-active">View</a>
-  <a href="about.html" class="nav-link">About</a>
+  <a href="area" class="nav-link">Area</a>
+  <a href="simulate" class="nav-link">Simulate</a>
+  <a href="view" class="nav-link nav-active">View</a>
+  <a href="about" class="nav-link">About</a>
 </nav>
 
 <button id="panel-toggle" onclick="const p=document.getElementById('ui-panel');p.classList.toggle('panel-open');this.textContent=p.classList.contains('panel-open')?'✕':'☰';" title="Toggle controls">✕</button>
@@ -632,7 +632,7 @@ async function loadData() {
   } catch (e) {
     document.getElementById('loading').innerHTML =
       `<div style="color:#f66">Failed to load data<br><small>${e.message}</small><br><br>
-       <small>Run the simulation first (<a href="simulate.html" style="color:#7eb8ff">simulate.html</a>), or serve from project root:<br>
+       <small>Run the simulation first (<a href="simulate" style="color:#7eb8ff">simulate.html</a>), or serve from project root:<br>
        <code>python -m http.server 8000</code></small></div>`;
   }
 }

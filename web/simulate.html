@@ -376,12 +376,12 @@
 <body>
 
 <nav id="header-nav">
-  <a href="index.html" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+  <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
   <div class="nav-sep"></div>
-  <a href="area.html" class="nav-link">Area</a>
-  <a href="simulate.html" class="nav-link nav-active">Simulate</a>
-  <a href="view.html" class="nav-link">View</a>
-  <a href="about.html" class="nav-link">About</a>
+  <a href="area" class="nav-link">Area</a>
+  <a href="simulate" class="nav-link nav-active">Simulate</a>
+  <a href="view" class="nav-link">View</a>
+  <a href="about" class="nav-link">About</a>
 </nav>
 
 <!-- ═══════════════════ MAIN CONSOLE ═══════════════════ -->
@@ -2302,7 +2302,7 @@ async function openVisualizationTool() {
     // Serialize to JSON string before storing — avoids structured-clone issues
     // with large or complex objects and guarantees the data is always readable.
     await idbPut(JSON.stringify(simResult));
-    window.location.href = 'view.html';
+    window.location.href = 'view';
   } catch (e) {
     log(`Could not save to IndexedDB (${e.message}). Try downloading the JSON and placing it at data/simulation.json.`, 'error');
   }
