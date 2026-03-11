@@ -3,149 +3,239 @@
     "label": "Terrain",
     "tip": "3D terrain only, no simulation overlays",
     "sliders": {
-      "terrain-op": 0.85,
-      "theta-op":   0,
-      "wvel-op":    0,
-      "conv-op":    0,
-      "wind-op":    0,
-      "ew-op":      0,
-      "ns-op":      0,
-      "z-op":       0,
-      "amb":        2.0,
-      "sun-int":    3.0
-    }
+      "terrain-op": 0.95,
+      "theta-op": 0,
+      "wvel-op": 0,
+      "conv-op": 0,
+      "wind-op": 0,
+      "ew-op": 0,
+      "ns-op": 0,
+      "z-op": 0,
+      "amb": 2.0,
+      "sun-int": 3.0
+    },
+    "sliders_visible": [
+      "sec-time",
+      "cg-time",
+      "sec-overlays",
+      "cg-terrain-op",
+      "sec-lighting",
+      "cg-amb",
+      "cg-sun-int"
+    ]
   },
   {
     "label": "θ' surface",
     "tip": "Surface temperature anomaly — where the ground heats the boundary layer",
     "sliders": {
-      "terrain-op": 0.85,
-      "theta-op":   0.70,
-      "wvel-op":    0,
-      "conv-op":    0,
-      "wind-op":    0.50,
-      "ew-op":      0,
-      "ns-op":      0,
-      "z-op":       0,
-      "amb":        2.0,
-      "sun-int":    3.0
-    }
+      "terrain-op": 1,
+      "theta-op": 0.7,
+      "wvel-op": 0,
+      "conv-op": 0,
+      "wind-op": 1,
+      "ew-op": 0,
+      "ns-op": 0,
+      "z-op": 0,
+      "amb": 2.0,
+      "sun-int": 3.0
+    },
+    "sliders_visible": [
+      "sec-time",
+      "cg-time",
+      "sec-overlays",
+      "cg-theta-op",
+      "cg-wind-op"
+    ]
   },
   {
     "label": "Vertical w",
     "tip": "Vertical velocity at the surface level — rising (red) and sinking (blue) air",
     "sliders": {
-      "terrain-op": 0.85,
-      "theta-op":   0,
-      "wvel-op":    0.75,
-      "conv-op":    0,
-      "wind-op":    0.50,
-      "ew-op":      0,
-      "ns-op":      0,
-      "z-op":       0,
-      "amb":        2.0,
-      "sun-int":    3.0
-    }
-  },
-  {
-    "label": "Convergence",
-    "tip": "Surface wind convergence — where horizontal flow converges to trigger thermals",
-    "sliders": {
-      "terrain-op": 0.85,
-      "theta-op":   0,
-      "wvel-op":    0,
-      "conv-op":    0.85,
-      "wind-op":    0.50,
-      "ew-op":      0,
-      "ns-op":      0,
-      "z-op":       0,
-      "amb":        2.0,
-      "sun-int":    3.0
-    }
+      "terrain-op": 1,
+      "theta-op": 0,
+      "wvel-op": 0.7,
+      "conv-op": 0,
+      "wind-op": 1,
+      "ew-op": 0,
+      "ns-op": 0,
+      "z-op": 0,
+      "amb": 2.0,
+      "sun-int": 8.0
+    },
+    "sliders_visible": [
+      "sec-time",
+      "cg-time",
+      "sec-overlays",
+      "cg-wvel-op",
+      "cg-wind-op"
+    ]
   },
   {
     "label": "EW slice",
     "tip": "East-West vertical cross-section — temperature anomaly through the plume",
     "sliders": {
       "terrain-op": 0.70,
-      "theta-op":   0,
-      "wvel-op":    0,
-      "conv-op":    0,
-      "wind-op":    0,
-      "ew-op":      0.85,
-      "ns-op":      0,
-      "z-op":       0,
-      "amb":        2.0,
-      "sun-int":    2.0
+      "theta-op": 0,
+      "wvel-op": 0,
+      "conv-op": 0,
+      "wind-op": 0,
+      "ew-op": 0.85,
+      "ns-op": 0,
+      "z-op": 0,
+      "amb": 2.0,
+      "sun-int": 2.0
     },
-    "slice_modes": { "ew": "theta" }
+    "slice_modes": {
+      "ew": "theta"
+    },
+    "sliders_visible": [
+      "sec-time",
+      "cg-time",
+      "sec-overlays",
+      "cg-terrain-op",
+      "sec-slices",
+      "sg-ew"
+    ]
   },
   {
     "label": "NS slice",
     "tip": "North-South vertical cross-section — temperature anomaly through the plume",
     "sliders": {
       "terrain-op": 0.70,
-      "theta-op":   0,
-      "wvel-op":    0,
-      "conv-op":    0,
-      "wind-op":    0,
-      "ew-op":      0,
-      "ns-op":      0.85,
-      "z-op":       0,
-      "amb":        2.0,
-      "sun-int":    2.0
+      "theta-op": 0,
+      "wvel-op": 0,
+      "conv-op": 0,
+      "wind-op": 0,
+      "ew-op": 0,
+      "ns-op": 0.85,
+      "z-op": 0,
+      "amb": 2.0,
+      "sun-int": 2.0
     },
-    "slice_modes": { "ns": "theta" }
+    "slice_modes": {
+      "ns": "theta"
+    },
+    "sliders_visible": [
+      "sec-time",
+      "cg-time",
+      "sec-overlays",
+      "cg-terrain-op",
+      "sec-slices",
+      "sg-ns"
+    ]
   },
   {
     "label": "Z slice",
     "tip": "Horizontal plane at a chosen altitude — inspect any level of the atmosphere",
     "sliders": {
       "terrain-op": 0.70,
-      "theta-op":   0,
-      "wvel-op":    0,
-      "conv-op":    0,
-      "wind-op":    0,
-      "ew-op":      0,
-      "ns-op":      0,
-      "z-op":       0.85,
-      "amb":        2.0,
-      "sun-int":    2.0
+      "theta-op": 0,
+      "wvel-op": 0,
+      "conv-op": 0,
+      "wind-op": 0,
+      "ew-op": 0,
+      "ns-op": 0,
+      "z-op": 0.85,
+      "amb": 2.0,
+      "sun-int": 2.0
     },
-    "slice_modes": { "z": "theta" }
+    "slice_modes": {
+      "z": "theta"
+    },
+    "sliders_visible": [
+      "sec-time",
+      "cg-time",
+      "sec-overlays",
+      "cg-terrain-op",
+      "sec-slices",
+      "sg-z"
+    ]
+  },
+  {
+    "label": "Convergence",
+    "tip": "Surface wind convergence — where horizontal flow converges to trigger thermals",
+    "sliders": {
+      "terrain-op": 1.0,
+      "theta-op": 0,
+      "wvel-op": 0,
+      "conv-op": 0.85,
+      "wind-op": 0,
+      "ew-op": 0,
+      "ns-op": 0,
+      "z-op": 0,
+      "amb": 2.0,
+      "sun-int": 3.0
+    },
+    "sliders_visible": [
+      "sec-time",
+      "cg-time",
+      "sec-overlays",
+      "cg-terrain-op",
+      "cg-conv-op"
+    ]
   },
   {
     "label": "Full 3D",
     "tip": "Surface θ' + EW and NS vertical cross-sections — full plume structure at a glance",
     "sliders": {
       "terrain-op": 0.60,
-      "theta-op":   0.50,
-      "wvel-op":    0,
-      "conv-op":    0,
-      "wind-op":    0.30,
-      "ew-op":      0.75,
-      "ns-op":      0.75,
-      "z-op":       0,
-      "amb":        2.5,
-      "sun-int":    2.0
+      "theta-op": 0.50,
+      "wvel-op": 0,
+      "conv-op": 0,
+      "wind-op": 0,
+      "ew-op": 0.75,
+      "ns-op": 0.75,
+      "z-op": 0,
+      "amb": 2.5,
+      "sun-int": 2.0
     },
-    "slice_modes": { "ew": "theta", "ns": "theta" }
+    "slice_modes": {
+      "ew": "theta",
+      "ns": "theta",
+      "z": "theta"
+    },
+    "sliders_visible": [
+      "sec-time",
+      "cg-time",
+      "sec-overlays",
+      "cg-terrain-op",
+      "cg-theta-op",
+      "sec-slices",
+      "sg-ew",
+      "sg-ns",
+      "sg-z"
+    ]
   },
   {
     "label": "Updraft 3D",
     "tip": "Vertical velocity on EW + NS slices — see the full 3D updraft core",
     "sliders": {
       "terrain-op": 0.60,
-      "theta-op":   0,
-      "wvel-op":    0.40,
-      "conv-op":    0,
-      "wind-op":    0.30,
-      "ew-op":      0.75,
-      "ns-op":      0.75,
-      "z-op":       0,
-      "amb":        2.5,
-      "sun-int":    2.0
+      "theta-op": 0,
+      "wvel-op": 0.40,
+      "conv-op": 0,
+      "wind-op": 0,
+      "ew-op": 0.75,
+      "ns-op": 0.75,
+      "z-op": 0,
+      "amb": 2.5,
+      "sun-int": 2.0
     },
-    "slice_modes": { "ew": "w", "ns": "w" }
+    "slice_modes": {
+      "ew": "w",
+      "ns": "w",
+      "z": "w"
+    },
+    "sliders_visible": [
+      "sec-time",
+      "cg-time",
+      "sec-overlays",
+      "cg-terrain-op",
+      "cg-wvel-op",
+      "sec-slices",
+      "sg-ew",
+      "sg-ns",
+      "sg-z"
+    ]
   }
 ]

@@ -67,6 +67,9 @@
     .preset-btn.active { background:rgba(100,160,255,0.28); color:#7eb8ff; border-color:rgba(100,160,255,0.5); font-weight:600; }
     .preset-btn.active.modified { border-color:rgba(255,200,80,0.6); color:#ffc84a; }
 
+    /* ── Visibility control ── */
+    .ctrl-hidden { display: none !important; }
+
     /* ── Slice group ── */
     .slice-group { background:rgba(100,160,255,0.04); border:1px solid rgba(100,160,255,0.1);
       border-radius:8px; padding:8px; margin-bottom:8px; }
@@ -166,38 +169,38 @@
 
   <div id="preset-buttons"></div>
 
-  <div class="sec">Time</div>
-  <div class="cg">
+  <div class="sec" id="sec-time">Time</div>
+  <div class="cg" id="cg-time">
     <label>Scenario <span id="time-display">—</span></label>
     <input type="range" id="time-slider" min="0" max="0" step="1" value="0">
     <div id="sun-info" style="font-size:10px;color:#556677;margin-top:3px">—</div>
   </div>
 
-  <div class="sec">Overlays</div>
-  <div class="cg">
+  <div class="sec" id="sec-overlays">Overlays</div>
+  <div class="cg" id="cg-terrain-op">
     <label>Terrain (elevation) <span id="terrain-op-val">0.85</span></label>
     <input type="range" id="terrain-op" min="0" max="1" step="0.05" value="0.85">
   </div>
-  <div class="cg">
+  <div class="cg" id="cg-theta-op">
     <label>θ' temp. anomaly <span id="theta-op-val">0.70</span></label>
     <input type="range" id="theta-op" min="0" max="1" step="0.05" value="0.70">
   </div>
-  <div class="cg">
+  <div class="cg" id="cg-wvel-op">
     <label>Vertical velocity w <span id="wvel-op-val">0.00</span></label>
     <input type="range" id="wvel-op" min="0" max="1" step="0.05" value="0.00">
   </div>
-  <div class="cg">
+  <div class="cg" id="cg-conv-op">
     <label>Convergence <span id="conv-op-val">0.00</span></label>
     <input type="range" id="conv-op" min="0" max="1" step="0.05" value="0.00">
   </div>
-  <div class="cg">
+  <div class="cg" id="cg-wind-op">
     <label>Wind arrows <span id="wind-op-val">0.50</span></label>
     <input type="range" id="wind-op" min="0" max="1" step="0.05" value="0.50">
   </div>
 
-  <div class="sec">Slices</div>
+  <div class="sec" id="sec-slices">Slices</div>
 
-  <div class="slice-group">
+  <div class="slice-group" id="sg-ew">
     <div class="slice-header">
       <span>EW cross-section</span>
       <button class="mode-btn" id="ew-mode-btn">θ'</button>
@@ -212,7 +215,7 @@
     </div>
   </div>
 
-  <div class="slice-group">
+  <div class="slice-group" id="sg-ns">
     <div class="slice-header">
       <span>NS cross-section</span>
       <button class="mode-btn" id="ns-mode-btn">θ'</button>
@@ -227,7 +230,7 @@
     </div>
   </div>
 
-  <div class="slice-group">
+  <div class="slice-group" id="sg-z">
     <div class="slice-header">
       <span>Z horizontal slice</span>
       <button class="mode-btn" id="z-mode-btn">θ'</button>
@@ -242,12 +245,12 @@
     </div>
   </div>
 
-  <div class="sec">Lighting</div>
-  <div class="cg">
+  <div class="sec" id="sec-lighting">Lighting</div>
+  <div class="cg" id="cg-amb">
     <label>Ambient <span id="amb-val">2.0</span></label>
     <input type="range" id="amb" min="0" max="6" step="0.1" value="2.0">
   </div>
-  <div class="cg">
+  <div class="cg" id="cg-sun-int">
     <label>Sun intensity <span id="sun-val">3.0</span></label>
     <input type="range" id="sun-int" min="0" max="8" step="0.1" value="3.0">
   </div>
@@ -456,6 +459,22 @@ const SLIDER_VAL_ID = {
   'amb':'amb-val', 'sun-int':'sun-val',
 };
 
+const ALL_CTRL_IDS = [
+  'sec-time','cg-time',
+  'sec-overlays','cg-terrain-op','cg-theta-op','cg-wvel-op','cg-conv-op','cg-wind-op',
+  'sec-slices','sg-ew','sg-ns','sg-z',
+  'sec-lighting','cg-amb','cg-sun-int',
+];
+
+function applySliderVisibility(preset) {
+  const visible = preset.sliders_visible ? new Set(preset.sliders_visible) : null;
+  ALL_CTRL_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('ctrl-hidden', visible !== null && !visible.has(id));
+  });
+}
+
 function applyPreset(preset) {
   // Set slider values — dispatching 'input' triggers all existing bindOp setters
   for (const [id, val] of Object.entries(preset.sliders || {})) {
@@ -476,6 +495,8 @@ function applyPreset(preset) {
     if (type === 'ns' && nsMode !== mode) { nsMode = mode; btn.textContent = mode === 'theta' ? "θ'" : 'w'; recolorSlice('ns'); }
     if (type === 'z'  && zMode  !== mode) { zMode  = mode; btn.textContent = mode === 'theta' ? "θ'" : 'w'; recolorSlice('z');  }
   }
+  // Show/hide controls
+  applySliderVisibility(preset);
 }
 
 function buildPresetButtons() {
@@ -601,7 +622,7 @@ function init() {
   bindOp('theta-op',  'theta-op-val',  v => { if(thetaMat) thetaMat.opacity=v; });
   bindOp('wvel-op',   'wvel-op-val',   v => { if(wvelMat) wvelMat.opacity=v;  });
   bindOp('conv-op',   'conv-op-val',   v => { if(convMat) convMat.opacity=v;  toggleCb('cb-conv-wrap', v>0); });
-  bindOp('wind-op',   'wind-op-val',   v => { if(windGroup) windGroup.children.forEach(c=>c.material&&(c.material.opacity=v)); });
+  bindOp('wind-op',   'wind-op-val',   v => { if(windGroup) { windGroup.visible = v>0; windGroup.children.forEach(c=>c.material&&(c.material.opacity=v)); } });
   bindOp('ew-op',     'ew-op-val',     v => { if(ewSliceMat) ewSliceMat.opacity=v; });
   bindOp('ns-op',     'ns-op-val',     v => { if(nsSliceMat) nsSliceMat.opacity=v; });
   bindOp('z-op',      'z-op-val',      v => { if(zSliceMat)  zSliceMat.opacity=v;  });
@@ -672,7 +693,7 @@ function buildTerrain(T) {
 
 // ── Overlay meshes (θ', w, convergence) ──────────────────────────────────────
 function buildOverlay(T, type) {
-  const lift = type==='theta'?3 : type==='wvel'?6 : 9;
+  const lift = type==='conv'?9 : 6;
   const mat = new THREE.MeshBasicMaterial({
     vertexColors:true, transparent:true, opacity:0,
     depthWrite:false, depthTest:false,
