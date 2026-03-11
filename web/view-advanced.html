@@ -55,6 +55,18 @@
       padding-top:8px; }
     .hint { font-size:10px; color:#334455; margin-top:10px; line-height:1.5; }
 
+    /* ── Preset buttons ── */
+    #preset-buttons { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:4px; }
+    .preset-btn {
+      font-size:10px; padding:4px 8px; flex:1; min-width:60px; text-align:center;
+      background:rgba(100,160,255,0.08); border:1px solid rgba(100,160,255,0.2);
+      color:#5a7890; border-radius:5px; cursor:pointer;
+      transition:background 0.15s, color 0.15s, border-color 0.15s;
+    }
+    .preset-btn:hover { background:rgba(100,160,255,0.18); color:#90b8d8; }
+    .preset-btn.active { background:rgba(100,160,255,0.28); color:#7eb8ff; border-color:rgba(100,160,255,0.5); font-weight:600; }
+    .preset-btn.active.modified { border-color:rgba(255,200,80,0.6); color:#ffc84a; }
+
     /* ── Slice group ── */
     .slice-group { background:rgba(100,160,255,0.04); border:1px solid rgba(100,160,255,0.1);
       border-radius:8px; padding:8px; margin-bottom:8px; }
@@ -151,6 +163,8 @@
 
 <div id="ui-panel">
   <h2>NS Simulation — 3D</h2>
+
+  <div id="preset-buttons"></div>
 
   <div class="sec">Time</div>
   <div class="cg">
@@ -406,6 +420,8 @@ function idbGet() {
 }
 
 // ── Load & init ───────────────────────────────────────────────────────────────
+let presetsData = [];
+
 async function loadData() {
   try {
     let data = await idbGet();
@@ -415,13 +431,81 @@ async function loadData() {
       data = await r.json();
     }
     simData = data;
+    // Load presets (non-fatal if missing)
+    try {
+      const pr = await fetch('presets-advanced.json');
+      if (pr.ok) presetsData = await pr.json();
+    } catch {}
     document.getElementById('loading').style.display = 'none';
     init();
+    buildPresetButtons();
   } catch(e) {
     document.getElementById('loading').innerHTML =
       `<div style="color:#f66">Failed to load NS data<br><small>${e.message}</small><br><br>
        <small>Run the NS simulation first (<a href="simulate-advanced" style="color:#7eb8ff">Simulate NS</a>)</small></div>`;
   }
+}
+
+// ── Presets ───────────────────────────────────────────────────────────────────
+// Map slider id → val-display id (mirrors bindOp calls in init)
+const SLIDER_VAL_ID = {
+  'terrain-op':'terrain-op-val', 'theta-op':'theta-op-val',
+  'wvel-op':'wvel-op-val', 'conv-op':'conv-op-val',
+  'wind-op':'wind-op-val', 'ew-op':'ew-op-val',
+  'ns-op':'ns-op-val', 'z-op':'z-op-val',
+  'amb':'amb-val', 'sun-int':'sun-val',
+};
+
+function applyPreset(preset) {
+  // Set slider values — dispatching 'input' triggers all existing bindOp setters
+  for (const [id, val] of Object.entries(preset.sliders || {})) {
+    const el = document.getElementById(id);
+    if (!el) continue;
+    el.value = val;
+    el.dispatchEvent(new Event('input'));
+    // Also update display span in case the event didn't (safety)
+    const valEl = document.getElementById(SLIDER_VAL_ID[id]);
+    if (valEl) valEl.textContent = parseFloat(val).toFixed(2);
+  }
+  // Apply slice θ'/w modes
+  for (const [type, mode] of Object.entries(preset.slice_modes || {})) {
+    const btnId = type + '-mode-btn';
+    const btn = document.getElementById(btnId);
+    if (!btn) continue;
+    if (type === 'ew' && ewMode !== mode) { ewMode = mode; btn.textContent = mode === 'theta' ? "θ'" : 'w'; recolorSlice('ew'); }
+    if (type === 'ns' && nsMode !== mode) { nsMode = mode; btn.textContent = mode === 'theta' ? "θ'" : 'w'; recolorSlice('ns'); }
+    if (type === 'z'  && zMode  !== mode) { zMode  = mode; btn.textContent = mode === 'theta' ? "θ'" : 'w'; recolorSlice('z');  }
+  }
+}
+
+function buildPresetButtons() {
+  const container = document.getElementById('preset-buttons');
+  if (!container || !presetsData.length) return;
+  container.innerHTML = '';
+
+  presetsData.forEach((preset, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'preset-btn' + (i === 0 ? ' active' : '');
+    btn.textContent = preset.label;
+    btn.title = preset.tip || '';
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active', 'modified'));
+      btn.classList.add('active');
+      applyPreset(preset);
+    });
+    container.appendChild(btn);
+  });
+
+  // Mark active preset as "modified" when any slider is manually changed
+  document.getElementById('ui-panel').addEventListener('input', e => {
+    if (e.target.type === 'range') {
+      const active = document.querySelector('.preset-btn.active');
+      if (active) active.classList.add('modified');
+    }
+  }, true);
+
+  // Apply first preset silently
+  if (presetsData.length > 0) applyPreset(presetsData[0]);
 }
 
 function init() {

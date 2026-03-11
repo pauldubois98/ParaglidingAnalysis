@@ -1819,11 +1819,11 @@ async function runFetch() {
     const {records: era5Records, diurnal: era5Diurnal} = await fetchWeatherData(
       centerLat, centerLon, dateStr, weatherMode, windowDays, msg => log(msg), tzOffsetFetch);
     if (era5Records.length) {
-      document.getElementById("era5_auto").checked = false
       log(`Weather: ${era5Records.length} clear-sky midday observations.`, 'success');
     }
     else{
-     log('Weather: no data — will use fallback max_heat.', 'warn');
+      document.getElementById("era5_auto").checked = false
+      log('Weather: no data — will use fallback max_heat.', 'warn');
     }
     setProgress(0.98);
     renderERA5Plot(document.getElementById('plot-era5'), era5Records);
