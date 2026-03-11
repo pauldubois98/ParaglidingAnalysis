@@ -277,9 +277,25 @@
         <div><label class="field-label">UTC offset (h)</label><input type="number" id="tz_offset" step="1" min="-12" max="14" value="2"></div>
         <div><label class="field-label">Interval (min)</label><input type="number" id="interval_min" step="15" min="15" max="120" value="60"></div>
       </div>
-      <label class="field-label">Min sun elevation (°)</label>
-      <input type="number" id="min_elevation" step="1" min="0" max="20" value="0">
-      <div class="field-hint">Scenarios with sun below this angle are skipped.</div>
+      <div class="grid-2">
+        <div>
+          <label class="field-label">Start time (local)</label>
+          <input type="time" id="start_time" value="06:00" oninput="onStartTimeChange()">
+        </div>
+        <div>
+          <label class="field-label">Elev start (°)</label>
+          <input type="number" id="elev_start" step="0.5" min="0" max="30" value="0" oninput="onElevStartChange()">
+        </div>
+        <div>
+          <label class="field-label">End time (local)</label>
+          <input type="time" id="end_time" value="20:00" oninput="onEndTimeChange()">
+        </div>
+        <div>
+          <label class="field-label">Elev end (°)</label>
+          <input type="number" id="elev_end" step="0.5" min="0" max="30" value="0" oninput="onElevEndChange()">
+        </div>
+      </div>
+      <div class="field-hint">Start/end times and their matching sun elevation thresholds are linked — edit either one.</div>
 
       <div class="section-title hide">Area</div>
       <div class="grid-2 hide">
@@ -424,7 +440,118 @@ function validateDate() {
   } else { message = 'Typical day mode.'; }
   dateHint.textContent = message;
   dateHint.style.color = valid ? '#99b8d0' : '#ff8866';
+  // Re-sync sun time fields whenever date changes
+  _sunTimeInit();
   return valid;
+}
+
+// ── Sun time ↔ elevation linking ─────────────────────────────────
+
+function _getSimCenter() {
+  const lat = (parseFloat(document.getElementById('min_lat').value || 42.99) +
+               parseFloat(document.getElementById('max_lat').value || 42.99)) / 2;
+  const lon = (parseFloat(document.getElementById('min_lon').value || 0.905) +
+               parseFloat(document.getElementById('max_lon').value || 0.905)) / 2;
+  return { lat, lon };
+}
+
+function _getSimDateTzOffset() {
+  const dateStr = document.getElementById('sim_date').value;
+  const tzOffset = parseInt(document.getElementById('tz_offset').value) || 0;
+  return { dateStr, tzOffset };
+}
+
+/** Sun elevation (degrees) at a given local time HH:MM on the configured date. */
+function _sunElevAtLocalTime(hhMM) {
+  const { lat, lon } = _getSimCenter();
+  const { dateStr, tzOffset } = _getSimDateTzOffset();
+  if (!dateStr || !hhMM) return null;
+  const [hh, mm] = hhMM.split(':').map(Number);
+  const hUtc = ((hh - tzOffset) % 24 + 24) % 24;
+  const [y, mo, d] = dateStr.split('-').map(Number);
+  const dt = new Date(Date.UTC(y, mo - 1, d, hUtc, mm, 0));
+  const pos = SunCalc.getPosition(dt, lat, lon);
+  return pos.altitude * 180 / Math.PI;
+}
+
+/** First local time (HH:MM) in the morning when sun elevation crosses threshold (ascending). */
+function _localTimeAtMorningElev(elevDeg) {
+  const { lat, lon } = _getSimCenter();
+  const { dateStr, tzOffset } = _getSimDateTzOffset();
+  if (!dateStr) return null;
+  const [y, mo, d] = dateStr.split('-').map(Number);
+  for (let m = 0; m < 12 * 60; m++) {          // midnight→noon UTC
+    const dt = new Date(Date.UTC(y, mo - 1, d, Math.floor(m / 60), m % 60, 0));
+    const el = SunCalc.getPosition(dt, lat, lon).altitude * 180 / Math.PI;
+    if (el >= elevDeg) {
+      const localTotalMin = ((Math.floor(m / 60) + tzOffset) * 60 + m % 60 + 1440) % 1440;
+      return String(Math.floor(localTotalMin / 60)).padStart(2, '0') + ':' + String(localTotalMin % 60).padStart(2, '0');
+    }
+  }
+  return null;
+}
+
+/** Last local time (HH:MM) in the afternoon/evening when sun elevation crosses threshold (descending). */
+function _localTimeAtEveningElev(elevDeg) {
+  const { lat, lon } = _getSimCenter();
+  const { dateStr, tzOffset } = _getSimDateTzOffset();
+  if (!dateStr) return null;
+  const [y, mo, d] = dateStr.split('-').map(Number);
+  for (let m = 24 * 60 - 1; m >= 12 * 60; m--) { // midnight→noon UTC, reversed
+    const dt = new Date(Date.UTC(y, mo - 1, d, Math.floor(m / 60), m % 60, 0));
+    const el = SunCalc.getPosition(dt, lat, lon).altitude * 180 / Math.PI;
+    if (el >= elevDeg) {
+      const localTotalMin = ((Math.floor(m / 60) + tzOffset) * 60 + m % 60 + 1440) % 1440;
+      return String(Math.floor(localTotalMin / 60)).padStart(2, '0') + ':' + String(localTotalMin % 60).padStart(2, '0');
+    }
+  }
+  return null;
+}
+
+// Called when user edits start time → update morning elevation
+function onStartTimeChange() {
+  const t = document.getElementById('start_time').value;
+  const el = _sunElevAtLocalTime(t);
+  if (el !== null)
+    document.getElementById('elev_start').value = Math.max(0, Math.round(el * 10) / 10);
+}
+
+// Called when user edits morning elevation → update start time
+function onElevStartChange() {
+  const el = parseFloat(document.getElementById('elev_start').value) || 0;
+  const t = _localTimeAtMorningElev(el);
+  if (t) document.getElementById('start_time').value = t;
+}
+
+// Called when user edits end time → update evening elevation
+function onEndTimeChange() {
+  const t = document.getElementById('end_time').value;
+  const el = _sunElevAtLocalTime(t);
+  if (el !== null)
+    document.getElementById('elev_end').value = Math.max(0, Math.round(el * 10) / 10);
+}
+
+// Called when user edits evening elevation → update end time
+function onElevEndChange() {
+  const el = parseFloat(document.getElementById('elev_end').value) || 0;
+  const t = _localTimeAtEveningElev(el);
+  if (t) document.getElementById('end_time').value = t;
+}
+
+// Initialize sun time fields — only when the date actually changes.
+// Called from validateDate() which is invoked on date change, config load,
+// and runFetch. We guard against runFetch/mode-switch resets by tracking
+// which date was last initialized.
+let _sunTimeInitedDate = null;
+function _sunTimeInit() {
+  const currentDate = document.getElementById('sim_date').value;
+  if (!currentDate || currentDate === _sunTimeInitedDate) return;
+  _sunTimeInitedDate = currentDate;
+  const el = window._cfgMinElevDeg ?? 0;
+  document.getElementById('elev_start').value = el;
+  document.getElementById('elev_end').value = el;
+  onElevStartChange();
+  onElevEndChange();
 }
 
 // Global state
@@ -441,7 +568,9 @@ fetch('config.json').then(r => r.json()).then(cfg => {
   setVal('sim_date', new Date().toISOString().slice(0,10));
   setVal('tz_offset', cfg.simulation.tz_offset);
   setVal('interval_min', cfg.simulation.interval_min);
-  setVal('min_elevation', cfg.simulation.min_elevation_deg);
+  // min_elevation no longer used directly; start/end times are set after config + date load
+  // Defer sun time init until date is also set (handled in validateDate)
+  window._cfgMinElevDeg = cfg.simulation.min_elevation_deg ?? 0;
   setVal('era5_window', cfg.heating.era5_window_days);
   setVal('diffuse_frac', cfg.heating.diffuse_fraction);
   setVal('elr', cfg.heating.elr_per_km);
@@ -707,22 +836,56 @@ async function fetchLandcover(bbox, Z, nx, ny, dx, dy) {
 // ═══════════════════════════════════════════════════════════════════
 //  SUN SCENARIOS
 // ═══════════════════════════════════════════════════════════════════
-function generateSunScenarios(lat, lon, dateStr, tzOffset, intervalMin, minElevDeg) {
+/**
+ * Generate sun scenarios for the day.
+ * @param {number} elevStart  - sun elevation (°) for start time
+ * @param {number} elevEnd    - sun elevation (°) for end time
+ * @param {string} startTimeLocal  - "HH:MM" local hard start (or null to use elevation only)
+ * @param {string} endTimeLocal    - "HH:MM" local hard end (or null to use elevation only)
+ */
+function generateSunScenarios(lat, lon, dateStr, tzOffset, intervalMin,
+                               minElevMorning, minElevEvening, startTimeLocal, endTimeLocal) {
   const [year,month,day] = dateStr.split('-').map(Number);
   const scenarios = [];
-  for (let m=0; m<24*60; m+=intervalMin) {
-    const hUtc=Math.floor(m/60), minUtc=m%60;
-    const dtUtc=new Date(Date.UTC(year,month-1,day,hUtc,minUtc,0));
-    const pos=SunCalc.getPosition(dtUtc,lat,lon);
-    const el_deg=pos.altitude*180/Math.PI;
-    if (el_deg < minElevDeg) continue;
-    const az_deg=((pos.azimuth*180/Math.PI)+180+360)%360;
-    const localH=(hUtc+tzOffset+24)%24, localMin=minUtc;
-    const localStr=String(localH).padStart(2,'0')+':'+String(localMin).padStart(2,'0');
-    const utcStr=String(hUtc).padStart(2,'0')+':'+String(minUtc).padStart(2,'0');
+
+  // Convert local HH:MM → UTC minutes-from-midnight
+  function localHHMMtoUtcMin(hhMM) {
+    if (!hhMM) return null;
+    const [h, m] = hhMM.split(':').map(Number);
+    return ((h - tzOffset) * 60 + m + 1440) % 1440;
+  }
+  const startUtcMin = localHHMMtoUtcMin(startTimeLocal);
+  const endUtcMin   = localHHMMtoUtcMin(endTimeLocal);
+
+  // Find solar noon (UTC minutes) to split morning/evening thresholds
+  let noonUtcMin = 12 * 60, maxElev = -Infinity;
+  for (let m = 6*60; m < 18*60; m += 5) {
+    const dt = new Date(Date.UTC(year, month-1, day, Math.floor(m/60), m%60, 0));
+    const el = SunCalc.getPosition(dt, lat, lon).altitude;
+    if (el > maxElev) { maxElev = el; noonUtcMin = m; }
+  }
+
+  for (let m = 0; m < 24*60; m += intervalMin) {
+    // Hard time window filter
+    if (startUtcMin !== null && m < startUtcMin) continue;
+    if (endUtcMin   !== null && m > endUtcMin)   continue;
+
+    const hUtc = Math.floor(m/60), minUtc = m%60;
+    const dtUtc = new Date(Date.UTC(year, month-1, day, hUtc, minUtc, 0));
+    const pos = SunCalc.getPosition(dtUtc, lat, lon);
+    const el_deg = pos.altitude * 180 / Math.PI;
+
+    // Apply split elevation threshold
+    const threshold = m <= noonUtcMin ? minElevMorning : minElevEvening;
+    if (el_deg < threshold) continue;
+
+    const az_deg = ((pos.azimuth*180/Math.PI) + 180 + 360) % 360;
+    const localH = (hUtc + tzOffset + 24) % 24, localMin = minUtc;
+    const localStr = String(localH).padStart(2,'0') + ':' + String(localMin).padStart(2,'0');
+    const utcStr   = String(hUtc).padStart(2,'0')   + ':' + String(minUtc).padStart(2,'0');
     const time_s = hUtc*3600 + minUtc*60;
-    scenarios.push({name:localStr, local_time:localStr, utc_time:utcStr, time_s,
-      sun_azimuth:Math.round(az_deg*100)/100, sun_elevation:Math.round(el_deg*100)/100});
+    scenarios.push({ name: localStr, local_time: localStr, utc_time: utcStr, time_s,
+      sun_azimuth: Math.round(az_deg*100)/100, sun_elevation: Math.round(el_deg*100)/100 });
   }
   return scenarios;
 }
@@ -1663,7 +1826,10 @@ async function runSim() {
     const dateStr  = document.getElementById('sim_date').value;
     const tzOffset = parseInt(document.getElementById('tz_offset').value);
     const intervalMin = parseInt(document.getElementById('interval_min').value);
-    const minElevDeg  = parseFloat(document.getElementById('min_elevation').value);
+    const minElevMorning = parseFloat(document.getElementById('elev_start').value) || 0;
+    const minElevEvening = parseFloat(document.getElementById('elev_end').value) || 0;
+    const startTimeLocal = document.getElementById('start_time').value || null;
+    const endTimeLocal   = document.getElementById('end_time').value   || null;
     const tauHours    = parseFloat(document.getElementById('tau_hours').value);
     const diffuseFrac = parseFloat(document.getElementById('diffuse_frac').value);
     const ELR_km      = parseFloat(document.getElementById('elr').value);
@@ -1720,7 +1886,8 @@ async function runSim() {
     // Calibrate max_heat + T0
     const centerLat = (bbox.min_lat + bbox.max_lat) / 2;
     const centerLon = (bbox.min_lon + bbox.max_lon) / 2;
-    const scenarios_all = generateSunScenarios(centerLat, centerLon, dateStr, tzOffset, intervalMin, minElevDeg);
+    const scenarios_all = generateSunScenarios(centerLat, centerLon, dateStr, tzOffset, intervalMin,
+      minElevMorning, minElevEvening, startTimeLocal, endTimeLocal);
     if (!scenarios_all.length) throw new Error('No sun scenarios (sun always below min elevation?)');
     log(`${scenarios_all.length} sun scenarios generated.`);
 
