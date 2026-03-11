@@ -227,6 +227,74 @@
     .nav-btn-info:hover  { color:#c8dff0; border-color:rgba(100,160,255,0.6); background:rgba(100,160,255,0.15); }
     .nav-btn-area:hover  { color:#a8e8d8; border-color:rgba(70,200,175,0.6);  background:rgba(70,200,175,0.15);  }
     .nav-btn-run:hover   { color:#98ffb8; border-color:rgba(50,195,95,0.62);  background:rgba(50,195,95,0.18);   }
+
+    /* ── Mobile panel toggle button ── */
+    #panel-toggle {
+      display: none;
+      position: absolute;
+      top: 8px; right: 8px;
+      z-index: 1002;
+      background: rgba(10,15,30,0.88);
+      border: 1px solid rgba(100,160,255,0.35);
+      border-radius: 10px;
+      color: #7eb8ff;
+      padding: 9px 14px;
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: background 0.15s;
+    }
+    #panel-toggle:active { background: rgba(30,55,100,0.7); }
+
+    @media (max-width: 768px) {
+      #panel-toggle { display: block; }
+
+      #ui-panel {
+        top: auto !important;
+        right: 0 !important;
+        left: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-height: 72vh;
+        border-radius: 14px 14px 0 0;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      #ui-panel.panel-open {
+        transform: translateY(0);
+      }
+
+      #info-panel {
+        top: auto !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        max-height: 55vh;
+        border-radius: 14px 14px 0 0;
+        overflow-y: auto;
+      }
+
+      #colorbars {
+        bottom: auto !important;
+        top: 8px !important;
+        left: 8px !important;
+        max-width: calc(100vw - 16px);
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        -webkit-overflow-scrolling: touch;
+        gap: 6px;
+      }
+      .colorbar { padding: 6px 8px; }
+      .colorbar-canvas { height: 80px !important; }
+
+      /* Larger touch targets for range sliders */
+      input[type="range"]::-webkit-slider-thumb { width: 20px; height: 20px; }
+      .scenario-btn, .mode-btn { padding: 7px 13px; font-size: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -340,11 +408,14 @@
     Drag to rotate · Scroll to zoom · Right-drag to pan
   </div>
   <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(100,160,255,0.12); display:flex; flex-direction:column; gap:6px;">
+    <a href="index.html" class="nav-btn nav-btn-info">← Home</a>
     <a href="area.html" class="nav-btn nav-btn-area">Back to area selection</a>
     <a href="simulate.html" class="nav-btn nav-btn-run">Back to simulation</a>
     <a href="about.html" class="nav-btn nav-btn-info">About the simulation</a>
   </div>
 </div>
+
+<button id="panel-toggle" onclick="document.getElementById('ui-panel').classList.toggle('panel-open')" title="Toggle controls">☰</button>
 
 <div id="colorbars">
   <div class="colorbar" id="cb-elevation-wrap">

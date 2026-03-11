@@ -292,10 +292,51 @@
       letter-spacing: 0.3px;
       transition: background 0.18s, border-color 0.18s, color 0.18s;
     }
-    .link-area  { color:#80d0c0; border-color:rgba(70,200,175,0.28); background:rgba(70,200,175,0.06); }
-    .link-about { color:#99b8d0; border-color:rgba(100,160,255,0.28); background:rgba(100,160,255,0.06); }
+    .link-area  { color:#80d0c0; border-color:rgba(70,200,175,0.28); background:rgba(70,200,175,0.06); text-align: center;}
+    .link-about { color:#99b8d0; border-color:rgba(100,160,255,0.28); background:rgba(100,160,255,0.06); text-align: center;}
     .link-area:hover  { color:#a8e8d8; border-color:rgba(70,200,175,0.6);  background:rgba(70,200,175,0.15); }
     .link-about:hover { color:#c8dff0; border-color:rgba(100,160,255,0.6); background:rgba(100,160,255,0.15); }
+
+    @media (max-width: 768px) {
+      body { overflow-y: auto !important; height: auto !important; min-height: 100vh; }
+
+      #status-bar {
+        position: sticky !important;
+        top: 0 !important; bottom: auto !important;
+        height: auto !important;
+        padding: 7px 14px;
+        z-index: 100;
+      }
+
+      #console-area {
+        position: relative !important;
+        inset: auto !important;
+        width: 100%;
+        min-height: 45vh;
+        padding: 10px;
+      }
+
+      #plots-area, #sim-plots-area {
+        height: auto !important;
+        flex-wrap: wrap;
+      }
+      .plot-box { flex: 0 0 calc(50% - 5px) !important; height: 140px !important; }
+
+      #ui-panel {
+        position: relative !important;
+        top: auto !important; right: auto !important; bottom: auto !important;
+        width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
+        border-radius: 0;
+        border-left: none; border-right: none;
+      }
+
+      /* Prevent iOS zoom on input focus */
+      input[type="number"], input[type="date"], input[type="text"] { font-size: 16px !important; }
+
+      .btn { padding: 10px 8px; font-size: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -511,8 +552,9 @@
       <button class="btn btn-map" id="btn-map" onclick="openVisualizationTool()" disabled>Open Viewer</button>
     </div>
     <div class="footer-nav">
-      <a href="area.html" class="link-area">Back to area selection</a>
-      <a href="about.html" class="link-about">About the simulation</a>
+      <a href="index.html" class="link-about">Home</a>
+      <a href="area.html" class="link-area">Area selection</a>
+      <a href="about.html" class="link-about">About</a>
     </div>
   </div>
 </div>

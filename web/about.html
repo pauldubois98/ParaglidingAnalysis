@@ -184,6 +184,18 @@
       font-size: 12px;
       color: #3a5070;
     }
+
+    @media (max-width: 640px) {
+      body { padding: 20px 14px 60px; }
+      header h1 { font-size: 20px; }
+      h2 { font-size: 15px; letter-spacing: 1px; }
+      table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+      td, th { white-space: normal; min-width: 70px; }
+      td:first-child { min-width: 100px; }
+      .formula { font-size: 11px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .pipeline-step { gap: 10px; padding: 10px 12px; }
+      header a { display: inline-block; padding: 3px 0; }
+    }
   </style>
 </head>
 <body>
@@ -197,6 +209,8 @@
       Calibration: ERA5 reanalysis (Open-Meteo)
     </p>
     <br>
+    <a href="index.html">Home</a>
+    &nbsp;·&nbsp;
     <a href="view.html">Visualization tool</a>
     &nbsp;·&nbsp;
     <a href="area.html">Area Selection</a>
