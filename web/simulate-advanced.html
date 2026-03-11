@@ -1805,14 +1805,14 @@ async function runFetch() {
 // ═══════════════════════════════════════════════════════════════════
 //  MAIN PIPELINE: RUN NS SIMULATION
 // ═══════════════════════════════════════════════════════════════════
-let _simShouldStop = false;
+let _activeWorker = null;
+
 function stopSim() {
-  _simShouldStop = true;
+  if (_activeWorker) _activeWorker.postMessage({type: 'stop'});
   document.getElementById('btn-stop').disabled = true;
 }
 
 async function runSim() {
-  _simShouldStop = false;
   if (!fetchedData) { log('No data fetched yet.', 'error'); return; }
   document.getElementById('btn-sim').disabled = true;
   document.getElementById('btn-fetch').disabled = true;
@@ -1931,194 +1931,142 @@ async function runSim() {
     setProgress(0.35);
     await yieldUI();
 
-    // Create NS3D solver
-    const solver = new NS3D({NX, NY, NZ, dx, dy, dz, solidMask, ELR: ELR_km, T_ref: T0, Cs, omega, maxIter});
-    log('NS3D solver initialized.');
+    // --- Worker-based NS simulation ---
+    const workerSrc = document.getElementById('ns3d-worker-src').textContent;
+    const workerBlob = new Blob([workerSrc], {type: 'application/javascript'});
+    const workerUrl = URL.createObjectURL(workerBlob);
+    _activeWorker = new Worker(workerUrl);
+    URL.revokeObjectURL(workerUrl);
 
     // Show viz area
     document.getElementById('plots-area-sim').style.display = 'flex';
 
-    // Compute iz_view from h_view
-    function getIzView() {
-      const iz = Math.min(NZ-1, Math.max(0, Math.round((h_view / dz) - 0.5)));
-      return iz;
-    }
-    const iz_view = getIzView();
+    const iz_view = Math.min(NZ-1, Math.max(0, Math.round((h_view / dz) - 0.5)));
     log(`View layer: iz=${iz_view} (h_view=${h_view}m AGL, cell_center=${((iz_view+0.5)*dz).toFixed(0)}m)`);
 
-    // Time loop
     const sunrise_s = heatMaps[0].time_s;
     const sunset_s  = heatMaps[heatMaps.length-1].time_s + intervalMin * 60;
     const total_steps = Math.ceil((sunset_s - sunrise_s) / dt);
     log(`NS time loop: ${sunrise_s/3600}h → ${sunset_s/3600}h, dt=${dt}s, ~${total_steps} steps`);
 
-    let t_sim = sunrise_s;
-    let step_num = 0;
-    const t_start_wall = performance.now();
+    // Copy buffers for transfer (zero-copy to worker)
+    const solidMaskCopy = new Uint8Array(solidMask);
+    const heatMapsData = heatMaps.map(hm => ({time_s: hm.time_s, buf: hm.Q_Ks.buffer.slice(0)}));
+    const transferList = [solidMaskCopy.buffer, ...heatMapsData.map(h=>h.buf)];
 
-    // Output collection
-    const scenario_output = [];
-    const next_sc_times = scenarios_all.map(sc => sc.time_s);
-    let next_sc_idx = 0;
+    await new Promise((resolve, reject) => {
+      _activeWorker.onmessage = function(e) {
+        const msg = e.data;
+        if (msg.type === 'frame') {
+          const eta_ms = msg.step_num > 0 ? (msg.elapsed_ms / msg.step_num) * (msg.total_steps - msg.step_num) : 0;
+          document.getElementById('ns-stats').textContent =
+            `Time: ${msg.localStr}  |  Step: ${msg.step_num}/${msg.total_steps}  |  max θ': ${msg.maxTheta.toFixed(2)} K  |  max w: ${msg.maxW.toFixed(2)} m/s  |  ETA: ${(eta_ms/1000).toFixed(0)}s`;
+          setStatus(`NS sim ${msg.localStr} — step ${msg.step_num}/${msg.total_steps} — max w=${msg.maxW.toFixed(2)} m/s`);
+          setProgress(0.35 + 0.6 * (msg.step_num / msg.total_steps));
 
-    const convergence_sum = new Float64Array(NY * NX);
-    const dT_weight_sum   = new Float64Array(NY * NX);
+          // Build a fake solver-like object so updateVisualization works unchanged
+          const fakeSolver = {
+            NX: msg.NX, NY: msg.NY, NZ: msg.NZ,
+            dx: msg.dx, dy: msg.dy, dz: msg.dz,
+            solidMask: msg.solid2d_plan,
+            _idx(ix, iy, iz){ return iy*this.NX+ix; },
+            getSliceTheta(){ return msg.theta_plan; },
+            getSliceUV()   { return {u: msg.u_plan, v: msg.v_plan}; },
+            getSliceW()    { return msg.w_plan; },
+            getVerticalSliceEW(){ return {theta: msg.ewTheta, solid: msg.ewSolid}; },
+            getVerticalSliceNS(){ return {theta: msg.nsTheta, solid: msg.nsSolid}; },
+          };
+          updateVisualization(fakeSolver, msg.iz_view);
 
-    while (t_sim < sunset_s && !_simShouldStop) {
-      const Q = interpolateHeatMap(heatMaps, t_sim);
-      solver.step(dt, Q);
-      t_sim += dt;
-      step_num++;
+        } else if (msg.type === 'log') {
+          log(msg.msg, msg.level || 'info');
+        } else if (msg.type === 'error') {
+          log(`NS SIMULATION ERROR: ${msg.msg}`, 'error');
+          setStatus('NS Simulation failed.');
+          reject(new Error(msg.msg));
+        } else if (msg.type === 'done') {
+          const {convergence_sum, dT_weight_sum} = msg;
+          const conv_field = new Float32Array(NY * NX);
+          for (let k=0;k<NY*NX;k++)
+            conv_field[k] = dT_weight_sum[k] > 0 ? convergence_sum[k] / dT_weight_sum[k] : 0;
+          const p99conv = percentile(conv_field, 99, true);
+          for (let k=0;k<NY*NX;k++) conv_field[k] = Math.min(1, Math.max(0, conv_field[k]/(p99conv+1e-9)));
 
-      // Update stats + visualization
-      if (step_num % stepsPerFrame === 0) {
-        const theta_surf = solver.getSurfaceTheta();
-        const w_surf     = solver.getSurfaceUVW().w;
-        let maxTheta = 0, maxW = 0;
-        for (let k=0;k<theta_surf.length;k++) { if (Math.abs(theta_surf[k])>maxTheta) maxTheta=Math.abs(theta_surf[k]); }
-        for (let k=0;k<w_surf.length;k++) { if (Math.abs(w_surf[k])>maxW) maxW=Math.abs(w_surf[k]); }
+          const takeoffLat  = parseFloat(document.getElementById('takeoff_lat').value);
+          const takeoffLon  = parseFloat(document.getElementById('takeoff_lon').value);
+          const landingLat  = parseFloat(document.getElementById('landing_lat').value);
+          const landingLon  = parseFloat(document.getElementById('landing_lon').value);
+          const [toX,toY] = lonlatToLocal(takeoffLon,takeoffLat,lon0,lat0);
+          const [laX,laY] = lonlatToLocal(landingLon,landingLat,lon0,lat0);
+          const toZ = elevAtLatLon(takeoffLat,takeoffLon,Z,NX,NY,bbox);
+          const laZ = elevAtLatLon(landingLat,landingLon,Z,NX,NY,bbox);
+          const zMin = Math.min(...Z);
+          const MESH_NX=mesh.nx, MESH_NY=mesh.ny;
+          const tf_full = new Float32Array(NY*NX);
+          for (let k=0;k<NY*NX;k++) tf_full[k]=thermal_factor[k];
 
-        // Estimate time remaining
-        const elapsed_ms = performance.now() - t_start_wall;
-        const steps_done = step_num;
-        const steps_total = total_steps;
-        const eta_ms = steps_done > 0 ? (elapsed_ms / steps_done) * (steps_total - steps_done) : 0;
-        const eta_s  = eta_ms / 1000;
-        const localH = Math.floor(((t_sim / 3600) + tzOffset + 24) % 24);
-        const localM = Math.floor((t_sim % 3600) / 60);
-        const localStr = String(localH).padStart(2,'0')+':'+String(localM).padStart(2,'0');
+          simResult = {
+            simulation_date: dateStr,
+            tz_offset: tzOffset,
+            interval_min: intervalMin,
+            tau_hours: tauHours,
+            max_heat: MAX_HEAT,
+            dalr: 0.0098,
+            T0: T0,
+            T0_diurnal: T0_diurnal,
+            ns_solver: {NX, NY, NZ, dz, domH, Cs, omega, maxIter, dt},
+            terrain: {
+              nx: NX, ny: NY, x_extent, y_extent,
+              z_extent: [zMin, zMin+2000], dx, dy,
+              arrow_step: 8,
+              elevation: float32ToNested(Z, NY, NX),
+              thermal_factor: float32ToNested(tf_full, NY, NX),
+              trigger_factor: float32ToNested(new Float32Array(NY*NX).fill(0.5), NY, NX),
+              convergence: float32ToNested(conv_field, NY, NX),
+              projection_origin: {lat: lat0, lon: lon0},
+              mesh_nx: MESH_NX, mesh_ny: MESH_NY,
+              mesh_dx: mesh.dx, mesh_dy: mesh.dy,
+              mesh_elevation: float32ToNested(mesh.Z, MESH_NY, MESH_NX),
+            },
+            markers: [
+              {name:'Landing',  type:'landing',  x:laX, y:laY, z:laZ},
+              {name:'Take-off', type:'takeoff',  x:toX, y:toY, z:toZ},
+            ],
+            scenarios: msg.scenario_output,
+          };
 
-        const statsEl = document.getElementById('ns-stats');
-        statsEl.textContent = `Time: ${localStr}  |  Step: ${step_num}/${total_steps}  |  max θ': ${maxTheta.toFixed(2)} K  |  max w: ${maxW.toFixed(2)} m/s  |  ETA: ${eta_s.toFixed(0)}s`;
-
-        setStatus(`NS sim ${localStr} — step ${step_num}/${total_steps} — max w=${maxW.toFixed(2)} m/s`);
-        setProgress(0.35 + 0.6 * (step_num / total_steps));
-
-        updateVisualization(solver, iz_view);
-        await yieldUI();
-      }
-
-      // Save output at scenario times
-      while (next_sc_idx < next_sc_times.length && t_sim >= next_sc_times[next_sc_idx]) {
-        const sc = scenarios_all[next_sc_idx];
-        const surf_theta = solver.getSurfaceTheta();
-        const {u: su, v: sv, w: sw} = solver.getSurfaceUVW();
-
-        // Convergence: -div(u,v) at surface level
-        const iz_bot_avg = Math.round(solver.bottomFluidIz.reduce((a,b)=>a+b,0)/solver.bottomFluidIz.length);
-        const conv_snap = new Float32Array(NY * NX);
-        for (let iy=0;iy<NY;iy++) {
-          for (let ix=0;ix<NX;ix++) {
-            const ixp = (ix+1)%NX, ixm = (ix-1+NX)%NX;
-            const iyp = (iy+1)%NY, iym = (iy-1+NY)%NY;
-            const duk = (su[iy*NX+ixp]-su[iy*NX+ixm])/(2*dx);
-            const dvk = (sv[iyp*NX+ix]-sv[iym*NX+ix])/(2*dy);
-            conv_snap[iy*NX+ix] = -(duk+dvk);
+          if (msg.stopped) {
+            log(`NS simulation stopped. ${msg.scenario_output.length} scenarios, ${msg.step_num} steps.`, 'warn');
+            setStatus('NS Simulation stopped.');
+          } else {
+            log(`NS simulation complete! ${msg.scenario_output.length} scenarios, ${msg.step_num} steps.`, 'success');
+            setProgress(1.0); setStatus('NS Simulation complete.');
           }
+          document.getElementById('btn-map').disabled = false;
+          resolve();
         }
-
-        for (let k=0;k<NY*NX;k++) {
-          const w_val = Math.max(sw[k], 0);
-          convergence_sum[k] += conv_snap[k] * w_val;
-          dT_weight_sum[k]   += w_val;
-        }
-
-        const M2H = 3600; // m/s → m/h
-        scenario_output.push({
-          name:         sc.name,
-          local_time:   sc.local_time,
-          utc_time:     sc.utc_time,
-          sun_azimuth:  sc.sun_azimuth,
-          sun_elevation:sc.sun_elevation,
-          ground_temp_anomaly: float32ToNested(surf_theta, NY, NX),
-          u_surface:    float32ToNested(su.map(v=>v*M2H), NY, NX),
-          v_surface:    float32ToNested(sv.map(v=>v*M2H), NY, NX),
-          w_vel:        float32ToNested(sw, NY, NX),
-          convergence:  float32ToNested(conv_snap, NY, NX),
-        });
-        log(`Saved scenario ${sc.local_time}: max θ'=${Math.max(...surf_theta).toFixed(2)} K`, 'success');
-        next_sc_idx++;
-      }
-    }
-
-    // Final visualization
-    updateVisualization(solver, iz_view);
-    await yieldUI();
-
-    // Build convergence field
-    const conv_field = new Float32Array(NY * NX);
-    for (let k=0;k<NY*NX;k++)
-      conv_field[k] = dT_weight_sum[k] > 0 ? convergence_sum[k] / dT_weight_sum[k] : 0;
-    const p99conv = percentile(conv_field, 99, true);
-    for (let k=0;k<NY*NX;k++) conv_field[k] = Math.min(1, Math.max(0, conv_field[k]/(p99conv+1e-9)));
-
-    // Markers
-    const takeoffLat  = parseFloat(document.getElementById('takeoff_lat').value);
-    const takeoffLon  = parseFloat(document.getElementById('takeoff_lon').value);
-    const landingLat  = parseFloat(document.getElementById('landing_lat').value);
-    const landingLon  = parseFloat(document.getElementById('landing_lon').value);
-    const [toX,toY] = lonlatToLocal(takeoffLon,takeoffLat,lon0,lat0);
-    const [laX,laY] = lonlatToLocal(landingLon,landingLat,lon0,lat0);
-    const toZ = elevAtLatLon(takeoffLat,takeoffLon,Z,NX,NY,bbox);
-    const laZ = elevAtLatLon(landingLat,landingLon,Z,NX,NY,bbox);
-
-    const zMin=Math.min(...Z), zMax=Math.max(...Z);
-    const MESH_NX=mesh.nx, MESH_NY=mesh.ny;
-
-    // Build thermal factor for full output (also resample for display)
-    const tf_full = new Float32Array(NY*NX);
-    for (let k=0;k<NY*NX;k++) tf_full[k]=thermal_factor[k];
-    const trigger_factor = new Float32Array(NY*NX).fill(0.5); // placeholder
-
-    simResult = {
-      simulation_date: dateStr,
-      tz_offset: tzOffset,
-      interval_min: intervalMin,
-      tau_hours: tauHours,
-      max_heat: MAX_HEAT,
-      dalr: 0.0098,
-      T0: T0,
-      T0_diurnal: T0_diurnal,
-      ns_solver: {NX, NY, NZ, dz, domH, Cs, omega, maxIter, dt},
-      terrain: {
-        nx: NX, ny: NY,
-        x_extent, y_extent,
-        z_extent: [zMin, zMin+2000],
-        dx, dy,
-        arrow_step: 8,
-        elevation: float32ToNested(Z, NY, NX),
-        thermal_factor: float32ToNested(tf_full, NY, NX),
-        trigger_factor: float32ToNested(trigger_factor, NY, NX),
-        convergence: float32ToNested(conv_field, NY, NX),
-        projection_origin: {lat: lat0, lon: lon0},
-        mesh_nx: MESH_NX, mesh_ny: MESH_NY,
-        mesh_dx: mesh.dx, mesh_dy: mesh.dy,
-        mesh_elevation: float32ToNested(mesh.Z, MESH_NY, MESH_NX),
-      },
-      markers: [
-        {name:'Landing',  type:'landing',  x:laX, y:laY, z:laZ},
-        {name:'Take-off', type:'takeoff',  x:toX, y:toY, z:toZ},
-      ],
-      scenarios: scenario_output,
-    };
-
-    if (_simShouldStop) {
-      log(`NS simulation stopped. ${scenario_output.length} scenarios, ${step_num} steps.`, 'warn');
-      setStatus('NS Simulation stopped.');
-    } else {
-      log(`NS simulation complete! ${scenario_output.length} scenarios, ${step_num} steps.`, 'success');
-      setProgress(1.0); setStatus('NS Simulation complete.');
-    }
-    document.getElementById('btn-map').disabled = false;
+      };
+      _activeWorker.onerror = function(e) {
+        reject(new Error(e.message));
+      };
+      _activeWorker.postMessage({
+        type: 'init',
+        solverParams: {NX, NY, NZ, dx, dy, dz, ELR_km, T0, Cs, omega, maxIter},
+        solidMaskBuf: solidMaskCopy.buffer,
+        heatMapsData,
+        simParams: {dt, stepsPerFrame, sunrise_s, sunset_s, total_steps, tzOffset, iz_view, scenarios_all, intervalMin},
+      }, transferList);
+    });
 
   } catch(e) {
     log(`NS SIMULATION ERROR: ${e.message||e}`, 'error');
     console.error(e); setStatus('NS Simulation failed.');
+  } finally {
+    if (_activeWorker) { _activeWorker.terminate(); _activeWorker = null; }
+    document.getElementById('btn-fetch').disabled = false;
+    document.getElementById('btn-sim').disabled = false;
+    document.getElementById('btn-stop').disabled = true;
   }
-
-  document.getElementById('btn-fetch').disabled = false;
-  document.getElementById('btn-sim').disabled = false;
-  document.getElementById('btn-stop').disabled = true;
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -2147,6 +2095,581 @@ async function openViewer() {
   } catch(e) {
     log(`Could not save to IndexedDB (${e.message}). Try downloading JSON instead.`, 'error');
   }
+}
+</script>
+
+<script type="text/worker" id="ns3d-worker-src">
+'use strict';
+class NS3D {
+  constructor({NX, NY, NZ, dx, dy, dz, solidMask, ELR, T_ref, Cs, omega, maxIter}) {
+    this.NX = NX; this.NY = NY; this.NZ = NZ;
+    this.dx = dx; this.dy = dy; this.dz = dz;
+    this.solidMask = solidMask; // Uint8Array[NZ*NY*NX], 1=solid
+    this.ELR = ELR / 1000;     // K/m (input is K/km)
+    this.DALR = 9.76 / 1000;   // K/m
+    this.T_ref = T_ref;         // reference temperature K
+    this.Cs = Cs;
+    this.omega = omega;
+    this.maxIter = maxIter;
+    this.g = 9.81;
+
+    const N = NX * NY * NZ;
+    this.u = new Float64Array(N);     // x-velocity (East)
+    this.v = new Float64Array(N);     // y-velocity (South)
+    this.w = new Float64Array(N);     // z-velocity (Up)
+    this.p = new Float64Array(N);     // pressure / rho0
+    this.theta = new Float64Array(N); // potential temperature anomaly θ'
+    this.nu_t = new Float64Array(N);  // turbulent viscosity
+
+    // Precompute bottom fluid iz for each column
+    this.bottomFluidIz = new Int32Array(NX * NY).fill(NZ - 1);
+    for (let iy = 0; iy < NY; iy++) {
+      for (let ix = 0; ix < NX; ix++) {
+        for (let iz = 0; iz < NZ; iz++) {
+          if (!solidMask[iz * NY * NX + iy * NX + ix]) {
+            this.bottomFluidIz[iy * NX + ix] = iz;
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  _idx(ix, iy, iz) { return iz * this.NY * this.NX + iy * this.NX + ix; }
+  _wrapX(ix) { return ((ix % this.NX) + this.NX) % this.NX; }
+  _wrapY(iy) { return ((iy % this.NY) + this.NY) % this.NY; }
+  _isSolid(ix, iy, iz) {
+    if (iz < 0 || iz >= this.NZ) return true;
+    return !!this.solidMask[this._idx(this._wrapX(ix), this._wrapY(iy), iz)];
+  }
+
+  // Get field value with BCs: periodic x/y, Neumann z top, 0 in solid
+  _getF(arr, ix, iy, iz) {
+    if (iz < 0) iz = 0;
+    if (iz >= this.NZ) iz = this.NZ - 1;
+    const wx = this._wrapX(ix), wy = this._wrapY(iy);
+    if (this.solidMask[this._idx(wx, wy, iz)]) return 0;
+    return arr[this._idx(wx, wy, iz)];
+  }
+
+  // Get pressure with Neumann BC at solid faces and boundaries
+  _getP(p, ix, iy, iz) {
+    // Top boundary: Neumann (copy from below)
+    if (iz >= this.NZ) return p[this._idx(this._wrapX(ix), this._wrapY(iy), this.NZ - 1)];
+    if (iz < 0) return p[this._idx(this._wrapX(ix), this._wrapY(iy), 0)];
+    const wx = this._wrapX(ix), wy = this._wrapY(iy);
+    if (this.solidMask[this._idx(wx, wy, iz)]) {
+      // Return pressure of calling center (Neumann: dp/dn=0)
+      return null; // handled by caller reducing stencil diagonal
+    }
+    return p[this._idx(wx, wy, iz)];
+  }
+
+  computeSmagorinsky() {
+    const {NX,NY,NZ,dx,dy,dz,Cs,solidMask,u,v,w,nu_t} = this;
+    const delta = Math.pow(dx * dy * dz, 1/3);
+    const Cs2_delta2 = (Cs * delta) ** 2;
+    const dt_stab_inv = 1; // will clamp separately
+
+    for (let iz = 0; iz < NZ; iz++) {
+      for (let iy = 0; iy < NY; iy++) {
+        for (let ix = 0; ix < NX; ix++) {
+          const k = this._idx(ix, iy, iz);
+          if (solidMask[k]) { nu_t[k] = 0; continue; }
+
+          const dudx = (this._getF(u,ix+1,iy,iz) - this._getF(u,ix-1,iy,iz)) / (2*dx);
+          const dudy = (this._getF(u,ix,iy+1,iz) - this._getF(u,ix,iy-1,iz)) / (2*dy);
+          const dudz = (this._getF(u,ix,iy,iz+1) - this._getF(u,ix,iy,iz-1)) / (2*dz);
+          const dvdx = (this._getF(v,ix+1,iy,iz) - this._getF(v,ix-1,iy,iz)) / (2*dx);
+          const dvdy = (this._getF(v,ix,iy+1,iz) - this._getF(v,ix,iy-1,iz)) / (2*dy);
+          const dvdz = (this._getF(v,ix,iy,iz+1) - this._getF(v,ix,iy,iz-1)) / (2*dz);
+          const dwdx = (this._getF(w,ix+1,iy,iz) - this._getF(w,ix-1,iy,iz)) / (2*dx);
+          const dwdy = (this._getF(w,ix,iy+1,iz) - this._getF(w,ix,iy-1,iz)) / (2*dy);
+          const dwdz = (this._getF(w,ix,iy,iz+1) - this._getF(w,ix,iy,iz-1)) / (2*dz);
+
+          const S11=dudx, S22=dvdy, S33=dwdz;
+          const S12=0.5*(dudy+dvdx), S13=0.5*(dudz+dwdx), S23=0.5*(dvdz+dwdy);
+          const SijSij = S11*S11 + S22*S22 + S33*S33 + 2*(S12*S12 + S13*S13 + S23*S23);
+          nu_t[k] = Cs2_delta2 * Math.sqrt(2 * SijSij);
+        }
+      }
+    }
+  }
+
+  // Semi-Lagrangian advection of field f, returns new Float64Array
+  advectField(f, dt) {
+    const {NX,NY,NZ,dx,dy,dz,u,v,w,solidMask} = this;
+    const fNew = new Float64Array(f.length);
+    for (let iz = 0; iz < NZ; iz++) {
+      for (let iy = 0; iy < NY; iy++) {
+        for (let ix = 0; ix < NX; ix++) {
+          const k = this._idx(ix, iy, iz);
+          if (solidMask[k]) { fNew[k] = 0; continue; }
+
+          // Backtrack departure point
+          const xd = ix - u[k] * dt / dx;
+          const yd = iy - v[k] * dt / dy;
+          const zd = iz - w[k] * dt / dz;
+
+          // Trilinear interpolation
+          const i0 = Math.floor(xd), j0 = Math.floor(yd), k0 = Math.floor(zd);
+          const ti = xd - i0, tj = yd - j0, tk_ = zd - k0;
+
+          const v000 = this._getF(f,i0,  j0,  k0);
+          const v100 = this._getF(f,i0+1,j0,  k0);
+          const v010 = this._getF(f,i0,  j0+1,k0);
+          const v110 = this._getF(f,i0+1,j0+1,k0);
+          const v001 = this._getF(f,i0,  j0,  k0+1);
+          const v101 = this._getF(f,i0+1,j0,  k0+1);
+          const v011 = this._getF(f,i0,  j0+1,k0+1);
+          const v111 = this._getF(f,i0+1,j0+1,k0+1);
+
+          fNew[k] = v000*(1-ti)*(1-tj)*(1-tk_)
+                  + v100*ti*(1-tj)*(1-tk_)
+                  + v010*(1-ti)*tj*(1-tk_)
+                  + v110*ti*tj*(1-tk_)
+                  + v001*(1-ti)*(1-tj)*tk_
+                  + v101*ti*(1-tj)*tk_
+                  + v011*(1-ti)*tj*tk_
+                  + v111*ti*tj*tk_;
+        }
+      }
+    }
+    return fNew;
+  }
+
+  // Divergence of (us,vs,ws) — central differences — returns Float64Array (units: 1/s)
+  computeDivergence(us, vs, ws) {
+    const {NX,NY,NZ,dx,dy,dz,solidMask} = this;
+    const div = new Float64Array(NX * NY * NZ);
+    for (let iz = 0; iz < NZ; iz++) {
+      for (let iy = 0; iy < NY; iy++) {
+        for (let ix = 0; ix < NX; ix++) {
+          const k = this._idx(ix, iy, iz);
+          if (solidMask[k]) continue;
+          const duk = (this._getF(us,ix+1,iy,iz) - this._getF(us,ix-1,iy,iz)) / (2*dx);
+          const dvk = (this._getF(vs,ix,iy+1,iz) - this._getF(vs,ix,iy-1,iz)) / (2*dy);
+          const dwk = (this._getF(ws,ix,iy,iz+1) - this._getF(ws,ix,iy,iz-1)) / (2*dz);
+          div[k] = duk + dvk + dwk;
+        }
+      }
+    }
+    return div;
+  }
+
+  // Red-Black SOR pressure Poisson: ∇²p = div/dt
+  solvePressurePoisson(div, dt) {
+    const {NX,NY,NZ,dx,dy,dz,solidMask,omega,maxIter,p} = this;
+    const idx2 = this._idx.bind(this);
+    const wx = this._wrapX.bind(this);
+    const wy = this._wrapY.bind(this);
+    const dx2=dx*dx, dy2=dy*dy, dz2=dz*dz;
+
+    for (let iter = 0; iter < maxIter; iter++) {
+      // Red-black pass (parity = (ix+iy+iz)%2)
+      for (let parity = 0; parity < 2; parity++) {
+        for (let iz = 0; iz < NZ; iz++) {
+          for (let iy = 0; iy < NY; iy++) {
+            for (let ix = 0; ix < NX; ix++) {
+              if ((ix + iy + iz) % 2 !== parity) continue;
+              const k = idx2(ix, iy, iz);
+              if (solidMask[k]) continue;
+
+              // Count fluid neighbors and sum their pressures
+              let psum = 0, nfluid = 0;
+
+              // x neighbors (periodic)
+              const ixp = wx(ix+1), ixm = wx(ix-1);
+              if (!solidMask[idx2(ixp,iy,iz)]) { psum += p[idx2(ixp,iy,iz)] / dx2; nfluid += 1/dx2; }
+              if (!solidMask[idx2(ixm,iy,iz)]) { psum += p[idx2(ixm,iy,iz)] / dx2; nfluid += 1/dx2; }
+
+              // y neighbors (periodic)
+              const iyp = wy(iy+1), iym = wy(iy-1);
+              if (!solidMask[idx2(ix,iyp,iz)]) { psum += p[idx2(ix,iyp,iz)] / dy2; nfluid += 1/dy2; }
+              if (!solidMask[idx2(ix,iym,iz)]) { psum += p[idx2(ix,iym,iz)] / dy2; nfluid += 1/dy2; }
+
+              // z neighbors (Neumann at boundaries/solid)
+              const izp = iz+1, izm = iz-1;
+              if (izp < NZ && !solidMask[idx2(ix,iy,izp)]) { psum += p[idx2(ix,iy,izp)] / dz2; nfluid += 1/dz2; }
+              else { /* Neumann: p_ghost = p_center, contributes 0 net */ }
+              if (izm >= 0 && !solidMask[idx2(ix,iy,izm)]) { psum += p[idx2(ix,iy,izm)] / dz2; nfluid += 1/dz2; }
+              else { /* Neumann */ }
+
+              if (nfluid < 1e-12) continue;
+              const rhs = div[k] / dt;
+              const p_gs = (psum - rhs) / nfluid;
+              p[k] = p[k] + omega * (p_gs - p[k]);
+            }
+          }
+        }
+      }
+
+      // Remove mean pressure every 20 iterations (handle null space)
+      if ((iter + 1) % 20 === 0) {
+        let pmean = 0, cnt = 0;
+        for (let k2 = 0; k2 < NX*NY*NZ; k2++) { if (!solidMask[k2]) { pmean += p[k2]; cnt++; } }
+        if (cnt > 0) { pmean /= cnt; for (let k2 = 0; k2 < NX*NY*NZ; k2++) if (!solidMask[k2]) p[k2] -= pmean; }
+      }
+    }
+  }
+
+  // Explicit diffusion applied in-place to u,v,w,theta
+  addDiffusion(us, vs, ws, theta_in, dt) {
+    const {NX,NY,NZ,dx,dy,dz,solidMask,nu_t} = this;
+    const Prt = 0.7;
+    const minDim = Math.min(dx,dy,dz);
+    const tmp_u = new Float64Array(us.length);
+    const tmp_v = new Float64Array(vs.length);
+    const tmp_w = new Float64Array(ws.length);
+    const tmp_t = new Float64Array(theta_in.length);
+
+    for (let iz = 0; iz < NZ; iz++) {
+      for (let iy = 0; iy < NY; iy++) {
+        for (let ix = 0; ix < NX; ix++) {
+          const k = this._idx(ix, iy, iz);
+          if (solidMask[k]) continue;
+          // Clamp nu_t for stability
+          const nu = Math.min(nu_t[k], 0.4 * minDim * minDim / (dt + 1e-30));
+          const kap = nu / Prt;
+
+          const lap_u = (this._getF(us,ix+1,iy,iz)-2*us[k]+this._getF(us,ix-1,iy,iz))/(dx*dx)
+                      + (this._getF(us,ix,iy+1,iz)-2*us[k]+this._getF(us,ix,iy-1,iz))/(dy*dy)
+                      + (this._getF(us,ix,iy,iz+1)-2*us[k]+this._getF(us,ix,iy,iz-1))/(dz*dz);
+          const lap_v = (this._getF(vs,ix+1,iy,iz)-2*vs[k]+this._getF(vs,ix-1,iy,iz))/(dx*dx)
+                      + (this._getF(vs,ix,iy+1,iz)-2*vs[k]+this._getF(vs,ix,iy-1,iz))/(dy*dy)
+                      + (this._getF(vs,ix,iy,iz+1)-2*vs[k]+this._getF(vs,ix,iy,iz-1))/(dz*dz);
+          const lap_w = (this._getF(ws,ix+1,iy,iz)-2*ws[k]+this._getF(ws,ix-1,iy,iz))/(dx*dx)
+                      + (this._getF(ws,ix,iy+1,iz)-2*ws[k]+this._getF(ws,ix,iy-1,iz))/(dy*dy)
+                      + (this._getF(ws,ix,iy,iz+1)-2*ws[k]+this._getF(ws,ix,iy,iz-1))/(dz*dz);
+          const lap_t = (this._getF(theta_in,ix+1,iy,iz)-2*theta_in[k]+this._getF(theta_in,ix-1,iy,iz))/(dx*dx)
+                      + (this._getF(theta_in,ix,iy+1,iz)-2*theta_in[k]+this._getF(theta_in,ix,iy-1,iz))/(dy*dy)
+                      + (this._getF(theta_in,ix,iy,iz+1)-2*theta_in[k]+this._getF(theta_in,ix,iy,iz-1))/(dz*dz);
+
+          tmp_u[k] = us[k] + dt * nu * lap_u;
+          tmp_v[k] = vs[k] + dt * nu * lap_v;
+          tmp_w[k] = ws[k] + dt * nu * lap_w;
+          tmp_t[k] = theta_in[k] + dt * kap * lap_t;
+        }
+      }
+    }
+    // Copy back
+    for (let k = 0; k < NX*NY*NZ; k++) {
+      if (solidMask[k]) continue;
+      us[k] = tmp_u[k]; vs[k] = tmp_v[k]; ws[k] = tmp_w[k]; theta_in[k] = tmp_t[k];
+    }
+  }
+
+  // One full NS timestep
+  // Q_Ks: Float32Array[NY*NX] surface heat flux in K/s
+  step(dt, Q_Ks) {
+    const {NX,NY,NZ,solidMask,g,T_ref,DALR,ELR,bottomFluidIz} = this;
+
+    // 1. Compute Smagorinsky turbulent viscosity
+    this.computeSmagorinsky();
+
+    // 2. Semi-Lagrangian advection of u,v,w,theta
+    const u_adv = this.advectField(this.u, dt);
+    const v_adv = this.advectField(this.v, dt);
+    const w_adv = this.advectField(this.w, dt);
+    const th_adv = this.advectField(this.theta, dt);
+
+    // 3. Diffusion (in-place on adv arrays)
+    this.addDiffusion(u_adv, v_adv, w_adv, th_adv, dt);
+
+    // 4. Buoyancy: w* += g*dt*θ'/T0
+    for (let iz = 0; iz < NZ; iz++) {
+      for (let iy = 0; iy < NY; iy++) {
+        for (let ix = 0; ix < NX; ix++) {
+          const k = this._idx(ix, iy, iz);
+          if (solidMask[k]) continue;
+          w_adv[k] += g * dt * th_adv[k] / T_ref;
+        }
+      }
+    }
+
+    // 5. Background stratification: θ'* -= w*(DALR-ELR)*dt
+    const strat = DALR - ELR; // positive = stable
+    for (let iz = 0; iz < NZ; iz++) {
+      for (let iy = 0; iy < NY; iy++) {
+        for (let ix = 0; ix < NX; ix++) {
+          const k = this._idx(ix, iy, iz);
+          if (solidMask[k]) continue;
+          th_adv[k] -= w_adv[k] * strat * dt;
+        }
+      }
+    }
+
+    // 6. Surface heat flux: add Q_Ks*dt to bottom fluid cell theta
+    if (Q_Ks) {
+      for (let iy = 0; iy < NY; iy++) {
+        for (let ix = 0; ix < NX; ix++) {
+          const iz_bot = bottomFluidIz[iy * NX + ix];
+          const k = this._idx(ix, iy, iz_bot);
+          th_adv[k] += Q_Ks[iy * NX + ix] * dt;
+        }
+      }
+    }
+
+    // 7. Enforce no-slip on solid boundaries: zero velocity adjacent to solid
+    for (let iz = 0; iz < NZ; iz++) {
+      for (let iy = 0; iy < NY; iy++) {
+        for (let ix = 0; ix < NX; ix++) {
+          const k = this._idx(ix, iy, iz);
+          if (solidMask[k]) { u_adv[k]=0; v_adv[k]=0; w_adv[k]=0; th_adv[k]=0; }
+        }
+      }
+    }
+    // Zero w at top boundary
+    for (let iy = 0; iy < NY; iy++)
+      for (let ix = 0; ix < NX; ix++)
+        w_adv[this._idx(ix,iy,NZ-1)] = 0;
+
+    // 8. Solve pressure Poisson
+    const div = this.computeDivergence(u_adv, v_adv, w_adv);
+    this.solvePressurePoisson(div, dt);
+
+    // 9. Project: u = u* - dt*∇p
+    const {dx,dy,dz,p} = this;
+    for (let iz = 0; iz < NZ; iz++) {
+      for (let iy = 0; iy < NY; iy++) {
+        for (let ix = 0; ix < NX; ix++) {
+          const k = this._idx(ix, iy, iz);
+          if (solidMask[k]) continue;
+          // Pressure gradient with Neumann at solid/boundary
+          const wx_p = this._wrapX.bind(this), wy_p = this._wrapY.bind(this);
+
+          const ixp = wx_p(ix+1), ixm = wx_p(ix-1);
+          const iyp = wy_p(iy+1), iym = wy_p(iy-1);
+
+          // For cells next to solid, use one-sided difference (Neumann: dp/dn=0 → ghost=center)
+          let dpx, dpy, dpz;
+          const kxp = this._idx(ixp,iy,iz), kxm = this._idx(ixm,iy,iz);
+          const kyp = this._idx(ix,iyp,iz), kym = this._idx(ix,iym,iz);
+
+          if (!solidMask[kxp] && !solidMask[kxm]) dpx = (p[kxp]-p[kxm])/(2*dx);
+          else if (!solidMask[kxp]) dpx = (p[kxp]-p[k])/dx;
+          else if (!solidMask[kxm]) dpx = (p[k]-p[kxm])/dx;
+          else dpx = 0;
+
+          if (!solidMask[kyp] && !solidMask[kym]) dpy = (p[kyp]-p[kym])/(2*dy);
+          else if (!solidMask[kyp]) dpy = (p[kyp]-p[k])/dy;
+          else if (!solidMask[kym]) dpy = (p[k]-p[kym])/dy;
+          else dpy = 0;
+
+          const izp = iz+1, izm = iz-1;
+          const pzp = (izp<NZ && !solidMask[this._idx(ix,iy,izp)]) ? p[this._idx(ix,iy,izp)] : p[k];
+          const pzm = (izm>=0 && !solidMask[this._idx(ix,iy,izm)]) ? p[this._idx(ix,iy,izm)] : p[k];
+          dpz = (pzp - pzm) / (2 * dz);
+
+          u_adv[k] -= dt * dpx;
+          v_adv[k] -= dt * dpy;
+          w_adv[k] -= dt * dpz;
+        }
+      }
+    }
+
+    // Enforce BCs again after projection
+    for (let k = 0; k < NX*NY*NZ; k++) if (solidMask[k]) { u_adv[k]=0; v_adv[k]=0; w_adv[k]=0; }
+    for (let iy = 0; iy < NY; iy++)
+      for (let ix = 0; ix < NX; ix++)
+        w_adv[this._idx(ix,iy,NZ-1)] = 0;
+
+    // Store back
+    this.u = u_adv; this.v = v_adv; this.w = w_adv; this.theta = th_adv;
+  }
+
+  // Surface θ' at bottom fluid cell
+  getSurfaceTheta() {
+    const {NX,NY,bottomFluidIz} = this;
+    const out = new Float32Array(NY*NX);
+    for (let iy=0;iy<NY;iy++) for (let ix=0;ix<NX;ix++)
+      out[iy*NX+ix] = this.theta[this._idx(ix,iy,bottomFluidIz[iy*NX+ix])];
+    return out;
+  }
+  getSurfaceUVW() {
+    const {NX,NY,bottomFluidIz} = this;
+    const u=new Float32Array(NY*NX), v=new Float32Array(NY*NX), w=new Float32Array(NY*NX);
+    for (let iy=0;iy<NY;iy++) for (let ix=0;ix<NX;ix++) {
+      const k=this._idx(ix,iy,bottomFluidIz[iy*NX+ix]);
+      u[iy*NX+ix]=this.u[k]; v[iy*NX+ix]=this.v[k]; w[iy*NX+ix]=this.w[k];
+    }
+    return {u,v,w};
+  }
+  getSliceTheta(iz) {
+    const {NX,NY} = this;
+    const out=new Float32Array(NY*NX);
+    for (let iy=0;iy<NY;iy++) for (let ix=0;ix<NX;ix++) out[iy*NX+ix]=this.theta[this._idx(ix,iy,iz)];
+    return out;
+  }
+  getSliceW(iz) {
+    const {NX,NY} = this;
+    const out=new Float32Array(NY*NX);
+    for (let iy=0;iy<NY;iy++) for (let ix=0;ix<NX;ix++) out[iy*NX+ix]=this.w[this._idx(ix,iy,iz)];
+    return out;
+  }
+  getSliceUV(iz) {
+    const {NX,NY} = this;
+    const u=new Float32Array(NY*NX), v=new Float32Array(NY*NX);
+    for (let iy=0;iy<NY;iy++) for (let ix=0;ix<NX;ix++) {
+      u[iy*NX+ix]=this.u[this._idx(ix,iy,iz)];
+      v[iy*NX+ix]=this.v[this._idx(ix,iy,iz)];
+    }
+    return {u,v};
+  }
+  // EW cross-section at iy: returns {theta, w} as Float32Array[NZ*NX]
+  getVerticalSliceEW(iy) {
+    const {NX,NZ,solidMask} = this;
+    const theta=new Float32Array(NZ*NX), w=new Float32Array(NZ*NX);
+    const solid=new Uint8Array(NZ*NX);
+    for (let iz=0;iz<NZ;iz++) for (let ix=0;ix<NX;ix++) {
+      theta[iz*NX+ix]=this.theta[this._idx(ix,iy,iz)];
+      w[iz*NX+ix]=this.w[this._idx(ix,iy,iz)];
+      solid[iz*NX+ix]=solidMask[this._idx(ix,iy,iz)];
+    }
+    return {theta,w,solid};
+  }
+  // NS cross-section at ix
+  getVerticalSliceNS(ix) {
+    const {NY,NZ,solidMask} = this;
+    const theta=new Float32Array(NZ*NY), w=new Float32Array(NZ*NY);
+    const solid=new Uint8Array(NZ*NY);
+    for (let iz=0;iz<NZ;iz++) for (let iy=0;iy<NY;iy++) {
+      theta[iz*NY+iy]=this.theta[this._idx(ix,iy,iz)];
+      w[iz*NY+iy]=this.w[this._idx(ix,iy,iz)];
+      solid[iz*NY+iy]=solidMask[this._idx(ix,iy,iz)];
+    }
+    return {theta,w,solid};
+  }
+}
+
+function interpolateHeatMap(heatMaps, t_sim) {
+  if (!heatMaps.length) return null;
+  if (heatMaps.length === 1) return heatMaps[0].Q_Ks;
+  if (t_sim <= heatMaps[0].time_s) return heatMaps[0].Q_Ks;
+  if (t_sim >= heatMaps[heatMaps.length-1].time_s) return heatMaps[heatMaps.length-1].Q_Ks;
+  let lo = 0;
+  for (let i = 0; i < heatMaps.length-1; i++) {
+    if (heatMaps[i].time_s <= t_sim && t_sim < heatMaps[i+1].time_s) { lo = i; break; }
+  }
+  const a = heatMaps[lo], b = heatMaps[lo+1];
+  const alpha = (t_sim - a.time_s) / (b.time_s - a.time_s + 1e-9);
+  const Q = new Float32Array(a.Q_Ks.length);
+  for (let k = 0; k < Q.length; k++) Q[k] = a.Q_Ks[k]*(1-alpha) + b.Q_Ks[k]*alpha;
+  return Q;
+}
+
+function float32ToNested(arr, ny, nx) {
+  return Array.from({length: ny}, (_,j) => Array.from({length: nx}, (_,i) => arr[j*nx+i]));
+}
+
+let _stopFlag = false;
+
+self.onmessage = function(e) {
+  if (e.data.type === 'stop') { _stopFlag = true; return; }
+  if (e.data.type === 'init') {
+    _stopFlag = false;
+    runSim(e.data).catch(err => self.postMessage({type:'error', msg: String(err)}));
+  }
+};
+
+async function runSim({solverParams, solidMaskBuf, heatMapsData, simParams}) {
+  const solidMask = new Uint8Array(solidMaskBuf);
+  const {NX, NY, NZ, dx, dy, dz, ELR_km, T0, Cs, omega, maxIter} = solverParams;
+  const {dt, stepsPerFrame, sunrise_s, sunset_s, total_steps, tzOffset, iz_view, scenarios_all, intervalMin} = simParams;
+
+  const heatMaps = heatMapsData.map(hm => ({time_s: hm.time_s, Q_Ks: new Float32Array(hm.buf)}));
+  const solver = new NS3D({NX, NY, NZ, dx, dy, dz, solidMask, ELR: ELR_km, T_ref: T0, Cs, omega, maxIter});
+
+  let t_sim = sunrise_s, step_num = 0;
+  const t_start = Date.now();
+
+  const scenario_output = [];
+  const convergence_sum = new Float64Array(NY * NX);
+  const dT_weight_sum   = new Float64Array(NY * NX);
+  const next_sc_times = scenarios_all.map(sc => sc.time_s);
+  let next_sc_idx = 0;
+
+  while (t_sim < sunset_s && !_stopFlag) {
+    const Q = interpolateHeatMap(heatMaps, t_sim);
+    solver.step(dt, Q);
+    t_sim += dt;
+    step_num++;
+
+    if (step_num % stepsPerFrame === 0) {
+      const theta_plan = solver.getSliceTheta(iz_view);
+      const {u: u_plan, v: v_plan} = solver.getSliceUV(iz_view);
+      const w_plan = solver.getSliceW(iz_view);
+      const solid2d_plan = new Uint8Array(NY * NX);
+      for (let iy=0;iy<NY;iy++) for (let ix=0;ix<NX;ix++)
+        solid2d_plan[iy*NX+ix] = solver.solidMask[solver._idx(ix,iy,iz_view)];
+      const ewSlice = solver.getVerticalSliceEW(Math.floor(NY/2));
+      const nsSlice = solver.getVerticalSliceNS(Math.floor(NX/2));
+
+      const elapsed_ms = Date.now() - t_start;
+      let maxTheta = 0, maxW = 0;
+      for (let k=0;k<theta_plan.length;k++) if (Math.abs(theta_plan[k])>maxTheta) maxTheta=Math.abs(theta_plan[k]);
+      for (let k=0;k<w_plan.length;k++) if (Math.abs(w_plan[k])>maxW) maxW=Math.abs(w_plan[k]);
+      const localH = Math.floor(((t_sim / 3600) + tzOffset + 24) % 24);
+      const localM = Math.floor((t_sim % 3600) / 60);
+      const localStr = String(localH).padStart(2,'0')+':'+String(localM).padStart(2,'0');
+
+      self.postMessage({
+        type: 'frame',
+        step_num, total_steps, t_sim, elapsed_ms, maxTheta, maxW, localStr,
+        NX, NY, NZ, dx, dy, dz, iz_view,
+        theta_plan, u_plan, v_plan, w_plan, solid2d_plan,
+        ewTheta: ewSlice.theta, ewSolid: ewSlice.solid,
+        nsTheta: nsSlice.theta, nsSolid: nsSlice.solid,
+      }, [theta_plan.buffer, u_plan.buffer, v_plan.buffer, w_plan.buffer,
+          solid2d_plan.buffer, ewSlice.theta.buffer, ewSlice.solid.buffer,
+          nsSlice.theta.buffer, nsSlice.solid.buffer]);
+
+      await new Promise(r => setTimeout(r, 0));
+    }
+
+    while (next_sc_idx < next_sc_times.length && t_sim >= next_sc_times[next_sc_idx]) {
+      const sc = scenarios_all[next_sc_idx];
+      const surf_theta = solver.getSurfaceTheta();
+      const {u: su, v: sv, w: sw} = solver.getSurfaceUVW();
+
+      const conv_snap = new Float32Array(NY * NX);
+      for (let iy=0;iy<NY;iy++) {
+        for (let ix=0;ix<NX;ix++) {
+          const ixp = (ix+1)%NX, ixm = (ix-1+NX)%NX;
+          const iyp = (iy+1)%NY, iym = (iy-1+NY)%NY;
+          const duk = (su[iy*NX+ixp]-su[iy*NX+ixm])/(2*dx);
+          const dvk = (sv[iyp*NX+ix]-sv[iym*NX+ix])/(2*dy);
+          conv_snap[iy*NX+ix] = -(duk+dvk);
+        }
+      }
+      for (let k=0;k<NY*NX;k++) {
+        const w_val = Math.max(sw[k], 0);
+        convergence_sum[k] += conv_snap[k] * w_val;
+        dT_weight_sum[k]   += w_val;
+      }
+      const M2H = 3600;
+      scenario_output.push({
+        name: sc.name, local_time: sc.local_time, utc_time: sc.utc_time,
+        sun_azimuth: sc.sun_azimuth, sun_elevation: sc.sun_elevation,
+        ground_temp_anomaly: float32ToNested(surf_theta, NY, NX),
+        u_surface: float32ToNested(su.map(v=>v*M2H), NY, NX),
+        v_surface: float32ToNested(sv.map(v=>v*M2H), NY, NX),
+        w_vel:     float32ToNested(sw, NY, NX),
+        convergence: float32ToNested(conv_snap, NY, NX),
+      });
+      self.postMessage({type:'log', msg:`Saved scenario ${sc.local_time}: max θ'=${Math.max(...surf_theta).toFixed(2)} K`, level:'success'});
+      next_sc_idx++;
+    }
+  }
+
+  self.postMessage({
+    type: 'done',
+    stopped: _stopFlag,
+    step_num,
+    scenario_output,
+    convergence_sum,
+    dT_weight_sum,
+  }, [convergence_sum.buffer, dT_weight_sum.buffer]);
 }
 </script>
 </body>
