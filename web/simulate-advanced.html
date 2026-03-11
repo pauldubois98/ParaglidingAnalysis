@@ -285,19 +285,19 @@
           <input type="time" id="start_time" value="06:00" oninput="onStartTimeChange()">
         </div>
         <div>
-          <label class="field-label">Elev start (°)</label>
-          <input type="number" id="elev_start" step="0.5" min="0" max="30" value="0" oninput="onElevStartChange()">
+          <label class="field-label">Sun elev at start (°)</label>
+          <input type="number" id="elev_start" step="0.5" min="0" max="30" value="0" readonly style="opacity:0.55;cursor:default;">
         </div>
         <div>
           <label class="field-label">End time (local)</label>
           <input type="time" id="end_time" value="20:00" oninput="onEndTimeChange()">
         </div>
         <div>
-          <label class="field-label">Elev end (°)</label>
-          <input type="number" id="elev_end" step="0.5" min="0" max="30" value="0" oninput="onElevEndChange()">
+          <label class="field-label">Sun elev at end (°)</label>
+          <input type="number" id="elev_end" step="0.5" min="0" max="30" value="0" readonly style="opacity:0.55;cursor:default;">
         </div>
       </div>
-      <div class="field-hint">Start/end times and their matching sun elevation thresholds are linked — edit either one.</div>
+      <div class="field-hint">Edit start/end times; sun elevation at those times is shown for reference.</div>
 
       <div class="section-title hide">Area</div>
       <div class="grid-2 hide">
@@ -539,13 +539,6 @@ function onStartTimeChange() {
     document.getElementById('elev_start').value = Math.max(0, Math.round(el * 10) / 10);
 }
 
-// Called when user edits morning elevation → update start time
-function onElevStartChange() {
-  const el = parseFloat(document.getElementById('elev_start').value) || 0;
-  const t = _localTimeAtMorningElev(el);
-  if (t) document.getElementById('start_time').value = t;
-}
-
 // Called when user edits end time → update evening elevation
 function onEndTimeChange() {
   const t = document.getElementById('end_time').value;
@@ -554,27 +547,17 @@ function onEndTimeChange() {
     document.getElementById('elev_end').value = Math.max(0, Math.round(el * 10) / 10);
 }
 
-// Called when user edits evening elevation → update end time
-function onElevEndChange() {
-  const el = parseFloat(document.getElementById('elev_end').value) || 0;
-  const t = _localTimeAtEveningElev(el);
-  if (t) document.getElementById('end_time').value = t;
-}
-
 // Initialize sun time fields — only when the date actually changes.
-// Called from validateDate() which is invoked on date change, config load,
-// and runFetch. We guard against runFetch/mode-switch resets by tracking
-// which date was last initialized.
 let _sunTimeInitedDate = null;
 function _sunTimeInit() {
   const currentDate = document.getElementById('sim_date').value;
   if (!currentDate || currentDate === _sunTimeInitedDate) return;
   _sunTimeInitedDate = currentDate;
   const el = window._cfgMinElevDeg ?? 0;
-  document.getElementById('elev_start').value = el;
-  document.getElementById('elev_end').value = el;
-  onElevStartChange();
-  onElevEndChange();
+  const tStart = _localTimeAtMorningElev(el);
+  const tEnd   = _localTimeAtEveningElev(el);
+  if (tStart) { document.getElementById('start_time').value = tStart; onStartTimeChange(); }
+  if (tEnd)   { document.getElementById('end_time').value   = tEnd;   onEndTimeChange(); }
 }
 
 // Global state
@@ -1849,8 +1832,6 @@ async function runSim() {
     const dateStr  = document.getElementById('sim_date').value;
     const tzOffset = parseInt(document.getElementById('tz_offset').value);
     const intervalMin = parseInt(document.getElementById('interval_min').value);
-    const minElevMorning = parseFloat(document.getElementById('elev_start').value) || 0;
-    const minElevEvening = parseFloat(document.getElementById('elev_end').value) || 0;
     const startTimeLocal = document.getElementById('start_time').value || null;
     const endTimeLocal   = document.getElementById('end_time').value   || null;
     const tauHours    = parseFloat(document.getElementById('tau_hours').value);
@@ -1911,7 +1892,7 @@ async function runSim() {
     const centerLat = (bbox.min_lat + bbox.max_lat) / 2;
     const centerLon = (bbox.min_lon + bbox.max_lon) / 2;
     const scenarios_all = generateSunScenarios(centerLat, centerLon, dateStr, tzOffset, intervalMin,
-      minElevMorning, minElevEvening, startTimeLocal, endTimeLocal);
+      0, 0, startTimeLocal, endTimeLocal);
     if (!scenarios_all.length) throw new Error('No sun scenarios (sun always below min elevation?)');
     log(`${scenarios_all.length} sun scenarios generated.`);
 
