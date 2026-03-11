@@ -497,6 +497,19 @@ async function loadData() {
     if (!settingsResp.ok) throw new Error(`settings.json: HTTP ${settingsResp.status}`);
     if (!cmapsResp.ok)   throw new Error(`colormaps.json: HTTP ${cmapsResp.status}`);
     simData = simJson;  // either from IndexedDB (simulate.html) or data/simulation.json
+    DALR_JS = simData.dalr ?? 0.0098;
+    // Derive HTOP_MAX from the actual data: max thermal top at standard ELR (6.5 K/km)
+    { const ELR_STD = 0.0065;
+      const dLapseRef = DALR_JS - ELR_STD;
+      if (dLapseRef > 0) {
+        let maxDT = 0;
+        for (const sc of simData.scenarios)
+          for (const row of sc.ground_temp_anomaly)
+            for (const v of row) if (v > maxDT) maxDT = v;
+        const rawMax = maxDT / dLapseRef;
+        HTOP_MAX = Math.max(500, Math.ceil(rawMax / 500) * 500);
+      }
+    }
     window._modesData     = await modesResp.json();
     window._settingsData  = await settingsResp.json();
     window._colormapsData = await cmapsResp.json();
@@ -1098,8 +1111,8 @@ function updateShadowColors(scenarioIndex) {
 // ─── Thermal top overlay ─────────────────────────────────────────────────────
 // Computed in JS from ground_temp_anomaly + ELR slider — no Python re-run needed.
 // h_top(i,j) = dT(i,j) / (DALR − ELR)   [metres AGL]
-const DALR_JS = 0.0098;   // K/m — fixed by thermodynamics
-const HTOP_MAX = 3000;     // m — colormap ceiling (cells above saturate to top colour)
+let DALR_JS = 0.0098;   // K/m — set from simData.dalr after load; fallback to physical constant
+let HTOP_MAX = 3000;     // m — colormap ceiling; derived from data max dT after load
 
 let thermalTopMesh = null;
 
