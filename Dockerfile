@@ -1,9 +1,9 @@
 FROM nginx:alpine
 
-# Copy our custom Nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Create the cache directory and set permissions
+RUN mkdir -p /var/cache/nginx && chown -R nginx:nginx /var/cache/nginx
 
-# Copy the web project files to the Nginx html directory
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY web/ /usr/share/nginx/html/
 
 EXPOSE 108

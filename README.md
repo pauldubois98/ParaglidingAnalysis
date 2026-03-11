@@ -10,6 +10,7 @@ Then http://localhost:8000 (port forward may be needed).
 ## Production
 Build via
 ```bash
+$ docker compose down
 $ docker compose up --build
 ```
 Serve via
