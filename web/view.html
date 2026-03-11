@@ -1727,14 +1727,26 @@ let _lastGi = null, _lastGj = null, _lastPt = null;
 //   w_max = √(0.5·(g/T₀)·dT_eff·H)
 // Temperature: linear decay dT(z) = dT_eff·(1−z/H)  — used for fill colour.
 // H = thermal top AGL = dT_eff / (DALR − ELR)
-const G_OVER_T0 = 9.81 / 293.15;   // ≈ 0.03349 m/s² per K
-
 function drawPlumeProfile(gi, gj) {
   const plumeSection = document.getElementById('plume-section');
   const canvas  = document.getElementById('plume-canvas');
   const labelsEl = document.getElementById('plume-alt-labels');
   if (!canvas || !simData) return;
 
+  // T0: interpolate diurnal profile by scenario local_time, fall back to scalar T0
+  const sc = simData.scenarios[currentScenario];
+  const elev = simData.terrain.elevation[gj][gi];
+  let T0_ref;
+  if (simData.T0_diurnal) {
+    const [hh, mm] = sc.local_time.split(':').map(Number);
+    const h = hh + mm / 60;
+    const h0 = Math.floor(h) % 24, h1 = (h0 + 1) % 24;
+    T0_ref = simData.T0_diurnal[h0] * (1 - h % 1) + simData.T0_diurnal[h1] * (h % 1);
+  } else {
+    T0_ref = simData.T0 ?? 293.15;
+  }
+  const T0_local = T0_ref - DALR_JS * (elev - terrainZMin);  // adjust for cell altitude
+  const G_OVER_T0 = 9.81 / T0_local;
   const T   = simData.terrain;
   const dT0 = simData.scenarios[currentScenario].ground_temp_anomaly[gj][gi];
   const ELR = parseFloat(document.getElementById('elr').value) / 1000;
@@ -1742,8 +1754,6 @@ function drawPlumeProfile(gi, gj) {
   const threshold = parseFloat(document.getElementById('trigger-threshold').value);
   const dT_eff = Math.max(0, dT0 - threshold);
   const zTop = (dLapse > 0 && dT_eff > 0) ? dT_eff / dLapse : 0;
-
-  const elev = simData.terrain.elevation[gj][gi];
 
   // Fixed Y axis (MSL) — same regardless of which cell is selected
   // Bottom = lowest terrain point on map, top = highest terrain + tallest thermal

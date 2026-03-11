@@ -539,16 +539,6 @@ function updateWeatherMode() {
     document.getElementById('max_heat').disabled = true;
     document.getElementById('era5_window').value = 0;  // exact day
     document.getElementById('era5_window').disabled = true;
-  } else if (mode === 'forecast') {
-    // Forecast mode: will use forecast API instead of ERA5
-    era5Auto.checked = true;
-    era5Auto.disabled = false;
-    document.getElementById('max_heat').disabled = true;
-    document.getElementById('era5_window').value = 0;  // exact day
-    document.getElementById('era5_window').disabled = true;
-    // Set date to today for forecast
-    const todayStr = new Date().toISOString().split('T')[0];
-    document.getElementById('sim_date').value = todayStr;
   }
   validateDate();
 }
@@ -591,7 +581,7 @@ function validateDate() {
 }
 
 // Override fetchERA5dT to support different modes
-async function fetchWeatherData(lat, lon, dateStr, mode, windowDays, logFn) {
+async function fetchWeatherData(lat, lon, dateStr, mode, windowDays, logFn, tzOffset) {
   if (mode === 'typical') {
     // Fetch 5 years of ERA5 data (original behavior)
     logFn(`Fetching typical weather: 5-year ERA5 average around ${dateStr}…`);
@@ -599,21 +589,15 @@ async function fetchWeatherData(lat, lon, dateStr, mode, windowDays, logFn) {
   } else if (mode === 'exact') {
     // Fetch only the exact date's ERA5 data
     logFn(`Fetching exact weather: ERA5 data for ${dateStr} (past date)…`);
-    const records = await fetchERA5dTExact(lat, lon, dateStr, windowDays);
-    logFn(`Exact: ${records.length} observations collected.`, 'success');
-    return records;
-  } else if (mode === 'forecast') {
-    // Fetch forecast data (Open-Meteo forecast API)
-    logFn(`Fetching forecast weather: ${dateStr} (next 3 days)…`);
-    const records = await fetchForecastdT(lat, lon, dateStr);
-    logFn(`Forecast: ${records.length} observations collected.`, 'success');
-    return records;
+    const result = await fetchERA5dTExact(lat, lon, dateStr, windowDays, tzOffset);
+    logFn(`Exact: ${result.records.length} observations collected.`, 'success');
+    return result;
   }
-  return [];
+  return { records: [], diurnal: Array(24).fill(null) };
 }
 
 // Fetch ERA5 for exact date (single day)
-async function fetchERA5dTExact(lat, lon, dateStr, windowDays) {
+async function fetchERA5dTExact(lat, lon, dateStr, windowDays, tzOffset) {
   const target = new Date(dateStr + 'T12:00:00Z');
   const yesterday = new Date(target); yesterday.setDate(yesterday.getDate() - windowDays);
   const tomorrow = new Date(target); tomorrow.setDate(tomorrow.getDate() + windowDays);
@@ -625,7 +609,7 @@ async function fetchERA5dTExact(lat, lon, dateStr, windowDays) {
     throw new Error('ERA5 data not available for recent dates (lags 5 days). Choose an earlier date or use Forecast mode.');
   }
 
-  const apiUrl = `https://historical-forecast-api.open-meteo.com/v1/forecast` +
+  const apiUrl = `https://archive-api.open-meteo.com/v1/archive` +
     `?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}` +
     `&start_date=${fmt(yesterday)}&end_date=${fmt(tomorrow)}` +
     `&hourly=temperature_2m,surface_temperature,direct_radiation` +
@@ -643,11 +627,15 @@ async function fetchERA5dTExact(lat, lon, dateStr, windowDays) {
   const swnorm = hourly.direct_radiation || [];
 
   const records = [];
+  const hourlyT2m = Array.from({length: 24}, () => []);
   for (let i = 0; i < times.length; i++) {
     const dt = new Date(times[i]);
-    const hour = dt.getUTCHours();
+    const utcHour = dt.getUTCHours();
+    const localHour = (utcHour + tzOffset + 24) % 24;
+    // Collect all-hours t2m for diurnal profile
+    if (t2m[i] != null) hourlyT2m[localHour].push(t2m[i]);
     // Only take midday (10h–14h UTC) to match typical sampling
-    if (hour < 10 || hour > 14) continue;
+    if (utcHour < 10 || utcHour > 14) continue;
     const T2 = t2m[i];
     const Ts = tsfc[i];
     const SW = swnorm[i];
@@ -660,13 +648,14 @@ async function fetchERA5dTExact(lat, lon, dateStr, windowDays) {
     const emiss = 0.95;
     const Tsky = Math.pow(R_sw / sigma + Math.pow(Ta + 273.15, 4), 0.25) - 273.15;
     const delta_T0 = (Ts - T2) - emiss * (T2 - Tsky);
-    records.push(Math.max(0, delta_T0));
+    records.push({ dT: Math.max(0, delta_T0), t2m: T2 });
   }
-  return records;
+  const diurnal = hourlyT2m.map(vals => vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null);
+  return { records, diurnal };
 }
 
 // Fetch forecast data (Open-Meteo)
-async function fetchForecastdT(lat, lon, dateStr) {
+async function fetchForecastdT(lat, lon, dateStr, tzOffset) {
   const target = new Date(dateStr + 'T12:00:00Z');
   const startDate = dateStr;
   const endDate = dateStr;
@@ -690,11 +679,15 @@ async function fetchForecastdT(lat, lon, dateStr) {
   const swnorm = hourly.shortwave_radiation || [];
 
   const records = [];
+  const hourlyT2m = Array.from({length: 24}, () => []);
   for (let i = 0; i < times.length; i++) {
     const dt = new Date(times[i]);
-    const hour = dt.getUTCHours();
+    const utcHour = dt.getUTCHours();
+    const localHour = (utcHour + tzOffset + 24) % 24;
+    // Collect all-hours t2m for diurnal profile
+    if (t2m[i] != null) hourlyT2m[localHour].push(t2m[i]);
     // Only take midday (10h–14h UTC)
-    if (hour < 10 || hour > 14) continue;
+    if (utcHour < 10 || utcHour > 14) continue;
     const T2 = t2m[i];
     const Ts = tsoil[i];
     const SW = swnorm[i];
@@ -707,9 +700,10 @@ async function fetchForecastdT(lat, lon, dateStr) {
     const emiss = 0.95;
     const Tsky = Math.pow(R_sw / sigma + Math.pow(Ta + 273.15, 4), 0.25) - 273.15;
     const delta_T0 = (Ts - T2) - emiss * (T2 - Tsky);
-    records.push(Math.max(0, delta_T0));
+    records.push({ dT: Math.max(0, delta_T0), t2m: T2 });
   }
-  return records;
+  const diurnal = hourlyT2m.map(vals => vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null);
+  return { records, diurnal };
 }
 
 // ── Global simulation state ───────────────────────────────────────
@@ -1403,7 +1397,7 @@ async function fetchERA5dT(lat, lon, dateStr, windowDays) {
     const start = new Date(tgt);    start.setDate(start.getDate() - windowDays);
     const end   = new Date(tgt);    end.setDate(end.getDate() + windowDays);
     if (end > cutoff) end.setTime(cutoff.getTime());
-    if (start >= end) return Promise.resolve({ year, rows: [] });
+    if (start >= end) return Promise.resolve({ year, rows: [], hourlyT2m: Array.from({length: 24}, () => []) });
 
     const apiUrl = `https://historical-forecast-api.open-meteo.com/v1/forecast` +
       `?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}` +
@@ -1419,21 +1413,31 @@ async function fetchERA5dT(lat, lon, dateStr, windowDays) {
         const times = h.time || [], t2m = h.temperature_2m || [];
         const tskin = h.surface_temperature || [], drad = h.direct_radiation || [];
         const rows = [];
+        const hourlyT2m = Array.from({length: 24}, () => []);
         for (let k = 0; k < times.length; k++) {
-          if (t2m[k] == null || tskin[k] == null || drad[k] == null) continue;
           const hour = parseInt(times[k].slice(11, 13));
+          // Collect all-hours t2m for diurnal profile
+          if (t2m[k] != null) hourlyT2m[hour].push(t2m[k]);
+          // Midday clear-sky records for calibration
+          if (t2m[k] == null || tskin[k] == null || drad[k] == null) continue;
           if (hour < 11 || hour > 14) continue;
           if (drad[k] < 600) continue;
-          rows.push(tskin[k] - t2m[k]);
+          rows.push({ dT: tskin[k] - t2m[k], t2m: t2m[k] });
         }
-        return { year, rows };
+        return { year, rows, hourlyT2m };
       })
-      .catch(e => { log(`ERA5 year ${year}: fetch failed (${e.message})`, 'warn'); return { year, rows: [] }; });
+      .catch(e => { log(`ERA5 year ${year}: fetch failed (${e.message})`, 'warn'); return { year, rows: [], hourlyT2m: Array.from({length: 24}, () => []) }; });
   });
 
   const results = await Promise.all(requests);
   const records = results.flatMap(r => r.rows);
-  return records;
+
+  // Merge hourlyT2m across years and compute mean per local hour
+  const merged = Array.from({length: 24}, () => []);
+  for (const r of results) r.hourlyT2m.forEach((vals, h) => merged[h].push(...vals));
+  const diurnal = merged.map(vals => vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null);
+
+  return { records, diurnal };
 }
 
 async function calibrateMaxHeat(records, scenarios, Z, nx, ny, dx, dy, thermalFactor, diffuseFrac) {
@@ -1441,16 +1445,22 @@ async function calibrateMaxHeat(records, scenarios, Z, nx, ny, dx, dy, thermalFa
 
   if (!records.length) {
     log('No ERA5 data returned — using fallback max_heat=15.0', 'warn');
-    return 15.0;
+    return { max_heat: 15.0, T0: 293.15 };
   }
 
-  records.sort((a, b) => a - b);
-  const mid = Math.floor(records.length / 2);
-  const dT_obs = records.length % 2 === 1
-    ? records[mid]
-    : (records[mid - 1] + records[mid]) / 2;
+  const dTvals = records.map(r => r.dT).sort((a, b) => a - b);
+  const t2mvals = records.map(r => r.t2m).sort((a, b) => a - b);
+  const mid = Math.floor(dTvals.length / 2);
+  const dT_obs = dTvals.length % 2 === 1
+    ? dTvals[mid]
+    : (dTvals[mid - 1] + dTvals[mid]) / 2;
+  const t2m_med = t2mvals.length % 2 === 1
+    ? t2mvals[mid]
+    : (t2mvals[mid - 1] + t2mvals[mid]) / 2;
+  const T0 = t2m_med + 273.15;  // Celsius → Kelvin
 
-  log(`ERA5 clear-sky midday dT: median=${dT_obs.toFixed(2)} K (n=${records.length})`, 'success');
+  log(`ERA5 clear-sky midday dT: median=${dT_obs.toFixed(2)} K (n=${dTvals.length})`, 'success');
+  log(`ERA5 clear-sky midday T2m: median=${T0.toFixed(2)} K`, 'success');
 
   // Noon scenario (highest elevation)
   const noonSc = scenarios.reduce((best, sc) => sc.sun_elevation > best.sun_elevation ? sc : best, scenarios[0]);
@@ -1465,7 +1475,8 @@ async function calibrateMaxHeat(records, scenarios, Z, nx, ny, dx, dy, thermalFa
 
   const max_heat = dT_obs / model_response;
   log(`max_heat = ${dT_obs.toFixed(2)} / ${model_response.toFixed(4)} = ${max_heat.toFixed(2)} K`, 'success');
-  return max_heat;
+  log(`T0 (reference) = ${T0.toFixed(2)} K`, 'success');
+  return { max_heat, T0 };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1556,11 +1567,12 @@ function renderERA5Plot(canvas, records) {
     return;
   }
 
-  const sorted = [...records].sort((a, b) => a - b);
+  const dTvals = records.map(r => r.dT);
+  const sorted = [...dTvals].sort((a, b) => a - b);
   const rMin = sorted[0], rMax = sorted[sorted.length - 1];
   const BINS = 24;
   const counts = new Array(BINS).fill(0);
-  for (const v of records) {
+  for (const v of dTvals) {
     const bin = Math.min(BINS - 1, Math.floor((v - rMin) / (rMax - rMin + 1e-9) * BINS));
     counts[bin]++;
   }
@@ -1775,7 +1787,9 @@ async function runFetch() {
     }
 
     log(`Fetching ${weatherMode} weather data for ${dateStr}…`);
-    const era5Records = await fetchWeatherData(centerLat, centerLon, dateStr, weatherMode, windowDays, msg => log(msg));
+    const tzOffsetFetch = parseInt(document.getElementById('tz_offset').value);
+    const { records: era5Records, diurnal: era5Diurnal } = await fetchWeatherData(
+      centerLat, centerLon, dateStr, weatherMode, windowDays, msg => log(msg), tzOffsetFetch);
     if (era5Records.length) {
       log(`Weather data: ${era5Records.length} clear-sky midday observations collected.`, 'success');
     } else {
@@ -1784,7 +1798,7 @@ async function runFetch() {
     setProgress(0.98);
     renderERA5Plot(document.getElementById('plot-era5'), era5Records);
 
-    fetchedData = { sim, mesh, lcCodes, bbox, era5Records };
+    fetchedData = { sim, mesh, lcCodes, bbox, era5Records, era5Diurnal };
     log('All data fetched. Ready to run simulation.', 'success');
     setProgress(1.0);
     setStatus('Data ready.');
@@ -1855,23 +1869,34 @@ async function runSim() {
     log(`${scenarios.length} scenarios generated.`, 'success');
     if (!scenarios.length) throw new Error('No sun scenarios (sun always below min elevation?)');
 
-    // ── Max_heat calibration ────────────────────────────────────────
-    let MAX_HEAT;
-    if (weatherMode === 'forecast') {
-      // Forecast mode: Use manual max_heat
+    // ── Max_heat + T0 calibration ──────────────────────────────────
+    let MAX_HEAT, T0, T0_diurnal;
+
+    // Build a 24-value diurnal T0 profile in Kelvin from ERA5 hourly t2m.
+    // Gaps (hours with no data) are filled with a cos model anchored to T0.
+    function buildDiurnalProfile(rawDiurnal, T0_ref) {
+      // rawDiurnal: array of 24 values in °C (or null). T0_ref in K.
+      const T0_noon_C = T0_ref - 273.15;
+      const A = 5, h_max = 14;
+      const T_mean_C = T0_noon_C - A * Math.cos(2 * Math.PI * (12 - h_max) / 24);
+      return Array.from({length: 24}, (_, h) => {
+        const v = rawDiurnal ? rawDiurnal[h] : null;
+        return (v != null ? v : T_mean_C + A * Math.cos(2 * Math.PI * (h - h_max) / 24)) + 273.15;
+      });
+    }
+    // Typical or Exact: Use ERA5 data fetched during fetch step
+    if (!fetchedData.era5Records || fetchedData.era5Records.length === 0) {
+      log('No ERA5 data available — using manual max_heat fallback.', 'warn');
       MAX_HEAT = parseFloat(document.getElementById('max_heat').value);
-      log(`Forecast: using manual max_heat = ${MAX_HEAT} K`);
+      T0 = 293.15;
+      T0_diurnal = buildDiurnalProfile(fetchedData.era5Diurnal, T0);
     } else {
-      // Typical or Exact: Use ERA5 data fetched during fetch step
-      if (!fetchedData.era5Records || fetchedData.era5Records.length === 0) {
-        log('No ERA5 data available — using manual max_heat fallback.', 'warn');
-        MAX_HEAT = parseFloat(document.getElementById('max_heat').value);
-      } else {
-        setStatus('Calibrating max_heat from weather data…');
-        MAX_HEAT = await calibrateMaxHeat(fetchedData.era5Records, scenarios,
-                                           Z, nx, ny, dx, dy, thermal_factor, diffuseFrac);
-        log(`max_heat calibrated: ${MAX_HEAT.toFixed(2)} K`);
-      }
+      setStatus('Calibrating max_heat from weather data…');
+      ({ max_heat: MAX_HEAT, T0 } = await calibrateMaxHeat(fetchedData.era5Records, scenarios,
+                                          Z, nx, ny, dx, dy, thermal_factor, diffuseFrac));
+      T0_diurnal = buildDiurnalProfile(fetchedData.era5Diurnal, T0);
+      log(`max_heat calibrated: ${MAX_HEAT.toFixed(2)} K`);
+      log(`T0_diurnal: ${T0_diurnal.map(v => v.toFixed(1)).join(', ')}`);
     }
     setProgress(0.12);
 
@@ -1911,6 +1936,8 @@ async function runSim() {
       interval_min:     intervalMin,
       tau_hours:        tauHours,
       max_heat:         MAX_HEAT,
+      T0:               T0,
+      T0_diurnal:       T0_diurnal,
       k_release:        kRelease,
       release_threshold: relThreshold,
       v_advect_max:     vAdvectMax,

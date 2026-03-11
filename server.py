@@ -21,8 +21,9 @@ PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
 
 # Allowlist: only proxy these hosts (security guard for local dev)
 ALLOWED_HOSTS = {
-    'archive.open-meteo.com',
+    'archive-api.open-meteo.com',
     'historical-forecast-api.open-meteo.com',
+    'api.open-meteo.com',
     'esa-worldcover.s3.eu-central-1.amazonaws.com',
 }
 
