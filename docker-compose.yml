@@ -2,8 +2,8 @@ services:
   web:
     container_name: paragliding
     build: .
-    ports:
-      - "108:108"
+    expose:
+      - 108
     restart: unless-stopped
     networks:
       - venerqueserver
