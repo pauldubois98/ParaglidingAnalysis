@@ -442,7 +442,7 @@
       <div class="section-title">Date &amp; Time</div>
       
       <label class="field-label">Simulation date</label>
-      <input type="date" id="sim_date" value="2024-07-15" onchange="validateDate()">
+      <input type="date" id="sim_date" onchange="validateDate()">
       <div class="field-hint" id="date-hint">Target date for sun position and weather data.</div>
       <div class="grid-2">
         <div>
@@ -834,7 +834,7 @@ fetch('config.json').then(r => r.json()).then(cfg => {
   setVal('takeoff_lon',       cfg.area.takeoff.lon);
   setVal('landing_lat',       cfg.area.landing.lat);
   setVal('landing_lon',       cfg.area.landing.lon);
-  setVal('sim_date',          cfg.simulation.date);
+  setVal('sim_date',          new Date().toISOString().slice(0, 10));
   setVal('tz_offset',         cfg.simulation.tz_offset);
   setVal('interval_min',      cfg.simulation.interval_min);
   setVal('min_elevation',     cfg.simulation.min_elevation_deg);

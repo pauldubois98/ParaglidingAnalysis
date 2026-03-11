@@ -18,7 +18,6 @@
     }
   },
   "simulation": {
-    "date":              "2024-07-15",
     "tz_offset":         2,
     "interval_min":      60,
     "min_elevation_deg": 0.0,
