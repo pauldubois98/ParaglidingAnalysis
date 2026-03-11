@@ -1,0 +1,14 @@
+services:
+  web:
+    container_name: paragliding
+    build: .
+    ports:
+      - "108:108"
+    restart: unless-stopped
+    networks:
+      - venerqueserver
+
+networks:
+  venerqueserver:
+    external: true
+    name: venerqueserver-network
