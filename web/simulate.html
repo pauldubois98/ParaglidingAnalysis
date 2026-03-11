@@ -435,7 +435,7 @@
       <input type="checkbox" id="era5_auto" checked>
       ERA5 auto-calibrate max_heat
     </label>
-    <div class="field-hint">Fetches 5 years of ERA5 data to derive max_heat from observations.</div>
+    <div class="field-hint">Fetches ERA5 data to derive max_heat from observations.</div>
     <label class="field-label">Weather mode</label>
     <div class="radio-group">
       <label><input type="radio" name="weather_mode" value="typical" checked onchange="updateWeatherMode()"> Typical (5-years average of ERA5 data around this date.)</label>
@@ -636,8 +636,6 @@ async function fetchWeatherData(lat, lon, dateStr, mode, windowDays, logFn, tzOf
 // Fetch ERA5 for exact date (single day)
 async function fetchERA5dTExact(lat, lon, dateStr, windowDays, tzOffset) {
   const target = new Date(dateStr + 'T12:00:00Z');
-  const yesterday = new Date(target); yesterday.setDate(yesterday.getDate() - windowDays);
-  const tomorrow = new Date(target); tomorrow.setDate(tomorrow.getDate() + windowDays);
   const fmt = d => d.toISOString().slice(0, 10);
 
   // ERA5 lags ~5 days behind present
@@ -646,46 +644,37 @@ async function fetchERA5dTExact(lat, lon, dateStr, windowDays, tzOffset) {
     throw new Error('ERA5 data not available for recent dates (lags 5 days). Choose an earlier date or use Forecast mode.');
   }
 
-  const apiUrl = `https://archive-api.open-meteo.com/v1/archive` +
+  const start = new Date(target); start.setDate(start.getDate() - 1);
+  const end   = new Date(target); end.setDate(end.getDate() + 1);
+
+  const apiUrl = `https://historical-forecast-api.open-meteo.com/v1/forecast` +
     `?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}` +
-    `&start_date=${fmt(yesterday)}&end_date=${fmt(tomorrow)}` +
+    `&start_date=${fmt(start)}&end_date=${fmt(end)}` +
     `&hourly=temperature_2m,surface_temperature,direct_radiation` +
-    `&timezone=UTC`;
+    `&timezone=Europe/Paris`;
   const url = `/proxy?url=` + encodeURIComponent(apiUrl);
 
   const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`ERA5 fetch failed: ${resp.status}`);
+  if (!resp.ok) throw new Error(`ERA5 exact fetch failed: ${resp.status}`);
   const json = await resp.json();
 
-  const hourly = json.hourly || {};
-  const times = hourly.time || [];
-  const t2m = hourly.temperature_2m || [];
-  const tsfc = hourly.surface_temperature || [];
-  const swnorm = hourly.direct_radiation || [];
+  const h = json.hourly || {};
+  const times  = h.time || [];
+  const t2m    = h.temperature_2m || [];
+  const tskin  = h.surface_temperature || [];
+  const drad   = h.direct_radiation || [];
 
   const records = [];
   const hourlyT2m = Array.from({length: 24}, () => []);
   for (let i = 0; i < times.length; i++) {
-    const dt = new Date(times[i]);
-    const utcHour = dt.getUTCHours();
-    const localHour = (utcHour + tzOffset + 24) % 24;
-    // Collect all-hours t2m for diurnal profile
-    if (t2m[i] != null) hourlyT2m[localHour].push(t2m[i]);
-    // Only take midday (10h–14h UTC) to match typical sampling
-    if (utcHour < 10 || utcHour > 14) continue;
-    const T2 = t2m[i];
-    const Ts = tsfc[i];
-    const SW = swnorm[i];
-    if (T2 == null || Ts == null || SW == null) continue;
-    // Estimate clear-sky noon ΔT using same formula as calibrateMaxHeat
-    const alpha = 0.2;  // diffuse fraction placeholder
-    const R_sw = SW * (1 - alpha) / 3600;  // W/m² → W/m² per second not needed, keep as is
-    const sigma = 5.67e-8;
-    const Ta = T2 - 273.15;
-    const emiss = 0.95;
-    const Tsky = Math.pow(R_sw / sigma + Math.pow(Ta + 273.15, 4), 0.25) - 273.15;
-    const delta_T0 = (Ts - T2) - emiss * (T2 - Tsky);
-    records.push({ dT: Math.max(0, delta_T0), t2m: T2 });
+    const hour = parseInt(times[i].slice(11, 13));
+    if (t2m[i] != null) hourlyT2m[hour].push(t2m[i]);
+    if (t2m[i] == null || tskin[i] == null || drad[i] == null) continue;
+    if (hour < 11 || hour > 14) continue;
+    if (drad[i] < 600) continue;  // clear-sky only
+    // Only keep records from the target date
+    if (!times[i].startsWith(dateStr)) continue;
+    records.push({ dT: tskin[i] - t2m[i], t2m: t2m[i] });
   }
   const diurnal = hourlyT2m.map(vals => vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null);
   return { records, diurnal };
