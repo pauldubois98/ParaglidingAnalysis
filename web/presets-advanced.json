@@ -19,6 +19,7 @@
       "cg-time",
       "sec-overlays",
       "cg-terrain-op",
+      "cg-wind-op",
       "sec-lighting",
       "cg-amb",
       "cg-sun-int"

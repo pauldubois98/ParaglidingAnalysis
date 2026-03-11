@@ -767,7 +767,10 @@ function buildWindArrows(T) {
 }
 
 function updateWindArrows(sc, T) {
-  if (!windGroup || !sc.u_surface) return;
+  if (!windGroup) return;
+  const windOp = parseFloat(document.getElementById('wind-op').value) || 0;
+  windGroup.visible = windOp > 0;
+  if (!sc.u_surface || windOp === 0) return;
   const xRange = T.x_extent[1]-T.x_extent[0];
   const yRange = T.y_extent[1]-T.y_extent[0];
   const cx = (T.x_extent[0]+T.x_extent[1])/2;
