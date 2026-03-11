@@ -44,6 +44,10 @@
       display: none; flex-direction: row; gap: 10px;
       margin-top: 10px; height: 170px; flex-shrink: 0;
     }
+    #plots-area-sim {
+      display: none; flex-direction: row; gap: 10px;
+      margin-top: 10px; height: 170px; flex-shrink: 0;
+    }
     .plot-box {
       flex: 1; display: flex; flex-direction: column; align-items: center;
       background: rgba(5,8,18,0.7); border: 1px solid rgba(100,160,255,0.15);
@@ -58,28 +62,7 @@
       max-width: 100%; max-height: 140px; width: auto; height: auto;
       display: block; image-rendering: pixelated; border-radius: 4px;
     }
-    /* NS viz area */
-    #ns-viz-area {
-      display: none; flex-direction: column; gap: 6px;
-      margin-top: 10px; flex-shrink: 0;
-    }
-    #ns-viz-row1 { display: flex; gap: 6px; height: 200px; }
-    #ns-viz-row2 { display: flex; gap: 6px; height: 200px; }
-    .viz-box {
-      flex: 1; display: flex; flex-direction: column;
-      background: rgba(5,8,18,0.85); border: 1px solid rgba(100,160,255,0.2);
-      border-radius: 8px; overflow: hidden; min-width: 0;
-    }
-    .viz-label {
-      font-size: 9px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 1px; color: #3a6080; padding: 4px 6px 2px;
-      flex-shrink: 0;
-    }
-    .viz-box canvas {
-      flex: 1; width: 100%; height: 100%; display: block;
-      object-fit: contain; object-position: top left;
-      image-rendering: pixelated;
-    }
+    #canvas-plan { object-fit: contain; object-position: top left; }
     #ns-stats {
       font-size: 10px; color: #5588aa; padding: 2px 0;
       font-family: 'Consolas', monospace; flex-shrink: 0;
@@ -178,9 +161,11 @@
     .btn-secondary:hover { background:rgba(255,255,255,0.12); border-color:rgba(180,180,180,0.6); }
     .btn-fetch { color: #a0ceff; border-color: rgba(100,160,255,0.35); background: rgba(100,160,255,0.09); }
     .btn-sim   { color: #7eb8ff; border-color: rgba(100,160,255,0.28); background: rgba(100,160,255,0.06); }
+    .btn-stop  { color: #ff8080; border-color: rgba(255,80,80,0.35);   background: rgba(255,80,80,0.09); }
     .btn-map   { color: #60e0a0; border-color: rgba(50,195,95,0.35);   background: rgba(50,195,95,0.09); }
     .btn-fetch:not(:disabled):hover { background: rgba(100,160,255,0.2); border-color: rgba(100,160,255,0.6); }
     .btn-sim:not(:disabled):hover   { background: rgba(100,160,255,0.2); border-color: rgba(100,160,255,0.6); }
+    .btn-stop:not(:disabled):hover  { background: rgba(255,80,80,0.2);   border-color: rgba(255,80,80,0.6); }
     .btn-map:not(:disabled):hover   { background: rgba(50,195,95,0.2);   border-color: rgba(50,195,95,0.6); }
     /* Header nav */
     #header-nav {
@@ -211,6 +196,7 @@
       #status-bar { position: sticky !important; top: 44px !important; bottom: auto !important; height: auto !important; padding: 7px 14px; z-index: 100; }
       #console-area { position: relative !important; inset: auto !important; width: 100%; min-height: 40vh; padding: 10px; margin-top: 0; }
       #plots-area { height: auto !important; flex-wrap: wrap; }
+      #plots-area-sim { height: auto !important; flex-wrap: wrap; }
       .plot-box { flex: 0 0 calc(50% - 5px) !important; height: 140px !important; }
       #settings-area { position: relative !important; top: auto !important; right: auto !important; bottom: auto !important; width: 100% !important; height: auto !important; padding: 0; }
       #ui-panel { border-radius: 0; border-left: none; border-right: none; }
@@ -241,28 +227,24 @@
     <div class="plot-box"><div class="plot-title">Land Cover</div><canvas id="plot-lc"></canvas></div>
     <div class="plot-box"><div class="plot-title">ERA5 dT Distribution</div><canvas id="plot-era5"></canvas></div>
   </div>
-  <div id="ns-viz-area">
-    <div id="ns-stats"></div>
-    <div id="ns-viz-row1">
-      <div class="viz-box" style="flex:2">
-        <div class="viz-label">Plan View: θ' (color) + wind arrows</div>
+  <div id="ns-stats"></div>
+  <div id="plots-area-sim">
+      <div class="plot-box">
+        <div class="plot-title">Plan View θ'</div>
         <canvas id="canvas-plan"></canvas>
       </div>
-      <div class="viz-box" style="flex:1">
-        <div class="viz-label">Vertical velocity w</div>
+      <div class="plot-box">
+        <div class="plot-title">Vertical velocity w</div>
         <canvas id="canvas-w"></canvas>
       </div>
-    </div>
-    <div id="ns-viz-row2">
-      <div class="viz-box" style="flex:1">
-        <div class="viz-label">EW Vertical Slice (θ')</div>
+      <div class="plot-box">
+        <div class="plot-title">East West Vertical Slice (θ')</div>
         <canvas id="canvas-ew"></canvas>
       </div>
-      <div class="viz-box" style="flex:1">
-        <div class="viz-label">NS Vertical Slice (θ')</div>
+      <div class="plot-box">
+        <div class="plot-title">North South Vertical Slice (θ')</div>
         <canvas id="canvas-ns"></canvas>
       </div>
-    </div>
   </div>
 </div>
 <div id="status-bar">Idle</div>
@@ -382,6 +364,9 @@
       <div class="footer-row">
         <button class="btn btn-fetch" id="btn-fetch" onclick="runFetch()">Fetch Data</button>
         <button class="btn btn-sim"   id="btn-sim"   onclick="runSim()" disabled>Run NS Sim</button>
+      </div>
+      <div class="footer-row">
+        <button class="btn btn-stop"  id="btn-stop"  onclick="stopSim()" disabled>Stop</button>
         <button class="btn btn-map"   id="btn-map"   onclick="openViewer()" disabled>Open Viewer</button>
       </div>
     </div>
@@ -1585,7 +1570,7 @@ function divergingColor(t) {
   }
 }
 
-function renderDivergingField(canvas, data, W, H, vMax, label, solid2d, dispW, dispH) {
+function renderDivergingField(canvas, data, W, H, vMax, solid2d, dispW, dispH) {
   dispW = dispW || W; dispH = dispH || H;
   // Render at grid resolution then scale to physical aspect ratio
   const offscreen = document.createElement('canvas');
@@ -1615,13 +1600,6 @@ function renderDivergingField(canvas, data, W, H, vMax, label, solid2d, dispW, d
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(offscreen, 0, 0, dispW, dispH);
-  if (label) {
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillRect(0, dispH-14, dispW, 14);
-    ctx.fillStyle = '#e0e8f0';
-    ctx.font = '9px monospace';
-    ctx.fillText(label, 2, dispH-3);
-  }
 }
 
 function renderPlanView(canvas, theta_slice, u_slice, v_slice, NX, NY, solid2d, dispW, dispH) {
@@ -1629,7 +1607,7 @@ function renderPlanView(canvas, theta_slice, u_slice, v_slice, NX, NY, solid2d, 
   let vMax = 0;
   for (let k = 0; k < theta_slice.length; k++) if (Math.abs(theta_slice[k]) > vMax) vMax = Math.abs(theta_slice[k]);
   if (vMax < 0.01) vMax = 1;
-  renderDivergingField(canvas, theta_slice, NX, NY, vMax, `θ' max=${vMax.toFixed(2)} K`, solid2d, dispW, dispH);
+  renderDivergingField(canvas, theta_slice, NX, NY, vMax, solid2d, dispW, dispH);
 
   // Draw wind arrows in display pixel space
   const scaleX = dispW / NX, scaleY = dispH / NY;
@@ -1655,7 +1633,7 @@ function renderPlanView(canvas, theta_slice, u_slice, v_slice, NX, NY, solid2d, 
   }
 }
 
-function renderVerticalSlice(canvas, theta, solid, NW, NH, label, dispW, dispH) {
+function renderVerticalSlice(canvas, theta, solid, NW, NH, dispW, dispH) {
   dispW = dispW || NW; dispH = dispH || NH;
   // NW = horizontal cells (NX or NY), NH = NZ
   // Render with iz=0 at bottom (flip vertically)
@@ -1689,19 +1667,19 @@ function renderVerticalSlice(canvas, theta, solid, NW, NH, label, dispW, dispH) 
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(offscreen, 0, 0, dispW, dispH);
-  if (label) {
-    ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, dispH-14, dispW, 14);
-    ctx.fillStyle = '#e0e8f0'; ctx.font = '9px monospace'; ctx.fillText(label, 2, dispH-3);
-  }
 }
 
 function updateVisualization(solver, iz_view) {
   const {NX, NY, NZ, dx, dy, dz} = solver;
   // Physical display dimensions — preserve real-world aspect ratio.
   // Keep the larger cell-count axis at its native pixel count; scale the other.
-  const planDispW = NX, planDispH = Math.max(1, Math.round(NY * dy / dx));
-  const ewDispW   = NX, ewDispH   = Math.max(1, Math.round(NZ * dz / dx));
-  const nsDispW   = NY, nsDispH   = Math.max(1, Math.round(NZ * dz / dy));
+  const IMAGE_DISPLAY_FACTOR = 10;
+  const planDispW = NX*IMAGE_DISPLAY_FACTOR;
+  const planDispH = Math.max(1, Math.round(NY * dy / dx))*IMAGE_DISPLAY_FACTOR;
+  const ewDispW   = NX * IMAGE_DISPLAY_FACTOR;
+  const ewDispH   = Math.max(1, Math.round(NZ * dz / dx)) * IMAGE_DISPLAY_FACTOR;
+  const nsDispW   = NY * IMAGE_DISPLAY_FACTOR;
+  const nsDispH   = Math.max(1, Math.round(NZ * dz / dy)) * IMAGE_DISPLAY_FACTOR;
 
   // Plan view: θ' + wind at iz_view
   const theta_plan = solver.getSliceTheta(iz_view);
@@ -1720,19 +1698,19 @@ function updateVisualization(solver, iz_view) {
   for (let k=0;k<w_plan.length;k++) if (Math.abs(w_plan[k])>wMax) wMax=Math.abs(w_plan[k]);
   if (wMax<0.01) wMax=1;
   const canvasW = document.getElementById('canvas-w');
-  renderDivergingField(canvasW, w_plan, NX, NY, wMax, `w max=${wMax.toFixed(2)} m/s`, solid2d_plan, planDispW, planDispH);
+  renderDivergingField(canvasW, w_plan, NX, NY, wMax, solid2d_plan, planDispW, planDispH);
 
   // EW vertical slice at NY/2
   const iy_mid = Math.floor(NY / 2);
   const ewSlice = solver.getVerticalSliceEW(iy_mid);
   const canvasEW = document.getElementById('canvas-ew');
-  renderVerticalSlice(canvasEW, ewSlice.theta, ewSlice.solid, NX, NZ, `EW slice at j=${iy_mid}`, ewDispW, ewDispH);
+  renderVerticalSlice(canvasEW, ewSlice.theta, ewSlice.solid, NX, NZ, ewDispW, ewDispH);
 
   // NS vertical slice at NX/2
   const ix_mid = Math.floor(NX / 2);
   const nsSlice = solver.getVerticalSliceNS(ix_mid);
   const canvasNS = document.getElementById('canvas-ns');
-  renderVerticalSlice(canvasNS, nsSlice.theta, nsSlice.solid, NY, NZ, `NS slice at i=${ix_mid}`, nsDispW, nsDispH);
+  renderVerticalSlice(canvasNS, nsSlice.theta, nsSlice.solid, NY, NZ, nsDispW, nsDispH);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1760,7 +1738,7 @@ function interpolateHeatMap(heatMaps, t_sim) {
 async function runFetch() {
   fetchedData = null; simResult = null;
   document.getElementById('plots-area').style.display = 'none';
-  document.getElementById('ns-viz-area').style.display = 'none';
+  document.getElementById('plots-area-sim').style.display = 'none';
   setProgress(0);
   document.getElementById('btn-fetch').disabled = true;
   document.getElementById('btn-sim').disabled = true;
@@ -1827,11 +1805,19 @@ async function runFetch() {
 // ═══════════════════════════════════════════════════════════════════
 //  MAIN PIPELINE: RUN NS SIMULATION
 // ═══════════════════════════════════════════════════════════════════
+let _simShouldStop = false;
+function stopSim() {
+  _simShouldStop = true;
+  document.getElementById('btn-stop').disabled = true;
+}
+
 async function runSim() {
+  _simShouldStop = false;
   if (!fetchedData) { log('No data fetched yet.', 'error'); return; }
   document.getElementById('btn-sim').disabled = true;
   document.getElementById('btn-fetch').disabled = true;
   document.getElementById('btn-map').disabled = true;
+  document.getElementById('btn-stop').disabled = false;
   simResult = null;
   setProgress(0);
 
@@ -1950,7 +1936,7 @@ async function runSim() {
     log('NS3D solver initialized.');
 
     // Show viz area
-    document.getElementById('ns-viz-area').style.display = 'flex';
+    document.getElementById('plots-area-sim').style.display = 'flex';
 
     // Compute iz_view from h_view
     function getIzView() {
@@ -1978,7 +1964,7 @@ async function runSim() {
     const convergence_sum = new Float64Array(NY * NX);
     const dT_weight_sum   = new Float64Array(NY * NX);
 
-    while (t_sim < sunset_s) {
+    while (t_sim < sunset_s && !_simShouldStop) {
       const Q = interpolateHeatMap(heatMaps, t_sim);
       solver.step(dt, Q);
       t_sim += dt;
@@ -2116,8 +2102,13 @@ async function runSim() {
       scenarios: scenario_output,
     };
 
-    log(`NS simulation complete! ${scenario_output.length} scenarios, ${step_num} steps.`, 'success');
-    setProgress(1.0); setStatus('NS Simulation complete.');
+    if (_simShouldStop) {
+      log(`NS simulation stopped. ${scenario_output.length} scenarios, ${step_num} steps.`, 'warn');
+      setStatus('NS Simulation stopped.');
+    } else {
+      log(`NS simulation complete! ${scenario_output.length} scenarios, ${step_num} steps.`, 'success');
+      setProgress(1.0); setStatus('NS Simulation complete.');
+    }
     document.getElementById('btn-map').disabled = false;
 
   } catch(e) {
@@ -2127,6 +2118,7 @@ async function runSim() {
 
   document.getElementById('btn-fetch').disabled = false;
   document.getElementById('btn-sim').disabled = false;
+  document.getElementById('btn-stop').disabled = true;
 }
 
 // ═══════════════════════════════════════════════════════════════════
