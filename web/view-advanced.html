@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <title>NS Thermals — 3D View</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { background:#0a0f1a; color:#e0e8f0; font-family:'Segoe UI',sans-serif; overflow:hidden; }
+
+    #canvas-container { width:100vw; height:100vh; position:relative; margin-top:44px; }
+
+    /* ── Nav ── */
+    #header-nav {
+      position:fixed; top:0; left:0; right:0; height:44px; z-index:3000;
+      display:flex; align-items:center; padding:0 12px; gap:2px;
+      background:rgba(6,10,20,0.92); border-bottom:1px solid rgba(100,160,255,0.12);
+      backdrop-filter:blur(14px);
+    }
+    .nav-logo { display:flex; align-items:center; gap:7px; padding:5px 9px; margin-right:4px;
+      color:#7eb8ff; text-decoration:none; font-size:12px; font-weight:600;
+      border-radius:6px; white-space:nowrap; transition:background 0.15s; }
+    .nav-logo img { width:18px; height:18px;
+      filter:invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%); }
+    .nav-logo:hover { background:rgba(100,160,255,0.1); }
+    .nav-sep { width:1px; height:18px; background:rgba(100,160,255,0.12); margin:0 2px; flex-shrink:0; }
+    .nav-link { padding:5px 10px; color:#4a6888; text-decoration:none; font-size:12px;
+      border-radius:6px; white-space:nowrap; transition:background 0.15s,color 0.15s; }
+    .nav-link:hover { color:#90b8d8; background:rgba(100,160,255,0.08); }
+    .nav-link.nav-active { color:#7eb8ff; background:rgba(100,160,255,0.1); font-weight:500; }
+
+    /* ── UI panel ── */
+    #ui-panel {
+      position:absolute; top:52px; right:8px; width:260px;
+      background:rgba(10,15,30,0.88); border:1px solid rgba(100,160,255,0.3);
+      border-radius:12px; padding:14px; backdrop-filter:blur(8px);
+      max-height:calc(100vh - 60px); overflow-y:auto;
+      transform:translateX(calc(100% + 20px));
+      transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    #ui-panel.open { transform:translateX(0); }
+    #ui-panel h2 { font-size:13px; color:#7eb8ff; text-transform:uppercase;
+      letter-spacing:1px; margin-bottom:12px; }
+    .cg { margin-bottom:8px; }
+    .cg label { display:flex; justify-content:space-between; font-size:11px;
+      color:#99b8d0; margin-bottom:3px; }
+    .cg label span { color:#7eb8ff; font-weight:bold; }
+    input[type=range] { width:100%; appearance:none; height:4px;
+      background:rgba(100,160,255,0.2); border-radius:2px; outline:none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; width:13px; height:13px;
+      border-radius:50%; background:#7eb8ff; cursor:pointer; }
+    .sec { font-size:10px; text-transform:uppercase; letter-spacing:1px;
+      color:#3a6080; margin:12px 0 6px; border-top:1px solid rgba(100,160,255,0.1);
+      padding-top:8px; }
+    .hint { font-size:10px; color:#334455; margin-top:10px; line-height:1.5; }
+
+    /* ── Slice group ── */
+    .slice-group { background:rgba(100,160,255,0.04); border:1px solid rgba(100,160,255,0.1);
+      border-radius:8px; padding:8px; margin-bottom:8px; }
+    .slice-header { display:flex; justify-content:space-between; align-items:center;
+      font-size:10px; color:#7eb8ff; margin-bottom:6px; font-weight:600;
+      text-transform:uppercase; letter-spacing:0.5px; }
+    .mode-btn { font-size:9px; padding:2px 8px;
+      background:rgba(100,160,255,0.15); border:1px solid rgba(100,160,255,0.35);
+      color:#7eb8ff; border-radius:3px; cursor:pointer; transition:background 0.15s; }
+    .mode-btn:hover { background:rgba(100,160,255,0.3); }
+
+    /* ── Panel toggle ── */
+    #panel-toggle {
+      position:absolute; top:8px; right:8px; z-index:1002;
+      background:rgba(10,15,30,0.88); border:1px solid rgba(100,160,255,0.35);
+      border-radius:12px; color:#7eb8ff; padding:8px 13px; font-size:14px;
+      cursor:pointer; backdrop-filter:blur(8px);
+    }
+
+    /* ── Colorbars ── */
+    #colorbars {
+      position:absolute; bottom:20px; left:16px;
+      display:flex; flex-wrap:wrap; gap:8px; align-items:flex-end; max-width:500px;
+    }
+    .colorbar { background:rgba(10,15,30,0.82); border:1px solid rgba(100,160,255,0.2);
+      border-radius:8px; padding:8px 10px; display:none; }
+    .colorbar.show { display:block; }
+    .cb-title { font-size:10px; font-weight:bold; color:#7eb8ff; text-align:center; margin-bottom:5px; }
+    .cb-body { display:flex; gap:5px; align-items:stretch; }
+    .cb-labels { display:flex; flex-direction:column; justify-content:space-between;
+      font-size:9px; color:#99b8d0; line-height:1; }
+
+    /* ── Loading ── */
+    #loading { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+      text-align:center; color:#7eb8ff; }
+    .spinner { width:36px; height:36px; border:3px solid rgba(126,184,255,0.2);
+      border-top-color:#7eb8ff; border-radius:50%; animation:spin 0.8s linear infinite;
+      margin:0 auto 10px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── Info panel ── */
+    #info-panel {
+      position:absolute; top:8px; left:8px; width:220px;
+      background:rgba(10,15,30,0.85); border:1px solid rgba(100,160,255,0.3);
+      border-radius:10px; padding:12px; font-size:11px; color:#c8d8e8;
+      backdrop-filter:blur(8px); display:none;
+    }
+    #info-panel h3 { font-size:12px; color:#7eb8ff; margin-bottom:6px; }
+    .irow { display:flex; justify-content:space-between; margin-bottom:4px;
+      border-bottom:1px solid rgba(100,160,255,0.07); padding-bottom:4px; }
+    .irow:last-child { border:none; margin:0; padding:0; }
+    .ilabel { color:#6888a0; }
+    .ival { color:#e0f0ff; font-weight:bold; }
+    #plume-canvas { display:none; margin-top:8px; width:100%; height:180px;
+      border:1px solid rgba(100,160,255,0.2); border-radius:4px; }
+    #plume-legend { font-size:10px; margin-top:4px; display:none; line-height:1.5; }
+
+    @media (max-width:768px) {
+      #ui-panel { top:auto; right:0; left:0; bottom:0; width:100%;
+        max-height:70vh; border-radius:14px 14px 0 0;
+        transform:translateY(100%); }
+      #ui-panel.open { transform:translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<nav id="header-nav">
+  <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+  <div class="nav-sep"></div>
+  <a href="area" class="nav-link">Area</a>
+  <a href="simulate" class="nav-link">Simulate</a>
+  <a href="simulate-advanced" class="nav-link">Simulate NS</a>
+  <a href="view" class="nav-link">View</a>
+  <a href="view-advanced" class="nav-link nav-active">View NS</a>
+  <a href="about" class="nav-link">About</a>
+</nav>
+
+<div id="canvas-container">
+  <div id="loading"><div class="spinner"></div><div>Loading NS simulation data…</div></div>
+  <div id="info-panel">
+    <h3 id="ip-title">—</h3>
+    <div id="ip-rows"></div>
+    <canvas id="plume-canvas" width="196" height="180"></canvas>
+    <div id="plume-legend">
+      <span style="color:#6699ff" id="plume-leg-theta">— θ'</span>&nbsp;&nbsp;<span style="color:#ff7755" id="plume-leg-w">— w</span>
+    </div>
+  </div>
+</div>
+
+<button id="panel-toggle"
+  onclick="const p=document.getElementById('ui-panel');p.classList.toggle('open');this.textContent=p.classList.contains('open')?'✕':'☰';"
+  title="Toggle controls">☰</button>
+
+<div id="ui-panel">
+  <h2>NS Simulation — 3D</h2>
+
+  <div class="sec">Time</div>
+  <div class="cg">
+    <label>Scenario <span id="time-display">—</span></label>
+    <input type="range" id="time-slider" min="0" max="0" step="1" value="0">
+    <div id="sun-info" style="font-size:10px;color:#556677;margin-top:3px">—</div>
+  </div>
+
+  <div class="sec">Overlays</div>
+  <div class="cg">
+    <label>Terrain (elevation) <span id="terrain-op-val">0.85</span></label>
+    <input type="range" id="terrain-op" min="0" max="1" step="0.05" value="0.85">
+  </div>
+  <div class="cg">
+    <label>θ' temp. anomaly <span id="theta-op-val">0.70</span></label>
+    <input type="range" id="theta-op" min="0" max="1" step="0.05" value="0.70">
+  </div>
+  <div class="cg">
+    <label>Vertical velocity w <span id="wvel-op-val">0.00</span></label>
+    <input type="range" id="wvel-op" min="0" max="1" step="0.05" value="0.00">
+  </div>
+  <div class="cg">
+    <label>Convergence <span id="conv-op-val">0.00</span></label>
+    <input type="range" id="conv-op" min="0" max="1" step="0.05" value="0.00">
+  </div>
+  <div class="cg">
+    <label>Wind arrows <span id="wind-op-val">0.50</span></label>
+    <input type="range" id="wind-op" min="0" max="1" step="0.05" value="0.50">
+  </div>
+
+  <div class="sec">Slices</div>
+
+  <div class="slice-group">
+    <div class="slice-header">
+      <span>EW cross-section</span>
+      <button class="mode-btn" id="ew-mode-btn">θ'</button>
+    </div>
+    <div class="cg">
+      <label>Opacity <span id="ew-op-val">0.00</span></label>
+      <input type="range" id="ew-op" min="0" max="1" step="0.05" value="0.00">
+    </div>
+    <div class="cg">
+      <label>Y row <span id="ew-pos-val">—</span></label>
+      <input type="range" id="ew-pos" min="0" max="1" step="1" value="0">
+    </div>
+  </div>
+
+  <div class="slice-group">
+    <div class="slice-header">
+      <span>NS cross-section</span>
+      <button class="mode-btn" id="ns-mode-btn">θ'</button>
+    </div>
+    <div class="cg">
+      <label>Opacity <span id="ns-op-val">0.00</span></label>
+      <input type="range" id="ns-op" min="0" max="1" step="0.05" value="0.00">
+    </div>
+    <div class="cg">
+      <label>X col <span id="ns-pos-val">—</span></label>
+      <input type="range" id="ns-pos" min="0" max="1" step="1" value="0">
+    </div>
+  </div>
+
+  <div class="slice-group">
+    <div class="slice-header">
+      <span>Z horizontal slice</span>
+      <button class="mode-btn" id="z-mode-btn">θ'</button>
+    </div>
+    <div class="cg">
+      <label>Opacity <span id="z-op-val">0.00</span></label>
+      <input type="range" id="z-op" min="0" max="1" step="0.05" value="0.00">
+    </div>
+    <div class="cg">
+      <label>Altitude <span id="z-pos-val">—</span></label>
+      <input type="range" id="z-pos" min="0" max="1" step="1" value="0">
+    </div>
+  </div>
+
+  <div class="sec">Lighting</div>
+  <div class="cg">
+    <label>Ambient <span id="amb-val">2.0</span></label>
+    <input type="range" id="amb" min="0" max="6" step="0.1" value="2.0">
+  </div>
+  <div class="cg">
+    <label>Sun intensity <span id="sun-val">3.0</span></label>
+    <input type="range" id="sun-int" min="0" max="8" step="0.1" value="3.0">
+  </div>
+
+  <div class="hint">Drag to rotate · Scroll to zoom · Right-drag to pan</div>
+</div>
+
+<div id="colorbars">
+  <div class="colorbar" id="cb-elev-wrap">
+    <div class="cb-title">Elevation (m)</div>
+    <div class="cb-body">
+      <canvas id="cb-elev" width="20" height="120"></canvas>
+      <div class="cb-labels" id="cb-elev-labels"></div>
+    </div>
+  </div>
+  <div class="colorbar" id="cb-theta-wrap">
+    <div class="cb-title">θ' (K)</div>
+    <div class="cb-body">
+      <canvas id="cb-theta" width="20" height="120"></canvas>
+      <div class="cb-labels" id="cb-theta-labels"></div>
+    </div>
+  </div>
+  <div class="colorbar" id="cb-wvel-wrap">
+    <div class="cb-title">w (m/s)</div>
+    <div class="cb-body">
+      <canvas id="cb-wvel" width="20" height="120"></canvas>
+      <div class="cb-labels" id="cb-wvel-labels"></div>
+    </div>
+  </div>
+  <div class="colorbar" id="cb-conv-wrap">
+    <div class="cb-title">Convergence</div>
+    <div class="cb-body">
+      <canvas id="cb-conv" width="20" height="120"></canvas>
+      <div class="cb-labels" id="cb-conv-labels"></div>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ── Scene ────────────────────────────────────────────────────────────────────
+const container = document.getElementById('canvas-container');
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight - 44);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x040810);
+scene.fog = new THREE.Fog(0x040810, 8000, 20000);
+
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / (window.innerHeight - 44), 10, 30000);
+camera.position.set(0, -2500, 2500);
+camera.up.set(0, 0, 1);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0, 800);
+controls.enableDamping = true; controls.dampingFactor = 0.06;
+controls.minDistance = 100; controls.maxDistance = 15000;
+controls.maxPolarAngle = Math.PI * 0.48;
+
+const ambientLight = new THREE.AmbientLight(0x1a2a3a, 2);
+scene.add(ambientLight);
+const sun = new THREE.DirectionalLight(0xfff0dd, 3);
+sun.position.set(1000, -500, 2000);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+sun.shadow.camera.left = sun.shadow.camera.bottom = -6000;
+sun.shadow.camera.right = sun.shadow.camera.top = 6000;
+sun.shadow.camera.near = 100; sun.shadow.camera.far = 20000;
+sun.shadow.bias = -0.002;
+scene.add(sun);
+
+window.addEventListener('resize', () => {
+  const w = window.innerWidth, h = window.innerHeight - 44;
+  camera.aspect = w / h; camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+
+// ── Colormaps ─────────────────────────────────────────────────────────────────
+function elevColor(t) {
+  t = Math.max(0, Math.min(1, t));
+  if (t < 0.25) { const s=t/0.25; return [0.4+0.1*s, 0.25+0.25*s, 0.1]; }
+  if (t < 0.55) { const s=(t-0.25)/0.30; return [0.5-0.2*s, 0.5+0.1*s, 0.1+0.2*s]; }
+  if (t < 0.80) { const s=(t-0.55)/0.25; return [0.3+0.4*s, 0.6+0.2*s, 0.3+0.4*s]; }
+  const s=(t-0.80)/0.20; return [0.7+0.3*s, 0.8+0.2*s, 0.7+0.3*s];
+}
+
+function divergingColor(t) {
+  t = Math.max(0, Math.min(1, t));
+  if (t < 0.5) { const s = 1 - t * 2; return [1-s, 1-s, 1]; }
+  const s = (t - 0.5) * 2; return [1, 1-s, 1-s];
+}
+
+function convColor(t) {
+  t = Math.max(0, Math.min(1, t));
+  if (t < 0.5) { const s=t*2; return [s*0.95, s*0.45, 0]; }
+  const s=(t-0.5)*2; return [0.95, 0.45+s*0.55, s*0.1];
+}
+
+function drawColorbar(canvasId, labelsId, colorFn, minVal, maxVal, fmt) {
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(canvas.width, canvas.height);
+  for (let py=0;py<canvas.height;py++) {
+    const t = 1 - py/(canvas.height-1);
+    const [r,g,b] = colorFn(t);
+    for (let px=0;px<canvas.width;px++) {
+      const idx=(py*canvas.width+px)*4;
+      img.data[idx]=Math.round(r*255); img.data[idx+1]=Math.round(g*255);
+      img.data[idx+2]=Math.round(b*255); img.data[idx+3]=255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+  const div = document.getElementById(labelsId);
+  div.innerHTML = '';
+  for (let k=0;k<=4;k++) {
+    const v = maxVal - (k/4)*(maxVal-minVal);
+    const s = document.createElement('span');
+    s.textContent = fmt(v);
+    div.appendChild(s);
+  }
+}
+
+// ── State ────────────────────────────────────────────────────────────────────
+let simData = null;
+let terrainMesh = null, terrainMat = null;
+let thetaMesh = null, thetaMat = null;
+let wvelMesh = null, wvelMat = null;
+let convMesh = null, convMat = null;
+let windGroup = null;
+let sunSphere = null, sunGlow = null, sunLabel = null;
+let terrainZMin = 0, terrainZMax = 1;
+let globalMaxTheta = 1, globalMaxW = 1;
+let currentScenario = 0;
+
+// Slice state
+let ewSliceMesh = null, ewSliceMat = null, ewIy = 0, ewMode = 'theta';
+let nsSliceMesh = null, nsSliceMat = null, nsIx = 0, nsMode = 'theta';
+let zSliceMesh  = null, zSliceMat  = null, zIz  = 0, zMode  = 'theta';
+
+// ── IDB ──────────────────────────────────────────────────────────────────────
+function idbGet() {
+  return new Promise(resolve => {
+    const req = indexedDB.open('paragliding', 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore('sim');
+    req.onerror = () => resolve(null);
+    req.onsuccess = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('sim')) { resolve(null); return; }
+      const tx = db.transaction('sim', 'readwrite');
+      const store = tx.objectStore('sim');
+      const getReq = store.get('latest-ns');
+      getReq.onsuccess = () => {
+        const raw = getReq.result;
+        if (raw) store.delete('latest-ns');
+        try { resolve(raw ? JSON.parse(raw) : null); } catch { resolve(null); }
+      };
+      getReq.onerror = () => resolve(null);
+    };
+  });
+}
+
+// ── Load & init ───────────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    let data = await idbGet();
+    if (!data) {
+      const r = await fetch('../data/simulation-ns.json');
+      if (!r.ok) throw new Error(`simulation-ns.json: HTTP ${r.status}`);
+      data = await r.json();
+    }
+    simData = data;
+    document.getElementById('loading').style.display = 'none';
+    init();
+  } catch(e) {
+    document.getElementById('loading').innerHTML =
+      `<div style="color:#f66">Failed to load NS data<br><small>${e.message}</small><br><br>
+       <small>Run the NS simulation first (<a href="simulate-advanced" style="color:#7eb8ff">Simulate NS</a>)</small></div>`;
+  }
+}
+
+function init() {
+  const T = simData.terrain;
+  const scenarios = simData.scenarios;
+  const ns = simData.ns_solver;
+
+  // Compute global ranges — shared across surface overlays and all slices
+  globalMaxTheta = 0; globalMaxW = 0;
+  for (const sc of scenarios) {
+    for (const row of sc.ground_temp_anomaly) for (const v of row) if (Math.abs(v)>globalMaxTheta) globalMaxTheta=Math.abs(v);
+    if (sc.w_vel)    for (const row of sc.w_vel)   for (const v of row) if (Math.abs(v)>globalMaxW)     globalMaxW=Math.abs(v);
+    if (sc.theta_3d) for (const p of sc.theta_3d)  for (const row of p) for (const v of row) if (Math.abs(v)>globalMaxTheta) globalMaxTheta=Math.abs(v);
+    if (sc.w_3d)     for (const p of sc.w_3d)      for (const row of p) for (const v of row) if (Math.abs(v)>globalMaxW)     globalMaxW=Math.abs(v);
+  }
+  if (globalMaxTheta < 0.01) globalMaxTheta = 1;
+  if (globalMaxW     < 0.01) globalMaxW     = 1;
+
+  buildTerrain(T);
+  buildOverlay(T, 'theta');
+  buildOverlay(T, 'wvel');
+  buildOverlay(T, 'conv');
+  buildWindArrows(T);
+
+  if (ns) {
+    const ew = buildVertSlice('ew', T, ns);
+    ewSliceMesh = ew.mesh; ewSliceMat = ew.mat;
+    const ns_ = buildVertSlice('ns', T, ns);
+    nsSliceMesh = ns_.mesh; nsSliceMat = ns_.mat;
+    const z_ = buildZSlice(T, ns);
+    zSliceMesh = z_.mesh; zSliceMat = z_.mat;
+
+    // Init slice positions at mid
+    ewIy = Math.floor(ns.NY / 2);
+    nsIx = Math.floor(ns.NX / 2);
+    zIz  = 0;
+
+    // Configure position sliders
+    const ewPosEl = document.getElementById('ew-pos');
+    ewPosEl.max = ns.NY - 1; ewPosEl.value = ewIy;
+    document.getElementById('ew-pos-val').textContent = ewIy;
+
+    const nsPosEl = document.getElementById('ns-pos');
+    nsPosEl.max = ns.NX - 1; nsPosEl.value = nsIx;
+    document.getElementById('ns-pos-val').textContent = nsIx;
+
+    const zPosEl = document.getElementById('z-pos');
+    zPosEl.max = ns.NZ - 1; zPosEl.value = zIz;
+    document.getElementById('z-pos-val').textContent = Math.round(T.z_extent[0]) + 'm';
+
+    // Position sliders
+    ewPosEl.addEventListener('input', () => { ewIy = parseInt(ewPosEl.value); setEWSlicePos(); });
+    nsPosEl.addEventListener('input', () => { nsIx = parseInt(nsPosEl.value); setNSSlicePos(); });
+    zPosEl.addEventListener('input',  () => { zIz  = parseInt(zPosEl.value);  setZSlicePos();  });
+
+    // Mode toggle buttons
+    document.getElementById('ew-mode-btn').addEventListener('click', () => {
+      ewMode = ewMode === 'theta' ? 'w' : 'theta';
+      document.getElementById('ew-mode-btn').textContent = ewMode === 'theta' ? "θ'" : 'w';
+      recolorSlice('ew');
+    });
+    document.getElementById('ns-mode-btn').addEventListener('click', () => {
+      nsMode = nsMode === 'theta' ? 'w' : 'theta';
+      document.getElementById('ns-mode-btn').textContent = nsMode === 'theta' ? "θ'" : 'w';
+      recolorSlice('ns');
+    });
+    document.getElementById('z-mode-btn').addEventListener('click', () => {
+      zMode = zMode === 'theta' ? 'w' : 'theta';
+      document.getElementById('z-mode-btn').textContent = zMode === 'theta' ? "θ'" : 'w';
+      recolorSlice('z');
+    });
+  }
+
+  buildSun();
+
+  // Time slider
+  const slider = document.getElementById('time-slider');
+  slider.max = scenarios.length - 1;
+  slider.addEventListener('input', () => {
+    currentScenario = parseInt(slider.value);
+    updateScenario(currentScenario);
+  });
+
+  // Opacity sliders
+  function bindOp(id, valId, setter) {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => {
+      document.getElementById(valId).textContent = parseFloat(el.value).toFixed(2);
+      setter(parseFloat(el.value));
+    });
+  }
+  bindOp('terrain-op','terrain-op-val', v => { if(terrainMat) terrainMat.opacity=v; });
+  bindOp('theta-op',  'theta-op-val',  v => { if(thetaMat) thetaMat.opacity=v; });
+  bindOp('wvel-op',   'wvel-op-val',   v => { if(wvelMat) wvelMat.opacity=v;  });
+  bindOp('conv-op',   'conv-op-val',   v => { if(convMat) convMat.opacity=v;  toggleCb('cb-conv-wrap', v>0); });
+  bindOp('wind-op',   'wind-op-val',   v => { if(windGroup) windGroup.children.forEach(c=>c.material&&(c.material.opacity=v)); });
+  bindOp('ew-op',     'ew-op-val',     v => { if(ewSliceMat) ewSliceMat.opacity=v; });
+  bindOp('ns-op',     'ns-op-val',     v => { if(nsSliceMat) nsSliceMat.opacity=v; });
+  bindOp('z-op',      'z-op-val',      v => { if(zSliceMat)  zSliceMat.opacity=v;  });
+  bindOp('amb',       'amb-val',       v => { ambientLight.intensity=v; });
+  bindOp('sun-int',   'sun-val',       v => { sun.intensity=v; });
+
+  // Initial scenario
+  updateScenario(0);
+
+  // Colorbars — θ' and w always shown (shared by surface overlays + all slices)
+  toggleCb('cb-elev-wrap',  true);
+  toggleCb('cb-theta-wrap', true);
+  toggleCb('cb-wvel-wrap',  true);
+  drawColorbar('cb-elev',  'cb-elev-labels',  elevColor,           terrainZMin,      terrainZMax,      v=>v.toFixed(0)+'m');
+  drawColorbar('cb-theta', 'cb-theta-labels', t=>divergingColor(t), -globalMaxTheta, globalMaxTheta,   v=>v.toFixed(2)+'K');
+  drawColorbar('cb-wvel',  'cb-wvel-labels',  t=>divergingColor(t), -globalMaxW,     globalMaxW,       v=>v.toFixed(2)+'m/s');
+  drawColorbar('cb-conv',  'cb-conv-labels',  convColor,            0,               1,                v=>v.toFixed(2));
+
+  document.getElementById('ui-panel').classList.add('open');
+  document.getElementById('panel-toggle').textContent = '✕';
+}
+
+function toggleCb(id, show) {
+  document.getElementById(id).classList.toggle('show', show);
+}
+
+// ── Terrain ───────────────────────────────────────────────────────────────────
+function buildTerrain(T) {
+  if (terrainMesh) { scene.remove(terrainMesh); terrainMesh.geometry.dispose(); }
+
+  const hasMesh = T.mesh_elevation && T.mesh_nx && T.mesh_ny;
+  const elev = hasMesh ? T.mesh_elevation : T.elevation;
+  const nx = hasMesh ? T.mesh_nx : T.nx;
+  const ny = hasMesh ? T.mesh_ny : T.ny;
+
+  const geom = new THREE.PlaneGeometry(
+    T.x_extent[1]-T.x_extent[0], T.y_extent[1]-T.y_extent[0], nx-1, ny-1);
+  const pos = geom.attributes.position;
+  for (let j=0;j<ny;j++) for (let i=0;i<nx;i++) pos.setZ(j*nx+i, elev[j][i]);
+  pos.needsUpdate = true;
+  geom.computeVertexNormals();
+
+  terrainZMin = Infinity; terrainZMax = -Infinity;
+  for (let k=0;k<pos.count;k++) {
+    const z=pos.getZ(k);
+    if(z<terrainZMin) terrainZMin=z; if(z>terrainZMax) terrainZMax=z;
+  }
+
+  const colors = new Float32Array(pos.count*3);
+  for (let k=0;k<pos.count;k++) {
+    const t=(pos.getZ(k)-terrainZMin)/(terrainZMax-terrainZMin);
+    const [r,g,b]=elevColor(t);
+    colors[k*3]=r; colors[k*3+1]=g; colors[k*3+2]=b;
+  }
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+  terrainMat = new THREE.MeshLambertMaterial({ vertexColors:true, transparent:true, opacity:0.85 });
+  terrainMesh = new THREE.Mesh(geom, terrainMat);
+  terrainMesh.position.set((T.x_extent[0]+T.x_extent[1])/2, -(T.y_extent[0]+T.y_extent[1])/2, 0);
+  terrainMesh.receiveShadow = true;
+  scene.add(terrainMesh);
+
+  const meanElev = elev.flat().reduce((a,b)=>a+b,0)/(nx*ny);
+  controls.target.set(0, 0, meanElev);
+  camera.position.set(0, -3000, meanElev+1500);
+  controls.update();
+}
+
+// ── Overlay meshes (θ', w, convergence) ──────────────────────────────────────
+function buildOverlay(T, type) {
+  const lift = type==='theta'?3 : type==='wvel'?6 : 9;
+  const mat = new THREE.MeshBasicMaterial({
+    vertexColors:true, transparent:true, opacity:0,
+    depthWrite:false, depthTest:false,
+  });
+  const geom = new THREE.PlaneGeometry(
+    T.x_extent[1]-T.x_extent[0], T.y_extent[1]-T.y_extent[0], T.nx-1, T.ny-1);
+  const pos = geom.attributes.position;
+  for (let j=0;j<T.ny;j++) for (let i=0;i<T.nx;i++)
+    pos.setZ(j*T.nx+i, T.elevation[j][i]+lift);
+  pos.needsUpdate = true;
+  geom.setAttribute('color', new THREE.BufferAttribute(new Float32Array(T.nx*T.ny*3), 3));
+
+  const mesh = new THREE.Mesh(geom, mat);
+  mesh.position.set((T.x_extent[0]+T.x_extent[1])/2, -(T.y_extent[0]+T.y_extent[1])/2, 0);
+  scene.add(mesh);
+
+  if (type==='theta') { thetaMesh=mesh; thetaMat=mat; mat.opacity=0.70; }
+  else if (type==='wvel') { wvelMesh=mesh; wvelMat=mat; }
+  else { convMesh=mesh; convMat=mat; }
+}
+
+function updateOverlayColors(mesh, T, data, colorFn, minVal, maxVal) {
+  if (!mesh || !data) return;
+  const arr = mesh.geometry.attributes.color.array;
+  const range = maxVal - minVal || 1;
+  for (let j=0;j<T.ny;j++) {
+    for (let i=0;i<T.nx;i++) {
+      const idx=(j*T.nx+i)*3;
+      const t = (data[j][i]-minVal)/range;
+      const [r,g,b] = colorFn(Math.max(0,Math.min(1,t)));
+      arr[idx]=r; arr[idx+1]=g; arr[idx+2]=b;
+    }
+  }
+  mesh.geometry.attributes.color.needsUpdate = true;
+}
+
+// ── Wind arrows ───────────────────────────────────────────────────────────────
+function buildWindArrows(T) {
+  if (windGroup) { scene.remove(windGroup); windGroup.traverse(o=>{ if(o.geometry) o.geometry.dispose(); if(o.material) o.material.dispose(); }); }
+  windGroup = new THREE.Group();
+  const step = Math.max(2, Math.round(Math.min(T.nx,T.ny)/16));
+  const lineMat = new THREE.LineBasicMaterial({ color:0xffdd66, transparent:true, opacity:0.5 });
+  for (let j=Math.floor(step/2); j<T.ny; j+=step) {
+    for (let i=Math.floor(step/2); i<T.nx; i+=step) {
+      const pts = [new THREE.Vector3(0,0,0), new THREE.Vector3(0,0,0)];
+      const geom = new THREE.BufferGeometry().setFromPoints(pts);
+      const line = new THREE.Line(geom, lineMat.clone());
+      line.userData = {j, i};
+      windGroup.add(line);
+    }
+  }
+  scene.add(windGroup);
+}
+
+function updateWindArrows(sc, T) {
+  if (!windGroup || !sc.u_surface) return;
+  const xRange = T.x_extent[1]-T.x_extent[0];
+  const yRange = T.y_extent[1]-T.y_extent[0];
+  const cx = (T.x_extent[0]+T.x_extent[1])/2;
+  const cy = (T.y_extent[0]+T.y_extent[1])/2;
+  let uMax = 1e-6;
+  for (const row of sc.u_surface) for (const v of row) if(Math.abs(v)>uMax) uMax=Math.abs(v);
+  for (const row of sc.v_surface) for (const v of row) if(Math.abs(v)>uMax) uMax=Math.abs(v);
+  const arrowLen = Math.min(xRange, yRange) * 0.04;
+  windGroup.children.forEach(line => {
+    const {j, i} = line.userData;
+    const u = sc.u_surface[j][i], v = sc.v_surface[j][i];
+    const x0 = (i/(T.nx-1) - 0.5) * xRange;
+    const y0 = -(j/(T.ny-1) - 0.5) * yRange;
+    const z0 = T.elevation[j][i] + 15;
+    const scale = arrowLen / uMax;
+    const pts = new Float32Array([x0,y0,z0, x0+u*scale, y0-v*scale, z0]);
+    line.geometry.setAttribute('position', new THREE.BufferAttribute(pts,3));
+    line.geometry.attributes.position.needsUpdate = true;
+  });
+}
+
+// ── Vertical slices (EW / NS) ─────────────────────────────────────────────────
+function buildVertSlice(type, T, ns) {
+  const {NX, NY, NZ, domH} = ns;
+  const z0 = T.z_extent[0];
+  const xRange = T.x_extent[1] - T.x_extent[0];
+  const yRange = T.y_extent[1] - T.y_extent[0];
+  const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
+  const cy = (T.y_extent[0] + T.y_extent[1]) / 2;
+
+  const nH = (type === 'ew') ? NX : NY;
+  const positions = new Float32Array(NZ * nH * 3);
+  const colors    = new Float32Array(NZ * nH * 3).fill(0.5);
+
+  for (let iz = 0; iz < NZ; iz++) {
+    const z_w = z0 + iz / Math.max(1, NZ - 1) * domH;
+    for (let ih = 0; ih < nH; ih++) {
+      const base = (iz * nH + ih) * 3;
+      if (type === 'ew') {
+        positions[base]   = cx + (ih / Math.max(1, NX-1) - 0.5) * xRange;
+        positions[base+1] = -cy + (Math.floor(NY/2) / Math.max(1, NY-1) - 0.5) * yRange;
+      } else {
+        positions[base]   = cx + (Math.floor(NX/2) / Math.max(1, NX-1) - 0.5) * xRange;
+        positions[base+1] = -cy + (ih / Math.max(1, NY-1) - 0.5) * yRange;
+      }
+      positions[base+2] = z_w;
+    }
+  }
+
+  const indices = [];
+  for (let iz = 0; iz < NZ-1; iz++) {
+    for (let ih = 0; ih < nH-1; ih++) {
+      const a = iz*nH+ih, b=a+1, c=(iz+1)*nH+ih, d=c+1;
+      indices.push(a,b,c, b,d,c);
+    }
+  }
+
+  const geom = new THREE.BufferGeometry();
+  geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  geom.setAttribute('color',    new THREE.BufferAttribute(colors, 3));
+  geom.setIndex(indices);
+
+  const mat = new THREE.MeshBasicMaterial({
+    vertexColors:true, transparent:true, opacity:0,
+    side:THREE.DoubleSide, depthWrite:false,
+  });
+  const mesh = new THREE.Mesh(geom, mat);
+  scene.add(mesh);
+  return { mesh, mat };
+}
+
+// ── Z horizontal slice ────────────────────────────────────────────────────────
+function buildZSlice(T, ns) {
+  const geom = new THREE.PlaneGeometry(
+    T.x_extent[1]-T.x_extent[0], T.y_extent[1]-T.y_extent[0], ns.NX-1, ns.NY-1);
+  const pos = geom.attributes.position;
+  for (let k=0; k<pos.count; k++) pos.setZ(k, T.z_extent[0]);
+  pos.needsUpdate = true;
+  geom.setAttribute('color', new THREE.BufferAttribute(new Float32Array(ns.NX*ns.NY*3).fill(0.5), 3));
+  const mat = new THREE.MeshBasicMaterial({
+    vertexColors:true, transparent:true, opacity:0,
+    side:THREE.DoubleSide, depthWrite:false,
+  });
+  const mesh = new THREE.Mesh(geom, mat);
+  mesh.position.set((T.x_extent[0]+T.x_extent[1])/2, -(T.y_extent[0]+T.y_extent[1])/2, 0);
+  scene.add(mesh);
+  return { mesh, mat };
+}
+
+// ── Slice color updates ───────────────────────────────────────────────────────
+function updateVertSliceColors(mesh, sliceData, nH, nV, colorFn, minVal, maxVal) {
+  if (!mesh || !sliceData) return;
+  const arr = mesh.geometry.attributes.color.array;
+  const range = maxVal - minVal || 1;
+  for (let iz = 0; iz < nV; iz++) {
+    for (let ih = 0; ih < nH; ih++) {
+      const t = ((sliceData[iz]?.[ih] ?? 0) - minVal) / range;
+      const [r,g,b] = colorFn(Math.max(0, Math.min(1, t)));
+      const base = (iz * nH + ih) * 3;
+      arr[base]=r; arr[base+1]=g; arr[base+2]=b;
+    }
+  }
+  mesh.geometry.attributes.color.needsUpdate = true;
+}
+
+function updateZSliceColors(mesh, T, sliceData, colorFn, minVal, maxVal) {
+  if (!mesh || !sliceData) return;
+  const arr = mesh.geometry.attributes.color.array;
+  const range = maxVal - minVal || 1;
+  for (let j=0; j<T.ny; j++) {
+    for (let i=0; i<T.nx; i++) {
+      const t = ((sliceData[j]?.[i] ?? 0) - minVal) / range;
+      const [r,g,b] = colorFn(Math.max(0, Math.min(1, t)));
+      const base = (j*T.nx+i)*3;
+      arr[base]=r; arr[base+1]=g; arr[base+2]=b;
+    }
+  }
+  mesh.geometry.attributes.color.needsUpdate = true;
+}
+
+// ── Slice position setters ────────────────────────────────────────────────────
+function setEWSlicePos() {
+  if (!ewSliceMesh || !simData.ns_solver) return;
+  const ns = simData.ns_solver, T = simData.terrain;
+  const cy = (T.y_extent[0]+T.y_extent[1])/2;
+  const yRange = T.y_extent[1]-T.y_extent[0];
+  const y_w = -cy + (ewIy / Math.max(1, ns.NY-1) - 0.5) * yRange;
+  const pos = ewSliceMesh.geometry.attributes.position;
+  for (let k=0; k<pos.count; k++) pos.setY(k, y_w);
+  pos.needsUpdate = true;
+  document.getElementById('ew-pos-val').textContent = ewIy;
+  recolorSlice('ew');
+}
+
+function setNSSlicePos() {
+  if (!nsSliceMesh || !simData.ns_solver) return;
+  const ns = simData.ns_solver, T = simData.terrain;
+  const cx = (T.x_extent[0]+T.x_extent[1])/2;
+  const xRange = T.x_extent[1]-T.x_extent[0];
+  const x_w = cx + (nsIx / Math.max(1, ns.NX-1) - 0.5) * xRange;
+  const pos = nsSliceMesh.geometry.attributes.position;
+  for (let k=0; k<pos.count; k++) pos.setX(k, x_w);
+  pos.needsUpdate = true;
+  document.getElementById('ns-pos-val').textContent = nsIx;
+  recolorSlice('ns');
+}
+
+function setZSlicePos() {
+  if (!zSliceMesh || !simData.ns_solver) return;
+  const ns = simData.ns_solver, T = simData.terrain;
+  const z_w = T.z_extent[0] + zIz / Math.max(1, ns.NZ-1) * ns.domH;
+  const pos = zSliceMesh.geometry.attributes.position;
+  for (let k=0; k<pos.count; k++) pos.setZ(k, z_w);
+  pos.needsUpdate = true;
+  document.getElementById('z-pos-val').textContent = Math.round(z_w) + 'm';
+  recolorSlice('z');
+}
+
+// ── Recolor a slice from current scenario ─────────────────────────────────────
+function recolorSlice(type) {
+  const sc = simData?.scenarios[currentScenario];
+  if (!sc || !simData.ns_solver) return;
+  const ns = simData.ns_solver;
+  const T  = simData.terrain;
+
+  if (type === 'ew' && ewSliceMesh) {
+    const data3d = ewMode === 'theta' ? sc.theta_3d : sc.w_3d;
+    const maxVal = ewMode === 'theta' ? globalMaxTheta : globalMaxW;
+    if (data3d) {
+      const slice = data3d.map(plane => plane[ewIy] ?? []);
+      updateVertSliceColors(ewSliceMesh, slice, ns.NX, ns.NZ, divergingColor, -maxVal, maxVal);
+    }
+  }
+  if (type === 'ns' && nsSliceMesh) {
+    const data3d = nsMode === 'theta' ? sc.theta_3d : sc.w_3d;
+    const maxVal = nsMode === 'theta' ? globalMaxTheta : globalMaxW;
+    if (data3d) {
+      const slice = data3d.map(plane => plane.map(row => row[nsIx] ?? 0));
+      updateVertSliceColors(nsSliceMesh, slice, ns.NY, ns.NZ, divergingColor, -maxVal, maxVal);
+    }
+  }
+  if (type === 'z' && zSliceMesh) {
+    const data3d = zMode === 'theta' ? sc.theta_3d : sc.w_3d;
+    const maxVal = zMode === 'theta' ? globalMaxTheta : globalMaxW;
+    if (data3d) {
+      updateZSliceColors(zSliceMesh, T, data3d[zIz], divergingColor, -maxVal, maxVal);
+    }
+  }
+}
+
+function recolorAllSlices() {
+  recolorSlice('ew');
+  recolorSlice('ns');
+  recolorSlice('z');
+}
+
+// ── Sun ───────────────────────────────────────────────────────────────────────
+const SUN_R = 8000;
+function buildSun() {
+  sunSphere = new THREE.Mesh(
+    new THREE.SphereGeometry(140,16,16),
+    new THREE.MeshBasicMaterial({color:0xffee88}));
+  scene.add(sunSphere);
+  sunGlow = new THREE.Mesh(
+    new THREE.SphereGeometry(280,16,16),
+    new THREE.MeshBasicMaterial({color:0xffcc44, transparent:true, opacity:0.18,
+      blending:THREE.AdditiveBlending, depthWrite:false}));
+  scene.add(sunGlow);
+  sunLabel = document.createElement('div');
+  sunLabel.style.cssText = 'position:absolute;pointer-events:none;background:rgba(10,15,30,0.75);border:1px solid #ffcc44;color:#ffee88;font-size:10px;font-family:Segoe UI,sans-serif;padding:2px 6px;border-radius:4px;white-space:nowrap;transform:translate(-50%,-140%)';
+  container.appendChild(sunLabel);
+}
+
+function updateSun(sc) {
+  const az = sc.sun_azimuth * Math.PI/180;
+  const el = sc.sun_elevation * Math.PI/180;
+  const cz = (terrainZMin+terrainZMax)/2;
+  const pos = new THREE.Vector3(
+    SUN_R*Math.sin(az)*Math.cos(el),
+    SUN_R*Math.cos(az)*Math.cos(el),
+    cz+SUN_R*Math.sin(el));
+  sunSphere.position.copy(pos);
+  sunGlow.position.copy(pos);
+  sun.position.copy(pos);
+  sun.shadow.camera.updateProjectionMatrix();
+  sunLabel.textContent = `☀ ${sc.local_time}  el ${sc.sun_elevation.toFixed(0)}°`;
+}
+
+// ── Markers ───────────────────────────────────────────────────────────────────
+let markersMade = false;
+function buildMarkers(T) {
+  if (markersMade || !simData.markers) return;
+  markersMade = true;
+  const cx = (T.x_extent[0]+T.x_extent[1])/2;
+  const cy = (T.y_extent[0]+T.y_extent[1])/2;
+  for (const m of simData.markers) {
+    const color = m.type==='takeoff' ? 0x44ff88 : 0xff6644;
+    const sphere = new THREE.Mesh(new THREE.SphereGeometry(30,12,12), new THREE.MeshBasicMaterial({color}));
+    sphere.position.set(m.x-cx, -(m.y-cy), (m.z||terrainZMin)+40);
+    scene.add(sphere);
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(4,4,200,8), new THREE.MeshBasicMaterial({color}));
+    pole.position.set(m.x-cx, -(m.y-cy), (m.z||terrainZMin)-60);
+    pole.rotation.x = Math.PI/2;
+    scene.add(pole);
+  }
+}
+
+// ── Scenario update ───────────────────────────────────────────────────────────
+function updateScenario(idx) {
+  if (!simData) return;
+  const sc = simData.scenarios[idx];
+  const T  = simData.terrain;
+
+  document.getElementById('time-display').textContent = sc.local_time || sc.name;
+  document.getElementById('sun-info').textContent =
+    `az ${sc.sun_azimuth.toFixed(0)}°  el ${sc.sun_elevation.toFixed(0)}°`;
+  document.getElementById('time-slider').value = idx;
+
+  updateOverlayColors(thetaMesh, T, sc.ground_temp_anomaly, divergingColor, -globalMaxTheta, globalMaxTheta);
+  if (sc.w_vel)      updateOverlayColors(wvelMesh, T, sc.w_vel,       divergingColor, -globalMaxW, globalMaxW);
+  if (sc.convergence) updateOverlayColors(convMesh, T, sc.convergence, convColor, 0, 1);
+  recolorAllSlices();
+  updateWindArrows(sc, T);
+  updateSun(sc);
+  buildMarkers(T);
+}
+
+// ── Plume profile ─────────────────────────────────────────────────────────────
+function drawPlumeProfile(sc, i, j) {
+  const canvas = document.getElementById('plume-canvas');
+  const legend = document.getElementById('plume-legend');
+  if (!sc.theta_3d) { canvas.style.display='none'; legend.style.display='none'; return; }
+  canvas.style.display = 'block';
+  legend.style.display = 'block';
+
+  const NZ = sc.theta_3d.length;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const pad = { l:38, r:8, t:8, b:28 };
+  const plotW = W-pad.l-pad.r, plotH = H-pad.t-pad.b;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(5,10,20,0.95)';
+  ctx.fillRect(0, 0, W, H);
+
+  // Vertical profile at clicked (j,i) cell
+  const thetaCol = sc.theta_3d.map(plane => plane[j]?.[i] ?? 0);
+  const wCol     = sc.w_3d    ? sc.w_3d.map(plane => plane[j]?.[i] ?? 0) : null;
+
+  const maxAbsT = Math.max(1e-9, ...thetaCol.map(Math.abs));
+  const maxAbsW = wCol ? Math.max(1e-9, ...wCol.map(Math.abs)) : 1;
+
+  const ns = simData.ns_solver;
+  const z0 = simData.terrain.z_extent[0];
+
+  // Horizontal grid lines + Y axis altitude labels
+  const nYTicks = 5;
+  ctx.font = '10px monospace'; ctx.textAlign = 'right';
+  for (let k=0; k<=nYTicks; k++) {
+    const y = pad.t + plotH*(1-k/nYTicks);
+    const alt = Math.round(z0 + k/nYTicks * ns.domH);
+    ctx.fillStyle = '#5a7890';
+    ctx.fillText(alt+'m', pad.l-4, y+4);
+    ctx.strokeStyle = 'rgba(100,160,255,0.1)'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+plotW, y); ctx.stroke();
+  }
+
+  // Vertical axis line + zero line
+  ctx.strokeStyle = 'rgba(100,160,255,0.3)'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t+plotH);
+  ctx.moveTo(pad.l+plotW/2, pad.t); ctx.lineTo(pad.l+plotW/2, pad.t+plotH);
+  ctx.stroke();
+
+  function drawProfile(colData, maxAbs, color) {
+    ctx.strokeStyle = color; ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let iz=0; iz<NZ; iz++) {
+      const t = 0.5 + (colData[iz] / maxAbs) * 0.5;
+      const x = pad.l + Math.max(0,Math.min(1,t)) * plotW;
+      const y = pad.t + plotH*(1 - iz/Math.max(1,NZ-1));
+      if (iz===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+
+  drawProfile(thetaCol, maxAbsT, '#6699ff');
+  if (wCol) drawProfile(wCol, maxAbsW, '#ff7755');
+
+  // X axis value labels — show actual range for each profile
+  const fmt = v => Math.abs(v) < 10 ? v.toFixed(2) : v.toFixed(1);
+  ctx.font = '9px monospace'; ctx.textAlign = 'center';
+
+  // θ' labels (blue) at left/right ends
+  ctx.fillStyle = '#6699ff';
+  ctx.fillText(fmt(-maxAbsT)+'K', pad.l, pad.t+plotH+12);
+  ctx.fillText(fmt(+maxAbsT)+'K', pad.l+plotW, pad.t+plotH+12);
+
+  // w labels (orange) below, only if w data exists
+  if (wCol) {
+    ctx.fillStyle = '#ff7755';
+    ctx.fillText(fmt(-maxAbsW), pad.l, pad.t+plotH+23);
+    ctx.fillText(fmt(+maxAbsW)+'m/s', pad.l+plotW, pad.t+plotH+23);
+  }
+
+  // Zero label in middle
+  ctx.fillStyle = '#3a5568'; ctx.font = '9px monospace';
+  ctx.fillText('0', pad.l+plotW/2, pad.t+plotH+12);
+
+  // Update legend spans with actual values
+  document.getElementById('plume-leg-theta').textContent = `— θ' ±${fmt(maxAbsT)} K`;
+  if (wCol) document.getElementById('plume-leg-w').textContent = `— w ±${fmt(maxAbsW)} m/s`;
+}
+
+// ── Raycasting (click info) ───────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+renderer.domElement.addEventListener('click', e => {
+  if (!thetaMesh || !simData) return;
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.set(
+    ((e.clientX-rect.left)/rect.width)*2-1,
+    -((e.clientY-rect.top)/rect.height)*2+1);
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObject(thetaMesh);
+  if (!hits.length) { document.getElementById('info-panel').style.display='none'; return; }
+  const {uv} = hits[0];
+  const T = simData.terrain;
+  const sc = simData.scenarios[currentScenario];
+  const i = Math.min(T.nx-1, Math.round(uv.x*(T.nx-1)));
+  const j = Math.min(T.ny-1, Math.round((1-uv.y)*(T.ny-1)));
+  const theta = sc.ground_temp_anomaly[j]?.[i] ?? 0;
+  const wv    = sc.w_vel?.[j]?.[i] ?? 0;
+  const conv  = sc.convergence?.[j]?.[i] ?? 0;
+  const u     = sc.u_surface?.[j]?.[i] ?? 0;
+  const v     = sc.v_surface?.[j]?.[i] ?? 0;
+  const elev  = T.elevation[j]?.[i] ?? 0;
+
+  document.getElementById('ip-title').textContent = sc.local_time;
+  document.getElementById('ip-rows').innerHTML = `
+    <div class="irow"><span class="ilabel">Elevation</span><span class="ival">${elev.toFixed(0)} m</span></div>
+    <div class="irow"><span class="ilabel">θ' anomaly</span><span class="ival">${theta.toFixed(2)} K</span></div>
+    <div class="irow"><span class="ilabel">Vertical w</span><span class="ival">${wv.toFixed(2)} m/s</span></div>
+    <div class="irow"><span class="ilabel">Convergence</span><span class="ival">${conv.toFixed(3)}</span></div>
+    <div class="irow"><span class="ilabel">Wind (u,v)</span><span class="ival">${(u/3600).toFixed(1)}, ${(v/3600).toFixed(1)} m/s</span></div>
+  `;
+  drawPlumeProfile(sc, i, j);
+  document.getElementById('info-panel').style.display = 'block';
+});
+
+// ── Sun label screen pos ──────────────────────────────────────────────────────
+function updateSunLabelPos() {
+  if (!sunSphere || !sunLabel) return;
+  const v = sunSphere.position.clone().project(camera);
+  const rect = renderer.domElement.getBoundingClientRect();
+  const x = (v.x*0.5+0.5)*rect.width;
+  const y = (-v.y*0.5+0.5)*rect.height;
+  if (v.z < 1) {
+    sunLabel.style.display = 'block';
+    sunLabel.style.left = x+'px'; sunLabel.style.top = y+'px';
+  } else {
+    sunLabel.style.display = 'none';
+  }
+}
+
+// ── Render loop ───────────────────────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  updateSunLabelPos();
+  renderer.render(scene, camera);
+}
+animate();
+
+// Keyboard scenario navigation
+window.addEventListener('keydown', e => {
+  if (!simData) return;
+  if (e.key==='ArrowRight'||e.key==='ArrowUp') {
+    currentScenario = Math.min(simData.scenarios.length-1, currentScenario+1);
+    updateScenario(currentScenario);
+  } else if (e.key==='ArrowLeft'||e.key==='ArrowDown') {
+    currentScenario = Math.max(0, currentScenario-1);
+    updateScenario(currentScenario);
+  }
+});
+
+loadData();
+</script>
+</body>
+</html>

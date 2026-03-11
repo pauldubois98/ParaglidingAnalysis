@@ -63,10 +63,6 @@
       display: block; image-rendering: pixelated; border-radius: 4px;
     }
     #canvas-plan { object-fit: contain; object-position: top left; }
-    #ns-stats {
-      font-size: 10px; color: #5588aa; padding: 2px 0;
-      font-family: 'Consolas', monospace; flex-shrink: 0;
-    }
     /* Status bar */
     #status-bar {
       position: absolute; bottom: 0; left: 0; right: 0;
@@ -214,6 +210,7 @@
   <a href="simulate" class="nav-link">Simulate</a>
   <a href="simulate-advanced" class="nav-link nav-active">Simulation v2</a>
   <a href="view" class="nav-link">View</a>
+    <a href="view-advanced" class="nav-link">View NS</a>
   <a href="about" class="nav-link">About</a>
 </nav>
 
@@ -227,7 +224,6 @@
     <div class="plot-box"><div class="plot-title">Land Cover</div><canvas id="plot-lc"></canvas></div>
     <div class="plot-box"><div class="plot-title">ERA5 dT Distribution</div><canvas id="plot-era5"></canvas></div>
   </div>
-  <div id="ns-stats"></div>
   <div id="plots-area-sim">
       <div class="plot-box">
         <div class="plot-title">Plan View θ'</div>
@@ -260,7 +256,7 @@
       <div class="field-hint" id="date-hint">Target date for sun position and weather data.</div>
       <div class="grid-2">
         <div><label class="field-label">UTC offset (h)</label><input type="number" id="tz_offset" step="1" min="-12" max="14" value="2"></div>
-        <div><label class="field-label">Interval (min)</label><input type="number" id="interval_min" step="15" min="15" max="120" value="60"></div>
+        <div><label class="field-label">Interval (min)</label><input type="number" id="interval_min" step="15" min="15" max="120" value="10"></div>
       </div>
       <div class="grid-2">
         <div>
@@ -335,27 +331,27 @@
         <button class="btn-secondary" style="flex:1" onclick="loadPreset('precise')">Precise preset</button>
       </div>
       <div class="grid-2">
-        <div><label class="field-label">Horizontal NX</label><input type="number" id="ns_nx" step="4" min="8" max="120" value="80"></div>
-        <div><label class="field-label">Horizontal NY</label><input type="number" id="ns_ny" step="4" min="8" max="120" value="80"></div>
+        <div><label class="field-label">Horizontal NX</label><input type="number" id="ns_nx" step="4" min="8" max="120" value="50"></div>
+        <div><label class="field-label">Horizontal NY</label><input type="number" id="ns_ny" step="4" min="8" max="120" value="50"></div>
       </div>
       <div class="grid-2">
-        <div><label class="field-label">Vertical layers NZ</label><input type="number" id="ns_nz" step="1" min="10" max="80" value="40"></div>
+        <div><label class="field-label">Vertical layers NZ</label><input type="number" id="ns_nz" step="1" min="10" max="80" value="30"></div>
         <div><label class="field-label">Domain height (m)</label><input type="number" id="ns_domH" step="100" min="1000" max="8000" value="4000"></div>
       </div>
       <div class="grid-2">
-        <div><label class="field-label">NS time step (s)</label><input type="number" id="ns_dt" step="5" min="5" max="300" value="30"></div>
+        <div><label class="field-label">NS time step (s)</label><input type="number" id="ns_dt" step="5" min="5" max="300" value="90"></div>
         <div><label class="field-label">Smagorinsky Cs</label><input type="number" id="ns_cs" step="0.01" min="0.05" max="0.5" value="0.18"></div>
       </div>
       <div class="grid-2">
-        <div><label class="field-label">SOR omega</label><input type="number" id="ns_omega" step="0.05" min="1.0" max="1.95" value="1.6"></div>
-        <div><label class="field-label">Pressure max iter</label><input type="number" id="ns_maxiter" step="10" min="20" max="500" value="150"></div>
+        <div><label class="field-label">SOR omega</label><input type="number" id="ns_omega" step="0.05" min="1.0" max="1.95" value="1.75"></div>
+        <div><label class="field-label">Pressure max iter</label><input type="number" id="ns_maxiter" step="10" min="20" max="500" value="60"></div>
       </div>
       <div class="field-hint">Red-Black SOR pressure solver. Higher iterations = better accuracy, slower.</div>
 
       <div class="section-title">Visualization</div>
       <div class="grid-2">
         <div><label class="field-label">View height (m AGL)</label><input type="number" id="ns_hview" step="50" min="50" max="3000" value="500"></div>
-        <div><label class="field-label">Steps per frame</label><input type="number" id="ns_spf" step="1" min="1" max="60" value="5"></div>
+        <div><label class="field-label">Steps per frame</label><input type="number" id="ns_spf" step="1" min="1" max="60" value="10"></div>
       </div>
       <div class="field-hint">Height for plan-view slice. Steps between UI updates (higher = faster sim).</div>
 
@@ -551,7 +547,7 @@ let fetchedData = null;
 let simResult = null;
 
 function setVal(id, v) { const el = document.getElementById(id); if (el) el.value = v; }
-fetch('config.json').then(r => r.json()).then(cfg => {
+fetch('config-advanced.json').then(r => r.json()).then(cfg => {
   const b = cfg.area.bbox;
   setVal('min_lat', b.min_lat); setVal('max_lat', b.max_lat);
   setVal('min_lon', b.min_lon); setVal('max_lon', b.max_lon);
@@ -576,7 +572,7 @@ fetch('config.json').then(r => r.json()).then(cfg => {
     }
   } catch(e) {}
   updateWeatherMode(); validateDate();
-}).catch(e => console.warn('config.json not loaded:', e));
+}).catch(e => console.warn('config-advanced.json not loaded:', e));
 
 // ═══════════════════════════════════════════════════════════════════
 //  COORDINATE HELPERS
@@ -1786,8 +1782,13 @@ async function runFetch() {
     if (!validateDate()) throw new Error('Invalid date for selected weather mode.');
     const {records: era5Records, diurnal: era5Diurnal} = await fetchWeatherData(
       centerLat, centerLon, dateStr, weatherMode, windowDays, msg => log(msg), tzOffsetFetch);
-    if (era5Records.length) log(`Weather: ${era5Records.length} clear-sky midday observations.`, 'success');
-    else log('Weather: no data — will use fallback max_heat.', 'warn');
+    if (era5Records.length) {
+      document.getElementById("era5_auto").checked = false
+      log(`Weather: ${era5Records.length} clear-sky midday observations.`, 'success');
+    }
+    else{
+     log('Weather: no data — will use fallback max_heat.', 'warn');
+    }
     setProgress(0.98);
     renderERA5Plot(document.getElementById('plot-era5'), era5Records);
 
@@ -1959,9 +1960,7 @@ async function runSim() {
         const msg = e.data;
         if (msg.type === 'frame') {
           const eta_ms = msg.step_num > 0 ? (msg.elapsed_ms / msg.step_num) * (msg.total_steps - msg.step_num) : 0;
-          document.getElementById('ns-stats').textContent =
-            `Time: ${msg.localStr}  |  Step: ${msg.step_num}/${msg.total_steps}  |  max θ': ${msg.maxTheta.toFixed(2)} K  |  max w: ${msg.maxW.toFixed(2)} m/s  |  ETA: ${(eta_ms/1000).toFixed(0)}s`;
-          setStatus(`NS sim ${msg.localStr} — step ${msg.step_num}/${msg.total_steps} — max w=${msg.maxW.toFixed(2)} m/s`);
+          setStatus(`Time: ${msg.localStr}  |  Step: ${msg.step_num}/${msg.total_steps}  |  max θ': ${msg.maxTheta.toFixed(2)} K  |  max w: ${msg.maxW.toFixed(2)} m/s  |  ETA: ${(eta_ms/1000).toFixed(0)}s`);
           setProgress(0.35 + 0.6 * (msg.step_num / msg.total_steps));
 
           // Build a fake solver-like object so updateVisualization works unchanged
@@ -2017,7 +2016,7 @@ async function runSim() {
             ns_solver: {NX, NY, NZ, dz, domH, Cs, omega, maxIter, dt},
             terrain: {
               nx: NX, ny: NY, x_extent, y_extent,
-              z_extent: [zMin, zMin+2000], dx, dy,
+              z_extent: [zMin, zMin+domH], dx, dy,
               arrow_step: 8,
               elevation: float32ToNested(Z, NY, NX),
               thermal_factor: float32ToNested(tf_full, NY, NX),
@@ -2080,7 +2079,7 @@ function idbPut(json) {
     req.onsuccess = e => {
       const db = e.target.result;
       const tx = db.transaction('sim', 'readwrite');
-      const putReq = tx.objectStore('sim').put(json, 'latest');
+      const putReq = tx.objectStore('sim').put(json, 'latest-ns');
       putReq.onerror = () => reject(putReq.error);
       tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
     };
@@ -2091,7 +2090,7 @@ async function openViewer() {
   if (!simResult) { log('No simulation result.', 'error'); return; }
   try {
     await idbPut(JSON.stringify(simResult));
-    window.location.href = 'view';
+    window.location.href = 'view-advanced';
   } catch(e) {
     log(`Could not save to IndexedDB (${e.message}). Try downloading JSON instead.`, 'error');
   }
@@ -2561,6 +2560,11 @@ function interpolateHeatMap(heatMaps, t_sim) {
 function float32ToNested(arr, ny, nx) {
   return Array.from({length: ny}, (_,j) => Array.from({length: nx}, (_,i) => arr[j*nx+i]));
 }
+function float32ToNested3D(arr, nz, ny, nx) {
+  return Array.from({length: nz}, (_,k) =>
+    Array.from({length: ny}, (_,j) =>
+      Array.from({length: nx}, (_,i) => arr[k*ny*nx + j*nx + i])));
+}
 
 let _stopFlag = false;
 
@@ -2656,6 +2660,8 @@ async function runSim({solverParams, solidMaskBuf, heatMapsData, simParams}) {
         v_surface: float32ToNested(sv.map(v=>v*M2H), NY, NX),
         w_vel:     float32ToNested(sw, NY, NX),
         convergence: float32ToNested(conv_snap, NY, NX),
+        theta_3d: float32ToNested3D(solver.theta, NZ, NY, NX),
+        w_3d:     float32ToNested3D(solver.w, NZ, NY, NX),
       });
       self.postMessage({type:'log', msg:`Saved scenario ${sc.local_time}: max θ'=${Math.max(...surf_theta).toFixed(2)} K`, level:'success'});
       next_sc_idx++;
