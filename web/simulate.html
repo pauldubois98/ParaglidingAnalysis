@@ -2153,8 +2153,6 @@ async function runSim() {
     log(`Output structure: ${output.scenarios.length} scenarios · ` +
         `sim grid ${nx}×${ny} · mesh ${MESH_NX}×${MESH_NY} · ` +
         `${Object.keys(output.terrain).length} terrain fields`, 'success');
-    log('Note: values differ from Python due to different DEM source (Terrarium vs SRTM) ' +
-        'and sun position library (SunCalc vs pysolar). Structure is identical.', 'warn');
 
     // Daily heat: time-average of dT_carry across all steps
     const dailyHeat = dT_sum;
