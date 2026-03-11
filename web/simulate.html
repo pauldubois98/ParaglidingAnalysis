@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +9,12 @@
   <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
       background: #0a0f1a;
       color: #e0e8f0;
@@ -26,6 +32,7 @@
       flex-direction: column;
       padding: 16px;
     }
+
     #log-output {
       flex: 1;
       overflow-y: auto;
@@ -34,23 +41,40 @@
       line-height: 1.6;
       padding: 12px;
       background: rgba(5, 8, 18, 0.7);
-      border: 1px solid rgba(100,160,255,0.15);
+      border: 1px solid rgba(100, 160, 255, 0.15);
       border-radius: 8px;
     }
-    #log-output .log-info    { color: #5588aa; }
-    #log-output .log-success { color: #30c870; }
-    #log-output .log-warn    { color: #c8a040; }
-    #log-output .log-error   { color: #cc4444; }
-    .log-ts { color: #334455; margin-right: 6px; }
+
+    #log-output .log-info {
+      color: #5588aa;
+    }
+
+    #log-output .log-success {
+      color: #30c870;
+    }
+
+    #log-output .log-warn {
+      color: #c8a040;
+    }
+
+    #log-output .log-error {
+      color: #cc4444;
+    }
+
+    .log-ts {
+      color: #334455;
+      margin-right: 6px;
+    }
 
     /* ── Progress bar ── */
     #progress-wrap {
       margin-top: 10px;
       height: 6px;
-      background: rgba(100,160,255,0.1);
+      background: rgba(100, 160, 255, 0.1);
       border-radius: 3px;
       overflow: hidden;
     }
+
     #progress-bar {
       height: 100%;
       width: 0%;
@@ -68,18 +92,20 @@
       height: 170px;
       flex-shrink: 0;
     }
+
     .plot-box {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: rgba(5,8,18,0.7);
-      border: 1px solid rgba(100,160,255,0.15);
+      background: rgba(5, 8, 18, 0.7);
+      border: 1px solid rgba(100, 160, 255, 0.15);
       border-radius: 8px;
       padding: 6px 6px 4px;
       overflow: hidden;
       min-width: 0;
     }
+
     .plot-title {
       font-size: 10px;
       font-weight: 700;
@@ -90,6 +116,7 @@
       flex-shrink: 0;
       text-align: center;
     }
+
     .plot-box canvas {
       max-width: 100%;
       max-height: 140px;
@@ -113,10 +140,12 @@
     /* ── Status bar ── */
     #status-bar {
       position: absolute;
-      bottom: 0; left: 0; right: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
       height: 28px;
-      background: rgba(5,8,18,0.9);
-      border-top: 1px solid rgba(100,160,255,0.15);
+      background: rgba(5, 8, 18, 0.9);
+      border-top: 1px solid rgba(100, 160, 255, 0.15);
       display: flex;
       align-items: center;
       padding: 0 14px;
@@ -125,7 +154,7 @@
     }
 
     /* ── Right panel ── */
-    #settings-area{
+    #settings-area {
       position: absolute;
       top: 44px;
       right: 16px;
@@ -137,19 +166,21 @@
     }
 
     #ui-panel {
-      background: rgba(10,15,30,0.88);
-      border: 1px solid rgba(100,160,255,0.3);
+      background: rgba(10, 15, 30, 0.88);
+      border: 1px solid rgba(100, 160, 255, 0.3);
       border-radius: 12px;
       backdrop-filter: blur(8px);
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
+
     #panel-header {
       padding: 14px 16px 10px;
-      border-bottom: 1px solid rgba(100,160,255,0.15);
+      border-bottom: 1px solid rgba(100, 160, 255, 0.15);
       flex-shrink: 0;
     }
+
     #panel-header h2 {
       font-size: 14px;
       color: #7eb8ff;
@@ -163,8 +194,15 @@
       overflow-y: auto;
       padding: 12px 16px;
     }
-    #panel-body::-webkit-scrollbar { width: 4px; }
-    #panel-body::-webkit-scrollbar-thumb { background: rgba(100,160,255,0.2); border-radius: 2px; }
+
+    #panel-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #panel-body::-webkit-scrollbar-thumb {
+      background: rgba(100, 160, 255, 0.2);
+      border-radius: 2px;
+    }
 
     .section-title {
       font-size: 10px;
@@ -173,10 +211,13 @@
       letter-spacing: 1.5px;
       color: #3a6080;
       margin: 14px 0 6px;
-      border-bottom: 1px solid rgba(100,160,255,0.1);
+      border-bottom: 1px solid rgba(100, 160, 255, 0.1);
       padding-bottom: 4px;
     }
-    .section-title:first-child { margin-top: 0; }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
 
     .field-label {
       font-size: 11px;
@@ -184,6 +225,7 @@
       margin-bottom: 2px;
       display: block;
     }
+
     .field-hint {
       font-size: 10px;
       color: #3a6080;
@@ -191,10 +233,12 @@
       line-height: 1.4;
     }
 
-    input[type="number"], input[type="date"], input[type="text"] {
+    input[type="number"],
+    input[type="date"],
+    input[type="text"] {
       width: 100%;
-      background: rgba(100,160,255,0.07);
-      border: 1px solid rgba(100,160,255,0.2);
+      background: rgba(100, 160, 255, 0.07);
+      border: 1px solid rgba(100, 160, 255, 0.2);
       border-radius: 5px;
       color: #e0e8f0;
       font-size: 12px;
@@ -202,10 +246,16 @@
       outline: none;
       margin-bottom: 2px;
     }
-    input[type="number"]:focus, input[type="date"]:focus {
-      border-color: rgba(100,160,255,0.5);
+
+    input[type="number"]:focus,
+    input[type="date"]:focus {
+      border-color: rgba(100, 160, 255, 0.5);
     }
-    input:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    input:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
 
     .grid-2 {
       display: grid;
@@ -213,11 +263,28 @@
       gap: 6px;
       margin-bottom: 2px;
     }
-    .grid-2 .field-label { font-size: 10px; }
-    .hide { display: none; }
 
-    input[type="checkbox"] { accent-color: #7eb8ff; margin-right: 6px; vertical-align: middle; }
-    .checkbox-row { display: flex; align-items: center; font-size: 12px; color: #99b8d0; margin-bottom: 2px; }
+    .grid-2 .field-label {
+      font-size: 10px;
+    }
+
+    .hide {
+      display: none;
+    }
+
+    input[type="checkbox"] {
+      accent-color: #7eb8ff;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      color: #99b8d0;
+      margin-bottom: 2px;
+    }
 
     .radio-group {
       display: flex;
@@ -225,10 +292,11 @@
       gap: 6px;
       margin-bottom: 8px;
       padding: 8px 10px;
-      background: rgba(100,160,255,0.05);
-      border: 1px solid rgba(100,160,255,0.15);
+      background: rgba(100, 160, 255, 0.05);
+      border: 1px solid rgba(100, 160, 255, 0.15);
       border-radius: 6px;
     }
+
     .radio-group label {
       display: flex;
       align-items: center;
@@ -237,6 +305,7 @@
       cursor: pointer;
       padding: 4px 0;
     }
+
     .radio-group input[type="radio"] {
       accent-color: #7eb8ff;
       margin-right: 8px;
@@ -245,13 +314,18 @@
 
     #panel-footer {
       padding: 12px 16px 14px;
-      border-top: 1px solid rgba(100,160,255,0.15);
+      border-top: 1px solid rgba(100, 160, 255, 0.15);
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
       gap: 7px;
     }
-    .footer-row { display: flex; gap: 6px; }
+
+    .footer-row {
+      display: flex;
+      gap: 6px;
+    }
+
     .btn {
       flex: 1;
       display: inline-flex;
@@ -269,57 +343,161 @@
       white-space: nowrap;
       transition: background 0.18s, border-color 0.18s, color 0.18s;
     }
-    .btn:disabled { opacity: 0.32; cursor: not-allowed; }
-    .btn-fetch { color:#a0ceff; border-color:rgba(100,160,255,0.35); background:rgba(100,160,255,0.09); }
-    .btn-sim   { color:#7eb8ff; border-color:rgba(100,160,255,0.28); background:rgba(100,160,255,0.06); }
-    .btn-map   { color:#60e0a0; border-color:rgba(50,195,95,0.35);   background:rgba(50,195,95,0.09);  }
-    .btn-dl    { color:#f0b840; border-color:rgba(240,175,50,0.35);  background:rgba(240,155,40,0.08); }
-    .btn-fetch:not(:disabled):hover { background:rgba(100,160,255,0.2);  border-color:rgba(100,160,255,0.6); }
-    .btn-sim:not(:disabled):hover   { background:rgba(100,160,255,0.2);  border-color:rgba(100,160,255,0.6); }    
-    .btn-map:not(:disabled):hover   { background:rgba(50,195,95,0.2);    border-color:rgba(50,195,95,0.6);   }
-    .btn-dl:not(:disabled):hover    { background:rgba(240,155,40,0.2);   border-color:rgba(240,175,50,0.6);  }
-    .link-area  { color:#80d0c0; border-color:rgba(70,200,175,0.28);  background:rgba(70,200,175,0.06); }
-    .link-about { color:#99b8d0; border-color:rgba(100,160,255,0.28); background:rgba(100,160,255,0.06); }
-    .link-area:hover  { background:rgba(70,200,175,0.2);  border-color:rgba(70,200,175,0.6);  color:#a8e8d8; }
-    .link-about:hover { background:rgba(100,160,255,0.2); border-color:rgba(100,160,255,0.6); color:#c8dff0; }
+
+    .btn:disabled {
+      opacity: 0.32;
+      cursor: not-allowed;
+    }
+
+    .btn-fetch {
+      color: #a0ceff;
+      border-color: rgba(100, 160, 255, 0.35);
+      background: rgba(100, 160, 255, 0.09);
+    }
+
+    .btn-sim {
+      color: #7eb8ff;
+      border-color: rgba(100, 160, 255, 0.28);
+      background: rgba(100, 160, 255, 0.06);
+    }
+
+    .btn-map {
+      color: #60e0a0;
+      border-color: rgba(50, 195, 95, 0.35);
+      background: rgba(50, 195, 95, 0.09);
+    }
+
+    .btn-dl {
+      color: #f0b840;
+      border-color: rgba(240, 175, 50, 0.35);
+      background: rgba(240, 155, 40, 0.08);
+    }
+
+    .btn-fetch:not(:disabled):hover {
+      background: rgba(100, 160, 255, 0.2);
+      border-color: rgba(100, 160, 255, 0.6);
+    }
+
+    .btn-sim:not(:disabled):hover {
+      background: rgba(100, 160, 255, 0.2);
+      border-color: rgba(100, 160, 255, 0.6);
+    }
+
+    .btn-map:not(:disabled):hover {
+      background: rgba(50, 195, 95, 0.2);
+      border-color: rgba(50, 195, 95, 0.6);
+    }
+
+    .btn-dl:not(:disabled):hover {
+      background: rgba(240, 155, 40, 0.2);
+      border-color: rgba(240, 175, 50, 0.6);
+    }
+
+    .link-area {
+      color: #80d0c0;
+      border-color: rgba(70, 200, 175, 0.28);
+      background: rgba(70, 200, 175, 0.06);
+    }
+
+    .link-about {
+      color: #99b8d0;
+      border-color: rgba(100, 160, 255, 0.28);
+      background: rgba(100, 160, 255, 0.06);
+    }
+
+    .link-area:hover {
+      background: rgba(70, 200, 175, 0.2);
+      border-color: rgba(70, 200, 175, 0.6);
+      color: #a8e8d8;
+    }
+
+    .link-about:hover {
+      background: rgba(100, 160, 255, 0.2);
+      border-color: rgba(100, 160, 255, 0.6);
+      color: #c8dff0;
+    }
 
     /* ── Header nav ── */
     #header-nav {
       position: fixed;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       height: 44px;
       z-index: 3000;
       display: flex;
       align-items: center;
       padding: 0 12px;
       gap: 2px;
-      background: rgba(6,10,20,0.92);
-      border-bottom: 1px solid rgba(100,160,255,0.12);
+      background: rgba(6, 10, 20, 0.92);
+      border-bottom: 1px solid rgba(100, 160, 255, 0.12);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
     }
+
     .nav-logo {
-      display: flex; align-items: center; gap: 7px;
-      padding: 5px 9px; margin-right: 4px;
-      color: #7eb8ff; text-decoration: none;
-      font-size: 12px; font-weight: 600;
-      border-radius: 6px; white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 9px;
+      margin-right: 4px;
+      color: #7eb8ff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      white-space: nowrap;
       transition: background 0.15s;
     }
-    .nav-logo img { width: 18px; height: 18px; filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%); }
-    .nav-logo:hover { background: rgba(100,160,255,0.1); }
-    .nav-sep { width: 1px; height: 18px; background: rgba(100,160,255,0.12); margin: 0 2px; flex-shrink: 0; }
+
+    .nav-logo img {
+      width: 18px;
+      height: 18px;
+      filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%);
+    }
+
+    .nav-logo:hover {
+      background: rgba(100, 160, 255, 0.1);
+    }
+
+    .nav-sep {
+      width: 1px;
+      height: 18px;
+      background: rgba(100, 160, 255, 0.12);
+      margin: 0 2px;
+      flex-shrink: 0;
+    }
+
     .nav-link {
       padding: 5px 10px;
-      color: #4a6888; text-decoration: none;
-      font-size: 12px; border-radius: 6px; white-space: nowrap;
+      color: #4a6888;
+      text-decoration: none;
+      font-size: 12px;
+      border-radius: 6px;
+      white-space: nowrap;
       transition: background 0.15s, color 0.15s;
     }
-    .nav-link:hover { color: #90b8d8; background: rgba(100,160,255,0.08); }
-    .nav-link.nav-active { color: #7eb8ff; background: rgba(100,160,255,0.1); font-weight: 500; }
+
+    .nav-link:hover {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, 0.08);
+    }
+
+    .nav-link.nav-active {
+      color: #7eb8ff;
+      background: rgba(100, 160, 255, 0.1);
+      font-weight: 500;
+    }
+
     @media (max-width: 480px) {
-      .nav-logo span { display: none; }
-      .nav-link { padding: 5px 7px; font-size: 11px; }
+      .nav-logo span {
+        display: none;
+      }
+
+      .nav-link {
+        padding: 5px 7px;
+        font-size: 11px;
+      }
     }
 
     @media (max-width: 768px) {
@@ -327,12 +505,14 @@
         overflow-y: auto !important;
         height: auto !important;
         min-height: 100vh;
-        padding-top: 44px; /* clear fixed nav */
+        padding-top: 44px;
+        /* clear fixed nav */
       }
 
       #status-bar {
         position: sticky !important;
-        top: 44px !important; bottom: auto !important;
+        top: 44px !important;
+        bottom: auto !important;
         height: auto !important;
         padding: 7px 14px;
         z-index: 100;
@@ -347,15 +527,22 @@
         margin-top: 0;
       }
 
-      #plots-area, #sim-plots-area {
+      #plots-area,
+      #sim-plots-area {
         height: auto !important;
         flex-wrap: wrap;
       }
-      .plot-box { flex: 0 0 calc(50% - 5px) !important; height: 140px !important; }
+
+      .plot-box {
+        flex: 0 0 calc(50% - 5px) !important;
+        height: 140px !important;
+      }
 
       #settings-area {
         position: relative !important;
-        top: auto !important; right: auto !important; bottom: auto !important;
+        top: auto !important;
+        right: auto !important;
+        bottom: auto !important;
         width: 100% !important;
         height: auto !important;
         padding: 0;
@@ -363,1950 +550,1967 @@
 
       #ui-panel {
         border-radius: 0;
-        border-left: none; border-right: none;
+        border-left: none;
+        border-right: none;
       }
 
       /* Prevent iOS zoom on input focus */
-      input[type="number"], input[type="date"], input[type="text"] { font-size: 16px !important; }
+      input[type="number"],
+      input[type="date"],
+      input[type="text"] {
+        font-size: 16px !important;
+      }
 
-      .btn { padding: 10px 8px; font-size: 12px; }
+      .btn {
+        padding: 10px 8px;
+        font-size: 12px;
+      }
     }
   </style>
 </head>
+
 <body>
 
-<nav id="header-nav">
-  <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
-  <div class="nav-sep"></div>
-  <a href="area" class="nav-link">Area</a>
-  <a href="simulate" class="nav-link nav-active">Simulate</a>
-  <a href="view" class="nav-link">View</a>
-  <a href="about" class="nav-link">About</a>
-</nav>
+  <nav id="header-nav">
+    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+    <div class="nav-sep"></div>
+    <a href="area" class="nav-link">Area</a>
+    <a href="simulate" class="nav-link nav-active">Simulate</a>
+    <a href="view" class="nav-link">View</a>
+    <a href="about" class="nav-link">About</a>
+  </nav>
 
-<!-- ═══════════════════ MAIN CONSOLE ═══════════════════ -->
-<div id="console-area">
-  <div id="log-output">
-    <div class="log-info"><span class="log-ts">00:00:00</span>Ready — configure settings and click <strong>Fetch Data</strong>.</div>
-  </div>
-  <div id="progress-wrap"><div id="progress-bar"></div></div>
-  <div id="plots-area">
-    <div class="plot-box">
-      <div class="plot-title">Elevation (DEM)</div>
-      <canvas id="plot-elev"></canvas>
+  <!-- ═══════════════════ MAIN CONSOLE ═══════════════════ -->
+  <div id="console-area">
+    <div id="log-output">
+      <div class="log-info"><span class="log-ts">00:00:00</span>Ready — configure settings and click <strong>Fetch
+          Data</strong>.</div>
     </div>
-    <div class="plot-box">
-      <div class="plot-title">Land Cover</div>
-      <canvas id="plot-lc"></canvas>
+    <div id="progress-wrap">
+      <div id="progress-bar"></div>
     </div>
-    <div class="plot-box">
-      <div class="plot-title">ERA5 dT Distribution</div>
-      <canvas id="plot-era5"></canvas>
-    </div>
-  </div>
-  <div id="sim-plots-area">
-    <div class="plot-box">
-      <div class="plot-title">Slope</div>
-      <canvas id="plot-sim-slope"></canvas>
-    </div>
-    <div class="plot-box">
-      <div class="plot-title">Thermal Factor</div>
-      <canvas id="plot-sim-tf"></canvas>
-    </div>
-    <div class="plot-box">
-      <div class="plot-title">Trigger Zones</div>
-      <canvas id="plot-sim-trigger"></canvas>
-    </div>
-    <div class="plot-box">
-      <div class="plot-title">Convergence</div>
-      <canvas id="plot-sim-conv"></canvas>
-    </div>
-    <div class="plot-box">
-      <div class="plot-title">Daily Heat</div>
-      <canvas id="plot-sim-heat"></canvas>
-    </div>
-  </div>
-</div>
-<div id="status-bar">Idle</div>
-
-<!-- ═══════════════════ RIGHT PANEL ═══════════════════ -->
-<div id="settings-area">
-  <div id="ui-panel">
-    <div id="panel-header">
-      <h2>Run Simulation</h2>
-    </div>
-
-    <div id="panel-body">
-
-      <!-- Date & Time -->
-      <div class="section-title">Date &amp; Time</div>
-      
-      <label class="field-label">Simulation date</label>
-      <input type="date" id="sim_date" onchange="validateDate()">
-      <div class="field-hint" id="date-hint">Target date for sun position and weather data.</div>
-      <div class="grid-2">
-        <div>
-          <label class="field-label">UTC offset (h)</label>
-          <input type="number" id="tz_offset" step="1" min="-12" max="14" value="2">
-        </div>
-        <div>
-          <label class="field-label">Interval (min)</label>
-          <input type="number" id="interval_min" step="15" min="15" max="120" value="60">
-        </div>
+    <div id="plots-area">
+      <div class="plot-box">
+        <div class="plot-title">Elevation (DEM)</div>
+        <canvas id="plot-elev"></canvas>
       </div>
-      <label class="field-label">Min sun elevation (°)</label>
-      <input type="number" id="min_elevation" step="1" min="0" max="20" value="0">
-      <div class="field-hint">Scenarios with sun below this angle are skipped.</div>
-
-      <!-- Area -->
-      <div class="section-title hide">Area</div>
-      <div class="grid-2 hide">
-        <div>
-          <label class="field-label">Max lat (N)</label>
-          <input type="number" id="max_lat" step="0.0001" value="43.014963">
-        </div>
-        <div>
-          <label class="field-label">Min lat (S)</label>
-          <input type="number" id="min_lat" step="0.0001" value="42.961061">
-        </div>
-        <div>
-          <label class="field-label">Min lon (W)</label>
-          <input type="number" id="min_lon" step="0.0001" value="0.838481">
-        </div>
-        <div>
-          <label class="field-label">Max lon (E)</label>
-          <input type="number" id="max_lon" step="0.0001" value="0.933902">
-        </div>
+      <div class="plot-box">
+        <div class="plot-title">Land Cover</div>
+        <canvas id="plot-lc"></canvas>
       </div>
-
-      <!-- Markers -->
-      <div class="section-title hide">Markers</div>
-      <div class="grid-2 hide">
-        <div>
-          <label class="field-label">Takeoff lat</label>
-          <input type="number" id="takeoff_lat" step="0.00001" value="42.96940">
-        </div>
-        <div>
-          <label class="field-label">Takeoff lon</label>
-          <input type="number" id="takeoff_lon" step="0.00001" value="0.88594">
-        </div>
-        <div>
-          <label class="field-label">Landing lat</label>
-          <input type="number" id="landing_lat" step="0.00001" value="42.99216">
-        </div>
-        <div>
-          <label class="field-label">Landing lon</label>
-          <input type="number" id="landing_lon" step="0.00001" value="0.90398">
-        </div>
+      <div class="plot-box">
+        <div class="plot-title">ERA5 dT Distribution</div>
+        <canvas id="plot-era5"></canvas>
       </div>
-
-      <!-- Terrain -->
-      <div class="section-title">Terrain</div>
-      <div class="grid-2">
-        <div>
-          <label class="field-label">Sim zoom</label>
-          <input type="number" id="sim_zoom" min="11" max="14" step="1" value="12">
-        </div>
-        <div>
-          <label class="field-label">Mesh zoom</label>
-          <input type="number" id="mesh_zoom" min="12" max="15" step="1" value="14">
-        </div>
+    </div>
+    <div id="sim-plots-area">
+      <div class="plot-box">
+        <div class="plot-title">Slope</div>
+        <canvas id="plot-sim-slope"></canvas>
       </div>
-      <div class="field-hint">Zoom 12 ≈ 30 m/px (sim), zoom 14 ≈ 7 m/px (mesh).</div>
-
-      <!-- Heating -->
-      <div class="section-title">Heating</div>
-      <label class="checkbox-row">
-        <input type="checkbox" id="era5_auto" checked>
-        ERA5 auto-calibrate max_heat
-      </label>
-      <div class="field-hint">Fetches ERA5 data to derive max_heat from observations.</div>
-      <label class="field-label">Weather mode</label>
-      <div class="radio-group">
-        <label><input type="radio" name="weather_mode" value="typical" checked onchange="updateWeatherMode()"> Typical (5-years average of ERA5 data around this date.)</label>
-        <label><input type="radio" name="weather_mode" value="exact" onchange="updateWeatherMode()"> Exact (past date only; ERA5 data for specific date)</label>
+      <div class="plot-box">
+        <div class="plot-title">Thermal Factor</div>
+        <canvas id="plot-sim-tf"></canvas>
       </div>
-      <label class="field-label">max_heat (K) — manual fallback</label>
-      <input type="number" id="max_heat" step="0.5" min="1" max="40" value="15.0" disabled>
-      <div class="field-hint">Peak ground-air temperature anomaly under full insolation.</div>
-      <div class="grid-2">
-        <div>
-          <label class="field-label">ERA5 window (days)</label>
-          <input type="number" id="era5_window" step="1" min="1" max="30" value="7">
-        </div>
-        <div>
-          <label class="field-label">Diffuse fraction</label>
-          <input type="number" id="diffuse_frac" step="0.05" min="0" max="1" value="0.3">
-        </div>
+      <div class="plot-box">
+        <div class="plot-title">Trigger Zones</div>
+        <canvas id="plot-sim-trigger"></canvas>
       </div>
-      <label class="field-label">Env. lapse rate (K/km)</label>
-      <input type="number" id="elr" step="0.1" min="3" max="10" value="6.5">
-      <div class="field-hint">Environmental lapse rate. Higher = more unstable atmosphere.</div>
-
-      <!-- Thermal inertia -->
-      <div class="section-title">Thermal Inertia</div>
-      <label class="field-label">τ hours (reference grassland)</label>
-      <input type="number" id="tau_hours" step="0.1" min="0.2" max="5" value="1.5">
-      <div class="field-hint">Time constant for ground temperature to reach solar equilibrium. ~1 h bare rock, ~1.5 h mixed, ~3 h forest/water.</div>
-
-      <!-- Release -->
-      <div class="section-title">Thermal Release</div>
-      <div class="grid-2">
-        <div>
-          <label class="field-label">K_release (h⁻¹)</label>
-          <input type="number" id="k_release" step="0.05" min="0" max="2" value="0.3">
-        </div>
-        <div>
-          <label class="field-label">Threshold (K)</label>
-          <input type="number" id="release_threshold" step="0.1" min="0" max="10" value="1.5">
-        </div>
+      <div class="plot-box">
+        <div class="plot-title">Convergence</div>
+        <canvas id="plot-sim-conv"></canvas>
       </div>
-      <div class="field-hint">Accumulated heat above threshold releases at trigger zones.</div>
-
-      <!-- Advection -->
-      <div class="section-title">Advection</div>
-      <div class="grid-2">
-        <div>
-          <label class="field-label">V_advect_max (m/h)</label>
-          <input type="number" id="v_advect_max" step="50" min="50" max="3000" value="1000">
-        </div>
-        <div>
-          <label class="field-label">Ref slope</label>
-          <input type="number" id="ref_slope" step="0.05" min="0.05" max="1" value="0.30">
-        </div>
-      </div>
-      <div class="field-hint">Anabatic flow speed ceiling and reference slope (tan angle).</div>
-      <label class="field-label">K_collect (collector suction)</label>
-      <input type="number" id="k_collect" step="0.25" min="0" max="10" value="1.0">
-      <div class="field-hint">Strength of dT-gradient suction: collectors bleed heat toward trigger zones. 0 = pure orographic flow; higher = stronger collector→trigger funnelling.</div>
-
-      <!-- Output -->
-      <div class="section-title">Output</div>
-      <label class="field-label">Arrow step (px)</label>
-      <input type="number" id="arrow_step" step="1" min="2" max="32" value="8">
-      <div class="field-hint">Downsample flow arrows: every N-th sim grid cell.</div>
-
-    </div><!-- /panel-body -->
-
-    <div id="panel-footer">
-      <div class="footer-row">
-        <button class="btn btn-fetch" id="btn-fetch" onclick="runFetch()">Fetch Data</button>
-        <button class="btn btn-sim" id="btn-sim" onclick="runSim()" disabled>Run Simulation</button>
-        <!-- <button class="btn btn-dl" id="btn-dl" onclick="downloadJSON()" disabled>Download JSON</button> -->
-        <button class="btn btn-map" id="btn-map" onclick="openVisualizationTool()" disabled>Open Viewer</button>
+      <div class="plot-box">
+        <div class="plot-title">Daily Heat</div>
+        <canvas id="plot-sim-heat"></canvas>
       </div>
     </div>
   </div>
-</div>
+  <div id="status-bar">Idle</div>
 
-<script>
-// ═══════════════════════════════════════════════════════════════════
-//  UTILITY FUNCTIONS
-// ═══════════════════════════════════════════════════════════════════
+  <!-- ═══════════════════ RIGHT PANEL ═══════════════════ -->
+  <div id="settings-area">
+    <div id="ui-panel">
+      <div id="panel-header">
+        <h2>Run Simulation</h2>
+      </div>
 
-const yieldUI = () => new Promise(r => setTimeout(r, 0));
+      <div id="panel-body">
 
-// In-memory tile cache
-const TILE_CACHE = {};
+        <!-- Date & Time -->
+        <div class="section-title">Date &amp; Time</div>
 
-// ── Logging ──────────────────────────────────────────────────────
-const logEl = document.getElementById('log-output');
-const statusEl = document.getElementById('status-bar');
-const progressEl = document.getElementById('progress-bar');
+        <label class="field-label">Simulation date</label>
+        <input type="date" id="sim_date" onchange="validateDate()">
+        <div class="field-hint" id="date-hint">Target date for sun position and weather data.</div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">UTC offset (h)</label>
+            <input type="number" id="tz_offset" step="1" min="-12" max="14" value="2">
+          </div>
+          <div>
+            <label class="field-label">Interval (min)</label>
+            <input type="number" id="interval_min" step="15" min="15" max="120" value="60">
+          </div>
+        </div>
+        <label class="field-label">Min sun elevation (°)</label>
+        <input type="number" id="min_elevation" step="1" min="0" max="20" value="0">
+        <div class="field-hint">Scenarios with sun below this angle are skipped.</div>
 
-function ts() {
-  const d = new Date();
-  return [d.getHours(), d.getMinutes(), d.getSeconds()]
-    .map(n => String(n).padStart(2, '0')).join(':');
-}
+        <!-- Area -->
+        <div class="section-title hide">Area</div>
+        <div class="grid-2 hide">
+          <div>
+            <label class="field-label">Max lat (N)</label>
+            <input type="number" id="max_lat" step="0.0001" value="43.014963">
+          </div>
+          <div>
+            <label class="field-label">Min lat (S)</label>
+            <input type="number" id="min_lat" step="0.0001" value="42.961061">
+          </div>
+          <div>
+            <label class="field-label">Min lon (W)</label>
+            <input type="number" id="min_lon" step="0.0001" value="0.838481">
+          </div>
+          <div>
+            <label class="field-label">Max lon (E)</label>
+            <input type="number" id="max_lon" step="0.0001" value="0.933902">
+          </div>
+        </div>
 
-function log(msg, level = 'info') {
-  const div = document.createElement('div');
-  div.className = `log-${level}`;
-  div.innerHTML = `<span class="log-ts">${ts()}</span>${msg}`;
-  logEl.appendChild(div);
-  logEl.scrollTop = logEl.scrollHeight;
-}
+        <!-- Markers -->
+        <div class="section-title hide">Markers</div>
+        <div class="grid-2 hide">
+          <div>
+            <label class="field-label">Takeoff lat</label>
+            <input type="number" id="takeoff_lat" step="0.00001" value="42.96940">
+          </div>
+          <div>
+            <label class="field-label">Takeoff lon</label>
+            <input type="number" id="takeoff_lon" step="0.00001" value="0.88594">
+          </div>
+          <div>
+            <label class="field-label">Landing lat</label>
+            <input type="number" id="landing_lat" step="0.00001" value="42.99216">
+          </div>
+          <div>
+            <label class="field-label">Landing lon</label>
+            <input type="number" id="landing_lon" step="0.00001" value="0.90398">
+          </div>
+        </div>
 
-function setStatus(msg) { statusEl.textContent = msg; }
-function setProgress(frac) { progressEl.style.width = (Math.min(1, Math.max(0, frac)) * 100) + '%'; }
+        <!-- Terrain -->
+        <div class="section-title">Terrain</div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">Sim zoom</label>
+            <input type="number" id="sim_zoom" min="11" max="14" step="1" value="12">
+          </div>
+          <div>
+            <label class="field-label">Mesh zoom</label>
+            <input type="number" id="mesh_zoom" min="12" max="15" step="1" value="14">
+          </div>
+        </div>
+        <div class="field-hint">Zoom 12 ≈ 30 m/px (sim), zoom 14 ≈ 7 m/px (mesh).</div>
 
-// ── ERA5 checkbox toggle ──────────────────────────────────────────
-document.getElementById('era5_auto').addEventListener('change', function() {
-  document.getElementById('max_heat').disabled = this.checked;
-});
+        <!-- Heating -->
+        <div class="section-title">Heating</div>
+        <label class="checkbox-row">
+          <input type="checkbox" id="era5_auto" checked>
+          ERA5 auto-calibrate max_heat
+        </label>
+        <div class="field-hint">Fetches ERA5 data to derive max_heat from observations.</div>
+        <label class="field-label">Weather mode</label>
+        <div class="radio-group">
+          <label><input type="radio" name="weather_mode" value="typical" checked onchange="updateWeatherMode()"> Typical
+            (5-years average of ERA5 data around this date.)</label>
+          <label><input type="radio" name="weather_mode" value="exact" onchange="updateWeatherMode()"> Exact (past date
+            only; ERA5 data for specific date)</label>
+        </div>
+        <label class="field-label">max_heat (K) — manual fallback</label>
+        <input type="number" id="max_heat" step="0.5" min="1" max="40" value="15.0" disabled>
+        <div class="field-hint">Peak ground-air temperature anomaly under full insolation.</div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">ERA5 window (days)</label>
+            <input type="number" id="era5_window" step="1" min="1" max="30" value="7">
+          </div>
+          <div>
+            <label class="field-label">Diffuse fraction</label>
+            <input type="number" id="diffuse_frac" step="0.05" min="0" max="1" value="0.3">
+          </div>
+        </div>
+        <label class="field-label">Env. lapse rate (K/km)</label>
+        <input type="number" id="elr" step="0.1" min="3" max="10" value="6.5">
+        <div class="field-hint">Environmental lapse rate. Higher = more unstable atmosphere.</div>
 
-// ── Weather mode handling ─────────────────────────────────────────
-function getWeatherMode() {
-  const checked = document.querySelector('input[name="weather_mode"]:checked');
-  return checked ? checked.value : 'typical';
-}
+        <!-- Thermal inertia -->
+        <div class="section-title">Thermal Inertia</div>
+        <label class="field-label">τ hours (reference grassland)</label>
+        <input type="number" id="tau_hours" step="0.1" min="0.2" max="5" value="1.5">
+        <div class="field-hint">Time constant for ground temperature to reach solar equilibrium. ~1 h bare rock, ~1.5 h
+          mixed, ~3 h forest/water.</div>
 
-function updateWeatherMode() {
-  const mode = getWeatherMode();
-  const era5Auto = document.getElementById('era5_auto');
-  if (mode === 'typical') {
-    // Typical mode: ERA5 auto-calibrate from 5 years is appropriate
-    era5Auto.checked = true;
-    era5Auto.disabled = false;
-    document.getElementById('max_heat').disabled = true;
-    document.getElementById('era5_window').disabled = false;
-  } else if (mode === 'exact') {
-    // Exact mode: use specific date's ERA5 if available
-    era5Auto.checked = true;
-    era5Auto.disabled = false;
-    document.getElementById('max_heat').disabled = true;
-    document.getElementById('era5_window').value = 0;  // exact day
-    document.getElementById('era5_window').disabled = true;
-  }
-  validateDate();
-}
+        <!-- Release -->
+        <div class="section-title">Thermal Release</div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">K_release (h⁻¹)</label>
+            <input type="number" id="k_release" step="0.05" min="0" max="2" value="0.3">
+          </div>
+          <div>
+            <label class="field-label">Threshold (K)</label>
+            <input type="number" id="release_threshold" step="0.1" min="0" max="10" value="1.5">
+          </div>
+        </div>
+        <div class="field-hint">Accumulated heat above threshold releases at trigger zones.</div>
 
-function validateDate() {
-  const mode = getWeatherMode();
-  const dateInput = document.getElementById('sim_date');
-  const dateHint = document.getElementById('date-hint');
-  const selectedDate = new Date(dateInput.value);
-  const today = new Date();
-  today.setHours(0,0,0,0);
-  const threeDaysFromNow = new Date(today);
-  threeDaysFromNow.setDate(today.getDate() + 3);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-  const yesterday = new Date(today);
-  yesterday.setDate(today.getDate() - 1);
+        <!-- Advection -->
+        <div class="section-title">Advection</div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">V_advect_max (m/h)</label>
+            <input type="number" id="v_advect_max" step="50" min="50" max="3000" value="1000">
+          </div>
+          <div>
+            <label class="field-label">Ref slope</label>
+            <input type="number" id="ref_slope" step="0.05" min="0.05" max="1" value="0.30">
+          </div>
+        </div>
+        <div class="field-hint">Anabatic flow speed ceiling and reference slope (tan angle).</div>
+        <label class="field-label">K_collect (collector suction)</label>
+        <input type="number" id="k_collect" step="0.25" min="0" max="10" value="1.0">
+        <div class="field-hint">Strength of dT-gradient suction: collectors bleed heat toward trigger zones. 0 = pure
+          orographic flow; higher = stronger collector→trigger funnelling.</div>
 
-  let valid = true;
-  let message = '';
+        <!-- Output -->
+        <div class="section-title">Output</div>
+        <label class="field-label">Arrow step (px)</label>
+        <input type="number" id="arrow_step" step="1" min="2" max="32" value="8">
+        <div class="field-hint">Downsample flow arrows: every N-th sim grid cell.</div>
 
-  if (mode === 'exact') {
-    message = 'Exact day mode.';
-    // Must be in the past (before today)
-    if (selectedDate >= today) {
-      valid = false;
-      // Set to yesterday                                                                                               
-      const yesterdayStr = yesterday.toISOString().split('T')[0];                                                        
-      dateInput.value = yesterdayStr;     
+      </div><!-- /panel-body -->
+
+      <div id="panel-footer">
+        <div class="footer-row">
+          <button class="btn btn-fetch" id="btn-fetch" onclick="runFetch()">Fetch Data</button>
+          <button class="btn btn-sim" id="btn-sim" onclick="runSim()" disabled>Run Simulation</button>
+          <!-- <button class="btn btn-dl" id="btn-dl" onclick="downloadJSON()" disabled>Download JSON</button> -->
+          <button class="btn btn-map" id="btn-map" onclick="openVisualizationTool()" disabled>Open Viewer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════════
+    //  UTILITY FUNCTIONS
+    // ═══════════════════════════════════════════════════════════════════
+
+    const yieldUI = () => new Promise(r => setTimeout(r, 0));
+
+    // In-memory tile cache
+    const TILE_CACHE = {};
+
+    // ── Logging ──────────────────────────────────────────────────────
+    const logEl = document.getElementById('log-output');
+    const statusEl = document.getElementById('status-bar');
+    const progressEl = document.getElementById('progress-bar');
+
+    function ts() {
+      const d = new Date();
+      return [d.getHours(), d.getMinutes(), d.getSeconds()]
+        .map(n => String(n).padStart(2, '0')).join(':');
     }
-  } else {
-    // Typical: can be any date (seasonal average)
-    message = 'Typical day mode.';
-  }
 
-  dateHint.textContent = message;
-  dateHint.style.color = valid ? '#99b8d0' : '#ff8866';
-
-  return valid;
-}
-
-// Override fetchERA5dT to support different modes
-async function fetchWeatherData(lat, lon, dateStr, mode, windowDays, logFn, tzOffset) {
-  if (mode === 'typical') {
-    // Fetch 5 years of ERA5 data (original behavior)
-    logFn(`Fetching typical weather: 5-year ERA5 average around ${dateStr}…`);
-    return await fetchERA5dT(lat, lon, dateStr, windowDays);
-  } else if (mode === 'exact') {
-    // Fetch only the exact date's ERA5 data
-    logFn(`Fetching exact weather: ERA5 data for ${dateStr} (past date)…`);
-    const result = await fetchERA5dTExact(lat, lon, dateStr, windowDays, tzOffset);
-    logFn(`Exact: ${result.records.length} observations collected.`, 'success');
-    return result;
-  }
-  return { records: [], diurnal: Array(24).fill(null) };
-}
-
-// Fetch ERA5 for exact date (single day)
-async function fetchERA5dTExact(lat, lon, dateStr, windowDays, tzOffset) {
-  const target = new Date(dateStr + 'T12:00:00Z');
-  const fmt = d => d.toISOString().slice(0, 10);
-
-  // ERA5 lags ~5 days behind present
-  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 5);
-  if (target > cutoff) {
-    throw new Error('ERA5 data not available for recent dates (lags 5 days). Choose an earlier date or use Forecast mode.');
-  }
-
-  const start = new Date(target); start.setDate(start.getDate() - 1);
-  const end   = new Date(target); end.setDate(end.getDate() + 1);
-
-  const apiUrl = `https://historical-forecast-api.open-meteo.com/v1/forecast` +
-    `?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}` +
-    `&start_date=${fmt(start)}&end_date=${fmt(end)}` +
-    `&hourly=temperature_2m,surface_temperature,direct_radiation` +
-    `&timezone=Europe/Paris`;
-  const url = `/proxy?url=` + encodeURIComponent(apiUrl);
-
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`ERA5 exact fetch failed: ${resp.status}`);
-  const json = await resp.json();
-
-  const h = json.hourly || {};
-  const times  = h.time || [];
-  const t2m    = h.temperature_2m || [];
-  const tskin  = h.surface_temperature || [];
-  const drad   = h.direct_radiation || [];
-
-  const records = [];
-  const hourlyT2m = Array.from({length: 24}, () => []);
-  for (let i = 0; i < times.length; i++) {
-    const hour = parseInt(times[i].slice(11, 13));
-    if (t2m[i] != null) hourlyT2m[hour].push(t2m[i]);
-    if (t2m[i] == null || tskin[i] == null || drad[i] == null) continue;
-    if (hour < 11 || hour > 14) continue;
-    if (drad[i] < 600) continue;  // clear-sky only
-    // Only keep records from the target date
-    if (!times[i].startsWith(dateStr)) continue;
-    records.push({ dT: tskin[i] - t2m[i], t2m: t2m[i] });
-  }
-  const diurnal = hourlyT2m.map(vals => vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null);
-  return { records, diurnal };
-}
-
-// Fetch forecast data (Open-Meteo)
-async function fetchForecastdT(lat, lon, dateStr, tzOffset) {
-  const target = new Date(dateStr + 'T12:00:00Z');
-  const startDate = dateStr;
-  const endDate = dateStr;
-  const fmt = d => d.toISOString().slice(0, 10);
-
-  const apiUrl = `https://api.open-meteo.com/v1/forecast` +
-    `?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}` +
-    `&start_date=${fmt(startDate)}&end_date=${fmt(endDate)}` +
-    `&hourly=temperature_2m,soil_temperature_0cm,shortwave_radiation` +
-    `&timezone=UTC`;
-  const url = `/proxy?url=` + encodeURIComponent(apiUrl);
-
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`Forecast fetch failed: ${resp.status}`);
-  const json = await resp.json();
-
-  const hourly = json.hourly || {};
-  const times = hourly.time || [];
-  const t2m = hourly.temperature_2m || [];
-  const tsoil = hourly.soil_temperature_0cm || [];
-  const swnorm = hourly.shortwave_radiation || [];
-
-  const records = [];
-  const hourlyT2m = Array.from({length: 24}, () => []);
-  for (let i = 0; i < times.length; i++) {
-    const dt = new Date(times[i]);
-    const utcHour = dt.getUTCHours();
-    const localHour = (utcHour + tzOffset + 24) % 24;
-    // Collect all-hours t2m for diurnal profile
-    if (t2m[i] != null) hourlyT2m[localHour].push(t2m[i]);
-    // Only take midday (10h–14h UTC)
-    if (utcHour < 10 || utcHour > 14) continue;
-    const T2 = t2m[i];
-    const Ts = tsoil[i];
-    const SW = swnorm[i];
-    if (T2 == null || Ts == null || SW == null) continue;
-    // Estimate clear-sky ΔT similar to typical method
-    const alpha = 0.3;  // typical diffuse fraction for forecast
-    const R_sw = SW * (1 - alpha) / 3600;
-    const sigma = 5.67e-8;
-    const Ta = T2 - 273.15;
-    const emiss = 0.95;
-    const Tsky = Math.pow(R_sw / sigma + Math.pow(Ta + 273.15, 4), 0.25) - 273.15;
-    const delta_T0 = (Ts - T2) - emiss * (T2 - Tsky);
-    records.push({ dT: Math.max(0, delta_T0), t2m: T2 });
-  }
-  const diurnal = hourlyT2m.map(vals => vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null);
-  return { records, diurnal };
-}
-
-// ── Global simulation state ───────────────────────────────────────
-let fetchedData = null;   // { sim, mesh }
-let simResult   = null;   // final JSON object
-
-// ── Load defaults from config.json ───────────────────────────────
-function setVal(id, v) {
-  const el = document.getElementById(id);
-  if (el) el.value = v;
-}
-
-fetch('config.json').then(r => r.json()).then(cfg => {
-  const b = cfg.area.bbox;
-  setVal('min_lat',           b.min_lat);
-  setVal('max_lat',           b.max_lat);
-  setVal('min_lon',           b.min_lon);
-  setVal('max_lon',           b.max_lon);
-  setVal('takeoff_lat',       cfg.area.takeoff.lat);
-  setVal('takeoff_lon',       cfg.area.takeoff.lon);
-  setVal('landing_lat',       cfg.area.landing.lat);
-  setVal('landing_lon',       cfg.area.landing.lon);
-  setVal('sim_date',          new Date().toISOString().slice(0, 10));
-  setVal('tz_offset',         cfg.simulation.tz_offset);
-  setVal('interval_min',      cfg.simulation.interval_min);
-  setVal('min_elevation',     cfg.simulation.min_elevation_deg);
-  setVal('era5_window',       cfg.heating.era5_window_days);
-  setVal('diffuse_frac',      cfg.heating.diffuse_fraction);
-  setVal('elr',               cfg.heating.elr_per_km);
-  setVal('tau_hours',         cfg.heating.tau_hours);
-  setVal('k_release',         cfg.release.k_release);
-  setVal('release_threshold', cfg.release.release_threshold);
-  setVal('v_advect_max',      cfg.advection.v_advect_max);
-  setVal('ref_slope',         cfg.advection.ref_slope);
-  setVal('k_collect',         cfg.advection.k_collect ?? 1.0);
-  setVal('arrow_step',        cfg.output.arrow_step);
-  setVal('domainH',           cfg.simulation.domain_height_m);
-
-  // Override with saved area state from area.html (if present)
-  try {
-    const saved = JSON.parse(localStorage.getItem('paragliding_area') || 'null');
-    if (saved) {
-      if (saved.bbox) {
-        setVal('min_lat', saved.bbox.min_lat); setVal('max_lat', saved.bbox.max_lat);
-        setVal('min_lon', saved.bbox.min_lon); setVal('max_lon', saved.bbox.max_lon);
-      }
-      if (saved.takeoff) { setVal('takeoff_lat', saved.takeoff.lat); setVal('takeoff_lon', saved.takeoff.lon); }
-      if (saved.landing) { setVal('landing_lat', saved.landing.lat); setVal('landing_lon', saved.landing.lon); }
+    function log(msg, level = 'info') {
+      const div = document.createElement('div');
+      div.className = `log-${level}`;
+      div.innerHTML = `<span class="log-ts">${ts()}</span>${msg}`;
+      logEl.appendChild(div);
+      logEl.scrollTop = logEl.scrollHeight;
     }
-  } catch(e) {}
 
-  // Initialize weather mode after config loads
-  updateWeatherMode();
-  validateDate();
-}).catch(e => console.warn('config.json not loaded:', e));
+    function setStatus(msg) { statusEl.textContent = msg; }
+    function setProgress(frac) { progressEl.style.width = (Math.min(1, Math.max(0, frac)) * 100) + '%'; }
 
-// ═══════════════════════════════════════════════════════════════════
-//  COORDINATE HELPERS
-// ═══════════════════════════════════════════════════════════════════
-
-function lonlatToLocal(lon, lat, lon0, lat0) {
-  const R = 6371000;
-  const x = (lon - lon0) * Math.cos(lat0 * Math.PI / 180) * R * Math.PI / 180;
-  const y = -(lat - lat0) * R * Math.PI / 180;  // south is +y
-  return [x, y];
-}
-
-/** lon/lat → Web Mercator tile fractional coords at zoom z */
-function lonlatToTileFrac(lon, lat, z) {
-  const n = Math.pow(2, z);
-  const tx = (lon + 180) / 360 * n;
-  const lat_r = lat * Math.PI / 180;
-  const ty = (1 - Math.log(Math.tan(lat_r) + 1 / Math.cos(lat_r)) / Math.PI) / 2 * n;
-  return [tx, ty];
-}
-
-/** Integer tile x,y for a lon/lat at zoom z */
-function lonlatToTile(lon, lat, z) {
-  const [tx, ty] = lonlatToTileFrac(lon, lat, z);
-  return [Math.floor(tx), Math.floor(ty)];
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  ARRAY MATH HELPERS
-// ═══════════════════════════════════════════════════════════════════
-
-/** numpy.gradient equivalent — central diffs interior, one-sided edges, flat Float32Array */
-function gradient1D(arr, n) {
-  const out = new Float32Array(n);
-  if (n === 1) { out[0] = 0; return out; }
-  out[0] = arr[1] - arr[0];
-  out[n - 1] = arr[n - 1] - arr[n - 2];
-  for (let i = 1; i < n - 1; i++) out[i] = (arr[i + 1] - arr[i - 1]) / 2;
-  return out;
-}
-
-/** Gradient along axis=1 (i, column) — in-place result into out (flat ny×nx) */
-function gradientAxisI(arr, ny, nx) {
-  const out = new Float32Array(ny * nx);
-  for (let j = 0; j < ny; j++) {
-    const row = arr.subarray(j * nx, j * nx + nx);
-    const g   = gradient1D(row, nx);
-    out.set(g, j * nx);
-  }
-  return out;
-}
-
-/** Gradient along axis=0 (j, row) */
-function gradientAxisJ(arr, ny, nx) {
-  const out = new Float32Array(ny * nx);
-  const col = new Float32Array(ny);
-  for (let i = 0; i < nx; i++) {
-    for (let j = 0; j < ny; j++) col[j] = arr[j * nx + i];
-    const g = gradient1D(col, ny);
-    for (let j = 0; j < ny; j++) out[j * nx + i] = g[j];
-  }
-  return out;
-}
-
-/** 1D Gaussian kernel, radius = ceil(3*sigma) */
-function gaussianKernel1D(sigma) {
-  const r = Math.ceil(3 * sigma);
-  const k = new Float32Array(2 * r + 1);
-  let s = 0;
-  for (let i = -r; i <= r; i++) {
-    k[i + r] = Math.exp(-i * i / (2 * sigma * sigma));
-    s += k[i + r];
-  }
-  for (let i = 0; i < k.length; i++) k[i] /= s;
-  return k;
-}
-
-/** Separable 2D Gaussian filter (rows then columns) */
-function gaussianFilter2D(arr, ny, nx, sigma) {
-  const k = gaussianKernel1D(sigma);
-  const r = (k.length - 1) >> 1;
-  const tmp = new Float32Array(ny * nx);
-  const out = new Float32Array(ny * nx);
-
-  // Pass 1: along rows (i axis)
-  for (let j = 0; j < ny; j++) {
-    for (let i = 0; i < nx; i++) {
-      let v = 0, ws = 0;
-      for (let d = -r; d <= r; d++) {
-        const ii = Math.min(Math.max(i + d, 0), nx - 1);
-        const w = k[d + r];
-        v += arr[j * nx + ii] * w;
-        ws += w;
-      }
-      tmp[j * nx + i] = v / ws;
-    }
-  }
-  // Pass 2: along columns (j axis)
-  for (let i = 0; i < nx; i++) {
-    for (let j = 0; j < ny; j++) {
-      let v = 0, ws = 0;
-      for (let d = -r; d <= r; d++) {
-        const jj = Math.min(Math.max(j + d, 0), ny - 1);
-        const w = k[d + r];
-        v += tmp[jj * nx + i] * w;
-        ws += w;
-      }
-      out[j * nx + i] = v / ws;
-    }
-  }
-  return out;
-}
-
-/** Percentile of a Float32Array (values only) */
-function percentile(arr, p, positiveOnly = false) {
-  let a = Array.from(arr);
-  if (positiveOnly) a = a.filter(v => v > 0);
-  if (!a.length) return 0;
-  a.sort((x, y) => x - y);
-  const idx = (p / 100) * (a.length - 1);
-  const lo = Math.floor(idx), hi = Math.ceil(idx);
-  return a[lo] + (a[hi] - a[lo]) * (idx - lo);
-}
-
-/** Bilinear interpolation in a flat ny×nx grid */
-function bilinearSample(arr, ny, nx, jf, if_) {
-  const j0 = Math.max(0, Math.min(ny - 2, Math.floor(jf)));
-  const i0 = Math.max(0, Math.min(nx - 2, Math.floor(if_)));
-  const j1 = j0 + 1, i1 = i0 + 1;
-  const tj = jf - j0, ti = if_ - i0;
-  return (arr[j0 * nx + i0] * (1 - ti) * (1 - tj) +
-          arr[j0 * nx + i1] * ti * (1 - tj) +
-          arr[j1 * nx + i0] * (1 - ti) * tj +
-          arr[j1 * nx + i1] * ti * tj);
-}
-
-/** Convert flat Float32Array to nested JS array (ny rows of nx values) */
-function float32ToNested(arr, ny, nx) {
-  return Array.from({ length: ny }, (_, j) =>
-    Array.from({ length: nx }, (_, i) => arr[j * nx + i])
-  );
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  LAND-COVER CONSTANTS
-// ═══════════════════════════════════════════════════════════════════
-
-const LANDCOVER = {
-   10: { label: 'Tree cover',      color: [0,100,0],   tf: 0.45, tau: 2.50 },
-   20: { label: 'Shrubland',       color: [255,187,34],tf: 0.70, tau: 1.30 },
-   30: { label: 'Grassland',       color: [255,255,76],tf: 1.00, tau: 1.00 },
-   40: { label: 'Cropland',        color: [240,150,255],tf: 0.85, tau: 0.85 },
-   50: { label: 'Built-up',        color: [250,0,0],   tf: 1.30, tau: 0.50 },
-   60: { label: 'Bare/sparse',     color: [180,180,180],tf: 1.80, tau: 0.35 },
-   70: { label: 'Snow/ice',        color: [240,240,240],tf: 0.08, tau: 1.50 },
-   80: { label: 'Perm. water',     color: [0,100,200], tf: 0.03, tau: 15.00 },
-   90: { label: 'Herb. wetland',   color: [0,150,160], tf: 0.35, tau: 1.50 },
-   95: { label: 'Mangrove',        color: [0,207,117], tf: 0.50, tau: 2.00 },
-  100: { label: 'Moss/lichen',     color: [250,230,160],tf: 0.60, tau: 1.00 },
-};
-
-const LC_CODES = Object.keys(LANDCOVER).map(Number);
-
-/** Find nearest WorldCover class by RGB colour distance */
-function nearestLcClass(r, g, b) {
-  let best = 30, bestD = Infinity;
-  for (const code of LC_CODES) {
-    const [cr, cg, cb] = LANDCOVER[code].color;
-    const d = (r-cr)**2 + (g-cg)**2 + (b-cb)**2;
-    if (d < bestD) { bestD = d; best = code; }
-  }
-  return best;
-}
-
-/** Slope-based heuristic fallback when WorldCover WMS is blocked by CORS */
-function slopeHeuristicLandcover(Z, ny, nx, dx, dy) {
-  const dzdx = gradientAxisI(Z, ny, nx);
-  const dzdy = gradientAxisJ(Z, ny, nx);
-  const lc = new Int16Array(ny * nx);
-  for (let idx = 0; idx < ny * nx; idx++) {
-    const slope = Math.sqrt((dzdx[idx]/dx)**2 + (dzdy[idx]/dy)**2);
-    const z = Z[idx];
-    if (z > 2400) { lc[idx] = 70; }
-    else if (slope > 0.5) { lc[idx] = 60; }
-    else if (slope > 0.25) { lc[idx] = 20; }
-    else if (z < 500 && slope < 0.05) { lc[idx] = 40; }
-    else { lc[idx] = 30; }
-  }
-  return lc;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  DEM FETCHING (Terrarium tiles)
-// ═══════════════════════════════════════════════════════════════════
-
-async function fetchDEM(bbox, zoom, logFn) {
-  const { min_lat, max_lat, min_lon, max_lon } = bbox;
-
-  const [x0, y0] = lonlatToTile(min_lon, max_lat, zoom);  // NW corner
-  const [x1, y1] = lonlatToTile(max_lon, min_lat, zoom);  // SE corner
-
-  const xs = [], ys = [];
-  for (let x = x0; x <= x1; x++) xs.push(x);
-  for (let y = y0; y <= y1; y++) ys.push(y);
-
-  logFn(`Fetching ${xs.length}×${ys.length} Terrarium tiles at zoom ${zoom}…`);
-
-  const TILE_PX = 256;
-  const canvasW = xs.length * TILE_PX;
-  const canvasH = ys.length * TILE_PX;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = canvasW; canvas.height = canvasH;
-  const ctx = canvas.getContext('2d');
-
-  let fetched = 0;
-  const total = xs.length * ys.length;
-
-  for (let ri = 0; ri < ys.length; ri++) {
-    for (let ci = 0; ci < xs.length; ci++) {
-      const tx = xs[ci], ty = ys[ri];
-      const cacheKey = `tile_${zoom}_${tx}_${ty}`;
-
-      let imgData;
-      if (TILE_CACHE[cacheKey]) {
-        imgData = TILE_CACHE[cacheKey];
-      } else {
-        const url = `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${zoom}/${tx}/${ty}.png`;
-        imgData = await new Promise((resolve, reject) => {
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = url;
-        });
-        TILE_CACHE[cacheKey] = imgData;
-      }
-
-      ctx.drawImage(imgData, ci * TILE_PX, ri * TILE_PX, TILE_PX, TILE_PX);
-      fetched++;
-      setProgress(fetched / total * 0.4);
-      if (fetched % 5 === 0) await yieldUI();
-    }
-  }
-
-  const rawPx = ctx.getImageData(0, 0, canvasW, canvasH).data;
-
-  // Fractional tile coordinates of the bbox corners
-  const [tx0f, ty0f] = lonlatToTileFrac(min_lon, max_lat, zoom);  // NW
-  const [tx1f, ty1f] = lonlatToTileFrac(max_lon, min_lat, zoom);  // SE
-
-  // Pixel offsets within the assembled canvas
-  const px0 = (tx0f - x0) * TILE_PX;
-  const py0 = (ty0f - y0) * TILE_PX;
-  const px1 = (tx1f - x0) * TILE_PX;
-  const py1 = (ty1f - y0) * TILE_PX;
-
-  const nx = Math.round(px1 - px0);
-  const ny = Math.round(py1 - py0);
-
-  logFn(`DEM canvas: ${canvasW}×${canvasH}px → bbox ${nx}×${ny} cells`);
-
-  // Helper: bilinear sample from raw RGBA pixel data (canvasW wide)
-  function sampleElev(pxf, pyf) {
-    const px0s = Math.floor(pxf), py0s = Math.floor(pyf);
-    const px1s = Math.min(px0s + 1, canvasW - 1);
-    const py1s = Math.min(py0s + 1, canvasH - 1);
-    const tx = pxf - px0s, ty_ = pyf - py0s;
-
-    function decode(px, py) {
-      const idx = (py * canvasW + px) * 4;
-      return rawPx[idx] * 256 + rawPx[idx+1] + rawPx[idx+2] / 256 - 32768;
-    }
-    const v00 = decode(px0s, py0s), v10 = decode(px1s, py0s);
-    const v01 = decode(px0s, py1s), v11 = decode(px1s, py1s);
-    return v00*(1-tx)*(1-ty_) + v10*tx*(1-ty_) + v01*(1-tx)*ty_ + v11*tx*ty_;
-  }
-
-  // Build uniform grid in bbox
-  const Z = new Float32Array(ny * nx);
-  for (let j = 0; j < ny; j++) {
-    for (let i = 0; i < nx; i++) {
-      const pxf = px0 + (i + 0.5) / nx * (px1 - px0);
-      const pyf = py0 + (j + 0.5) / ny * (py1 - py0);
-      Z[j * nx + i] = sampleElev(pxf, pyf);
-    }
-    if (j % 20 === 0) await yieldUI();
-  }
-
-  // Physical grid spacing via equirectangular approximation
-  const latSpan = max_lat - min_lat;
-  const lonSpan = max_lon - min_lon;
-  const R = 6371000;
-  const lat0 = (min_lat + max_lat) / 2;
-  const lon0 = (min_lon + max_lon) / 2;
-  const totalY = latSpan * R * Math.PI / 180;
-  const totalX = lonSpan * Math.cos(lat0 * Math.PI / 180) * R * Math.PI / 180;
-  const dx = totalX / nx;
-  const dy = totalY / ny;
-
-  // Extent in local coords (origin = bbox center)
-  const [xmin] = lonlatToLocal(min_lon, lat0, lon0, lat0);
-  const [xmax] = lonlatToLocal(max_lon, lat0, lon0, lat0);
-  const [, ymin] = lonlatToLocal(lon0, max_lat, lon0, lat0);
-  const [, ymax] = lonlatToLocal(lon0, min_lat, lon0, lat0);
-
-  return { Z, nx, ny, dx, dy, x_extent: [xmin, xmax], y_extent: [ymin, ymax], lat0, lon0 };
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  LAND-COVER FETCHING (ESA WorldCover 2021, same as Python)
-// ═══════════════════════════════════════════════════════════════════
-
-/**
- * Fetches ESA WorldCover 2021 COG via the local proxy server (server.py),
- * which forwards HTTP Range requests to the ESA S3 bucket server-side,
- * bypassing browser CORS restrictions.
- * Falls back to slope heuristic if the proxy or COG is unavailable.
- */
-
-async function parseCOGWindow(tiff, min_lon, max_lon, min_lat, max_lat, nx, ny) {
-  const image = await tiff.getImage();
-  const [originX, originY] = image.getOrigin();    // [west-lon, north-lat]
-  const [resX, resY]       = image.getResolution(); // resX > 0, resY < 0
-  const imgW = image.getWidth(), imgH = image.getHeight();
-
-  const left   = Math.max(0,    Math.floor((min_lon - originX) / resX));
-  const top    = Math.max(0,    Math.floor((max_lat - originY) / resY));
-  const right  = Math.min(imgW, Math.ceil( (max_lon - originX) / resX));
-  const bottom = Math.min(imgH, Math.ceil( (min_lat - originY) / resY));
-
-  if (left >= right || top >= bottom) throw new Error('Bbox outside GeoTIFF extent.');
-
-  log(`Reading ${right - left}×${bottom - top} px window…`);
-  await yieldUI();
-
-  const rasters = await image.readRasters({ window: [left, top, right, bottom] });
-  const raw = rasters[0];
-  const rawW = right - left, rawH = bottom - top;
-
-  // Nearest-neighbour resample to sim grid — matches Python's ndimage_zoom order=0
-  const lc = new Int16Array(ny * nx);
-  for (let j = 0; j < ny; j++) {
-    for (let i = 0; i < nx; i++) {
-      const srcI = Math.min(rawW - 1, Math.round(i / (nx - 1) * (rawW - 1)));
-      const srcJ = Math.min(rawH - 1, Math.round(j / (ny - 1) * (rawH - 1)));
-      lc[j * nx + i] = raw[srcJ * rawW + srcI];
-    }
-  }
-  return { lc, rawW, rawH };
-}
-
-async function fetchLandcover(bbox, Z, nx, ny, dx, dy) {
-  const { min_lat, max_lat, min_lon, max_lon } = bbox;
-
-  // ── ESA WorldCover S3 COG via local proxy ─────────────────────────
-  try {
-    const tileLatSW = Math.floor(min_lat / 3) * 3;
-    const tileLonSW = Math.floor(min_lon / 3) * 3;
-    if (Math.floor(max_lat / 3) * 3 !== tileLatSW ||
-        Math.floor(max_lon / 3) * 3 !== tileLonSW) {
-      throw new Error('Bbox spans multiple WorldCover tiles.');
-    }
-    const latStr = (tileLatSW >= 0 ? 'N' : 'S') + String(Math.abs(tileLatSW)).padStart(2, '0');
-    const lonStr = (tileLonSW >= 0 ? 'E' : 'W') + String(Math.abs(tileLonSW)).padStart(3, '0');
-    const s3url    = `https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/` +
-                     `ESA_WorldCover_10m_2021_v200_${latStr}${lonStr}_Map.tif`;
-    const proxyUrl = `/proxy?url=` + encodeURIComponent(s3url);
-
-    log(`Fetching ESA WorldCover COG (${latStr}${lonStr}) via local proxy…`);
-    const tiff = await GeoTIFF.fromUrl(proxyUrl, { allowFullFile: false });
-    const { lc, rawW, rawH } = await parseCOGWindow(
-      tiff, min_lon, max_lon, min_lat, max_lat, nx, ny);
-    log(`ESA WorldCover COG: ${rawW}×${rawH} px → ${nx}×${ny}.`, 'success');
-    return lc;
-
-  } catch (e) {
-    log(`ESA WorldCover COG unavailable (${e.message || e}) — using slope heuristic.`, 'warn');
-    return slopeHeuristicLandcover(Z, ny, nx, dx, dy);
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  SUN SCENARIOS (SunCalc)
-// ═══════════════════════════════════════════════════════════════════
-
-function generateSunScenarios(lat, lon, dateStr, tzOffset, intervalMin, minElevDeg) {
-  const [year, month, day] = dateStr.split('-').map(Number);
-  const scenarios = [];
-  for (let m = 0; m < 24 * 60; m += intervalMin) {
-    const hUtc = Math.floor(m / 60);
-    const minUtc = m % 60;
-    const dtUtc = new Date(Date.UTC(year, month - 1, day, hUtc, minUtc, 0));
-    const pos = SunCalc.getPosition(dtUtc, lat, lon);
-    const el_deg = pos.altitude * 180 / Math.PI;
-    if (el_deg < minElevDeg) continue;
-
-    // SunCalc azimuth: from south, CCW in radians → convert to north CW degrees
-    const az_deg = ((pos.azimuth * 180 / Math.PI) + 180 + 360) % 360;
-
-    const localH = (hUtc + tzOffset + 24) % 24;
-    const localMin = minUtc;
-    const localStr = String(localH).padStart(2,'0') + ':' + String(localMin).padStart(2,'0');
-    const utcStr   = String(hUtc).padStart(2,'0') + ':' + String(minUtc).padStart(2,'0');
-
-    scenarios.push({
-      name: localStr,
-      local_time: localStr,
-      utc_time: utcStr,
-      sun_azimuth: Math.round(az_deg * 100) / 100,
-      sun_elevation: Math.round(el_deg * 100) / 100,
+    // ── ERA5 checkbox toggle ──────────────────────────────────────────
+    document.getElementById('era5_auto').addEventListener('change', function () {
+      document.getElementById('max_heat').disabled = this.checked;
     });
-  }
-  return scenarios;
-}
 
-// ═══════════════════════════════════════════════════════════════════
-//  SHADOW MASK
-// ═══════════════════════════════════════════════════════════════════
-
-async function computeShadowMask(Z, nx, ny, dx, dy, azDeg, elDeg) {
-  const az = azDeg * Math.PI / 180;
-  const el = elDeg * Math.PI / 180;
-  const tan_el = Math.tan(el);
-
-  let di = Math.sin(az);
-  let dj = -Math.cos(az);  // j increases southward, sun to north = dj negative
-
-  const maxAbs = Math.max(Math.abs(di), Math.abs(dj));
-  if (maxAbs < 1e-9) return new Uint8Array(ny * nx); // zenith sun = no shadow
-
-  di /= maxAbs;
-  dj /= maxAbs;
-
-  const step_m = Math.sqrt((di * dx) ** 2 + (dj * dy) ** 2);
-
-  const shadow = new Uint8Array(ny * nx);  // 0=lit, 1=shadowed
-  const active = new Uint8Array(ny * nx).fill(1);
-
-  // Starting positions: stored as floats; we work cell-by-cell implicitly
-  // via index arithmetic — iterate steps, compute new positions for all cells.
-  const maxSteps = Math.ceil(Math.max(nx / Math.max(Math.abs(di), 1e-9),
-                                       ny / Math.max(Math.abs(dj), 1e-9))) + 1;
-
-  // i0[j*nx+i] = i, j0[j*nx+i] = j — precompute starting indices
-  const i0 = new Float32Array(ny * nx);
-  const j0 = new Float32Array(ny * nx);
-  for (let j = 0; j < ny; j++)
-    for (let i = 0; i < nx; i++) {
-      i0[j * nx + i] = i;
-      j0[j * nx + i] = j;
+    // ── Weather mode handling ─────────────────────────────────────────
+    function getWeatherMode() {
+      const checked = document.querySelector('input[name="weather_mode"]:checked');
+      return checked ? checked.value : 'typical';
     }
 
-  let anyActive = true;
-  for (let step = 1; step <= maxSteps && anyActive; step++) {
-    anyActive = false;
-    const dist = step * step_m;
-    for (let idx = 0; idx < ny * nx; idx++) {
-      if (!active[idx]) continue;
-      const ri = Math.round(i0[idx] + step * di);
-      const rj = Math.round(j0[idx] + step * dj);
-      if (ri < 0 || ri >= nx || rj < 0 || rj >= ny) {
-        active[idx] = 0; continue;
+    function updateWeatherMode() {
+      const mode = getWeatherMode();
+      const era5Auto = document.getElementById('era5_auto');
+      if (mode === 'typical') {
+        // Typical mode: ERA5 auto-calibrate from 5 years is appropriate
+        era5Auto.checked = true;
+        era5Auto.disabled = false;
+        document.getElementById('max_heat').disabled = true;
+        document.getElementById('era5_window').disabled = false;
+      } else if (mode === 'exact') {
+        // Exact mode: use specific date's ERA5 if available
+        era5Auto.checked = true;
+        era5Auto.disabled = false;
+        document.getElementById('max_heat').disabled = true;
+        document.getElementById('era5_window').value = 0;  // exact day
+        document.getElementById('era5_window').disabled = true;
       }
-      anyActive = true;
-      const z_terrain = Z[rj * nx + ri];
-      const sun_ray_z = Z[idx] + dist * tan_el;
-      if (z_terrain > sun_ray_z) {
-        shadow[idx] = 1;
-        active[idx] = 0;
-      }
+      validateDate();
     }
-    if (step % 20 === 0) await yieldUI();
-  }
-  return shadow;
-}
 
-// ═══════════════════════════════════════════════════════════════════
-//  SOLAR HEATING
-// ═══════════════════════════════════════════════════════════════════
+    function validateDate() {
+      const mode = getWeatherMode();
+      const dateInput = document.getElementById('sim_date');
+      const dateHint = document.getElementById('date-hint');
+      const selectedDate = new Date(dateInput.value);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const threeDaysFromNow = new Date(today);
+      threeDaysFromNow.setDate(today.getDate() + 3);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
+      const yesterday = new Date(today);
+      yesterday.setDate(today.getDate() - 1);
 
-function computeSolarHeating(Z, nx, ny, dx, dy, azDeg, elDeg, thermalFactor, maxHeat, shadowMask, diffuseFrac) {
-  const az = azDeg * Math.PI / 180;
-  const el = elDeg * Math.PI / 180;
-  // Sun direction in East/North/Up
-  const sx = Math.sin(az) * Math.cos(el);
-  const sy = Math.cos(az) * Math.cos(el);  // north=cos(az) because az from north CW
-  const sz = Math.sin(el);
+      let valid = true;
+      let message = '';
 
-  // Atmospheric transmittance (Kasten-Young + Bird)
-  const AM = 1 / (Math.sin(el) + 0.50572 * Math.pow(elDeg + 6.07995, -1.6364));
-  const T_atm = Math.pow(0.7, Math.pow(AM, 0.678));
-
-  const dzdx = gradientAxisI(Z, ny, nx);  // ∂Z/∂East
-  const dzdy = gradientAxisJ(Z, ny, nx);  // ∂Z/∂South
-
-  // Raw cos(incidence) before blurring
-  const cosInc_raw = new Float32Array(ny * nx);
-  for (let idx = 0; idx < ny * nx; idx++) {
-    const nx_ = -dzdx[idx];
-    const ny_ =  dzdy[idx];
-    const nz_ = 1.0;
-    const norm = Math.sqrt(nx_*nx_ + ny_*ny_ + nz_*nz_);
-    cosInc_raw[idx] = Math.max(0, (nx_*sx + ny_*sy + nz_*sz) / norm);
-  }
-
-  const cosInc = gaussianFilter2D(cosInc_raw, ny, nx, 1.5);
-
-  const dT = new Float32Array(ny * nx);
-  for (let idx = 0; idx < ny * nx; idx++) {
-    const gx = dzdx[idx] / dx, gy = dzdy[idx] / dy;
-    const slopeAngle = Math.atan(Math.sqrt(gx*gx + gy*gy));
-    const svf = (1 + Math.cos(slopeAngle)) / 2;
-    const direct = cosInc[idx] * T_atm * (shadowMask ? (1 - shadowMask[idx]) : 1);
-    const diffuse = diffuseFrac * (1 - T_atm) * svf;
-    const insolation = direct + diffuse;
-    const tf = thermalFactor ? thermalFactor[idx] : 1.0;
-    dT[idx] = maxHeat * insolation * tf;
-  }
-  return dT;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  OROGRAPHIC FLOW
-// ═══════════════════════════════════════════════════════════════════
-
-function computeOrographicFlow(Z, dTcarry, nx, ny, dx, dy, kCollect = 0) {
-  const dZdx = gradientAxisI(Z, ny, nx);
-  const dZdy = gradientAxisJ(Z, ny, nx);
-
-  const u_raw = new Float32Array(ny * nx);
-  const v_raw = new Float32Array(ny * nx);
-  const grad_mag = new Float32Array(ny * nx);
-
-  // dT-gradient suction: flow down the dT gradient (collectors → triggers)
-  const dTdx = kCollect > 0 ? gradientAxisI(dTcarry, ny, nx) : null;
-  const dTdy = kCollect > 0 ? gradientAxisJ(dTcarry, ny, nx) : null;
-
-  for (let idx = 0; idx < ny * nx; idx++) {
-    const gx = dZdx[idx] / dx, gy = dZdy[idx] / dy;
-    const mag = Math.sqrt(gx*gx + gy*gy);
-    grad_mag[idx] = mag;
-    const safeMag = Math.max(mag, 1e-6);
-    u_raw[idx] = (gx / safeMag) * dTcarry[idx] - (kCollect > 0 ? kCollect * dTdx[idx] : 0);
-    v_raw[idx] = (gy / safeMag) * dTcarry[idx] - (kCollect > 0 ? kCollect * dTdy[idx] : 0);
-  }
-
-  const u = gaussianFilter2D(u_raw, ny, nx, 5);
-  const v = gaussianFilter2D(v_raw, ny, nx, 5);
-  return { u, v, grad_mag };
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  THERMAL FACTOR (resample LC to sim grid)
-// ═══════════════════════════════════════════════════════════════════
-
-function buildThermalFactor(lcCodes, lc_ny, lc_nx, sim_ny, sim_nx, tauHours) {
-  // Nearest-neighbour resample to sim grid
-  const tf = new Float32Array(sim_ny * sim_nx);
-  const tau = new Float32Array(sim_ny * sim_nx);
-
-  for (let j = 0; j < sim_ny; j++) {
-    for (let i = 0; i < sim_nx; i++) {
-      const lcJ = Math.min(lc_ny - 1, Math.round(j / sim_ny * lc_ny));
-      const lcI = Math.min(lc_nx - 1, Math.round(i / sim_nx * lc_nx));
-      const code = lcCodes[lcJ * lc_nx + lcI];
-      const lc = LANDCOVER[code] || LANDCOVER[30];
-      tf[j * sim_nx + i] = lc.tf;
-      tau[j * sim_nx + i] = lc.tau * tauHours;
-    }
-  }
-
-  const tf_smooth = gaussianFilter2D(tf, sim_ny, sim_nx, 4);
-  return { thermal_factor: tf_smooth, tau_grid: tau };
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  TRIGGER FACTOR
-// ═══════════════════════════════════════════════════════════════════
-
-async function computeTriggerFactor(Z, nx, ny, thermalFactor) {
-  // 1. Terrain convexity
-  const Z_smooth = gaussianFilter2D(Z, ny, nx, 4);
-  const d2zdx2 = gradientAxisI(gradientAxisI(Z_smooth, ny, nx), ny, nx);
-  const d2zdy2 = gradientAxisJ(gradientAxisJ(Z_smooth, ny, nx), ny, nx);
-  await yieldUI();
-
-  const convexity_raw = new Float32Array(ny * nx);
-  for (let idx = 0; idx < ny * nx; idx++) {
-    convexity_raw[idx] = Math.max(-(d2zdx2[idx] + d2zdy2[idx]), 0);
-  }
-  const convexity_blur = gaussianFilter2D(convexity_raw, ny, nx, 3);
-  const p99c = percentile(convexity_blur, 99, true);
-  const convexity_norm = new Float32Array(ny * nx);
-  for (let idx = 0; idx < ny * nx; idx++)
-    convexity_norm[idx] = Math.min(1, Math.max(0, convexity_blur[idx] / (p99c + 1e-9)));
-
-  await yieldUI();
-
-  // 2. Land-cover boundary
-  const dtf_dx = gradientAxisI(thermalFactor, ny, nx);
-  const dtf_dy = gradientAxisJ(thermalFactor, ny, nx);
-  const boundary_raw = new Float32Array(ny * nx);
-  for (let idx = 0; idx < ny * nx; idx++)
-    boundary_raw[idx] = Math.sqrt(dtf_dx[idx]**2 + dtf_dy[idx]**2);
-  const boundary_blur = gaussianFilter2D(boundary_raw, ny, nx, 3);
-  const p99b = percentile(boundary_blur, 99, true);
-  const boundary_norm = new Float32Array(ny * nx);
-  for (let idx = 0; idx < ny * nx; idx++)
-    boundary_norm[idx] = Math.min(1, Math.max(0, boundary_blur[idx] / (p99b + 1e-9)));
-
-  await yieldUI();
-
-  // 3. Combined
-  const trigger = new Float32Array(ny * nx);
-  let maxT = 0;
-  for (let idx = 0; idx < ny * nx; idx++) {
-    trigger[idx] = 0.6 * convexity_norm[idx] + 0.4 * boundary_norm[idx];
-    if (trigger[idx] > maxT) maxT = trigger[idx];
-  }
-  for (let idx = 0; idx < ny * nx; idx++) trigger[idx] /= (maxT + 1e-9);
-  return trigger;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  ERA5 CALIBRATION
-// ═══════════════════════════════════════════════════════════════════
-
-async function fetchERA5dT(lat, lon, dateStr, windowDays) {
-  const target = new Date(dateStr + 'T12:00:00Z');
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 5 }, (_, k) => currentYear - 5 + k);
-  const fmt = d => d.toISOString().slice(0, 10);
-
-  // ERA5 lags ~5 days behind present
-  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 5);
-
-  // Build one request per year and fire all in parallel
-  const requests = years.map(year => {
-    const tgt   = new Date(target); tgt.setFullYear(year);
-    const start = new Date(tgt);    start.setDate(start.getDate() - windowDays);
-    const end   = new Date(tgt);    end.setDate(end.getDate() + windowDays);
-    if (end > cutoff) end.setTime(cutoff.getTime());
-    if (start >= end) return Promise.resolve({ year, rows: [], hourlyT2m: Array.from({length: 24}, () => []) });
-
-    const apiUrl = `https://historical-forecast-api.open-meteo.com/v1/forecast` +
-      `?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}` +
-      `&start_date=${fmt(start)}&end_date=${fmt(end)}` +
-      `&hourly=temperature_2m,surface_temperature,direct_radiation` +
-      `&timezone=Europe/Paris`;
-    const url = `/proxy?url=` + encodeURIComponent(apiUrl);
-
-    return fetch(url)
-      .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-      .then(data => {
-        const h = data.hourly || {};
-        const times = h.time || [], t2m = h.temperature_2m || [];
-        const tskin = h.surface_temperature || [], drad = h.direct_radiation || [];
-        const rows = [];
-        const hourlyT2m = Array.from({length: 24}, () => []);
-        for (let k = 0; k < times.length; k++) {
-          const hour = parseInt(times[k].slice(11, 13));
-          // Collect all-hours t2m for diurnal profile
-          if (t2m[k] != null) hourlyT2m[hour].push(t2m[k]);
-          // Midday clear-sky records for calibration
-          if (t2m[k] == null || tskin[k] == null || drad[k] == null) continue;
-          if (hour < 11 || hour > 14) continue;
-          if (drad[k] < 600) continue;
-          rows.push({ dT: tskin[k] - t2m[k], t2m: t2m[k] });
+      if (mode === 'exact') {
+        message = 'Exact day mode.';
+        // Must be in the past (before today)
+        if (selectedDate >= today) {
+          valid = false;
+          // Set to yesterday                                                                                               
+          const yesterdayStr = yesterday.toISOString().split('T')[0];
+          dateInput.value = yesterdayStr;
         }
-        return { year, rows, hourlyT2m };
-      })
-      .catch(e => { log(`ERA5 year ${year}: fetch failed (${e.message})`, 'warn'); return { year, rows: [], hourlyT2m: Array.from({length: 24}, () => []) }; });
-  });
-
-  const results = await Promise.all(requests);
-  const records = results.flatMap(r => r.rows);
-
-  // Merge hourlyT2m across years and compute mean per local hour
-  const merged = Array.from({length: 24}, () => []);
-  for (const r of results) r.hourlyT2m.forEach((vals, h) => merged[h].push(...vals));
-  const diurnal = merged.map(vals => vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null);
-
-  return { records, diurnal };
-}
-
-async function calibrateMaxHeat(records, scenarios, Z, nx, ny, dx, dy, thermalFactor, diffuseFrac) {
-  log('Calibrating max_heat from ERA5…');
-
-  if (!records.length) {
-    log('No ERA5 data returned — using fallback max_heat=15.0', 'warn');
-    return { max_heat: 15.0, T0: 293.15 };
-  }
-
-  const dTvals = records.map(r => r.dT).sort((a, b) => a - b);
-  const t2mvals = records.map(r => r.t2m).sort((a, b) => a - b);
-  const mid = Math.floor(dTvals.length / 2);
-  const dT_obs = dTvals.length % 2 === 1
-    ? dTvals[mid]
-    : (dTvals[mid - 1] + dTvals[mid]) / 2;
-  const t2m_med = t2mvals.length % 2 === 1
-    ? t2mvals[mid]
-    : (t2mvals[mid - 1] + t2mvals[mid]) / 2;
-  const T0 = t2m_med + 273.15;  // Celsius → Kelvin
-
-  log(`ERA5 clear-sky midday dT: median=${dT_obs.toFixed(2)} K (n=${dTvals.length})`, 'success');
-  log(`ERA5 clear-sky midday T2m: median=${T0.toFixed(2)} K`, 'success');
-
-  // Noon scenario (highest elevation)
-  const noonSc = scenarios.reduce((best, sc) => sc.sun_elevation > best.sun_elevation ? sc : best, scenarios[0]);
-  log(`Reference scenario: ${noonSc.local_time}  az=${noonSc.sun_azimuth}°  el=${noonSc.sun_elevation}°`);
-
-  // Model response with max_heat=1, no shadow
-  const resp = computeSolarHeating(Z, nx, ny, dx, dy, noonSc.sun_azimuth, noonSc.sun_elevation,
-                                    thermalFactor, 1.0, null, diffuseFrac);
-  let sum = 0;
-  for (let idx = 0; idx < resp.length; idx++) sum += resp[idx];
-  const model_response = sum / resp.length;
-
-  const max_heat = dT_obs / model_response;
-  log(`max_heat = ${dT_obs.toFixed(2)} / ${model_response.toFixed(4)} = ${max_heat.toFixed(2)} K`, 'success');
-  log(`T0 (reference) = ${T0.toFixed(2)} K`, 'success');
-  return { max_heat, T0 };
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  MARKER ELEVATION (bilinear in sim grid)
-// ═══════════════════════════════════════════════════════════════════
-
-function elevAtLatLon(lat, lon, Z, nx, ny, bbox) {
-  const { min_lat, max_lat, min_lon, max_lon } = bbox;
-  // Nearest-neighbour — matches Python's argmin grid lookup
-  const i = Math.min(nx - 1, Math.max(0, Math.round((lon - min_lon) / (max_lon - min_lon) * (nx - 1))));
-  const j = Math.min(ny - 1, Math.max(0, Math.round((max_lat - lat) / (max_lat - min_lat) * (ny - 1))));
-  return Z[j * nx + i];
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  2D FETCH PLOTS
-// ═══════════════════════════════════════════════════════════════════
-
-function elevToColor(z, zMin, zMax) {
-  const t = Math.max(0, Math.min(1, (z - zMin) / (zMax - zMin + 1e-9)));
-  if (t < 0.25) {
-    const s = t / 0.25;
-    return [Math.round(30 + s*30), Math.round(60 + s*120), Math.round(140 - s*60)];
-  } else if (t < 0.55) {
-    const s = (t - 0.25) / 0.30;
-    return [Math.round(60 + s*100), Math.round(180 - s*60), Math.round(80 - s*40)];
-  } else if (t < 0.80) {
-    const s = (t - 0.55) / 0.25;
-    return [Math.round(160 + s*80), Math.round(120 + s*60), Math.round(40 + s*60)];
-  } else {
-    const s = (t - 0.80) / 0.20;
-    return [Math.round(240 + s*15), Math.round(180 + s*75), Math.round(100 + s*155)];
-  }
-}
-
-function renderElevationPlot(canvas, Z, nx, ny) {
-  canvas.width = nx; canvas.height = ny;
-  const ctx = canvas.getContext('2d');
-  const img = ctx.createImageData(nx, ny);
-  let zMin = Infinity, zMax = -Infinity;
-  for (let i = 0; i < Z.length; i++) { if (Z[i] < zMin) zMin = Z[i]; if (Z[i] > zMax) zMax = Z[i]; }
-  for (let j = 0; j < ny; j++) {
-    for (let i = 0; i < nx; i++) {
-      const idx = j * nx + i;
-      const [r, g, b] = elevToColor(Z[idx], zMin, zMax);
-      img.data[idx*4]   = r;
-      img.data[idx*4+1] = g;
-      img.data[idx*4+2] = b;
-      img.data[idx*4+3] = 255;
-    }
-  }
-  ctx.putImageData(img, 0, 0);
-  ctx.fillStyle = 'rgba(0,0,0,0.55)';
-  ctx.fillRect(0, ny - 14, nx, 14);
-  ctx.fillStyle = '#e0e8f0';
-  ctx.font = '9px monospace';
-  ctx.fillText(`${Math.round(zMin)} – ${Math.round(zMax)} m`, 2, ny - 3);
-}
-
-function renderLandcoverPlot(canvas, lcCodes, nx, ny) {
-  canvas.width = nx; canvas.height = ny;
-  const ctx = canvas.getContext('2d');
-  const img = ctx.createImageData(nx, ny);
-  for (let j = 0; j < ny; j++) {
-    for (let i = 0; i < nx; i++) {
-      const idx = j * nx + i;
-      const lc = LANDCOVER[lcCodes[idx]] || LANDCOVER[30];
-      img.data[idx*4]   = lc.color[0];
-      img.data[idx*4+1] = lc.color[1];
-      img.data[idx*4+2] = lc.color[2];
-      img.data[idx*4+3] = 255;
-    }
-  }
-  ctx.putImageData(img, 0, 0);
-}
-
-function renderERA5Plot(canvas, records) {
-  const W = 300, H = 140;
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, W, H);
-
-  if (!records || !records.length) {
-    ctx.fillStyle = '#3a6080';
-    ctx.font = '10px monospace';
-    ctx.textAlign = 'center';
-    ctx.fillText('No ERA5 data', W / 2, H / 2);
-    return;
-  }
-
-  const dTvals = records.map(r => r.dT);
-  const sorted = [...dTvals].sort((a, b) => a - b);
-  const rMin = sorted[0], rMax = sorted[sorted.length - 1];
-  const BINS = 24;
-  const counts = new Array(BINS).fill(0);
-  for (const v of dTvals) {
-    const bin = Math.min(BINS - 1, Math.floor((v - rMin) / (rMax - rMin + 1e-9) * BINS));
-    counts[bin]++;
-  }
-  const maxCount = Math.max(...counts);
-  const pad = { l: 28, r: 8, t: 8, b: 22 };
-  const plotW = W - pad.l - pad.r;
-  const plotH = H - pad.t - pad.b;
-  const binW = plotW / BINS;
-
-  // Bars
-  for (let b = 0; b < BINS; b++) {
-    const barH = (counts[b] / maxCount) * plotH;
-    ctx.fillStyle = `rgba(62,130,195,${0.5 + 0.5 * counts[b] / maxCount})`;
-    ctx.fillRect(pad.l + b * binW, pad.t + plotH - barH, Math.max(1, binW - 1), barH);
-  }
-
-  // Axes
-  ctx.strokeStyle = '#334455';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(pad.l, pad.t);
-  ctx.lineTo(pad.l, pad.t + plotH);
-  ctx.lineTo(pad.l + plotW, pad.t + plotH);
-  ctx.stroke();
-
-  // X-axis labels
-  ctx.fillStyle = '#5588aa';
-  ctx.font = '8px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText(rMin.toFixed(1), pad.l, pad.t + plotH + 10);
-  ctx.fillText(rMax.toFixed(1), pad.l + plotW, pad.t + plotH + 10);
-  const mid = (rMin + rMax) / 2;
-  ctx.fillText(mid.toFixed(1) + ' K', pad.l + plotW / 2, pad.t + plotH + 10);
-
-  // Median line
-  const med = sorted[Math.floor(sorted.length / 2)];
-  const medX = pad.l + ((med - rMin) / (rMax - rMin + 1e-9)) * plotW;
-  ctx.strokeStyle = '#7eb8ff';
-  ctx.setLineDash([2, 3]);
-  ctx.beginPath();
-  ctx.moveTo(medX, pad.t); ctx.lineTo(medX, pad.t + plotH);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  // Bottom label
-  ctx.fillStyle = '#7eb8ff';
-  ctx.font = '8px monospace';
-  ctx.textAlign = 'center';
-  ctx.fillText(`median ${med.toFixed(1)} K  (n=${records.length})`, W / 2, pad.t + plotH + 20);
-}
-
-function showPlotsArea() {
-  document.getElementById('plots-area').style.display = 'flex';
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  SIMULATION PLOTS
-// ═══════════════════════════════════════════════════════════════════
-
-let _simPlots = null; // set by runSim before renderSimPlots()
-
-/** Generic canvas renderer: arr is Float32Array, colorFn maps [0,1]→[r,g,b] */
-function renderGridPlot(canvas, arr, nx, ny, colorFn, label) {
-  canvas.width = nx; canvas.height = ny;
-  const ctx = canvas.getContext('2d');
-  const img = ctx.createImageData(nx, ny);
-  let vMin = Infinity, vMax = -Infinity;
-  for (let i = 0; i < arr.length; i++) { if (arr[i] < vMin) vMin = arr[i]; if (arr[i] > vMax) vMax = arr[i]; }
-  const range = vMax - vMin + 1e-9;
-  for (let idx = 0; idx < ny * nx; idx++) {
-    const t = (arr[idx] - vMin) / range;
-    const [r, g, b] = colorFn(t);
-    img.data[idx*4]   = r;
-    img.data[idx*4+1] = g;
-    img.data[idx*4+2] = b;
-    img.data[idx*4+3] = 255;
-  }
-  ctx.putImageData(img, 0, 0);
-  if (label) {
-    ctx.fillStyle = 'rgba(0,0,0,0.55)';
-    ctx.fillRect(0, ny - 14, nx, 14);
-    ctx.fillStyle = '#e0e8f0';
-    ctx.font = '9px monospace';
-    ctx.fillText(label, 2, ny - 3);
-  }
-}
-
-// slope: white (flat) → yellow → red (steep)
-function cmapSlope(t) {
-  if (t < 0.5) { const s = t / 0.5; return [255, Math.round(255 - s*80), Math.round(255 - s*220)]; }
-  const s = (t - 0.5) / 0.5;
-  return [255, Math.round(175 - s*175), Math.round(35 - s*35)];
-}
-
-// thermal factor: blue (low/water) → green → orange → red (bare rock)
-function cmapThermalFactor(t) {
-  if (t < 0.33) { const s = t/0.33; return [Math.round(s*50), Math.round(60+s*140), Math.round(200-s*150)]; }
-  if (t < 0.66) { const s = (t-0.33)/0.33; return [Math.round(50+s*190), Math.round(200-s*100), Math.round(50-s*30)]; }
-  const s = (t-0.66)/0.34;
-  return [Math.round(240+s*15), Math.round(100-s*100), 20];
-}
-
-// trigger zones: near-black → deep blue → cyan → white
-function cmapTrigger(t) {
-  if (t < 0.5) { const s = t/0.5; return [Math.round(s*40), Math.round(s*160), Math.round(s*220)]; }
-  const s = (t-0.5)/0.5;
-  return [Math.round(40+s*215), Math.round(160+s*95), Math.round(220+s*35)];
-}
-
-// convergence: near-black → teal → bright lime-yellow
-function cmapConvergence(t) {
-  if (t < 0.5) { const s = t/0.5; return [0, Math.round(s*200), Math.round(s*100)]; }
-  const s = (t-0.5)/0.5;
-  return [Math.round(s*220), Math.round(200+s*55), Math.round(100-s*100)];
-}
-
-// daily heat: dark purple → blue → green → yellow → red (plasma-like)
-function cmapHeat(t) {
-  if (t < 0.25) { const s = t/0.25; return [Math.round(80+s*70), 0, Math.round(120+s*100)]; }
-  if (t < 0.50) { const s = (t-0.25)/0.25; return [Math.round(150+s*70), Math.round(s*80), Math.round(220-s*170)]; }
-  if (t < 0.75) { const s = (t-0.50)/0.25; return [Math.round(220+s*35), Math.round(80+s*130), 50]; }
-  const s = (t-0.75)/0.25;
-  return [255, Math.round(210+s*45), Math.round(50+s*50)];
-}
-
-async function renderSimPlots() {
-  if (!_simPlots) return;
-  const { Z, thermal_factor, trigger_factor, conv_field, dailyHeat, nx, ny, dx, dy } = _simPlots;
-
-  document.getElementById('sim-plots-area').style.display = 'flex';
-  await yieldUI();
-
-  // Slope magnitude (capped at tan 55°)
-  const dzdx = gradientAxisI(Z, ny, nx);
-  const dzdy = gradientAxisJ(Z, ny, nx);
-  const slope = new Float32Array(ny * nx);
-  for (let idx = 0; idx < ny*nx; idx++)
-    slope[idx] = Math.min(1.43, Math.sqrt((dzdx[idx]/dx)**2 + (dzdy[idx]/dy)**2));
-  renderGridPlot(document.getElementById('plot-sim-slope'), slope, nx, ny, cmapSlope, 'Slope');
-  await yieldUI();
-
-  renderGridPlot(document.getElementById('plot-sim-tf'), thermal_factor, nx, ny, cmapThermalFactor, 'Thermal factor');
-  await yieldUI();
-
-  renderGridPlot(document.getElementById('plot-sim-trigger'), trigger_factor, nx, ny, cmapTrigger, 'Trigger zones');
-  await yieldUI();
-
-  renderGridPlot(document.getElementById('plot-sim-conv'), conv_field, nx, ny, cmapConvergence, 'Convergence');
-  await yieldUI();
-
-  renderGridPlot(document.getElementById('plot-sim-heat'), dailyHeat, nx, ny, cmapHeat, 'Daily heat (K)');
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  MAIN PIPELINE: FETCH DATA
-// ═══════════════════════════════════════════════════════════════════
-
-async function runFetch() {
-  const _dl = document.getElementById('btn-dl'); if (_dl) _dl.disabled = true;
-  fetchedData = null; simResult = null;
-  document.getElementById('plots-area').style.display = 'none';
-  setProgress(0);
-
-  try {
-    const bbox = {
-      min_lat: parseFloat(document.getElementById('min_lat').value),
-      max_lat: parseFloat(document.getElementById('max_lat').value),
-      min_lon: parseFloat(document.getElementById('min_lon').value),
-      max_lon: parseFloat(document.getElementById('max_lon').value),
-    };
-    const simZoom  = parseInt(document.getElementById('sim_zoom').value);
-    const meshZoom = parseInt(document.getElementById('mesh_zoom').value);
-
-    log(`Bounding box: ${bbox.min_lat.toFixed(4)}–${bbox.max_lat.toFixed(4)}N, ${bbox.min_lon.toFixed(4)}–${bbox.max_lon.toFixed(4)}E`);
-
-    // ── Fetch sim DEM ──────────────────────────────────────────────
-    setStatus('Fetching simulation DEM…');
-    log(`Fetching sim DEM at zoom ${simZoom}…`);
-    const sim = await fetchDEM(bbox, simZoom, msg => log(msg));
-    log(`Sim DEM: ${sim.nx}×${sim.ny}, dx=${sim.dx.toFixed(1)}m dy=${sim.dy.toFixed(1)}m`, 'success');
-    setProgress(0.45);
-    showPlotsArea();
-    renderElevationPlot(document.getElementById('plot-elev'), sim.Z, sim.nx, sim.ny);
-
-    // ── Fetch mesh DEM ─────────────────────────────────────────────
-    setStatus('Fetching mesh DEM…');
-    log(`Fetching mesh DEM at zoom ${meshZoom}…`);
-    const mesh = await fetchDEM(bbox, meshZoom, msg => log(msg));
-    log(`Mesh DEM: ${mesh.nx}×${mesh.ny}, dx=${mesh.dx.toFixed(1)}m dy=${mesh.dy.toFixed(1)}m`, 'success');
-    setProgress(0.75);
-
-    // ── Fetch land cover ───────────────────────────────────────────
-    setStatus('Fetching land cover (ESA WorldCover COG)…');
-    const lcCodes = await fetchLandcover(bbox, sim.Z, sim.nx, sim.ny, sim.dx, sim.dy);
-    log(`Land cover grid: ${sim.nx}×${sim.ny} cells.`, 'success');
-    setProgress(0.95);
-    renderLandcoverPlot(document.getElementById('plot-lc'), lcCodes, sim.nx, sim.ny);
-
-    // ── Fetch weather calibration data ───────────────────────────────
-    setStatus('Fetching weather calibration data…');
-    const dateStr    = document.getElementById('sim_date').value;
-    const windowDays = parseInt(document.getElementById('era5_window').value);
-    const centerLat  = (bbox.min_lat + bbox.max_lat) / 2;
-    const centerLon  = (bbox.min_lon + bbox.max_lon) / 2;
-    const weatherMode = getWeatherMode();
-
-    if (!validateDate()) {
-      throw new Error('Invalid date for selected weather mode. Please correct the date.');
-    }
-
-    log(`Fetching ${weatherMode} weather data for ${dateStr}…`);
-    const tzOffsetFetch = parseInt(document.getElementById('tz_offset').value);
-    const { records: era5Records, diurnal: era5Diurnal } = await fetchWeatherData(
-      centerLat, centerLon, dateStr, weatherMode, windowDays, msg => log(msg), tzOffsetFetch);
-    if (era5Records.length) {
-      log(`Weather data: ${era5Records.length} clear-sky midday observations collected.`, 'success');
-    } else {
-      log('Weather data: no data returned — max_heat will use manual/fallback value.', 'warn');
-    }
-    setProgress(0.98);
-    renderERA5Plot(document.getElementById('plot-era5'), era5Records);
-
-    fetchedData = { sim, mesh, lcCodes, bbox, era5Records, era5Diurnal };
-    log('All data fetched. Ready to run simulation.', 'success');
-    setProgress(1.0);
-    setStatus('Data ready.');
-    document.getElementById('btn-sim').disabled = false;
-  } catch (e) {
-    log(`FETCH ERROR: ${e.message || e}`, 'error');
-    console.error(e);
-    setStatus('Fetch failed.');
-  }
-
-  document.getElementById('btn-fetch').disabled = false;
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  MAIN PIPELINE: RUN SIMULATION
-// ═══════════════════════════════════════════════════════════════════
-
-async function runSim() {
-  if (!fetchedData) { log('No data fetched yet.', 'error'); return; }
-  document.getElementById('btn-sim').disabled = true;
-  document.getElementById('btn-fetch').disabled = true;
-  const _dl2 = document.getElementById('btn-dl'); if (_dl2) _dl2.disabled = true;
-  document.getElementById('btn-map').disabled = true;
-  simResult = null;
-  _simPlots = null;
-  document.getElementById('sim-plots-area').style.display = 'none';
-  setProgress(0);
-
-  try {
-    const { sim, mesh, lcCodes, bbox } = fetchedData;
-    const { Z, nx, ny, dx, dy, x_extent, y_extent, lat0, lon0 } = sim;
-
-    const dateStr       = document.getElementById('sim_date').value;
-    const tzOffset      = parseInt(document.getElementById('tz_offset').value);
-    const intervalMin   = parseInt(document.getElementById('interval_min').value);
-    const minElevDeg    = parseFloat(document.getElementById('min_elevation').value);
-    const tauHours      = parseFloat(document.getElementById('tau_hours').value);
-    const kRelease      = parseFloat(document.getElementById('k_release').value);
-    const relThreshold  = parseFloat(document.getElementById('release_threshold').value);
-    const vAdvectMax    = parseFloat(document.getElementById('v_advect_max').value);
-    const refSlope      = parseFloat(document.getElementById('ref_slope').value);
-    const kCollect      = parseFloat(document.getElementById('k_collect').value);
-    const arrowStep     = parseInt(document.getElementById('arrow_step').value);
-    const weatherMode = getWeatherMode();
-    const diffuseFrac = parseFloat(document.getElementById('diffuse_frac').value);
-    const DT_INTERVAL   = intervalMin / 60;  // hours per step
-
-    // ── Build thermal factor grid ──────────────────────────────────
-    setStatus('Building thermal factor grid…');
-    log('Building thermal factor / tau grids from land cover…');
-    const { thermal_factor, tau_grid } = buildThermalFactor(lcCodes, ny, nx, ny, nx, tauHours);
-    log(`Thermal factor: min=${Math.min(...thermal_factor).toFixed(2)}, max=${Math.max(...thermal_factor).toFixed(2)}`, 'success');
-    await yieldUI();
-
-    // ── Compute trigger factor ─────────────────────────────────────
-    setStatus('Computing trigger factor…');
-    log('Computing trigger factor (convexity + land-cover boundary)…');
-    const trigger_factor = await computeTriggerFactor(Z, nx, ny, thermal_factor);
-    log('Trigger factor computed.', 'success');
-    setProgress(0.05);
-    await yieldUI();
-
-    // ── Sun scenarios ──────────────────────────────────────────────
-    setStatus('Computing sun scenarios…');
-    log(`Generating sun scenarios for ${dateStr} (UTC+${tzOffset}, interval=${intervalMin} min)…`);
-    const centerLat = (bbox.min_lat + bbox.max_lat) / 2;
-    const centerLon = (bbox.min_lon + bbox.max_lon) / 2;
-    const scenarios = generateSunScenarios(centerLat, centerLon, dateStr, tzOffset, intervalMin, minElevDeg);
-    log(`${scenarios.length} scenarios generated.`, 'success');
-    if (!scenarios.length) throw new Error('No sun scenarios (sun always below min elevation?)');
-
-    // ── Max_heat + T0 calibration ──────────────────────────────────
-    let MAX_HEAT, T0, T0_diurnal;
-
-    // Build a 24-value diurnal T0 profile in Kelvin from ERA5 hourly t2m.
-    // Gaps (hours with no data) are filled with a cos model anchored to T0.
-    function buildDiurnalProfile(rawDiurnal, T0_ref) {
-      // rawDiurnal: array of 24 values in °C (or null). T0_ref in K.
-      const T0_noon_C = T0_ref - 273.15;
-      const A = 5, h_max = 14;
-      const T_mean_C = T0_noon_C - A * Math.cos(2 * Math.PI * (12 - h_max) / 24);
-      return Array.from({length: 24}, (_, h) => {
-        const v = rawDiurnal ? rawDiurnal[h] : null;
-        return (v != null ? v : T_mean_C + A * Math.cos(2 * Math.PI * (h - h_max) / 24)) + 273.15;
-      });
-    }
-    // Typical or Exact: Use ERA5 data fetched during fetch step
-    if (!fetchedData.era5Records || fetchedData.era5Records.length === 0) {
-      log('No ERA5 data available — using manual max_heat fallback.', 'warn');
-      MAX_HEAT = parseFloat(document.getElementById('max_heat').value);
-      T0 = 293.15;
-      T0_diurnal = buildDiurnalProfile(fetchedData.era5Diurnal, T0);
-    } else {
-      setStatus('Calibrating max_heat from weather data…');
-      ({ max_heat: MAX_HEAT, T0 } = await calibrateMaxHeat(fetchedData.era5Records, scenarios,
-                                          Z, nx, ny, dx, dy, thermal_factor, diffuseFrac));
-      T0_diurnal = buildDiurnalProfile(fetchedData.era5Diurnal, T0);
-      log(`max_heat calibrated: ${MAX_HEAT.toFixed(2)} K`);
-      log(`T0_diurnal: ${T0_diurnal.map(v => v.toFixed(1)).join(', ')}`);
-    }
-    setProgress(0.12);
-
-    // ── Decay grid from tau ────────────────────────────────────────
-    const decay_grid = new Float32Array(ny * nx);
-    for (let idx = 0; idx < ny * nx; idx++)
-      decay_grid[idx] = Math.exp(-DT_INTERVAL / tau_grid[idx]);
-
-    // ── Marker positions ───────────────────────────────────────────
-    const takeoffLat = parseFloat(document.getElementById('takeoff_lat').value);
-    const takeoffLon = parseFloat(document.getElementById('takeoff_lon').value);
-    const landingLat = parseFloat(document.getElementById('landing_lat').value);
-    const landingLon = parseFloat(document.getElementById('landing_lon').value);
-
-    const [toX, toY] = lonlatToLocal(takeoffLon, takeoffLat, lon0, lat0);
-    const [laX, laY] = lonlatToLocal(landingLon, landingLat, lon0, lat0);
-    const toZ = elevAtLatLon(takeoffLat, takeoffLon, Z, nx, ny, bbox);
-    const laZ = elevAtLatLon(landingLat, landingLon, Z, nx, ny, bbox);
-
-    log(`Take-off: x=${toX.toFixed(0)}m y=${toY.toFixed(0)}m z=${toZ.toFixed(0)}m`);
-    log(`Landing:  x=${laX.toFixed(0)}m y=${laY.toFixed(0)}m z=${laZ.toFixed(0)}m`);
-
-    // ── Arrow indices ──────────────────────────────────────────────
-    const arrow_js = [], arrow_is = [];
-    for (let j = Math.floor(arrowStep / 2); j < ny; j += arrowStep) arrow_js.push(j);
-    for (let i = Math.floor(arrowStep / 2); i < nx; i += arrowStep) arrow_is.push(i);
-
-    // ── Mesh metadata ──────────────────────────────────────────────
-    const mesh_dx = mesh.dx, mesh_dy = mesh.dy;
-    const MESH_NX = mesh.nx, MESH_NY = mesh.ny;
-
-    // ── Output skeleton ───────────────────────────────────────────
-    const zMin = Math.min(...Z), zMax = Math.max(...Z);
-    const output = {
-      simulation_date:  dateStr,
-      tz_offset:        tzOffset,
-      interval_min:     intervalMin,
-      tau_hours:        tauHours,
-      max_heat:         MAX_HEAT,
-      dalr:             0.0098,
-      T0:               T0,
-      T0_diurnal:       T0_diurnal,
-      k_release:        kRelease,
-      release_threshold: relThreshold,
-      v_advect_max:     vAdvectMax,
-      ref_slope:        refSlope,
-      k_collect:        kCollect,
-      terrain: {
-        nx, ny,
-        x_extent, y_extent,
-        z_extent: [zMin, zMin + 2_000],
-        dx, dy,
-        arrow_step: arrowStep,
-        elevation:      float32ToNested(Z, ny, nx),
-        thermal_factor: float32ToNested(thermal_factor, ny, nx),
-        trigger_factor: float32ToNested(trigger_factor, ny, nx),
-        // convergence added after scenario loop
-        projection_origin: { lat: lat0, lon: lon0 },
-        mesh_nx: MESH_NX, mesh_ny: MESH_NY,
-        mesh_dx, mesh_dy,
-        mesh_elevation: float32ToNested(mesh.Z, MESH_NY, MESH_NX),
-      },
-      markers: [
-        { name: 'Landing',  type: 'landing',  x: laX, y: laY, z: laZ },
-        { name: 'Take-off', type: 'takeoff',  x: toX, y: toY, z: toZ },
-      ],
-      scenarios: [],
-    };
-
-    // ── Per-step simulation ────────────────────────────────────────
-    log(`Running ${scenarios.length} simulation steps…`);
-    setStatus('Running simulation…');
-
-    const dT_carry = new Float32Array(ny * nx);  // start at 0
-    const convergence_sum    = new Float64Array(ny * nx);
-    const dT_weight_sum      = new Float64Array(ny * nx);
-    const dT_sum             = new Float32Array(ny * nx);
-    let V_ADVECT = vAdvectMax;
-
-    for (let si = 0; si < scenarios.length; si++) {
-      const sc = scenarios[si];
-      setStatus(`Step ${si+1}/${scenarios.length}: ${sc.local_time}  az=${sc.sun_azimuth}°  el=${sc.sun_elevation}°`);
-      setProgress(0.12 + (si / scenarios.length) * 0.86);
-
-      // Shadow mask
-      const shadow = await computeShadowMask(Z, nx, ny, dx, dy, sc.sun_azimuth, sc.sun_elevation);
-
-      // Instantaneous solar heating
-      const dT_inst = computeSolarHeating(Z, nx, ny, dx, dy, sc.sun_azimuth, sc.sun_elevation,
-                                           thermal_factor, MAX_HEAT, shadow, diffuseFrac);
-
-      // Thermal inertia: exponential approach to equilibrium
-      for (let idx = 0; idx < ny * nx; idx++)
-        dT_carry[idx] = dT_carry[idx] * decay_grid[idx] + dT_inst[idx] * (1 - decay_grid[idx]);
-
-      // Phase 1: thermal release at trigger zones
-      for (let idx = 0; idx < ny * nx; idx++) {
-        const excess = Math.max(dT_carry[idx] - relThreshold, 0);
-        const release = trigger_factor[idx] * excess * kRelease * DT_INTERVAL;
-        dT_carry[idx] = Math.max(dT_carry[idx] - release, 0);
+      } else {
+        // Typical: can be any date (seasonal average)
+        message = 'Typical day mode.';
       }
 
-      // Orographic flow + collector suction
-      const { u: u_flow, v: v_flow, grad_mag } = computeOrographicFlow(Z, dT_carry, nx, ny, dx, dy, kCollect);
+      dateHint.textContent = message;
+      dateHint.style.color = valid ? '#99b8d0' : '#ff8866';
+
+      return valid;
+    }
+
+    // Override fetchERA5dT to support different modes
+    async function fetchWeatherData(lat, lon, dateStr, mode, windowDays, logFn, tzOffset) {
+      if (mode === 'typical') {
+        // Fetch 5 years of ERA5 data (original behavior)
+        logFn(`Fetching typical weather: 5-year ERA5 average around ${dateStr}…`);
+        return await fetchERA5dT(lat, lon, dateStr, windowDays);
+      } else if (mode === 'exact') {
+        // Fetch only the exact date's ERA5 data
+        logFn(`Fetching exact weather: ERA5 data for ${dateStr} (past date)…`);
+        const result = await fetchERA5dTExact(lat, lon, dateStr, windowDays, tzOffset);
+        logFn(`Exact: ${result.records.length} observations collected.`, 'success');
+        return result;
+      }
+      return { records: [], diurnal: Array(24).fill(null) };
+    }
+
+    // Fetch ERA5 for exact date (single day)
+    async function fetchERA5dTExact(lat, lon, dateStr, windowDays, tzOffset) {
+      const target = new Date(dateStr + 'T12:00:00Z');
+      const fmt = d => d.toISOString().slice(0, 10);
+
+      // ERA5 lags ~5 days behind present
+      const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 5);
+      if (target > cutoff) {
+        throw new Error('ERA5 data not available for recent dates (lags 5 days). Choose an earlier date or use Forecast mode.');
+      }
+
+      const start = new Date(target); start.setDate(start.getDate() - 1);
+      const end = new Date(target); end.setDate(end.getDate() + 1);
+
+      const apiUrl = `https://historical-forecast-api.open-meteo.com/v1/forecast` +
+        `?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}` +
+        `&start_date=${fmt(start)}&end_date=${fmt(end)}` +
+        `&hourly=temperature_2m,surface_temperature,direct_radiation` +
+        `&timezone=Europe/Paris`;
+      const url = `/proxy?url=` + encodeURIComponent(apiUrl);
+
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`ERA5 exact fetch failed: ${resp.status}`);
+      const json = await resp.json();
+
+      const h = json.hourly || {};
+      const times = h.time || [];
+      const t2m = h.temperature_2m || [];
+      const tskin = h.surface_temperature || [];
+      const drad = h.direct_radiation || [];
+
+      const records = [];
+      const hourlyT2m = Array.from({ length: 24 }, () => []);
+      for (let i = 0; i < times.length; i++) {
+        const hour = parseInt(times[i].slice(11, 13));
+        if (t2m[i] != null) hourlyT2m[hour].push(t2m[i]);
+        if (t2m[i] == null || tskin[i] == null || drad[i] == null) continue;
+        if (hour < 11 || hour > 14) continue;
+        if (drad[i] < 600) continue;  // clear-sky only
+        // Only keep records from the target date
+        if (!times[i].startsWith(dateStr)) continue;
+        records.push({ dT: tskin[i] - t2m[i], t2m: t2m[i] });
+      }
+      const diurnal = hourlyT2m.map(vals => vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null);
+      return { records, diurnal };
+    }
+
+    // Fetch forecast data (Open-Meteo)
+    async function fetchForecastdT(lat, lon, dateStr, tzOffset) {
+      const target = new Date(dateStr + 'T12:00:00Z');
+      const startDate = dateStr;
+      const endDate = dateStr;
+      const fmt = d => d.toISOString().slice(0, 10);
+
+      const apiUrl = `https://api.open-meteo.com/v1/forecast` +
+        `?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}` +
+        `&start_date=${fmt(startDate)}&end_date=${fmt(endDate)}` +
+        `&hourly=temperature_2m,soil_temperature_0cm,shortwave_radiation` +
+        `&timezone=UTC`;
+      const url = `/proxy?url=` + encodeURIComponent(apiUrl);
+
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`Forecast fetch failed: ${resp.status}`);
+      const json = await resp.json();
+
+      const hourly = json.hourly || {};
+      const times = hourly.time || [];
+      const t2m = hourly.temperature_2m || [];
+      const tsoil = hourly.soil_temperature_0cm || [];
+      const swnorm = hourly.shortwave_radiation || [];
+
+      const records = [];
+      const hourlyT2m = Array.from({ length: 24 }, () => []);
+      for (let i = 0; i < times.length; i++) {
+        const dt = new Date(times[i]);
+        const utcHour = dt.getUTCHours();
+        const localHour = (utcHour + tzOffset + 24) % 24;
+        // Collect all-hours t2m for diurnal profile
+        if (t2m[i] != null) hourlyT2m[localHour].push(t2m[i]);
+        // Only take midday (10h–14h UTC)
+        if (utcHour < 10 || utcHour > 14) continue;
+        const T2 = t2m[i];
+        const Ts = tsoil[i];
+        const SW = swnorm[i];
+        if (T2 == null || Ts == null || SW == null) continue;
+        // Estimate clear-sky ΔT similar to typical method
+        const alpha = 0.3;  // typical diffuse fraction for forecast
+        const R_sw = SW * (1 - alpha) / 3600;
+        const sigma = 5.67e-8;
+        const Ta = T2 - 273.15;
+        const emiss = 0.95;
+        const Tsky = Math.pow(R_sw / sigma + Math.pow(Ta + 273.15, 4), 0.25) - 273.15;
+        const delta_T0 = (Ts - T2) - emiss * (T2 - Tsky);
+        records.push({ dT: Math.max(0, delta_T0), t2m: T2 });
+      }
+      const diurnal = hourlyT2m.map(vals => vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null);
+      return { records, diurnal };
+    }
+
+    // ── Global simulation state ───────────────────────────────────────
+    let fetchedData = null;   // { sim, mesh }
+    let simResult = null;   // final JSON object
+
+    // ── Load defaults from config.json ───────────────────────────────
+    function setVal(id, v) {
+      const el = document.getElementById(id);
+      if (el) el.value = v;
+    }
+
+    fetch('config.json').then(r => r.json()).then(cfg => {
+      const b = cfg.area.bbox;
+      setVal('min_lat', b.min_lat);
+      setVal('max_lat', b.max_lat);
+      setVal('min_lon', b.min_lon);
+      setVal('max_lon', b.max_lon);
+      setVal('takeoff_lat', cfg.area.takeoff.lat);
+      setVal('takeoff_lon', cfg.area.takeoff.lon);
+      setVal('landing_lat', cfg.area.landing.lat);
+      setVal('landing_lon', cfg.area.landing.lon);
+      setVal('sim_date', new Date().toISOString().slice(0, 10));
+      setVal('tz_offset', cfg.simulation.tz_offset);
+      setVal('interval_min', cfg.simulation.interval_min);
+      setVal('min_elevation', cfg.simulation.min_elevation_deg);
+      setVal('era5_window', cfg.heating.era5_window_days);
+      setVal('diffuse_frac', cfg.heating.diffuse_fraction);
+      setVal('elr', cfg.heating.elr_per_km);
+      setVal('tau_hours', cfg.heating.tau_hours);
+      setVal('k_release', cfg.release.k_release);
+      setVal('release_threshold', cfg.release.release_threshold);
+      setVal('v_advect_max', cfg.advection.v_advect_max);
+      setVal('ref_slope', cfg.advection.ref_slope);
+      setVal('k_collect', cfg.advection.k_collect ?? 1.0);
+      setVal('arrow_step', cfg.output.arrow_step);
+      setVal('domainH', cfg.simulation.domain_height_m);
+
+      // Override with saved area state from area.html (if present)
+      try {
+        const saved = JSON.parse(localStorage.getItem('paragliding_area') || 'null');
+        if (saved) {
+          if (saved.bbox) {
+            setVal('min_lat', saved.bbox.min_lat); setVal('max_lat', saved.bbox.max_lat);
+            setVal('min_lon', saved.bbox.min_lon); setVal('max_lon', saved.bbox.max_lon);
+          }
+          if (saved.takeoff) { setVal('takeoff_lat', saved.takeoff.lat); setVal('takeoff_lon', saved.takeoff.lon); }
+          if (saved.landing) { setVal('landing_lat', saved.landing.lat); setVal('landing_lon', saved.landing.lon); }
+        }
+      } catch (e) { }
+
+      // Initialize weather mode after config loads
+      updateWeatherMode();
+      validateDate();
+    }).catch(e => console.warn('config.json not loaded:', e));
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  COORDINATE HELPERS
+    // ═══════════════════════════════════════════════════════════════════
+
+    function lonlatToLocal(lon, lat, lon0, lat0) {
+      const R = 6371000;
+      const x = (lon - lon0) * Math.cos(lat0 * Math.PI / 180) * R * Math.PI / 180;
+      const y = -(lat - lat0) * R * Math.PI / 180;  // south is +y
+      return [x, y];
+    }
+
+    /** lon/lat → Web Mercator tile fractional coords at zoom z */
+    function lonlatToTileFrac(lon, lat, z) {
+      const n = Math.pow(2, z);
+      const tx = (lon + 180) / 360 * n;
+      const lat_r = lat * Math.PI / 180;
+      const ty = (1 - Math.log(Math.tan(lat_r) + 1 / Math.cos(lat_r)) / Math.PI) / 2 * n;
+      return [tx, ty];
+    }
+
+    /** Integer tile x,y for a lon/lat at zoom z */
+    function lonlatToTile(lon, lat, z) {
+      const [tx, ty] = lonlatToTileFrac(lon, lat, z);
+      return [Math.floor(tx), Math.floor(ty)];
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  ARRAY MATH HELPERS
+    // ═══════════════════════════════════════════════════════════════════
+
+    /** numpy.gradient equivalent — central diffs interior, one-sided edges, flat Float32Array */
+    function gradient1D(arr, n) {
+      const out = new Float32Array(n);
+      if (n === 1) { out[0] = 0; return out; }
+      out[0] = arr[1] - arr[0];
+      out[n - 1] = arr[n - 1] - arr[n - 2];
+      for (let i = 1; i < n - 1; i++) out[i] = (arr[i + 1] - arr[i - 1]) / 2;
+      return out;
+    }
+
+    /** Gradient along axis=1 (i, column) — in-place result into out (flat ny×nx) */
+    function gradientAxisI(arr, ny, nx) {
+      const out = new Float32Array(ny * nx);
+      for (let j = 0; j < ny; j++) {
+        const row = arr.subarray(j * nx, j * nx + nx);
+        const g = gradient1D(row, nx);
+        out.set(g, j * nx);
+      }
+      return out;
+    }
+
+    /** Gradient along axis=0 (j, row) */
+    function gradientAxisJ(arr, ny, nx) {
+      const out = new Float32Array(ny * nx);
+      const col = new Float32Array(ny);
+      for (let i = 0; i < nx; i++) {
+        for (let j = 0; j < ny; j++) col[j] = arr[j * nx + i];
+        const g = gradient1D(col, ny);
+        for (let j = 0; j < ny; j++) out[j * nx + i] = g[j];
+      }
+      return out;
+    }
+
+    /** 1D Gaussian kernel, radius = ceil(3*sigma) */
+    function gaussianKernel1D(sigma) {
+      const r = Math.ceil(3 * sigma);
+      const k = new Float32Array(2 * r + 1);
+      let s = 0;
+      for (let i = -r; i <= r; i++) {
+        k[i + r] = Math.exp(-i * i / (2 * sigma * sigma));
+        s += k[i + r];
+      }
+      for (let i = 0; i < k.length; i++) k[i] /= s;
+      return k;
+    }
+
+    /** Separable 2D Gaussian filter (rows then columns) */
+    function gaussianFilter2D(arr, ny, nx, sigma) {
+      const k = gaussianKernel1D(sigma);
+      const r = (k.length - 1) >> 1;
+      const tmp = new Float32Array(ny * nx);
+      const out = new Float32Array(ny * nx);
+
+      // Pass 1: along rows (i axis)
+      for (let j = 0; j < ny; j++) {
+        for (let i = 0; i < nx; i++) {
+          let v = 0, ws = 0;
+          for (let d = -r; d <= r; d++) {
+            const ii = Math.min(Math.max(i + d, 0), nx - 1);
+            const w = k[d + r];
+            v += arr[j * nx + ii] * w;
+            ws += w;
+          }
+          tmp[j * nx + i] = v / ws;
+        }
+      }
+      // Pass 2: along columns (j axis)
+      for (let i = 0; i < nx; i++) {
+        for (let j = 0; j < ny; j++) {
+          let v = 0, ws = 0;
+          for (let d = -r; d <= r; d++) {
+            const jj = Math.min(Math.max(j + d, 0), ny - 1);
+            const w = k[d + r];
+            v += tmp[jj * nx + i] * w;
+            ws += w;
+          }
+          out[j * nx + i] = v / ws;
+        }
+      }
+      return out;
+    }
+
+    /** Percentile of a Float32Array (values only) */
+    function percentile(arr, p, positiveOnly = false) {
+      let a = Array.from(arr);
+      if (positiveOnly) a = a.filter(v => v > 0);
+      if (!a.length) return 0;
+      a.sort((x, y) => x - y);
+      const idx = (p / 100) * (a.length - 1);
+      const lo = Math.floor(idx), hi = Math.ceil(idx);
+      return a[lo] + (a[hi] - a[lo]) * (idx - lo);
+    }
+
+    /** Bilinear interpolation in a flat ny×nx grid */
+    function bilinearSample(arr, ny, nx, jf, if_) {
+      const j0 = Math.max(0, Math.min(ny - 2, Math.floor(jf)));
+      const i0 = Math.max(0, Math.min(nx - 2, Math.floor(if_)));
+      const j1 = j0 + 1, i1 = i0 + 1;
+      const tj = jf - j0, ti = if_ - i0;
+      return (arr[j0 * nx + i0] * (1 - ti) * (1 - tj) +
+        arr[j0 * nx + i1] * ti * (1 - tj) +
+        arr[j1 * nx + i0] * (1 - ti) * tj +
+        arr[j1 * nx + i1] * ti * tj);
+    }
+
+    /** Convert flat Float32Array to nested JS array (ny rows of nx values) */
+    function float32ToNested(arr, ny, nx) {
+      return Array.from({ length: ny }, (_, j) =>
+        Array.from({ length: nx }, (_, i) => arr[j * nx + i])
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  LAND-COVER CONSTANTS
+    // ═══════════════════════════════════════════════════════════════════
+
+    const LANDCOVER = {
+      10: { label: 'Tree cover', color: [0, 100, 0], tf: 0.45, tau: 2.50 },
+      20: { label: 'Shrubland', color: [255, 187, 34], tf: 0.70, tau: 1.30 },
+      30: { label: 'Grassland', color: [255, 255, 76], tf: 1.00, tau: 1.00 },
+      40: { label: 'Cropland', color: [240, 150, 255], tf: 0.85, tau: 0.85 },
+      50: { label: 'Built-up', color: [250, 0, 0], tf: 1.30, tau: 0.50 },
+      60: { label: 'Bare/sparse', color: [180, 180, 180], tf: 1.80, tau: 0.35 },
+      70: { label: 'Snow/ice', color: [240, 240, 240], tf: 0.08, tau: 1.50 },
+      80: { label: 'Perm. water', color: [0, 100, 200], tf: 0.03, tau: 15.00 },
+      90: { label: 'Herb. wetland', color: [0, 150, 160], tf: 0.35, tau: 1.50 },
+      95: { label: 'Mangrove', color: [0, 207, 117], tf: 0.50, tau: 2.00 },
+      100: { label: 'Moss/lichen', color: [250, 230, 160], tf: 0.60, tau: 1.00 },
+    };
+
+    const LC_CODES = Object.keys(LANDCOVER).map(Number);
+
+    /** Find nearest WorldCover class by RGB colour distance */
+    function nearestLcClass(r, g, b) {
+      let best = 30, bestD = Infinity;
+      for (const code of LC_CODES) {
+        const [cr, cg, cb] = LANDCOVER[code].color;
+        const d = (r - cr) ** 2 + (g - cg) ** 2 + (b - cb) ** 2;
+        if (d < bestD) { bestD = d; best = code; }
+      }
+      return best;
+    }
+
+    /** Slope-based heuristic fallback when WorldCover WMS is blocked by CORS */
+    function slopeHeuristicLandcover(Z, ny, nx, dx, dy) {
+      const dzdx = gradientAxisI(Z, ny, nx);
+      const dzdy = gradientAxisJ(Z, ny, nx);
+      const lc = new Int16Array(ny * nx);
+      for (let idx = 0; idx < ny * nx; idx++) {
+        const slope = Math.sqrt((dzdx[idx] / dx) ** 2 + (dzdy[idx] / dy) ** 2);
+        const z = Z[idx];
+        if (z > 2400) { lc[idx] = 70; }
+        else if (slope > 0.5) { lc[idx] = 60; }
+        else if (slope > 0.25) { lc[idx] = 20; }
+        else if (z < 500 && slope < 0.05) { lc[idx] = 40; }
+        else { lc[idx] = 30; }
+      }
+      return lc;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  DEM FETCHING (Terrarium tiles)
+    // ═══════════════════════════════════════════════════════════════════
+
+    async function fetchDEM(bbox, zoom, logFn) {
+      const { min_lat, max_lat, min_lon, max_lon } = bbox;
+
+      const [x0, y0] = lonlatToTile(min_lon, max_lat, zoom);  // NW corner
+      const [x1, y1] = lonlatToTile(max_lon, min_lat, zoom);  // SE corner
+
+      const xs = [], ys = [];
+      for (let x = x0; x <= x1; x++) xs.push(x);
+      for (let y = y0; y <= y1; y++) ys.push(y);
+
+      logFn(`Fetching ${xs.length}×${ys.length} Terrarium tiles at zoom ${zoom}…`);
+
+      const TILE_PX = 256;
+      const canvasW = xs.length * TILE_PX;
+      const canvasH = ys.length * TILE_PX;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = canvasW; canvas.height = canvasH;
+      const ctx = canvas.getContext('2d');
+
+      let fetched = 0;
+      const total = xs.length * ys.length;
+
+      for (let ri = 0; ri < ys.length; ri++) {
+        for (let ci = 0; ci < xs.length; ci++) {
+          const tx = xs[ci], ty = ys[ri];
+          const cacheKey = `tile_${zoom}_${tx}_${ty}`;
+
+          let imgData;
+          if (TILE_CACHE[cacheKey]) {
+            imgData = TILE_CACHE[cacheKey];
+          } else {
+            const url = `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${zoom}/${tx}/${ty}.png`;
+            imgData = await new Promise((resolve, reject) => {
+              const img = new Image();
+              img.crossOrigin = 'anonymous';
+              img.onload = () => resolve(img);
+              img.onerror = reject;
+              img.src = url;
+            });
+            TILE_CACHE[cacheKey] = imgData;
+          }
+
+          ctx.drawImage(imgData, ci * TILE_PX, ri * TILE_PX, TILE_PX, TILE_PX);
+          fetched++;
+          setProgress(fetched / total * 0.4);
+          if (fetched % 5 === 0) await yieldUI();
+        }
+      }
+
+      const rawPx = ctx.getImageData(0, 0, canvasW, canvasH).data;
+
+      // Fractional tile coordinates of the bbox corners
+      const [tx0f, ty0f] = lonlatToTileFrac(min_lon, max_lat, zoom);  // NW
+      const [tx1f, ty1f] = lonlatToTileFrac(max_lon, min_lat, zoom);  // SE
+
+      // Pixel offsets within the assembled canvas
+      const px0 = (tx0f - x0) * TILE_PX;
+      const py0 = (ty0f - y0) * TILE_PX;
+      const px1 = (tx1f - x0) * TILE_PX;
+      const py1 = (ty1f - y0) * TILE_PX;
+
+      const nx = Math.round(px1 - px0);
+      const ny = Math.round(py1 - py0);
+
+      logFn(`DEM canvas: ${canvasW}×${canvasH}px → bbox ${nx}×${ny} cells`);
+
+      // Helper: bilinear sample from raw RGBA pixel data (canvasW wide)
+      function sampleElev(pxf, pyf) {
+        const px0s = Math.floor(pxf), py0s = Math.floor(pyf);
+        const px1s = Math.min(px0s + 1, canvasW - 1);
+        const py1s = Math.min(py0s + 1, canvasH - 1);
+        const tx = pxf - px0s, ty_ = pyf - py0s;
+
+        function decode(px, py) {
+          const idx = (py * canvasW + px) * 4;
+          return rawPx[idx] * 256 + rawPx[idx + 1] + rawPx[idx + 2] / 256 - 32768;
+        }
+        const v00 = decode(px0s, py0s), v10 = decode(px1s, py0s);
+        const v01 = decode(px0s, py1s), v11 = decode(px1s, py1s);
+        return v00 * (1 - tx) * (1 - ty_) + v10 * tx * (1 - ty_) + v01 * (1 - tx) * ty_ + v11 * tx * ty_;
+      }
+
+      // Build uniform grid in bbox
+      const Z = new Float32Array(ny * nx);
+      for (let j = 0; j < ny; j++) {
+        for (let i = 0; i < nx; i++) {
+          const pxf = px0 + (i + 0.5) / nx * (px1 - px0);
+          const pyf = py0 + (j + 0.5) / ny * (py1 - py0);
+          Z[j * nx + i] = sampleElev(pxf, pyf);
+        }
+        if (j % 20 === 0) await yieldUI();
+      }
+
+      // Physical grid spacing via equirectangular approximation
+      const latSpan = max_lat - min_lat;
+      const lonSpan = max_lon - min_lon;
+      const R = 6371000;
+      const lat0 = (min_lat + max_lat) / 2;
+      const lon0 = (min_lon + max_lon) / 2;
+      const totalY = latSpan * R * Math.PI / 180;
+      const totalX = lonSpan * Math.cos(lat0 * Math.PI / 180) * R * Math.PI / 180;
+      const dx = totalX / nx;
+      const dy = totalY / ny;
+
+      // Extent in local coords (origin = bbox center)
+      const [xmin] = lonlatToLocal(min_lon, lat0, lon0, lat0);
+      const [xmax] = lonlatToLocal(max_lon, lat0, lon0, lat0);
+      const [, ymin] = lonlatToLocal(lon0, max_lat, lon0, lat0);
+      const [, ymax] = lonlatToLocal(lon0, min_lat, lon0, lat0);
+
+      return { Z, nx, ny, dx, dy, x_extent: [xmin, xmax], y_extent: [ymin, ymax], lat0, lon0 };
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  LAND-COVER FETCHING (ESA WorldCover 2021, same as Python)
+    // ═══════════════════════════════════════════════════════════════════
+
+    /**
+     * Fetches ESA WorldCover 2021 COG via the local proxy server (server.py),
+     * which forwards HTTP Range requests to the ESA S3 bucket server-side,
+     * bypassing browser CORS restrictions.
+     * Falls back to slope heuristic if the proxy or COG is unavailable.
+     */
+
+    async function parseCOGWindow(tiff, min_lon, max_lon, min_lat, max_lat, nx, ny) {
+      const image = await tiff.getImage();
+      const [originX, originY] = image.getOrigin();    // [west-lon, north-lat]
+      const [resX, resY] = image.getResolution(); // resX > 0, resY < 0
+      const imgW = image.getWidth(), imgH = image.getHeight();
+
+      const left = Math.max(0, Math.floor((min_lon - originX) / resX));
+      const top = Math.max(0, Math.floor((max_lat - originY) / resY));
+      const right = Math.min(imgW, Math.ceil((max_lon - originX) / resX));
+      const bottom = Math.min(imgH, Math.ceil((min_lat - originY) / resY));
+
+      if (left >= right || top >= bottom) throw new Error('Bbox outside GeoTIFF extent.');
+
+      log(`Reading ${right - left}×${bottom - top} px window…`);
       await yieldUI();
 
-      // Dynamic V_ADVECT
-      const p75slope = percentile(grad_mag, 75);
-      let sumPos = 0, cntPos = 0;
-      for (let idx = 0; idx < ny * nx; idx++) {
-        if (dT_carry[idx] > 0) { sumPos += dT_carry[idx]; cntPos++; }
-      }
-      const mean_dT = cntPos > 0 ? sumPos / cntPos : 0;
-      V_ADVECT = Math.min(vAdvectMax, Math.max(50,
-        vAdvectMax * Math.sqrt(
-          Math.min(4, Math.max(0, p75slope / refSlope)) *
-          Math.min(4, Math.max(0, mean_dT  / MAX_HEAT))
-        )
-      ));
+      const rasters = await image.readRasters({ window: [left, top, right, bottom] });
+      const raw = rasters[0];
+      const rawW = right - left, rawH = bottom - top;
 
-      // Normalise flow to V_ADVECT m/h
-      let flowMax = 1e-6;
-      for (let idx = 0; idx < ny * nx; idx++) {
-        const m = Math.max(Math.abs(u_flow[idx]), Math.abs(v_flow[idx]));
-        if (m > flowMax) flowMax = m;
-      }
-      const u_vel = new Float32Array(ny * nx);
-      const v_vel = new Float32Array(ny * nx);
-      for (let idx = 0; idx < ny * nx; idx++) {
-        u_vel[idx] = (u_flow[idx] / flowMax) * V_ADVECT;
-        v_vel[idx] = (v_flow[idx] / flowMax) * V_ADVECT;
-      }
-
-      // CFL sub-stepping
-      let maxU = 0, maxV = 0;
-      for (let idx = 0; idx < ny * nx; idx++) {
-        if (Math.abs(u_vel[idx]) > maxU) maxU = Math.abs(u_vel[idx]);
-        if (Math.abs(v_vel[idx]) > maxV) maxV = Math.abs(v_vel[idx]);
-      }
-      const cfl = (maxU / dx + maxV / dy) * DT_INTERVAL;
-      const N_sub = Math.max(1, Math.ceil(cfl / 0.9));
-      const dt_sub = DT_INTERVAL / N_sub;
-
-      for (let sub = 0; sub < N_sub; sub++) {
-        // Upwind x (i axis): pad edges
-        const grad_x = new Float32Array(ny * nx);
-        for (let j = 0; j < ny; j++) {
-          for (let i = 0; i < nx; i++) {
-            const idx = j * nx + i;
-            const iL = Math.max(0, i - 1), iR = Math.min(nx - 1, i + 1);
-            if (u_vel[idx] >= 0) {
-              grad_x[idx] = (dT_carry[idx] - dT_carry[j * nx + iL]) / dx;
-            } else {
-              grad_x[idx] = (dT_carry[j * nx + iR] - dT_carry[idx]) / dx;
-            }
-          }
+      // Nearest-neighbour resample to sim grid — matches Python's ndimage_zoom order=0
+      const lc = new Int16Array(ny * nx);
+      for (let j = 0; j < ny; j++) {
+        for (let i = 0; i < nx; i++) {
+          const srcI = Math.min(rawW - 1, Math.round(i / (nx - 1) * (rawW - 1)));
+          const srcJ = Math.min(rawH - 1, Math.round(j / (ny - 1) * (rawH - 1)));
+          lc[j * nx + i] = raw[srcJ * rawW + srcI];
         }
-        // Upwind y (j axis)
-        const grad_y = new Float32Array(ny * nx);
-        for (let j = 0; j < ny; j++) {
-          for (let i = 0; i < nx; i++) {
-            const idx = j * nx + i;
-            const jU = Math.max(0, j - 1), jD = Math.min(ny - 1, j + 1);
-            if (v_vel[idx] >= 0) {
-              grad_y[idx] = (dT_carry[idx] - dT_carry[jU * nx + i]) / dy;
-            } else {
-              grad_y[idx] = (dT_carry[jD * nx + i] - dT_carry[idx]) / dy;
-            }
-          }
+      }
+      return { lc, rawW, rawH };
+    }
+
+    async function fetchLandcover(bbox, Z, nx, ny, dx, dy) {
+      const { min_lat, max_lat, min_lon, max_lon } = bbox;
+
+      // ── ESA WorldCover S3 COG via local proxy ─────────────────────────
+      try {
+        const tileLatSW = Math.floor(min_lat / 3) * 3;
+        const tileLonSW = Math.floor(min_lon / 3) * 3;
+        if (Math.floor(max_lat / 3) * 3 !== tileLatSW ||
+          Math.floor(max_lon / 3) * 3 !== tileLonSW) {
+          throw new Error('Bbox spans multiple WorldCover tiles.');
         }
+        const latStr = (tileLatSW >= 0 ? 'N' : 'S') + String(Math.abs(tileLatSW)).padStart(2, '0');
+        const lonStr = (tileLonSW >= 0 ? 'E' : 'W') + String(Math.abs(tileLonSW)).padStart(3, '0');
+        const s3url = `https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/` +
+          `ESA_WorldCover_10m_2021_v200_${latStr}${lonStr}_Map.tif`;
+        const proxyUrl = `/proxy?url=` + encodeURIComponent(s3url);
+
+        log(`Fetching ESA WorldCover COG (${latStr}${lonStr}) via local proxy…`);
+        const tiff = await GeoTIFF.fromUrl(proxyUrl, { allowFullFile: false });
+        const { lc, rawW, rawH } = await parseCOGWindow(
+          tiff, min_lon, max_lon, min_lat, max_lat, nx, ny);
+        log(`ESA WorldCover COG: ${rawW}×${rawH} px → ${nx}×${ny}.`, 'success');
+        return lc;
+
+      } catch (e) {
+        log(`ESA WorldCover COG unavailable (${e.message || e}) — using slope heuristic.`, 'warn');
+        return slopeHeuristicLandcover(Z, ny, nx, dx, dy);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  SUN SCENARIOS (SunCalc)
+    // ═══════════════════════════════════════════════════════════════════
+
+    function generateSunScenarios(lat, lon, dateStr, tzOffset, intervalMin, minElevDeg) {
+      const [year, month, day] = dateStr.split('-').map(Number);
+      const scenarios = [];
+      for (let m = 0; m < 24 * 60; m += intervalMin) {
+        const hUtc = Math.floor(m / 60);
+        const minUtc = m % 60;
+        const dtUtc = new Date(Date.UTC(year, month - 1, day, hUtc, minUtc, 0));
+        const pos = SunCalc.getPosition(dtUtc, lat, lon);
+        const el_deg = pos.altitude * 180 / Math.PI;
+        if (el_deg < minElevDeg) continue;
+
+        // SunCalc azimuth: from south, CCW in radians → convert to north CW degrees
+        const az_deg = ((pos.azimuth * 180 / Math.PI) + 180 + 360) % 360;
+
+        const localH = (hUtc + tzOffset + 24) % 24;
+        const localMin = minUtc;
+        const localStr = String(localH).padStart(2, '0') + ':' + String(localMin).padStart(2, '0');
+        const utcStr = String(hUtc).padStart(2, '0') + ':' + String(minUtc).padStart(2, '0');
+
+        scenarios.push({
+          name: localStr,
+          local_time: localStr,
+          utc_time: utcStr,
+          sun_azimuth: Math.round(az_deg * 100) / 100,
+          sun_elevation: Math.round(el_deg * 100) / 100,
+        });
+      }
+      return scenarios;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  SHADOW MASK
+    // ═══════════════════════════════════════════════════════════════════
+
+    async function computeShadowMask(Z, nx, ny, dx, dy, azDeg, elDeg) {
+      const az = azDeg * Math.PI / 180;
+      const el = elDeg * Math.PI / 180;
+      const tan_el = Math.tan(el);
+
+      let di = Math.sin(az);
+      let dj = -Math.cos(az);  // j increases southward, sun to north = dj negative
+
+      const maxAbs = Math.max(Math.abs(di), Math.abs(dj));
+      if (maxAbs < 1e-9) return new Uint8Array(ny * nx); // zenith sun = no shadow
+
+      di /= maxAbs;
+      dj /= maxAbs;
+
+      const step_m = Math.sqrt((di * dx) ** 2 + (dj * dy) ** 2);
+
+      const shadow = new Uint8Array(ny * nx);  // 0=lit, 1=shadowed
+      const active = new Uint8Array(ny * nx).fill(1);
+
+      // Starting positions: stored as floats; we work cell-by-cell implicitly
+      // via index arithmetic — iterate steps, compute new positions for all cells.
+      const maxSteps = Math.ceil(Math.max(nx / Math.max(Math.abs(di), 1e-9),
+        ny / Math.max(Math.abs(dj), 1e-9))) + 1;
+
+      // i0[j*nx+i] = i, j0[j*nx+i] = j — precompute starting indices
+      const i0 = new Float32Array(ny * nx);
+      const j0 = new Float32Array(ny * nx);
+      for (let j = 0; j < ny; j++)
+        for (let i = 0; i < nx; i++) {
+          i0[j * nx + i] = i;
+          j0[j * nx + i] = j;
+        }
+
+      let anyActive = true;
+      for (let step = 1; step <= maxSteps && anyActive; step++) {
+        anyActive = false;
+        const dist = step * step_m;
         for (let idx = 0; idx < ny * nx; idx++) {
-          dT_carry[idx] = Math.max(0, dT_carry[idx] - dt_sub * (u_vel[idx] * grad_x[idx] + v_vel[idx] * grad_y[idx]));
+          if (!active[idx]) continue;
+          const ri = Math.round(i0[idx] + step * di);
+          const rj = Math.round(j0[idx] + step * dj);
+          if (ri < 0 || ri >= nx || rj < 0 || rj >= ny) {
+            active[idx] = 0; continue;
+          }
+          anyActive = true;
+          const z_terrain = Z[rj * nx + ri];
+          const sun_ray_z = Z[idx] + dist * tan_el;
+          if (z_terrain > sun_ray_z) {
+            shadow[idx] = 1;
+            active[idx] = 0;
+          }
         }
-        if (sub % 3 === 0) await yieldUI();
+        if (step % 20 === 0) await yieldUI();
       }
+      return shadow;
+    }
 
-      // Convergence accumulation: -div(u_flow, v_flow)
-      const div_u = gradientAxisI(u_flow, ny, nx);
-      const div_v = gradientAxisJ(v_flow, ny, nx);
+    // ═══════════════════════════════════════════════════════════════════
+    //  SOLAR HEATING
+    // ═══════════════════════════════════════════════════════════════════
+
+    function computeSolarHeating(Z, nx, ny, dx, dy, azDeg, elDeg, thermalFactor, maxHeat, shadowMask, diffuseFrac) {
+      const az = azDeg * Math.PI / 180;
+      const el = elDeg * Math.PI / 180;
+      // Sun direction in East/North/Up
+      const sx = Math.sin(az) * Math.cos(el);
+      const sy = Math.cos(az) * Math.cos(el);  // north=cos(az) because az from north CW
+      const sz = Math.sin(el);
+
+      // Atmospheric transmittance (Kasten-Young + Bird)
+      const AM = 1 / (Math.sin(el) + 0.50572 * Math.pow(elDeg + 6.07995, -1.6364));
+      const T_atm = Math.pow(0.7, Math.pow(AM, 0.678));
+
+      const dzdx = gradientAxisI(Z, ny, nx);  // ∂Z/∂East
+      const dzdy = gradientAxisJ(Z, ny, nx);  // ∂Z/∂South
+
+      // Raw cos(incidence) before blurring
+      const cosInc_raw = new Float32Array(ny * nx);
       for (let idx = 0; idx < ny * nx; idx++) {
-        const conv = Math.max(-(div_u[idx] / dx + div_v[idx] / dy), 0);
-        const w = Math.max(dT_carry[idx], 0);
-        convergence_sum[idx]  += conv * w;
-        dT_weight_sum[idx]    += w;
-        dT_sum[idx]           += dT_carry[idx];
+        const nx_ = -dzdx[idx];
+        const ny_ = dzdy[idx];
+        const nz_ = 1.0;
+        const norm = Math.sqrt(nx_ * nx_ + ny_ * ny_ + nz_ * nz_);
+        cosInc_raw[idx] = Math.max(0, (nx_ * sx + ny_ * sy + nz_ * sz) / norm);
       }
 
-      // Downsample flow arrows
-      const u_ds = arrow_js.map(j => arrow_is.map(i => u_flow[j * nx + i]));
-      const v_ds = arrow_js.map(j => arrow_is.map(i => v_flow[j * nx + i]));
+      const cosInc = gaussianFilter2D(cosInc_raw, ny, nx, 1.5);
 
-      output.scenarios.push({
-        name:                sc.name,
-        local_time:          sc.local_time,
-        utc_time:            sc.utc_time,
-        sun_azimuth:         sc.sun_azimuth,
-        sun_elevation:       sc.sun_elevation,
-        ground_temp_anomaly: float32ToNested(dT_carry, ny, nx),
-        shadow_mask:         Array.from(shadow),
-        u_surface:           u_ds,
-        v_surface:           v_ds,
-        advect_n_sub:        N_sub,
-        v_advect:            V_ADVECT,
+      const dT = new Float32Array(ny * nx);
+      for (let idx = 0; idx < ny * nx; idx++) {
+        const gx = dzdx[idx] / dx, gy = dzdy[idx] / dy;
+        const slopeAngle = Math.atan(Math.sqrt(gx * gx + gy * gy));
+        const svf = (1 + Math.cos(slopeAngle)) / 2;
+        const direct = cosInc[idx] * T_atm * (shadowMask ? (1 - shadowMask[idx]) : 1);
+        const diffuse = diffuseFrac * (1 - T_atm) * svf;
+        const insolation = direct + diffuse;
+        const tf = thermalFactor ? thermalFactor[idx] : 1.0;
+        dT[idx] = maxHeat * insolation * tf;
+      }
+      return dT;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  OROGRAPHIC FLOW
+    // ═══════════════════════════════════════════════════════════════════
+
+    function computeOrographicFlow(Z, dTcarry, nx, ny, dx, dy, kCollect = 0) {
+      const dZdx = gradientAxisI(Z, ny, nx);
+      const dZdy = gradientAxisJ(Z, ny, nx);
+
+      const u_raw = new Float32Array(ny * nx);
+      const v_raw = new Float32Array(ny * nx);
+      const grad_mag = new Float32Array(ny * nx);
+
+      // dT-gradient suction: flow down the dT gradient (collectors → triggers)
+      const dTdx = kCollect > 0 ? gradientAxisI(dTcarry, ny, nx) : null;
+      const dTdy = kCollect > 0 ? gradientAxisJ(dTcarry, ny, nx) : null;
+
+      for (let idx = 0; idx < ny * nx; idx++) {
+        const gx = dZdx[idx] / dx, gy = dZdy[idx] / dy;
+        const mag = Math.sqrt(gx * gx + gy * gy);
+        grad_mag[idx] = mag;
+        const safeMag = Math.max(mag, 1e-6);
+        u_raw[idx] = (gx / safeMag) * dTcarry[idx] - (kCollect > 0 ? kCollect * dTdx[idx] : 0);
+        v_raw[idx] = (gy / safeMag) * dTcarry[idx] - (kCollect > 0 ? kCollect * dTdy[idx] : 0);
+      }
+
+      const u = gaussianFilter2D(u_raw, ny, nx, 5);
+      const v = gaussianFilter2D(v_raw, ny, nx, 5);
+      return { u, v, grad_mag };
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  THERMAL FACTOR (resample LC to sim grid)
+    // ═══════════════════════════════════════════════════════════════════
+
+    function buildThermalFactor(lcCodes, lc_ny, lc_nx, sim_ny, sim_nx, tauHours) {
+      // Nearest-neighbour resample to sim grid
+      const tf = new Float32Array(sim_ny * sim_nx);
+      const tau = new Float32Array(sim_ny * sim_nx);
+
+      for (let j = 0; j < sim_ny; j++) {
+        for (let i = 0; i < sim_nx; i++) {
+          const lcJ = Math.min(lc_ny - 1, Math.round(j / sim_ny * lc_ny));
+          const lcI = Math.min(lc_nx - 1, Math.round(i / sim_nx * lc_nx));
+          const code = lcCodes[lcJ * lc_nx + lcI];
+          const lc = LANDCOVER[code] || LANDCOVER[30];
+          tf[j * sim_nx + i] = lc.tf;
+          tau[j * sim_nx + i] = lc.tau * tauHours;
+        }
+      }
+
+      const tf_smooth = gaussianFilter2D(tf, sim_ny, sim_nx, 4);
+      return { thermal_factor: tf_smooth, tau_grid: tau };
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  TRIGGER FACTOR
+    // ═══════════════════════════════════════════════════════════════════
+
+    async function computeTriggerFactor(Z, nx, ny, thermalFactor) {
+      // 1. Terrain convexity
+      const Z_smooth = gaussianFilter2D(Z, ny, nx, 4);
+      const d2zdx2 = gradientAxisI(gradientAxisI(Z_smooth, ny, nx), ny, nx);
+      const d2zdy2 = gradientAxisJ(gradientAxisJ(Z_smooth, ny, nx), ny, nx);
+      await yieldUI();
+
+      const convexity_raw = new Float32Array(ny * nx);
+      for (let idx = 0; idx < ny * nx; idx++) {
+        convexity_raw[idx] = Math.max(-(d2zdx2[idx] + d2zdy2[idx]), 0);
+      }
+      const convexity_blur = gaussianFilter2D(convexity_raw, ny, nx, 3);
+      const p99c = percentile(convexity_blur, 99, true);
+      const convexity_norm = new Float32Array(ny * nx);
+      for (let idx = 0; idx < ny * nx; idx++)
+        convexity_norm[idx] = Math.min(1, Math.max(0, convexity_blur[idx] / (p99c + 1e-9)));
+
+      await yieldUI();
+
+      // 2. Land-cover boundary
+      const dtf_dx = gradientAxisI(thermalFactor, ny, nx);
+      const dtf_dy = gradientAxisJ(thermalFactor, ny, nx);
+      const boundary_raw = new Float32Array(ny * nx);
+      for (let idx = 0; idx < ny * nx; idx++)
+        boundary_raw[idx] = Math.sqrt(dtf_dx[idx] ** 2 + dtf_dy[idx] ** 2);
+      const boundary_blur = gaussianFilter2D(boundary_raw, ny, nx, 3);
+      const p99b = percentile(boundary_blur, 99, true);
+      const boundary_norm = new Float32Array(ny * nx);
+      for (let idx = 0; idx < ny * nx; idx++)
+        boundary_norm[idx] = Math.min(1, Math.max(0, boundary_blur[idx] / (p99b + 1e-9)));
+
+      await yieldUI();
+
+      // 3. Combined
+      const trigger = new Float32Array(ny * nx);
+      let maxT = 0;
+      for (let idx = 0; idx < ny * nx; idx++) {
+        trigger[idx] = 0.6 * convexity_norm[idx] + 0.4 * boundary_norm[idx];
+        if (trigger[idx] > maxT) maxT = trigger[idx];
+      }
+      for (let idx = 0; idx < ny * nx; idx++) trigger[idx] /= (maxT + 1e-9);
+      return trigger;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  ERA5 CALIBRATION
+    // ═══════════════════════════════════════════════════════════════════
+
+    async function fetchERA5dT(lat, lon, dateStr, windowDays) {
+      const target = new Date(dateStr + 'T12:00:00Z');
+      const currentYear = new Date().getFullYear();
+      const years = Array.from({ length: 5 }, (_, k) => currentYear - 5 + k);
+      const fmt = d => d.toISOString().slice(0, 10);
+
+      // ERA5 lags ~5 days behind present
+      const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 5);
+
+      // Build one request per year and fire all in parallel
+      const requests = years.map(year => {
+        const tgt = new Date(target); tgt.setFullYear(year);
+        const start = new Date(tgt); start.setDate(start.getDate() - windowDays);
+        const end = new Date(tgt); end.setDate(end.getDate() + windowDays);
+        if (end > cutoff) end.setTime(cutoff.getTime());
+        if (start >= end) return Promise.resolve({ year, rows: [], hourlyT2m: Array.from({ length: 24 }, () => []) });
+
+        const apiUrl = `https://historical-forecast-api.open-meteo.com/v1/forecast` +
+          `?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}` +
+          `&start_date=${fmt(start)}&end_date=${fmt(end)}` +
+          `&hourly=temperature_2m,surface_temperature,direct_radiation` +
+          `&timezone=Europe/Paris`;
+        const url = `/proxy?url=` + encodeURIComponent(apiUrl);
+
+        return fetch(url)
+          .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+          .then(data => {
+            const h = data.hourly || {};
+            const times = h.time || [], t2m = h.temperature_2m || [];
+            const tskin = h.surface_temperature || [], drad = h.direct_radiation || [];
+            const rows = [];
+            const hourlyT2m = Array.from({ length: 24 }, () => []);
+            for (let k = 0; k < times.length; k++) {
+              const hour = parseInt(times[k].slice(11, 13));
+              // Collect all-hours t2m for diurnal profile
+              if (t2m[k] != null) hourlyT2m[hour].push(t2m[k]);
+              // Midday clear-sky records for calibration
+              if (t2m[k] == null || tskin[k] == null || drad[k] == null) continue;
+              if (hour < 11 || hour > 14) continue;
+              if (drad[k] < 600) continue;
+              rows.push({ dT: tskin[k] - t2m[k], t2m: t2m[k] });
+            }
+            return { year, rows, hourlyT2m };
+          })
+          .catch(e => { log(`ERA5 year ${year}: fetch failed (${e.message})`, 'warn'); return { year, rows: [], hourlyT2m: Array.from({ length: 24 }, () => []) }; });
       });
 
-      const carry_max = Math.max(...dT_carry);
-      log(`[${si+1}/${scenarios.length}] ${sc.local_time}  az=${sc.sun_azimuth}°  el=${sc.sun_elevation}°  carry_max=${carry_max.toFixed(1)} K  V_advect=${V_ADVECT.toFixed(0)} m/h`);
+      const results = await Promise.all(requests);
+      const records = results.flatMap(r => r.rows);
+
+      // Merge hourlyT2m across years and compute mean per local hour
+      const merged = Array.from({ length: 24 }, () => []);
+      for (const r of results) r.hourlyT2m.forEach((vals, h) => merged[h].push(...vals));
+      const diurnal = merged.map(vals => vals.length ? vals.reduce((s, v) => s + v, 0) / vals.length : null);
+
+      return { records, diurnal };
     }
 
-    // ── Convergence field ──────────────────────────────────────────
-    const conv_field = new Float32Array(ny * nx);
-    for (let idx = 0; idx < ny * nx; idx++) {
-      conv_field[idx] = dT_weight_sum[idx] > 0
-        ? convergence_sum[idx] / dT_weight_sum[idx]
-        : 0;
+    async function calibrateMaxHeat(records, scenarios, Z, nx, ny, dx, dy, thermalFactor, diffuseFrac) {
+      log('Calibrating max_heat from ERA5…');
+
+      if (!records.length) {
+        log('No ERA5 data returned — using fallback max_heat=15.0', 'warn');
+        return { max_heat: 15.0, T0: 293.15 };
+      }
+
+      const dTvals = records.map(r => r.dT).sort((a, b) => a - b);
+      const t2mvals = records.map(r => r.t2m).sort((a, b) => a - b);
+      const mid = Math.floor(dTvals.length / 2);
+      const dT_obs = dTvals.length % 2 === 1
+        ? dTvals[mid]
+        : (dTvals[mid - 1] + dTvals[mid]) / 2;
+      const t2m_med = t2mvals.length % 2 === 1
+        ? t2mvals[mid]
+        : (t2mvals[mid - 1] + t2mvals[mid]) / 2;
+      const T0 = t2m_med + 273.15;  // Celsius → Kelvin
+
+      log(`ERA5 clear-sky midday dT: median=${dT_obs.toFixed(2)} K (n=${dTvals.length})`, 'success');
+      log(`ERA5 clear-sky midday T2m: median=${T0.toFixed(2)} K`, 'success');
+
+      // Noon scenario (highest elevation)
+      const noonSc = scenarios.reduce((best, sc) => sc.sun_elevation > best.sun_elevation ? sc : best, scenarios[0]);
+      log(`Reference scenario: ${noonSc.local_time}  az=${noonSc.sun_azimuth}°  el=${noonSc.sun_elevation}°`);
+
+      // Model response with max_heat=1, no shadow
+      const resp = computeSolarHeating(Z, nx, ny, dx, dy, noonSc.sun_azimuth, noonSc.sun_elevation,
+        thermalFactor, 1.0, null, diffuseFrac);
+      let sum = 0;
+      for (let idx = 0; idx < resp.length; idx++) sum += resp[idx];
+      const model_response = sum / resp.length;
+
+      const max_heat = dT_obs / model_response;
+      log(`max_heat = ${dT_obs.toFixed(2)} / ${model_response.toFixed(4)} = ${max_heat.toFixed(2)} K`, 'success');
+      log(`T0 (reference) = ${T0.toFixed(2)} K`, 'success');
+      return { max_heat, T0 };
     }
-    const p99conv = percentile(conv_field, 99, true);
-    for (let idx = 0; idx < ny * nx; idx++)
-      conv_field[idx] = Math.min(1, Math.max(0, conv_field[idx] / (p99conv + 1e-9)));
 
-    output.terrain.convergence = float32ToNested(conv_field, ny, nx);
+    // ═══════════════════════════════════════════════════════════════════
+    //  MARKER ELEVATION (bilinear in sim grid)
+    // ═══════════════════════════════════════════════════════════════════
 
-    log(`Convergence: max=${Math.max(...conv_field).toFixed(3)}`, 'success');
-    log('Simulation complete!', 'success');
-    log(`Output structure: ${output.scenarios.length} scenarios · ` +
-        `sim grid ${nx}×${ny} · mesh ${MESH_NX}×${MESH_NY} · ` +
-        `${Object.keys(output.terrain).length} terrain fields`, 'success');
+    function elevAtLatLon(lat, lon, Z, nx, ny, bbox) {
+      const { min_lat, max_lat, min_lon, max_lon } = bbox;
+      // Nearest-neighbour — matches Python's argmin grid lookup
+      const i = Math.min(nx - 1, Math.max(0, Math.round((lon - min_lon) / (max_lon - min_lon) * (nx - 1))));
+      const j = Math.min(ny - 1, Math.max(0, Math.round((max_lat - lat) / (max_lat - min_lat) * (ny - 1))));
+      return Z[j * nx + i];
+    }
 
-    // Daily heat: time-average of dT_carry across all steps
-    const dailyHeat = dT_sum;
-    const nsc = scenarios.length;
-    for (let idx = 0; idx < ny * nx; idx++) dailyHeat[idx] /= nsc;
+    // ═══════════════════════════════════════════════════════════════════
+    //  2D FETCH PLOTS
+    // ═══════════════════════════════════════════════════════════════════
 
-    simResult = output;
-    _simPlots = { Z, thermal_factor, trigger_factor, conv_field, dailyHeat, nx, ny, dx, dy };
-    await renderSimPlots();
-    setProgress(1.0);
-    setStatus('Simulation complete.');
-    const _dl3 = document.getElementById('btn-dl'); if (_dl3) _dl3.disabled = false;
-    document.getElementById('btn-map').disabled = false;
-  } catch (e) {
-    log(`SIMULATION ERROR: ${e.message || e}`, 'error');
-    console.error(e);
-    setStatus('Simulation failed.');
-  }
+    function elevToColor(z, zMin, zMax) {
+      const t = Math.max(0, Math.min(1, (z - zMin) / (zMax - zMin + 1e-9)));
+      if (t < 0.25) {
+        const s = t / 0.25;
+        return [Math.round(30 + s * 30), Math.round(60 + s * 120), Math.round(140 - s * 60)];
+      } else if (t < 0.55) {
+        const s = (t - 0.25) / 0.30;
+        return [Math.round(60 + s * 100), Math.round(180 - s * 60), Math.round(80 - s * 40)];
+      } else if (t < 0.80) {
+        const s = (t - 0.55) / 0.25;
+        return [Math.round(160 + s * 80), Math.round(120 + s * 60), Math.round(40 + s * 60)];
+      } else {
+        const s = (t - 0.80) / 0.20;
+        return [Math.round(240 + s * 15), Math.round(180 + s * 75), Math.round(100 + s * 155)];
+      }
+    }
 
-  document.getElementById('btn-fetch').disabled = false;
-  document.getElementById('btn-sim').disabled = false;
-}
+    function renderElevationPlot(canvas, Z, nx, ny) {
+      canvas.width = nx; canvas.height = ny;
+      const ctx = canvas.getContext('2d');
+      const img = ctx.createImageData(nx, ny);
+      let zMin = Infinity, zMax = -Infinity;
+      for (let i = 0; i < Z.length; i++) { if (Z[i] < zMin) zMin = Z[i]; if (Z[i] > zMax) zMax = Z[i]; }
+      for (let j = 0; j < ny; j++) {
+        for (let i = 0; i < nx; i++) {
+          const idx = j * nx + i;
+          const [r, g, b] = elevToColor(Z[idx], zMin, zMax);
+          img.data[idx * 4] = r;
+          img.data[idx * 4 + 1] = g;
+          img.data[idx * 4 + 2] = b;
+          img.data[idx * 4 + 3] = 255;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect(0, ny - 14, nx, 14);
+      ctx.fillStyle = '#e0e8f0';
+      ctx.font = '9px monospace';
+      ctx.fillText(`${Math.round(zMin)} – ${Math.round(zMax)} m`, 2, ny - 3);
+    }
 
-// ═══════════════════════════════════════════════════════════════════
-//  DOWNLOAD
-// ═══════════════════════════════════════════════════════════════════
+    function renderLandcoverPlot(canvas, lcCodes, nx, ny) {
+      canvas.width = nx; canvas.height = ny;
+      const ctx = canvas.getContext('2d');
+      const img = ctx.createImageData(nx, ny);
+      for (let j = 0; j < ny; j++) {
+        for (let i = 0; i < nx; i++) {
+          const idx = j * nx + i;
+          const lc = LANDCOVER[lcCodes[idx]] || LANDCOVER[30];
+          img.data[idx * 4] = lc.color[0];
+          img.data[idx * 4 + 1] = lc.color[1];
+          img.data[idx * 4 + 2] = lc.color[2];
+          img.data[idx * 4 + 3] = 255;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
+    }
 
-function downloadJSON() {
-  if (!simResult) { log('No simulation result to download.', 'error'); return; }
-  // Pretty-print with 2-space indent so the file can be diffed against the
-  // Python output with standard tools (diff, jq, VS Code JSON diff, etc.)
-  const json = JSON.stringify(simResult, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.download = 'simulation.json';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  const kb = (json.length / 1024).toFixed(0);
-  log(`simulation.json downloaded (${kb} KB, pretty-printed).`, 'success');
-}
+    function renderERA5Plot(canvas, records) {
+      const W = 300, H = 140;
+      canvas.width = W; canvas.height = H;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, W, H);
 
-function idbPut(json) {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open('paragliding', 1);
-    req.onupgradeneeded = e => e.target.result.createObjectStore('sim');
-    req.onerror = () => reject(req.error);
-    req.onsuccess = e => {
-      const db = e.target.result;
-      const tx = db.transaction('sim', 'readwrite');
-      const putReq = tx.objectStore('sim').put(json, 'latest');
-      putReq.onerror = () => reject(putReq.error);
-      tx.oncomplete = resolve;
-      tx.onerror = () => reject(tx.error);
-    };
-  });
-}
+      if (!records || !records.length) {
+        ctx.fillStyle = '#3a6080';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('No ERA5 data', W / 2, H / 2);
+        return;
+      }
 
-async function openVisualizationTool() {
-  if (!simResult) { log('No simulation result.', 'error'); return; }
-  try {
-    // Serialize to JSON string before storing — avoids structured-clone issues
-    // with large or complex objects and guarantees the data is always readable.
-    await idbPut(JSON.stringify(simResult));
-    window.location.href = 'view';
-  } catch (e) {
-    log(`Could not save to IndexedDB (${e.message}). Try downloading the JSON and placing it at data/simulation.json.`, 'error');
-  }
-}
-</script>
+      const dTvals = records.map(r => r.dT);
+      const sorted = [...dTvals].sort((a, b) => a - b);
+      const rMin = sorted[0], rMax = sorted[sorted.length - 1];
+      const BINS = 24;
+      const counts = new Array(BINS).fill(0);
+      for (const v of dTvals) {
+        const bin = Math.min(BINS - 1, Math.floor((v - rMin) / (rMax - rMin + 1e-9) * BINS));
+        counts[bin]++;
+      }
+      const maxCount = Math.max(...counts);
+      const pad = { l: 28, r: 8, t: 8, b: 22 };
+      const plotW = W - pad.l - pad.r;
+      const plotH = H - pad.t - pad.b;
+      const binW = plotW / BINS;
+
+      // Bars
+      for (let b = 0; b < BINS; b++) {
+        const barH = (counts[b] / maxCount) * plotH;
+        ctx.fillStyle = `rgba(62,130,195,${0.5 + 0.5 * counts[b] / maxCount})`;
+        ctx.fillRect(pad.l + b * binW, pad.t + plotH - barH, Math.max(1, binW - 1), barH);
+      }
+
+      // Axes
+      ctx.strokeStyle = '#334455';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(pad.l, pad.t);
+      ctx.lineTo(pad.l, pad.t + plotH);
+      ctx.lineTo(pad.l + plotW, pad.t + plotH);
+      ctx.stroke();
+
+      // X-axis labels
+      ctx.fillStyle = '#5588aa';
+      ctx.font = '8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(rMin.toFixed(1), pad.l, pad.t + plotH + 10);
+      ctx.fillText(rMax.toFixed(1), pad.l + plotW, pad.t + plotH + 10);
+      const mid = (rMin + rMax) / 2;
+      ctx.fillText(mid.toFixed(1) + ' K', pad.l + plotW / 2, pad.t + plotH + 10);
+
+      // Median line
+      const med = sorted[Math.floor(sorted.length / 2)];
+      const medX = pad.l + ((med - rMin) / (rMax - rMin + 1e-9)) * plotW;
+      ctx.strokeStyle = '#7eb8ff';
+      ctx.setLineDash([2, 3]);
+      ctx.beginPath();
+      ctx.moveTo(medX, pad.t); ctx.lineTo(medX, pad.t + plotH);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Bottom label
+      ctx.fillStyle = '#7eb8ff';
+      ctx.font = '8px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`median ${med.toFixed(1)} K  (n=${records.length})`, W / 2, pad.t + plotH + 20);
+    }
+
+    function showPlotsArea() {
+      document.getElementById('plots-area').style.display = 'flex';
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  SIMULATION PLOTS
+    // ═══════════════════════════════════════════════════════════════════
+
+    let _simPlots = null; // set by runSim before renderSimPlots()
+
+    /** Generic canvas renderer: arr is Float32Array, colorFn maps [0,1]→[r,g,b] */
+    function renderGridPlot(canvas, arr, nx, ny, colorFn, label) {
+      canvas.width = nx; canvas.height = ny;
+      const ctx = canvas.getContext('2d');
+      const img = ctx.createImageData(nx, ny);
+      let vMin = Infinity, vMax = -Infinity;
+      for (let i = 0; i < arr.length; i++) { if (arr[i] < vMin) vMin = arr[i]; if (arr[i] > vMax) vMax = arr[i]; }
+      const range = vMax - vMin + 1e-9;
+      for (let idx = 0; idx < ny * nx; idx++) {
+        const t = (arr[idx] - vMin) / range;
+        const [r, g, b] = colorFn(t);
+        img.data[idx * 4] = r;
+        img.data[idx * 4 + 1] = g;
+        img.data[idx * 4 + 2] = b;
+        img.data[idx * 4 + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+      if (label) {
+        ctx.fillStyle = 'rgba(0,0,0,0.55)';
+        ctx.fillRect(0, ny - 14, nx, 14);
+        ctx.fillStyle = '#e0e8f0';
+        ctx.font = '9px monospace';
+        ctx.fillText(label, 2, ny - 3);
+      }
+    }
+
+    // slope: white (flat) → yellow → red (steep)
+    function cmapSlope(t) {
+      if (t < 0.5) { const s = t / 0.5; return [255, Math.round(255 - s * 80), Math.round(255 - s * 220)]; }
+      const s = (t - 0.5) / 0.5;
+      return [255, Math.round(175 - s * 175), Math.round(35 - s * 35)];
+    }
+
+    // thermal factor: blue (low/water) → green → orange → red (bare rock)
+    function cmapThermalFactor(t) {
+      if (t < 0.33) { const s = t / 0.33; return [Math.round(s * 50), Math.round(60 + s * 140), Math.round(200 - s * 150)]; }
+      if (t < 0.66) { const s = (t - 0.33) / 0.33; return [Math.round(50 + s * 190), Math.round(200 - s * 100), Math.round(50 - s * 30)]; }
+      const s = (t - 0.66) / 0.34;
+      return [Math.round(240 + s * 15), Math.round(100 - s * 100), 20];
+    }
+
+    // trigger zones: near-black → deep blue → cyan → white
+    function cmapTrigger(t) {
+      if (t < 0.5) { const s = t / 0.5; return [Math.round(s * 40), Math.round(s * 160), Math.round(s * 220)]; }
+      const s = (t - 0.5) / 0.5;
+      return [Math.round(40 + s * 215), Math.round(160 + s * 95), Math.round(220 + s * 35)];
+    }
+
+    // convergence: near-black → teal → bright lime-yellow
+    function cmapConvergence(t) {
+      if (t < 0.5) { const s = t / 0.5; return [0, Math.round(s * 200), Math.round(s * 100)]; }
+      const s = (t - 0.5) / 0.5;
+      return [Math.round(s * 220), Math.round(200 + s * 55), Math.round(100 - s * 100)];
+    }
+
+    // daily heat: dark purple → blue → green → yellow → red (plasma-like)
+    function cmapHeat(t) {
+      if (t < 0.25) { const s = t / 0.25; return [Math.round(80 + s * 70), 0, Math.round(120 + s * 100)]; }
+      if (t < 0.50) { const s = (t - 0.25) / 0.25; return [Math.round(150 + s * 70), Math.round(s * 80), Math.round(220 - s * 170)]; }
+      if (t < 0.75) { const s = (t - 0.50) / 0.25; return [Math.round(220 + s * 35), Math.round(80 + s * 130), 50]; }
+      const s = (t - 0.75) / 0.25;
+      return [255, Math.round(210 + s * 45), Math.round(50 + s * 50)];
+    }
+
+    async function renderSimPlots() {
+      if (!_simPlots) return;
+      const { Z, thermal_factor, trigger_factor, conv_field, dailyHeat, nx, ny, dx, dy } = _simPlots;
+
+      document.getElementById('sim-plots-area').style.display = 'flex';
+      await yieldUI();
+
+      // Slope magnitude (capped at tan 55°)
+      const dzdx = gradientAxisI(Z, ny, nx);
+      const dzdy = gradientAxisJ(Z, ny, nx);
+      const slope = new Float32Array(ny * nx);
+      for (let idx = 0; idx < ny * nx; idx++)
+        slope[idx] = Math.min(1.43, Math.sqrt((dzdx[idx] / dx) ** 2 + (dzdy[idx] / dy) ** 2));
+      renderGridPlot(document.getElementById('plot-sim-slope'), slope, nx, ny, cmapSlope, 'Slope');
+      await yieldUI();
+
+      renderGridPlot(document.getElementById('plot-sim-tf'), thermal_factor, nx, ny, cmapThermalFactor, 'Thermal factor');
+      await yieldUI();
+
+      renderGridPlot(document.getElementById('plot-sim-trigger'), trigger_factor, nx, ny, cmapTrigger, 'Trigger zones');
+      await yieldUI();
+
+      renderGridPlot(document.getElementById('plot-sim-conv'), conv_field, nx, ny, cmapConvergence, 'Convergence');
+      await yieldUI();
+
+      renderGridPlot(document.getElementById('plot-sim-heat'), dailyHeat, nx, ny, cmapHeat, 'Daily heat (K)');
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  MAIN PIPELINE: FETCH DATA
+    // ═══════════════════════════════════════════════════════════════════
+
+    async function runFetch() {
+      const _dl = document.getElementById('btn-dl'); if (_dl) _dl.disabled = true;
+      fetchedData = null; simResult = null;
+      document.getElementById('plots-area').style.display = 'none';
+      setProgress(0);
+
+      try {
+        const bbox = {
+          min_lat: parseFloat(document.getElementById('min_lat').value),
+          max_lat: parseFloat(document.getElementById('max_lat').value),
+          min_lon: parseFloat(document.getElementById('min_lon').value),
+          max_lon: parseFloat(document.getElementById('max_lon').value),
+        };
+        const simZoom = parseInt(document.getElementById('sim_zoom').value);
+        const meshZoom = parseInt(document.getElementById('mesh_zoom').value);
+
+        log(`Bounding box: ${bbox.min_lat.toFixed(4)}–${bbox.max_lat.toFixed(4)}N, ${bbox.min_lon.toFixed(4)}–${bbox.max_lon.toFixed(4)}E`);
+
+        // ── Fetch sim DEM ──────────────────────────────────────────────
+        setStatus('Fetching simulation DEM…');
+        log(`Fetching sim DEM at zoom ${simZoom}…`);
+        const sim = await fetchDEM(bbox, simZoom, msg => log(msg));
+        log(`Sim DEM: ${sim.nx}×${sim.ny}, dx=${sim.dx.toFixed(1)}m dy=${sim.dy.toFixed(1)}m`, 'success');
+        setProgress(0.45);
+        showPlotsArea();
+        renderElevationPlot(document.getElementById('plot-elev'), sim.Z, sim.nx, sim.ny);
+
+        // ── Fetch mesh DEM ─────────────────────────────────────────────
+        setStatus('Fetching mesh DEM…');
+        log(`Fetching mesh DEM at zoom ${meshZoom}…`);
+        const mesh = await fetchDEM(bbox, meshZoom, msg => log(msg));
+        log(`Mesh DEM: ${mesh.nx}×${mesh.ny}, dx=${mesh.dx.toFixed(1)}m dy=${mesh.dy.toFixed(1)}m`, 'success');
+        setProgress(0.75);
+
+        // ── Fetch land cover ───────────────────────────────────────────
+        setStatus('Fetching land cover (ESA WorldCover COG)…');
+        const lcCodes = await fetchLandcover(bbox, sim.Z, sim.nx, sim.ny, sim.dx, sim.dy);
+        log(`Land cover grid: ${sim.nx}×${sim.ny} cells.`, 'success');
+        setProgress(0.95);
+        renderLandcoverPlot(document.getElementById('plot-lc'), lcCodes, sim.nx, sim.ny);
+
+        // ── Fetch weather calibration data ───────────────────────────────
+        setStatus('Fetching weather calibration data…');
+        const dateStr = document.getElementById('sim_date').value;
+        const windowDays = parseInt(document.getElementById('era5_window').value);
+        const centerLat = (bbox.min_lat + bbox.max_lat) / 2;
+        const centerLon = (bbox.min_lon + bbox.max_lon) / 2;
+        const weatherMode = getWeatherMode();
+
+        if (!validateDate()) {
+          throw new Error('Invalid date for selected weather mode. Please correct the date.');
+        }
+
+        log(`Fetching ${weatherMode} weather data for ${dateStr}…`);
+        const tzOffsetFetch = parseInt(document.getElementById('tz_offset').value);
+        const { records: era5Records, diurnal: era5Diurnal } = await fetchWeatherData(
+          centerLat, centerLon, dateStr, weatherMode, windowDays, msg => log(msg), tzOffsetFetch);
+        if (era5Records.length) {
+          log(`Weather data: ${era5Records.length} clear-sky midday observations collected.`, 'success');
+        } else {
+          log('Weather data: no data returned — max_heat will use manual/fallback value.', 'warn');
+        }
+        setProgress(0.98);
+        renderERA5Plot(document.getElementById('plot-era5'), era5Records);
+
+        fetchedData = { sim, mesh, lcCodes, bbox, era5Records, era5Diurnal };
+        log('All data fetched. Ready to run simulation.', 'success');
+        setProgress(1.0);
+        setStatus('Data ready.');
+        document.getElementById('btn-sim').disabled = false;
+      } catch (e) {
+        log(`FETCH ERROR: ${e.message || e}`, 'error');
+        console.error(e);
+        setStatus('Fetch failed.');
+      }
+
+      document.getElementById('btn-fetch').disabled = false;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  MAIN PIPELINE: RUN SIMULATION
+    // ═══════════════════════════════════════════════════════════════════
+
+    async function runSim() {
+      if (!fetchedData) { log('No data fetched yet.', 'error'); return; }
+      document.getElementById('btn-sim').disabled = true;
+      document.getElementById('btn-fetch').disabled = true;
+      const _dl2 = document.getElementById('btn-dl'); if (_dl2) _dl2.disabled = true;
+      document.getElementById('btn-map').disabled = true;
+      simResult = null;
+      _simPlots = null;
+      document.getElementById('sim-plots-area').style.display = 'none';
+      setProgress(0);
+
+      try {
+        const { sim, mesh, lcCodes, bbox } = fetchedData;
+        const { Z, nx, ny, dx, dy, x_extent, y_extent, lat0, lon0 } = sim;
+
+        const dateStr = document.getElementById('sim_date').value;
+        const tzOffset = parseInt(document.getElementById('tz_offset').value);
+        const intervalMin = parseInt(document.getElementById('interval_min').value);
+        const minElevDeg = parseFloat(document.getElementById('min_elevation').value);
+        const tauHours = parseFloat(document.getElementById('tau_hours').value);
+        const kRelease = parseFloat(document.getElementById('k_release').value);
+        const relThreshold = parseFloat(document.getElementById('release_threshold').value);
+        const vAdvectMax = parseFloat(document.getElementById('v_advect_max').value);
+        const refSlope = parseFloat(document.getElementById('ref_slope').value);
+        const kCollect = parseFloat(document.getElementById('k_collect').value);
+        const arrowStep = parseInt(document.getElementById('arrow_step').value);
+        const weatherMode = getWeatherMode();
+        const diffuseFrac = parseFloat(document.getElementById('diffuse_frac').value);
+        const DT_INTERVAL = intervalMin / 60;  // hours per step
+
+        // ── Build thermal factor grid ──────────────────────────────────
+        setStatus('Building thermal factor grid…');
+        log('Building thermal factor / tau grids from land cover…');
+        const { thermal_factor, tau_grid } = buildThermalFactor(lcCodes, ny, nx, ny, nx, tauHours);
+        log(`Thermal factor: min=${Math.min(...thermal_factor).toFixed(2)}, max=${Math.max(...thermal_factor).toFixed(2)}`, 'success');
+        await yieldUI();
+
+        // ── Compute trigger factor ─────────────────────────────────────
+        setStatus('Computing trigger factor…');
+        log('Computing trigger factor (convexity + land-cover boundary)…');
+        const trigger_factor = await computeTriggerFactor(Z, nx, ny, thermal_factor);
+        log('Trigger factor computed.', 'success');
+        setProgress(0.05);
+        await yieldUI();
+
+        // ── Sun scenarios ──────────────────────────────────────────────
+        setStatus('Computing sun scenarios…');
+        log(`Generating sun scenarios for ${dateStr} (UTC+${tzOffset}, interval=${intervalMin} min)…`);
+        const centerLat = (bbox.min_lat + bbox.max_lat) / 2;
+        const centerLon = (bbox.min_lon + bbox.max_lon) / 2;
+        const scenarios = generateSunScenarios(centerLat, centerLon, dateStr, tzOffset, intervalMin, minElevDeg);
+        log(`${scenarios.length} scenarios generated.`, 'success');
+        if (!scenarios.length) throw new Error('No sun scenarios (sun always below min elevation?)');
+
+        // ── Max_heat + T0 calibration ──────────────────────────────────
+        let MAX_HEAT, T0, T0_diurnal;
+
+        // Build a 24-value diurnal T0 profile in Kelvin from ERA5 hourly t2m.
+        // Gaps (hours with no data) are filled with a cos model anchored to T0.
+        function buildDiurnalProfile(rawDiurnal, T0_ref) {
+          // rawDiurnal: array of 24 values in °C (or null). T0_ref in K.
+          const T0_noon_C = T0_ref - 273.15;
+          const A = 5, h_max = 14;
+          const T_mean_C = T0_noon_C - A * Math.cos(2 * Math.PI * (12 - h_max) / 24);
+          return Array.from({ length: 24 }, (_, h) => {
+            const v = rawDiurnal ? rawDiurnal[h] : null;
+            return (v != null ? v : T_mean_C + A * Math.cos(2 * Math.PI * (h - h_max) / 24)) + 273.15;
+          });
+        }
+        // Typical or Exact: Use ERA5 data fetched during fetch step
+        if (!fetchedData.era5Records || fetchedData.era5Records.length === 0) {
+          log('No ERA5 data available — using manual max_heat fallback.', 'warn');
+          MAX_HEAT = parseFloat(document.getElementById('max_heat').value);
+          T0 = 293.15;
+          T0_diurnal = buildDiurnalProfile(fetchedData.era5Diurnal, T0);
+        } else {
+          setStatus('Calibrating max_heat from weather data…');
+          ({ max_heat: MAX_HEAT, T0 } = await calibrateMaxHeat(fetchedData.era5Records, scenarios,
+            Z, nx, ny, dx, dy, thermal_factor, diffuseFrac));
+          T0_diurnal = buildDiurnalProfile(fetchedData.era5Diurnal, T0);
+          log(`max_heat calibrated: ${MAX_HEAT.toFixed(2)} K`);
+          log(`T0_diurnal: ${T0_diurnal.map(v => v.toFixed(1)).join(', ')}`);
+        }
+        setProgress(0.12);
+
+        // ── Decay grid from tau ────────────────────────────────────────
+        const decay_grid = new Float32Array(ny * nx);
+        for (let idx = 0; idx < ny * nx; idx++)
+          decay_grid[idx] = Math.exp(-DT_INTERVAL / tau_grid[idx]);
+
+        // ── Marker positions ───────────────────────────────────────────
+        const takeoffLat = parseFloat(document.getElementById('takeoff_lat').value);
+        const takeoffLon = parseFloat(document.getElementById('takeoff_lon').value);
+        const landingLat = parseFloat(document.getElementById('landing_lat').value);
+        const landingLon = parseFloat(document.getElementById('landing_lon').value);
+
+        const [toX, toY] = lonlatToLocal(takeoffLon, takeoffLat, lon0, lat0);
+        const [laX, laY] = lonlatToLocal(landingLon, landingLat, lon0, lat0);
+        const toZ = elevAtLatLon(takeoffLat, takeoffLon, Z, nx, ny, bbox);
+        const laZ = elevAtLatLon(landingLat, landingLon, Z, nx, ny, bbox);
+
+        log(`Take-off: x=${toX.toFixed(0)}m y=${toY.toFixed(0)}m z=${toZ.toFixed(0)}m`);
+        log(`Landing:  x=${laX.toFixed(0)}m y=${laY.toFixed(0)}m z=${laZ.toFixed(0)}m`);
+
+        // ── Arrow indices ──────────────────────────────────────────────
+        const arrow_js = [], arrow_is = [];
+        for (let j = Math.floor(arrowStep / 2); j < ny; j += arrowStep) arrow_js.push(j);
+        for (let i = Math.floor(arrowStep / 2); i < nx; i += arrowStep) arrow_is.push(i);
+
+        // ── Mesh metadata ──────────────────────────────────────────────
+        const mesh_dx = mesh.dx, mesh_dy = mesh.dy;
+        const MESH_NX = mesh.nx, MESH_NY = mesh.ny;
+
+        // ── Output skeleton ───────────────────────────────────────────
+        const zMin = Math.min(...Z), zMax = Math.max(...Z);
+        const output = {
+          simulation_date: dateStr,
+          tz_offset: tzOffset,
+          interval_min: intervalMin,
+          tau_hours: tauHours,
+          max_heat: MAX_HEAT,
+          dalr: 0.0098,
+          T0: T0,
+          T0_diurnal: T0_diurnal,
+          k_release: kRelease,
+          release_threshold: relThreshold,
+          v_advect_max: vAdvectMax,
+          ref_slope: refSlope,
+          k_collect: kCollect,
+          terrain: {
+            nx, ny,
+            x_extent, y_extent,
+            z_extent: [zMin, zMin + 2_000],
+            dx, dy,
+            arrow_step: arrowStep,
+            elevation: float32ToNested(Z, ny, nx),
+            thermal_factor: float32ToNested(thermal_factor, ny, nx),
+            trigger_factor: float32ToNested(trigger_factor, ny, nx),
+            // convergence added after scenario loop
+            projection_origin: { lat: lat0, lon: lon0 },
+            mesh_nx: MESH_NX, mesh_ny: MESH_NY,
+            mesh_dx, mesh_dy,
+            mesh_elevation: float32ToNested(mesh.Z, MESH_NY, MESH_NX),
+          },
+          markers: [
+            { name: 'Landing', type: 'landing', x: laX, y: laY, z: laZ },
+            { name: 'Take-off', type: 'takeoff', x: toX, y: toY, z: toZ },
+          ],
+          scenarios: [],
+        };
+
+        // ── Per-step simulation ────────────────────────────────────────
+        log(`Running ${scenarios.length} simulation steps…`);
+        setStatus('Running simulation…');
+
+        const dT_carry = new Float32Array(ny * nx);  // start at 0
+        const convergence_sum = new Float64Array(ny * nx);
+        const dT_weight_sum = new Float64Array(ny * nx);
+        const dT_sum = new Float32Array(ny * nx);
+        let V_ADVECT = vAdvectMax;
+
+        for (let si = 0; si < scenarios.length; si++) {
+          const sc = scenarios[si];
+          setStatus(`Step ${si + 1}/${scenarios.length}: ${sc.local_time}  az=${sc.sun_azimuth}°  el=${sc.sun_elevation}°`);
+          setProgress(0.12 + (si / scenarios.length) * 0.86);
+
+          // Shadow mask
+          const shadow = await computeShadowMask(Z, nx, ny, dx, dy, sc.sun_azimuth, sc.sun_elevation);
+
+          // Instantaneous solar heating
+          const dT_inst = computeSolarHeating(Z, nx, ny, dx, dy, sc.sun_azimuth, sc.sun_elevation,
+            thermal_factor, MAX_HEAT, shadow, diffuseFrac);
+
+          // Thermal inertia: exponential approach to equilibrium
+          for (let idx = 0; idx < ny * nx; idx++)
+            dT_carry[idx] = dT_carry[idx] * decay_grid[idx] + dT_inst[idx] * (1 - decay_grid[idx]);
+
+          // Phase 1: thermal release at trigger zones
+          for (let idx = 0; idx < ny * nx; idx++) {
+            const excess = Math.max(dT_carry[idx] - relThreshold, 0);
+            const release = trigger_factor[idx] * excess * kRelease * DT_INTERVAL;
+            dT_carry[idx] = Math.max(dT_carry[idx] - release, 0);
+          }
+
+          // Orographic flow + collector suction
+          const { u: u_flow, v: v_flow, grad_mag } = computeOrographicFlow(Z, dT_carry, nx, ny, dx, dy, kCollect);
+          await yieldUI();
+
+          // Dynamic V_ADVECT
+          const p75slope = percentile(grad_mag, 75);
+          let sumPos = 0, cntPos = 0;
+          for (let idx = 0; idx < ny * nx; idx++) {
+            if (dT_carry[idx] > 0) { sumPos += dT_carry[idx]; cntPos++; }
+          }
+          const mean_dT = cntPos > 0 ? sumPos / cntPos : 0;
+          V_ADVECT = Math.min(vAdvectMax, Math.max(50,
+            vAdvectMax * Math.sqrt(
+              Math.min(4, Math.max(0, p75slope / refSlope)) *
+              Math.min(4, Math.max(0, mean_dT / MAX_HEAT))
+            )
+          ));
+
+          // Normalise flow to V_ADVECT m/h
+          let flowMax = 1e-6;
+          for (let idx = 0; idx < ny * nx; idx++) {
+            const m = Math.max(Math.abs(u_flow[idx]), Math.abs(v_flow[idx]));
+            if (m > flowMax) flowMax = m;
+          }
+          const u_vel = new Float32Array(ny * nx);
+          const v_vel = new Float32Array(ny * nx);
+          for (let idx = 0; idx < ny * nx; idx++) {
+            u_vel[idx] = (u_flow[idx] / flowMax) * V_ADVECT;
+            v_vel[idx] = (v_flow[idx] / flowMax) * V_ADVECT;
+          }
+
+          // CFL sub-stepping
+          let maxU = 0, maxV = 0;
+          for (let idx = 0; idx < ny * nx; idx++) {
+            if (Math.abs(u_vel[idx]) > maxU) maxU = Math.abs(u_vel[idx]);
+            if (Math.abs(v_vel[idx]) > maxV) maxV = Math.abs(v_vel[idx]);
+          }
+          const cfl = (maxU / dx + maxV / dy) * DT_INTERVAL;
+          const N_sub = Math.max(1, Math.ceil(cfl / 0.9));
+          const dt_sub = DT_INTERVAL / N_sub;
+
+          for (let sub = 0; sub < N_sub; sub++) {
+            // Upwind x (i axis): pad edges
+            const grad_x = new Float32Array(ny * nx);
+            for (let j = 0; j < ny; j++) {
+              for (let i = 0; i < nx; i++) {
+                const idx = j * nx + i;
+                const iL = Math.max(0, i - 1), iR = Math.min(nx - 1, i + 1);
+                if (u_vel[idx] >= 0) {
+                  grad_x[idx] = (dT_carry[idx] - dT_carry[j * nx + iL]) / dx;
+                } else {
+                  grad_x[idx] = (dT_carry[j * nx + iR] - dT_carry[idx]) / dx;
+                }
+              }
+            }
+            // Upwind y (j axis)
+            const grad_y = new Float32Array(ny * nx);
+            for (let j = 0; j < ny; j++) {
+              for (let i = 0; i < nx; i++) {
+                const idx = j * nx + i;
+                const jU = Math.max(0, j - 1), jD = Math.min(ny - 1, j + 1);
+                if (v_vel[idx] >= 0) {
+                  grad_y[idx] = (dT_carry[idx] - dT_carry[jU * nx + i]) / dy;
+                } else {
+                  grad_y[idx] = (dT_carry[jD * nx + i] - dT_carry[idx]) / dy;
+                }
+              }
+            }
+            for (let idx = 0; idx < ny * nx; idx++) {
+              dT_carry[idx] = Math.max(0, dT_carry[idx] - dt_sub * (u_vel[idx] * grad_x[idx] + v_vel[idx] * grad_y[idx]));
+            }
+            if (sub % 3 === 0) await yieldUI();
+          }
+
+          // Convergence accumulation: -div(u_flow, v_flow)
+          const div_u = gradientAxisI(u_flow, ny, nx);
+          const div_v = gradientAxisJ(v_flow, ny, nx);
+          for (let idx = 0; idx < ny * nx; idx++) {
+            const conv = Math.max(-(div_u[idx] / dx + div_v[idx] / dy), 0);
+            const w = Math.max(dT_carry[idx], 0);
+            convergence_sum[idx] += conv * w;
+            dT_weight_sum[idx] += w;
+            dT_sum[idx] += dT_carry[idx];
+          }
+
+          // Downsample flow arrows
+          const u_ds = arrow_js.map(j => arrow_is.map(i => u_flow[j * nx + i]));
+          const v_ds = arrow_js.map(j => arrow_is.map(i => v_flow[j * nx + i]));
+
+          output.scenarios.push({
+            name: sc.name,
+            local_time: sc.local_time,
+            utc_time: sc.utc_time,
+            sun_azimuth: sc.sun_azimuth,
+            sun_elevation: sc.sun_elevation,
+            ground_temp_anomaly: float32ToNested(dT_carry, ny, nx),
+            shadow_mask: Array.from(shadow),
+            u_surface: u_ds,
+            v_surface: v_ds,
+            advect_n_sub: N_sub,
+            v_advect: V_ADVECT,
+          });
+
+          const carry_max = Math.max(...dT_carry);
+          log(`[${si + 1}/${scenarios.length}] ${sc.local_time}  az=${sc.sun_azimuth}°  el=${sc.sun_elevation}°  carry_max=${carry_max.toFixed(1)} K  V_advect=${V_ADVECT.toFixed(0)} m/h`);
+        }
+
+        // ── Convergence field ──────────────────────────────────────────
+        const conv_field = new Float32Array(ny * nx);
+        for (let idx = 0; idx < ny * nx; idx++) {
+          conv_field[idx] = dT_weight_sum[idx] > 0
+            ? convergence_sum[idx] / dT_weight_sum[idx]
+            : 0;
+        }
+        const p99conv = percentile(conv_field, 99, true);
+        for (let idx = 0; idx < ny * nx; idx++)
+          conv_field[idx] = Math.min(1, Math.max(0, conv_field[idx] / (p99conv + 1e-9)));
+
+        output.terrain.convergence = float32ToNested(conv_field, ny, nx);
+
+        log(`Convergence: max=${Math.max(...conv_field).toFixed(3)}`, 'success');
+        log('Simulation complete!', 'success');
+        log(`Output structure: ${output.scenarios.length} scenarios · ` +
+          `sim grid ${nx}×${ny} · mesh ${MESH_NX}×${MESH_NY} · ` +
+          `${Object.keys(output.terrain).length} terrain fields`, 'success');
+
+        // Daily heat: time-average of dT_carry across all steps
+        const dailyHeat = dT_sum;
+        const nsc = scenarios.length;
+        for (let idx = 0; idx < ny * nx; idx++) dailyHeat[idx] /= nsc;
+
+        simResult = output;
+        _simPlots = { Z, thermal_factor, trigger_factor, conv_field, dailyHeat, nx, ny, dx, dy };
+        await renderSimPlots();
+        setProgress(1.0);
+        setStatus('Simulation complete.');
+        const _dl3 = document.getElementById('btn-dl'); if (_dl3) _dl3.disabled = false;
+        document.getElementById('btn-map').disabled = false;
+      } catch (e) {
+        log(`SIMULATION ERROR: ${e.message || e}`, 'error');
+        console.error(e);
+        setStatus('Simulation failed.');
+      }
+
+      document.getElementById('btn-fetch').disabled = false;
+      document.getElementById('btn-sim').disabled = false;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  DOWNLOAD
+    // ═══════════════════════════════════════════════════════════════════
+
+    function downloadJSON() {
+      if (!simResult) { log('No simulation result to download.', 'error'); return; }
+      // Pretty-print with 2-space indent so the file can be diffed against the
+      // Python output with standard tools (diff, jq, VS Code JSON diff, etc.)
+      const json = JSON.stringify(simResult, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'simulation.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      const kb = (json.length / 1024).toFixed(0);
+      log(`simulation.json downloaded (${kb} KB, pretty-printed).`, 'success');
+    }
+
+    function idbPut(json) {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('paragliding', 1);
+        req.onupgradeneeded = e => e.target.result.createObjectStore('sim');
+        req.onerror = () => reject(req.error);
+        req.onsuccess = e => {
+          const db = e.target.result;
+          const tx = db.transaction('sim', 'readwrite');
+          const putReq = tx.objectStore('sim').put(json, 'latest');
+          putReq.onerror = () => reject(putReq.error);
+          tx.oncomplete = resolve;
+          tx.onerror = () => reject(tx.error);
+        };
+      });
+    }
+
+    async function openVisualizationTool() {
+      if (!simResult) { log('No simulation result.', 'error'); return; }
+      try {
+        // Serialize to JSON string before storing — avoids structured-clone issues
+        // with large or complex objects and guarantees the data is always readable.
+        await idbPut(JSON.stringify(simResult));
+        window.location.href = 'view';
+      } catch (e) {
+        log(`Could not save to IndexedDB (${e.message}). Try downloading the JSON and placing it at data/simulation.json.`, 'error');
+      }
+    }
+  </script>
 </body>
+
 </html>

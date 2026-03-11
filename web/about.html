@@ -1,12 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
   <title>Thermals</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
       background: #08111e;
@@ -24,7 +31,7 @@
 
     header {
       margin-bottom: 48px;
-      border-bottom: 1px solid rgba(100,160,255,0.2);
+      border-bottom: 1px solid rgba(100, 160, 255, 0.2);
       padding-bottom: 24px;
     }
 
@@ -46,7 +53,10 @@
       text-decoration: none;
       font-size: 13px;
     }
-    header a:hover { color: #7eb8ff; }
+
+    header a:hover {
+      color: #7eb8ff;
+    }
 
     h2 {
       font-size: 17px;
@@ -56,7 +66,7 @@
       letter-spacing: 1.5px;
       margin: 48px 0 20px;
       padding-bottom: 8px;
-      border-bottom: 1px solid rgba(100,160,255,0.15);
+      border-bottom: 1px solid rgba(100, 160, 255, 0.15);
     }
 
     h3 {
@@ -68,7 +78,10 @@
       letter-spacing: 0.8px;
     }
 
-    p { margin-bottom: 14px; color: #b0c8d8; }
+    p {
+      margin-bottom: 14px;
+      color: #b0c8d8;
+    }
 
     ul {
       margin: 0 0 14px 0;
@@ -80,9 +93,12 @@
       padding: 6px 0 6px 20px;
       position: relative;
       color: #b0c8d8;
-      border-bottom: 1px solid rgba(100,160,255,0.06);
+      border-bottom: 1px solid rgba(100, 160, 255, 0.06);
     }
-    ul li:last-child { border-bottom: none; }
+
+    ul li:last-child {
+      border-bottom: none;
+    }
 
     ul li::before {
       content: '▸';
@@ -102,9 +118,24 @@
       margin-left: 8px;
       vertical-align: middle;
     }
-    .tag-yes  { background: rgba(0,180,100,0.15);  color: #00c878; border: 1px solid rgba(0,180,100,0.3); }
-    .tag-part { background: rgba(255,180,0,0.12);  color: #d4a000; border: 1px solid rgba(255,180,0,0.3); }
-    .tag-no   { background: rgba(220,60,60,0.12);  color: #cc5555; border: 1px solid rgba(220,60,60,0.3); }
+
+    .tag-yes {
+      background: rgba(0, 180, 100, 0.15);
+      color: #00c878;
+      border: 1px solid rgba(0, 180, 100, 0.3);
+    }
+
+    .tag-part {
+      background: rgba(255, 180, 0, 0.12);
+      color: #d4a000;
+      border: 1px solid rgba(255, 180, 0, 0.3);
+    }
+
+    .tag-no {
+      background: rgba(220, 60, 60, 0.12);
+      color: #cc5555;
+      border: 1px solid rgba(220, 60, 60, 0.3);
+    }
 
     .pipeline {
       display: flex;
@@ -112,26 +143,32 @@
       gap: 2px;
       margin: 20px 0;
     }
+
     .pipeline-step {
       display: flex;
       align-items: center;
       gap: 16px;
       padding: 10px 16px;
-      background: rgba(30,50,80,0.5);
+      background: rgba(30, 50, 80, 0.5);
       border-left: 3px solid #2a5080;
       border-radius: 0 6px 6px 0;
     }
+
     .pipeline-step .num {
       font-size: 18px;
       font-weight: 700;
       color: #2a7080;
       min-width: 24px;
     }
-    .pipeline-step .desc { color: #a0b8cc; font-size: 13px; }
+
+    .pipeline-step .desc {
+      color: #a0b8cc;
+      font-size: 13px;
+    }
 
     .formula {
-      background: rgba(20,35,55,0.8);
-      border: 1px solid rgba(100,160,255,0.15);
+      background: rgba(20, 35, 55, 0.8);
+      border: 1px solid rgba(100, 160, 255, 0.15);
       border-radius: 6px;
       padding: 14px 18px;
       margin: 12px 0 16px;
@@ -142,8 +179,8 @@
     }
 
     .note {
-      background: rgba(255,200,50,0.06);
-      border-left: 3px solid rgba(255,200,50,0.3);
+      background: rgba(255, 200, 50, 0.06);
+      border-left: 3px solid rgba(255, 200, 50, 0.3);
       border-radius: 0 6px 6px 0;
       padding: 10px 16px;
       margin: 12px 0;
@@ -157,6 +194,7 @@
       margin: 12px 0 20px;
       font-size: 13px;
     }
+
     th {
       text-align: left;
       padding: 8px 12px;
@@ -165,21 +203,29 @@
       text-transform: uppercase;
       letter-spacing: 0.8px;
       font-size: 11px;
-      border-bottom: 1px solid rgba(100,160,255,0.2);
+      border-bottom: 1px solid rgba(100, 160, 255, 0.2);
     }
+
     td {
       padding: 7px 12px;
-      border-bottom: 1px solid rgba(100,160,255,0.07);
+      border-bottom: 1px solid rgba(100, 160, 255, 0.07);
       color: #a0b8cc;
       vertical-align: top;
     }
-    tr:last-child td { border-bottom: none; }
-    td:first-child { color: #c8d8e8; font-weight: 500; }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    td:first-child {
+      color: #c8d8e8;
+      font-weight: 500;
+    }
 
     footer {
       margin-top: 60px;
       padding-top: 20px;
-      border-top: 1px solid rgba(100,160,255,0.1);
+      border-top: 1px solid rgba(100, 160, 255, 0.1);
       text-align: center;
       font-size: 12px;
       color: #3a5070;
@@ -188,247 +234,527 @@
     /* ── Header nav ── */
     #header-nav {
       position: fixed;
-      top: 0; left: 0; right: 0;
+      top: 0;
+      left: 0;
+      right: 0;
       height: 44px;
       z-index: 3000;
       display: flex;
       align-items: center;
       padding: 0 12px;
       gap: 2px;
-      background: rgba(6,10,20,0.92);
-      border-bottom: 1px solid rgba(100,160,255,0.12);
+      background: rgba(6, 10, 20, 0.92);
+      border-bottom: 1px solid rgba(100, 160, 255, 0.12);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
     }
+
     .nav-logo {
-      display: flex; align-items: center; gap: 7px;
-      padding: 5px 9px; margin-right: 4px;
-      color: #7eb8ff; text-decoration: none;
-      font-size: 12px; font-weight: 600;
-      border-radius: 6px; white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 9px;
+      margin-right: 4px;
+      color: #7eb8ff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      white-space: nowrap;
       transition: background 0.15s;
     }
-    .nav-logo img { width: 18px; height: 18px; filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%); }
-    .nav-logo:hover { background: rgba(100,160,255,0.1); }
-    .nav-sep { width: 1px; height: 18px; background: rgba(100,160,255,0.12); margin: 0 2px; flex-shrink: 0; }
+
+    .nav-logo img {
+      width: 18px;
+      height: 18px;
+      filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%);
+    }
+
+    .nav-logo:hover {
+      background: rgba(100, 160, 255, 0.1);
+    }
+
+    .nav-sep {
+      width: 1px;
+      height: 18px;
+      background: rgba(100, 160, 255, 0.12);
+      margin: 0 2px;
+      flex-shrink: 0;
+    }
+
     .nav-link {
       padding: 5px 10px;
-      color: #4a6888; text-decoration: none;
-      font-size: 12px; border-radius: 6px; white-space: nowrap;
+      color: #4a6888;
+      text-decoration: none;
+      font-size: 12px;
+      border-radius: 6px;
+      white-space: nowrap;
       transition: background 0.15s, color 0.15s;
     }
-    .nav-link:hover { color: #90b8d8; background: rgba(100,160,255,0.08); }
-    .nav-link.nav-active { color: #7eb8ff; background: rgba(100,160,255,0.1); font-weight: 500; }
+
+    .nav-link:hover {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, 0.08);
+    }
+
+    .nav-link.nav-active {
+      color: #7eb8ff;
+      background: rgba(100, 160, 255, 0.1);
+      font-weight: 500;
+    }
+
     @media (max-width: 480px) {
-      .nav-logo span { display: none; }
-      .nav-link { padding: 5px 7px; font-size: 11px; }
+      .nav-logo span {
+        display: none;
+      }
+
+      .nav-link {
+        padding: 5px 7px;
+        font-size: 11px;
+      }
     }
 
     @media (max-width: 640px) {
-      body { padding: 56px 14px 60px; }
-      header h1 { font-size: 20px; }
-      h2 { font-size: 15px; letter-spacing: 1px; }
-      table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
-      td, th { white-space: normal; min-width: 70px; }
-      td:first-child { min-width: 100px; }
-      .formula { font-size: 11px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-      .pipeline-step { gap: 10px; padding: 10px 12px; }
-      header a { display: inline-block; padding: 3px 0; }
+      body {
+        padding: 56px 14px 60px;
+      }
+
+      header h1 {
+        font-size: 20px;
+      }
+
+      h2 {
+        font-size: 15px;
+        letter-spacing: 1px;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+      }
+
+      td,
+      th {
+        white-space: normal;
+        min-width: 70px;
+      }
+
+      td:first-child {
+        min-width: 100px;
+      }
+
+      .formula {
+        font-size: 11px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .pipeline-step {
+        gap: 10px;
+        padding: 10px 12px;
+      }
+
+      header a {
+        display: inline-block;
+        padding: 3px 0;
+      }
     }
   </style>
 </head>
+
 <body>
-<nav id="header-nav">
-  <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
-  <div class="nav-sep"></div>
-  <a href="area" class="nav-link">Area</a>
-  <a href="simulate" class="nav-link">Simulate</a>
-  <a href="view" class="nav-link">View</a>
-  <a href="about" class="nav-link nav-active">About</a>
-</nav>
-<div class="page">
+  <nav id="header-nav">
+    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+    <div class="nav-sep"></div>
+    <a href="area" class="nav-link">Area</a>
+    <a href="simulate" class="nav-link">Simulate</a>
+    <a href="view" class="nav-link">View</a>
+    <a href="about" class="nav-link nav-active">About</a>
+  </nav>
+  <div class="page">
 
-  <header>
-    <h1>Paragliding thermal simulations — How the simulation works</h1>
+    <header>
+      <h1>Paragliding thermal simulations — How the simulation works</h1>
+      <p>
+        Terrain: SRTM 30 m (sim) + AWS Terrarium ~7 m (mesh) &nbsp;·&nbsp;
+        Land cover: ESA WorldCover 2021 &nbsp;·&nbsp;
+        Calibration: ERA5 reanalysis (Open-Meteo)
+      </p>
+    </header>
+
+    <!-- ─── Pipeline ─────────────────────────────────────────────────────── -->
+    <h2>Pipeline overview</h2>
+    <div class="pipeline">
+      <div class="pipeline-step"><span class="num">1</span><span class="desc"><strong>Terrain (dual-resolution)</strong>
+          — SRTM 30 m DEM for simulation physics; AWS Terrarium ~7 m tiles for the visual mesh</span></div>
+      <div class="pipeline-step"><span class="num">2</span><span class="desc"><strong>Land cover</strong> — ESA
+          WorldCover 2021 (10 m) resampled to terrain grid, converted to thermal factors</span></div>
+      <div class="pipeline-step"><span class="num">3</span><span class="desc"><strong>Sun positions</strong> — real
+          astronomical ephemeris (pysolar) every 30 min during daylight</span></div>
+      <div class="pipeline-step"><span class="num">4</span><span class="desc"><strong>Solar heating</strong> — direct
+          beam + diffuse radiation per cell, with shadow ray-casting</span></div>
+      <div class="pipeline-step"><span class="num">5</span><span class="desc"><strong>Thermal inertia</strong> — ground
+          temperature accumulates across time steps with a relaxation constant</span></div>
+      <div class="pipeline-step"><span class="num">6</span><span class="desc"><strong>Orographic flow + collector
+            suction</strong> — anabatic upslope wind field combined with a dT-gradient term that pulls heat from warm
+          collectors toward cooler trigger zones</span></div>
+      <div class="pipeline-step"><span class="num">7</span><span class="desc"><strong>Trigger factor</strong> — static
+          map combining terrain convexity (∇²Z) and land-cover boundary gradient; identifies where thermals
+          preferentially release</span></div>
+      <div class="pipeline-step"><span class="num">8</span><span class="desc"><strong>Collecting zones</strong> —
+          heat-weighted mean flow convergence (−div u,v) accumulated over all scenarios; shows where thermal energy
+          funnels together</span></div>
+      <div class="pipeline-step"><span class="num">9</span><span class="desc"><strong>Export</strong> — all scenarios +
+          static fields packed into a JSON file served to the Three.js viewer</span></div>
+    </div>
+
+    <!-- ─── Effects taken into account ──────────────────────────────────── -->
+    <h2>Effects taken into account</h2>
+
+    <h3>Sun position &amp; geometry</h3>
+    <ul>
+      <li><strong>Real astronomical ephemeris</strong> <span class="tag tag-yes">modelled</span> — pysolar computes
+        exact azimuth and elevation for the center of the selected region at every time step, for any chosen date.</li>
+      <li><strong>Slope-aspect incidence angle</strong> <span class="tag tag-yes">modelled</span> — surface normals are
+        derived from the DEM gradient. A south-facing 30° slope receives more direct beam than a flat or north-facing
+        surface. Formula: cos(θ) = <em>n</em> · <em>s</em> (dot product of surface normal and sun direction).</li>
+      <li><strong>DEM horizon shadowing</strong> <span class="tag tag-yes">modelled</span> — for every cell, a ray is
+        cast toward the sun. If any terrain point along that ray is higher than the sun ray, the cell is in terrain
+        shadow and receives no direct beam.</li>
+    </ul>
+
+    <h3>Atmosphere</h3>
+    <ul>
+      <li><strong>Atmospheric transmittance</strong> <span class="tag tag-yes">modelled</span> — the beam weakens as it
+        passes through the atmosphere. Modelled with the Kasten-Young air mass formula and the Bird clear-sky model:
+        <div class="formula">AM = 1 / (sin(el) + 0.50572 × (el_deg + 6.07995)⁻¹·⁶³⁶⁴)
+          T_atm = 0.7 ^ (AM ^ 0.678)
+
+          At el=68° (midday): T_atm ≈ 0.70
+          At el=14° (dawn): T_atm ≈ 0.38</div>
+        A low sun delivers much less energy than geometry alone would suggest.
+      </li>
+      <li><strong>Diffuse sky radiation</strong> <span class="tag tag-yes">modelled</span> — cells in terrain shadow
+        still receive diffuse radiation from the sky dome. Modelled using an isotropic sky assumption:
+        <div class="formula">I_diffuse = 0.3 × (1 − T_atm) × SVF
+          SVF = (1 + cos(slope)) / 2 ← sky view factor</div>
+        More scattering at low sun angles → higher diffuse fraction at dawn and dusk. Flat plateaux see more sky than
+        deep valley floors (SVF closer to 1).
+      </li>
+    </ul>
+
+    <h3>Ground heating</h3>
+    <ul>
+      <li><strong>Land-cover thermal factor</strong> <span class="tag tag-yes">modelled</span> — different surfaces heat
+        at different rates depending on albedo and thermal inertia. Based on ESA WorldCover 2021 classes:
+        <table>
+          <thead>
+            <tr>
+              <th>Surface</th>
+              <th>Thermal factor</th>
+              <th>τ (h)</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Bare rock / scree</td>
+              <td>1.80</td>
+              <td>0.5</td>
+              <td>Low albedo, negligible heat capacity — spikes at noon</td>
+            </tr>
+            <tr>
+              <td>Built-up</td>
+              <td>1.30</td>
+              <td>0.75</td>
+              <td>Concrete / tarmac</td>
+            </tr>
+            <tr>
+              <td>Grassland</td>
+              <td>1.00</td>
+              <td>1.5</td>
+              <td>Reference</td>
+            </tr>
+            <tr>
+              <td>Cropland</td>
+              <td>0.85</td>
+              <td>1.3</td>
+              <td>Moderate inertia</td>
+            </tr>
+            <tr>
+              <td>Shrubland</td>
+              <td>0.70</td>
+              <td>2.0</td>
+              <td>Partial canopy</td>
+            </tr>
+            <tr>
+              <td>Tree cover</td>
+              <td>0.45</td>
+              <td>3.75</td>
+              <td>High inertia, canopy evaporation — peaks in early afternoon</td>
+            </tr>
+            <tr>
+              <td>Permanent water</td>
+              <td>0.03</td>
+              <td>22.5</td>
+              <td>Very high heat capacity — nearly constant temperature</td>
+            </tr>
+          </tbody>
+        </table>
+      </li>
+      <li><strong>Thermal inertia</strong> <span class="tag tag-yes">modelled</span> — the ground does not instantly
+        reach its equilibrium temperature. Heat accumulates over the day using a first-order low-pass filter:
+        <div class="formula">dT_carry(t) = dT_carry(t−1) × decay + dT_instant × (1 − decay)
+          decay = exp(−dt / τ), τ = 1.5 h</div>
+        This causes thermals to lag behind the sun, peaking in the early afternoon rather than at solar noon.
+      </li>
+      <li><strong>Absolute calibration from ERA5</strong> <span class="tag tag-yes">modelled</span> — the scale factor
+        <em>max_heat</em> is derived automatically from ERA5 reanalysis data (Open-Meteo) for the specific simulation
+        date. Clear-sky midday values of <em>surface_temperature − temperature_2m</em> from the past 5 years are used to
+        set the amplitude. This implicitly captures seasonal effects (soil moisture, vegetation state) without explicit
+        modelling.
+      </li>
+    </ul>
+
+    <h3>Thermal structure</h3>
+    <ul>
+      <li><strong>Thermal top height</strong> <span class="tag tag-yes">modelled</span> — the ceiling where a thermal
+        parcel loses buoyancy, derived from the ground temperature anomaly and atmospheric lapse rates:
+        <div class="formula">h_top = dT / (DALR − ELR)
+          DALR = 9.8 K/km (fixed by thermodynamics)
+          ELR = adjustable via slider (standard: 6.5 K/km)</div>
+      </li>
+      <li><strong>Collector and trigger zones</strong> <span class="tag tag-yes">modelled</span> — a <em>collector</em>
+        is a broad area that accumulates heat and where thermally-driven flow converges. A <em>trigger</em> is the
+        specific terrain or boundary feature where that heat detaches as a thermal.
+        <ul style="margin-top:6px">
+          <li><strong>Collecting zones</strong> map — for each scenario step the flow divergence div(u,v) is computed
+            from the orographic field; negative divergence (convergence) is weighted by the local temperature anomaly
+            and accumulated across all scenarios. The result is a static heat-weighted mean convergence field,
+            normalised to [0, 1]. Cells that are both warm <em>and</em> in a convergent part of the flow score highest.
+            The map responds to the trigger-threshold slider (same as Daily heat).</li>
+          <li><strong>Trigger zones</strong> map — combines terrain convexity (negated Laplacian −∇²Z — ridges and peaks
+            have ∇²Z &lt; 0) with land-cover boundary gradient (abrupt surface transitions) into a single static score,
+            blended 60/40. Bright spots on the trigger map at warm locations on the heat or collector map identify the
+            best thermal sources.</li>
+        </ul>
+      </li>
+      <li><strong>Thermal release cooling</strong> <span class="tag tag-yes">modelled</span> — cells with a high trigger
+        factor lose heat faster once their temperature anomaly exceeds a release threshold (default 1.5 K). Each time
+        step a fraction of the excess is removed:
+        <code>ΔT ← ΔT − trigger_factor × max(0, ΔT − T_release) × K × dt</code>, with K = 0.3 h⁻¹. This simulates the
+        ground cooling after a thermal detaches. The effect is strongest on ridge crests and land-cover boundaries where
+        trigger_factor peaks, creating realistic warm/cool patterning that propagates through subsequent time steps.
+      </li>
+      <li><strong>Heat advection along orographic flow</strong> <span class="tag tag-yes">modelled</span> — after the
+        release step each time step, the temperature anomaly field is advected along the orographic flow field using a
+        first-order upwind finite-difference scheme. The peak advection speed is computed dynamically each time step
+        from terrain steepness and current heating, following the anabatic-wind scaling:
+        <div class="formula">V_advect = V_max × √( clip(slope_75th / slope_ref) × clip(mean_dT / max_heat) )
+
+          V_max = 1 000 m/h — calibrated ceiling
+          slope_ref = 0.30 — characteristic slope (tan 17°)
+          slope_75th = 75th-percentile terrain gradient (avoids flat-valley bias)
+          mean_dT = mean temperature anomaly over heated cells
+          V_advect ∈ [50, 1 000] m/h</div>
+        This means advection is nearly idle at dawn (weak heating, slow anabatic flow) and peaks around solar noon
+        (strong heating + steep slopes drive fast upslope air). The time step is subdivided adaptively to keep the CFL
+        number ≤ 0.9. The flow field itself combines the orographic term with the collector-suction term (see above), so
+        trigger zones actively drain their surrounding collectors even when terrain geometry alone would not produce
+        convergence there. The dynamic speed also means the collector map naturally weights midday scenarios more
+        heavily, matching the period when paragliding thermals are active.
+      </li>
+      <li><strong>Orographic / anabatic flow + collector suction</strong> <span class="tag tag-yes">modelled</span> —
+        the advection velocity field has two components:
+        <ul style="margin-top:6px">
+          <li><strong>Orographic term</strong> — warm air rises along slopes (anabatic wind). Flow direction is the
+            terrain-slope unit vector weighted by local temperature anomaly, then Gaussian-smoothed (σ = 5 cells).
+            Cross-valley components cancel, leaving valley-channelled upslope flow.</li>
+          <li><strong>Collector-suction term</strong> — a dT-gradient component pulls heat down the temperature
+            gradient, from warm collectors toward cooler (recently released) trigger zones:
+            <div class="formula">u = (∇Z / |∇Z|) · dT − k_collect · ∇dT</div>
+            With k_collect = 0 the model is purely orographic. Raising it (default 1.0) increases the "suction" that
+            drains collector cells into trigger zones regardless of local terrain geometry, more faithfully reproducing
+            pressure-driven surface convergence under an active thermal.
+          </li>
+        </ul>
+      </li>
+      <li><strong>Trigger threshold</strong> <span class="tag tag-yes">modelled</span> — a user-adjustable minimum
+        temperature anomaly (in K) used as a <em>display filter</em>, not a physical barrier. The simulation computes
+        ground temperature anomalies independently of this value; the threshold is applied afterwards in the browser as
+        <code>max(0, ΔT − threshold)</code> when colouring the Thermal heat, Thermal top, Daily heat, and Collecting
+        zones maps. Raising it masks out weakly heated cells and shows only the strongest sources — it does
+        <strong>not</strong> cause heat to accumulate and release at a higher level. Think of it as a confidence cutoff:
+        "only show zones warmer than X K above the local mean".
+      </li>
+      <li><strong>Thermal inertia by land-cover type</strong> <span class="tag tag-yes">modelled</span> — each cell has
+        its own relaxation time constant τ derived from its ESA WorldCover class. Bare rock (τ ≈ 0.5 h) heats and cools
+        rapidly, peaking sharply at solar noon. Dense forest (τ ≈ 3.75 h) responds slowly and stays warm well into the
+        afternoon. Water (τ ≈ 22 h) barely changes temperature within a single day. Grassland (τ = 1.5 h) is the
+        reference. The per-cell decay factor is applied at every time step:
+        <code>dT(t) = dT(t−1) × exp(−dt/τ) + dT_instant × (1 − exp(−dt/τ))</code>. The τ values are estimates — soil
+        moisture, vegetation density, and slope aspect all affect the true value.
+      </li>
+      <li>
+        <strong>Thermal plume profile and vertical speed estimate</strong>
+        <span class="tag tag-part">estimated</span> — clicking any cell shows a side-panel plume profile. The
+        <em>width</em> of the plume at each altitude encodes the estimated vertical speed at that height, derived from
+        simple parcel buoyancy theory (no entrainment, no turbulence):
+        <div class="formula">w(z) = √(2 · g/T₀ · ΔT(z) · z<sub>AGL</sub>)</div> where ΔT(z) = ΔT<sub>eff</sub> · (1 −
+        z/H) (linear temperature excess decaying to zero at the ceiling), g = 9.81 m/s², T₀ = 293 K, and H is the
+        thermal top height. Normalised by its maximum, this gives a width profile w(z)/w<sub>max</sub> = 2·√(z/H · (1 −
+        z/H)), which peaks at <em>mid-height</em> (z = H/2). The peak speed label shown in the panel is:
+        <div class="formula">w<sub>max</sub> = √(0.5 · g/T₀ · ΔT<sub>eff</sub> · H)</div>
+        <strong>This is a rough order-of-magnitude estimate only.</strong>
+        Real thermals are slower than this formula predicts because it ignores entrainment of surrounding air (which
+        dilutes buoyancy and dissipates kinetic energy), turbulent drag, and the fact that a thermal is not a closed
+        parcel but a continuous plume. Typical real values for paragliding thermals are 1–4 m/s; the formula may
+        overestimate by a factor of 2–3 in strong conditions. Use it as a relative indicator (stronger ΔT and higher
+        ceiling → faster thermal) rather than an absolute number.
+      </li>
+    </ul>
+
+
+    <!-- ─── Simplifications ──────────────────────────────────────────────── -->
+    <h2>Simplifications made</h2>
+
+    <ul>
+      <li><strong>No fluid dynamics</strong> <span class="tag tag-part">simplified</span> — the model is purely
+        diagnostic. It computes where and when the ground heats up, but does not solve the Navier-Stokes equations.
+        There is no pressure field, no mass conservation, and no atmospheric convection feedback. The orographic flow is
+        a proxy, not a CFD result.</li>
+      <li><strong>Always clear sky</strong> <span class="tag tag-part">simplified</span> — cloud cover is not modelled.
+        The simulation represents a theoretical ideal clear-sky day for the chosen date. Real days will be affected by
+        cumulus, morning fog, etc.</li>
+      <li><strong>Fixed ELR</strong> <span class="tag tag-part">simplified</span> — the Environmental Lapse Rate is a
+        single value for the whole domain and the whole day. In reality it varies with altitude, time, and atmospheric
+        sounding. The slider allows manual adjustment.</li>
+      <li><strong>Isotropic diffuse sky</strong> <span class="tag tag-part">simplified</span> — diffuse radiation is
+        assumed to come uniformly from the entire sky hemisphere. In reality it is brighter near the sun (circumsolar
+        region) and near the horizon. A more accurate model (Perez) would require additional parameters.</li>
+      <li><strong>ERA5 calibration resolution</strong> <span class="tag tag-part">simplified</span> — ERA5 has ~28 km
+        resolution. The calibration gives the correct domain-average amplitude, but individual cells can exceed this by
+        a factor related to their thermal factor (e.g. bare rock × 1.8).</li>
+      <li><strong>No intra-day air temperature variation</strong> <span class="tag tag-part">simplified</span> — the
+        model uses a single <em>max_heat</em> value for the whole day. In reality, air temperature rises through the
+        afternoon, slightly reducing dT in the late afternoon relative to the morning at the same insolation level.</li>
+      <li><strong>Thermal triggering mechanism</strong> <span class="tag tag-part">partially modelled</span> — in
+        reality thermals do not release continuously; heat accumulates under a surface inversion until a bubble
+        detaches. The thermal release cooling (Phase 1) and heat advection (Phase 2) together approximate this: release
+        drains excess heat from geometrically-favoured cells each step, while advection transports surrounding warmth
+        into those cells to refuel them. The result is a continuous-release model with spatial heat redistribution. True
+        episodic bubble release (accumulate → burst → reset cycle, O(minutes)) is not modelled.</li>
+    </ul>
+
+
+    <!-- ─── Effects not taken into account ──────────────────────────────── -->
+    <h2>Effects not taken into account</h2>
+
+    <ul>
+      <li><strong>Ambient wind</strong> <span class="tag tag-no">not modelled</span> — no synoptic or valley wind is
+        included. Wind modifies thermal strength (shear, advection) and triggers blue thermals on windward slopes. It is
+        the largest missing physical effect.</li>
+      <li><strong>Soil moisture</strong> <span class="tag tag-no">not modelled</span> — wet soil splits incoming energy
+        between sensible heat (raises air temperature) and latent heat (evaporation). A wet field after rain heats much
+        less than dry bare ground. The ERA5 calibration partially absorbs the seasonal mean, but day-to-day variation is
+        not captured.</li>
+      <li><strong>No thermally-driven convergence or divergence</strong> <span class="tag tag-no">not modelled</span> —
+        the surface flow arrows show anabatic (upslope) wind driven by the terrain gradient, but not the horizontal
+        inflow that feeds the base of a thermal column, nor the lateral outflow at the thermal top. In reality, a strong
+        thermal draws air from a radius of several hundred metres at the surface and spreads it aloft at the capping
+        level. Modelling this correctly requires a divergence-free correction (solving a pressure Poisson equation),
+        which is equivalent to a simplified Navier-Stokes step and would add significant complexity.</li>
+      <li><strong>Clouds and cloud shadows</strong> <span class="tag tag-no">not modelled</span> — cumulus development,
+        cloud shadows, and their suppression of ground heating are ignored.</li>
+      <li><strong>Boundary layer dynamics</strong> <span class="tag tag-no">not modelled</span> — the mixing layer
+        height, thermals overshooting the ELR ceiling, and entrainment are not simulated.</li>
+      <li><strong>Subsidence and compensating sink</strong> <span class="tag tag-no">not modelled</span> — air that
+        rises in a thermal must descend somewhere. This broad, weak sink is not represented.</li>
+      <li><strong>Seasonal vegetation changes</strong> <span class="tag tag-no">not modelled</span> — land cover is
+        static (2021 WorldCover). Spring snowmelt, leaf-out, and summer drought are not reflected.</li>
+      <li><strong>Foehn, valley-exit jets, and local circulation</strong> <span class="tag tag-no">not modelled</span> —
+        complex mountain meteorological phenomena driven by synoptic pressure gradients.</li>
+      <li><strong>Turbulence and thermal structure</strong> <span class="tag tag-no">not modelled</span> — the plume
+        profile is based on simple parcel buoyancy (see "Thermal plume profile" above), not a turbulent plume
+        simulation. Entrainment, vortex ring structure, thermal pulsing, and the widening of real thermals with altitude
+        due to mixing are all absent. The vertical speed shown is an upper-bound estimate.</li>
+    </ul>
+
+
+    <!-- ─── Data sources ─────────────────────────────────────────────────── -->
+    <h2>Data sources</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Dataset</th>
+          <th>Used for</th>
+          <th>Source</th>
+          <th>Resolution</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Elevation — simulation</td>
+          <td>Shadow casting, slope normals, thermal tops, orographic flow</td>
+          <td>SRTM via AWS elevation tiles (Mapzen/Tilezen)</td>
+          <td>~30 m</td>
+        </tr>
+        <tr>
+          <td>Elevation — visual mesh</td>
+          <td>3-D terrain surface rendered in the browser</td>
+          <td>AWS Terrain Tiles, Terrarium RGB encoding (IGN RGE Alti source for France)</td>
+          <td>~7 m</td>
+        </tr>
+        <tr>
+          <td>Land cover</td>
+          <td>Thermal factor per cell</td>
+          <td>ESA WorldCover 2021</td>
+          <td>10 m</td>
+        </tr>
+        <tr>
+          <td>Sun position</td>
+          <td>Azimuth + elevation at each time step</td>
+          <td>pysolar (USNO astronomical algorithm)</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Calibration temperature</td>
+          <td>max_heat scale factor</td>
+          <td>ERA5 reanalysis via Open-Meteo archive API</td>
+          <td>~28 km</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Dual-resolution elevation strategy</h3>
     <p>
-      Terrain: SRTM 30 m (sim) + AWS Terrarium ~7 m (mesh) &nbsp;·&nbsp;
-      Land cover: ESA WorldCover 2021 &nbsp;·&nbsp;
-      Calibration: ERA5 reanalysis (Open-Meteo)
+      The simulation and the visual terrain use different DEM sources.
+      The <strong>SRTM 30 m</strong> grid is used for all physics computations:
+      slope normals, shadow ray-casting, thermal tops, and orographic flow.
+      A coarser grid keeps the computation and the exported JSON compact (15 time steps × 66 k cells).
     </p>
-  </header>
+    <p>
+      The <strong>AWS Terrarium ~7 m</strong> tiles are fetched once and used only to build the visual terrain mesh in
+      Three.js.
+      At zoom level 14, the underlying source for France is IGN RGE Alti (LiDAR-derived), giving approximately 4–5×
+      higher
+      surface detail than SRTM. The tiles are RGB-encoded PNGs: <code>elevation = R×256 + G + B/256 − 32768</code>,
+      delivered in Web Mercator (EPSG:3857) and reprojected to WGS84 (EPSG:4326) before use.
+      The mesh elevation is exported once into the JSON alongside the simulation data.
+    </p>
+    <p>
+      Physics overlays (heatmap, thermal flow, etc.) are rendered on the coarser 30 m grid but are visually correct
+      because they cover the same geographic extent and use <code>depthWrite: false</code>, floating just above the
+      terrain surface.
+    </p>
 
-  <!-- ─── Pipeline ─────────────────────────────────────────────────────── -->
-  <h2>Pipeline overview</h2>
-  <div class="pipeline">
-    <div class="pipeline-step"><span class="num">1</span><span class="desc"><strong>Terrain (dual-resolution)</strong> — SRTM 30 m DEM for simulation physics; AWS Terrarium ~7 m tiles for the visual mesh</span></div>
-    <div class="pipeline-step"><span class="num">2</span><span class="desc"><strong>Land cover</strong> — ESA WorldCover 2021 (10 m) resampled to terrain grid, converted to thermal factors</span></div>
-    <div class="pipeline-step"><span class="num">3</span><span class="desc"><strong>Sun positions</strong> — real astronomical ephemeris (pysolar) every 30 min during daylight</span></div>
-    <div class="pipeline-step"><span class="num">4</span><span class="desc"><strong>Solar heating</strong> — direct beam + diffuse radiation per cell, with shadow ray-casting</span></div>
-    <div class="pipeline-step"><span class="num">5</span><span class="desc"><strong>Thermal inertia</strong> — ground temperature accumulates across time steps with a relaxation constant</span></div>
-    <div class="pipeline-step"><span class="num">6</span><span class="desc"><strong>Orographic flow + collector suction</strong> — anabatic upslope wind field combined with a dT-gradient term that pulls heat from warm collectors toward cooler trigger zones</span></div>
-    <div class="pipeline-step"><span class="num">7</span><span class="desc"><strong>Trigger factor</strong> — static map combining terrain convexity (∇²Z) and land-cover boundary gradient; identifies where thermals preferentially release</span></div>
-    <div class="pipeline-step"><span class="num">8</span><span class="desc"><strong>Collecting zones</strong> — heat-weighted mean flow convergence (−div u,v) accumulated over all scenarios; shows where thermal energy funnels together</span></div>
-    <div class="pipeline-step"><span class="num">9</span><span class="desc"><strong>Export</strong> — all scenarios + static fields packed into a JSON file served to the Three.js viewer</span></div>
+    <footer>
+      Paragliding thermal simulation
+    </footer>
+
   </div>
-
-  <!-- ─── Effects taken into account ──────────────────────────────────── -->
-  <h2>Effects taken into account</h2>
-
-  <h3>Sun position &amp; geometry</h3>
-  <ul>
-    <li><strong>Real astronomical ephemeris</strong> <span class="tag tag-yes">modelled</span> — pysolar computes exact azimuth and elevation for the center of the selected region at every time step, for any chosen date.</li>
-    <li><strong>Slope-aspect incidence angle</strong> <span class="tag tag-yes">modelled</span> — surface normals are derived from the DEM gradient. A south-facing 30° slope receives more direct beam than a flat or north-facing surface. Formula: cos(θ) = <em>n</em> · <em>s</em> (dot product of surface normal and sun direction).</li>
-    <li><strong>DEM horizon shadowing</strong> <span class="tag tag-yes">modelled</span> — for every cell, a ray is cast toward the sun. If any terrain point along that ray is higher than the sun ray, the cell is in terrain shadow and receives no direct beam.</li>
-  </ul>
-
-  <h3>Atmosphere</h3>
-  <ul>
-    <li><strong>Atmospheric transmittance</strong> <span class="tag tag-yes">modelled</span> — the beam weakens as it passes through the atmosphere. Modelled with the Kasten-Young air mass formula and the Bird clear-sky model:
-      <div class="formula">AM     = 1 / (sin(el) + 0.50572 × (el_deg + 6.07995)⁻¹·⁶³⁶⁴)
-T_atm  = 0.7 ^ (AM ^ 0.678)
-
-At el=68° (midday): T_atm ≈ 0.70
-At el=14° (dawn):   T_atm ≈ 0.38</div>
-      A low sun delivers much less energy than geometry alone would suggest.</li>
-    <li><strong>Diffuse sky radiation</strong> <span class="tag tag-yes">modelled</span> — cells in terrain shadow still receive diffuse radiation from the sky dome. Modelled using an isotropic sky assumption:
-      <div class="formula">I_diffuse = 0.3 × (1 − T_atm) × SVF
-SVF = (1 + cos(slope)) / 2   ← sky view factor</div>
-      More scattering at low sun angles → higher diffuse fraction at dawn and dusk. Flat plateaux see more sky than deep valley floors (SVF closer to 1).</li>
-  </ul>
-
-  <h3>Ground heating</h3>
-  <ul>
-    <li><strong>Land-cover thermal factor</strong> <span class="tag tag-yes">modelled</span> — different surfaces heat at different rates depending on albedo and thermal inertia. Based on ESA WorldCover 2021 classes:
-      <table>
-        <thead><tr><th>Surface</th><th>Thermal factor</th><th>τ (h)</th><th>Reason</th></tr></thead>
-        <tbody>
-          <tr><td>Bare rock / scree</td><td>1.80</td><td>0.5</td><td>Low albedo, negligible heat capacity — spikes at noon</td></tr>
-          <tr><td>Built-up</td><td>1.30</td><td>0.75</td><td>Concrete / tarmac</td></tr>
-          <tr><td>Grassland</td><td>1.00</td><td>1.5</td><td>Reference</td></tr>
-          <tr><td>Cropland</td><td>0.85</td><td>1.3</td><td>Moderate inertia</td></tr>
-          <tr><td>Shrubland</td><td>0.70</td><td>2.0</td><td>Partial canopy</td></tr>
-          <tr><td>Tree cover</td><td>0.45</td><td>3.75</td><td>High inertia, canopy evaporation — peaks in early afternoon</td></tr>
-          <tr><td>Permanent water</td><td>0.03</td><td>22.5</td><td>Very high heat capacity — nearly constant temperature</td></tr>
-        </tbody>
-      </table>
-    </li>
-    <li><strong>Thermal inertia</strong> <span class="tag tag-yes">modelled</span> — the ground does not instantly reach its equilibrium temperature. Heat accumulates over the day using a first-order low-pass filter:
-      <div class="formula">dT_carry(t) = dT_carry(t−1) × decay + dT_instant × (1 − decay)
-decay = exp(−dt / τ),   τ = 1.5 h</div>
-      This causes thermals to lag behind the sun, peaking in the early afternoon rather than at solar noon.</li>
-    <li><strong>Absolute calibration from ERA5</strong> <span class="tag tag-yes">modelled</span> — the scale factor <em>max_heat</em> is derived automatically from ERA5 reanalysis data (Open-Meteo) for the specific simulation date. Clear-sky midday values of <em>surface_temperature − temperature_2m</em> from the past 5 years are used to set the amplitude. This implicitly captures seasonal effects (soil moisture, vegetation state) without explicit modelling.</li>
-  </ul>
-
-  <h3>Thermal structure</h3>
-  <ul>
-    <li><strong>Thermal top height</strong> <span class="tag tag-yes">modelled</span> — the ceiling where a thermal parcel loses buoyancy, derived from the ground temperature anomaly and atmospheric lapse rates:
-      <div class="formula">h_top = dT / (DALR − ELR)
-DALR = 9.8 K/km (fixed by thermodynamics)
-ELR  = adjustable via slider (standard: 6.5 K/km)</div>
-    </li>
-    <li><strong>Collector and trigger zones</strong> <span class="tag tag-yes">modelled</span> — a <em>collector</em> is a broad area that accumulates heat and where thermally-driven flow converges. A <em>trigger</em> is the specific terrain or boundary feature where that heat detaches as a thermal.
-      <ul style="margin-top:6px">
-        <li><strong>Collecting zones</strong> map — for each scenario step the flow divergence div(u,v) is computed from the orographic field; negative divergence (convergence) is weighted by the local temperature anomaly and accumulated across all scenarios. The result is a static heat-weighted mean convergence field, normalised to [0, 1]. Cells that are both warm <em>and</em> in a convergent part of the flow score highest. The map responds to the trigger-threshold slider (same as Daily heat).</li>
-        <li><strong>Trigger zones</strong> map — combines terrain convexity (negated Laplacian −∇²Z — ridges and peaks have ∇²Z &lt; 0) with land-cover boundary gradient (abrupt surface transitions) into a single static score, blended 60/40. Bright spots on the trigger map at warm locations on the heat or collector map identify the best thermal sources.</li>
-      </ul>
-    </li>
-    <li><strong>Thermal release cooling</strong> <span class="tag tag-yes">modelled</span> — cells with a high trigger factor lose heat faster once their temperature anomaly exceeds a release threshold (default 1.5 K). Each time step a fraction of the excess is removed: <code>ΔT ← ΔT − trigger_factor × max(0, ΔT − T_release) × K × dt</code>, with K = 0.3 h⁻¹. This simulates the ground cooling after a thermal detaches. The effect is strongest on ridge crests and land-cover boundaries where trigger_factor peaks, creating realistic warm/cool patterning that propagates through subsequent time steps.</li>
-    <li><strong>Heat advection along orographic flow</strong> <span class="tag tag-yes">modelled</span> — after the release step each time step, the temperature anomaly field is advected along the orographic flow field using a first-order upwind finite-difference scheme. The peak advection speed is computed dynamically each time step from terrain steepness and current heating, following the anabatic-wind scaling:
-      <div class="formula">V_advect = V_max × √( clip(slope_75th / slope_ref)  ×  clip(mean_dT / max_heat) )
-
-V_max      = 1 000 m/h   — calibrated ceiling
-slope_ref  = 0.30        — characteristic slope (tan 17°)
-slope_75th = 75th-percentile terrain gradient (avoids flat-valley bias)
-mean_dT    = mean temperature anomaly over heated cells
-V_advect   ∈ [50, 1 000] m/h</div>
-      This means advection is nearly idle at dawn (weak heating, slow anabatic flow) and peaks around solar noon (strong heating + steep slopes drive fast upslope air). The time step is subdivided adaptively to keep the CFL number ≤ 0.9. The flow field itself combines the orographic term with the collector-suction term (see above), so trigger zones actively drain their surrounding collectors even when terrain geometry alone would not produce convergence there. The dynamic speed also means the collector map naturally weights midday scenarios more heavily, matching the period when paragliding thermals are active.</li>
-    <li><strong>Orographic / anabatic flow + collector suction</strong> <span class="tag tag-yes">modelled</span> — the advection velocity field has two components:
-      <ul style="margin-top:6px">
-        <li><strong>Orographic term</strong> — warm air rises along slopes (anabatic wind). Flow direction is the terrain-slope unit vector weighted by local temperature anomaly, then Gaussian-smoothed (σ = 5 cells). Cross-valley components cancel, leaving valley-channelled upslope flow.</li>
-        <li><strong>Collector-suction term</strong> — a dT-gradient component pulls heat down the temperature gradient, from warm collectors toward cooler (recently released) trigger zones:
-          <div class="formula">u = (∇Z / |∇Z|) · dT  −  k_collect · ∇dT</div>
-          With k_collect = 0 the model is purely orographic. Raising it (default 1.0) increases the "suction" that drains collector cells into trigger zones regardless of local terrain geometry, more faithfully reproducing pressure-driven surface convergence under an active thermal.</li>
-      </ul>
-    </li>
-    <li><strong>Trigger threshold</strong> <span class="tag tag-yes">modelled</span> — a user-adjustable minimum temperature anomaly (in K) used as a <em>display filter</em>, not a physical barrier. The simulation computes ground temperature anomalies independently of this value; the threshold is applied afterwards in the browser as <code>max(0, ΔT − threshold)</code> when colouring the Thermal heat, Thermal top, Daily heat, and Collecting zones maps. Raising it masks out weakly heated cells and shows only the strongest sources — it does <strong>not</strong> cause heat to accumulate and release at a higher level. Think of it as a confidence cutoff: "only show zones warmer than X K above the local mean".</li>
-    <li><strong>Thermal inertia by land-cover type</strong> <span class="tag tag-yes">modelled</span> — each cell has its own relaxation time constant τ derived from its ESA WorldCover class. Bare rock (τ ≈ 0.5 h) heats and cools rapidly, peaking sharply at solar noon. Dense forest (τ ≈ 3.75 h) responds slowly and stays warm well into the afternoon. Water (τ ≈ 22 h) barely changes temperature within a single day. Grassland (τ = 1.5 h) is the reference. The per-cell decay factor is applied at every time step: <code>dT(t) = dT(t−1) × exp(−dt/τ) + dT_instant × (1 − exp(−dt/τ))</code>. The τ values are estimates — soil moisture, vegetation density, and slope aspect all affect the true value.</li>
-    <li>
-      <strong>Thermal plume profile and vertical speed estimate</strong>
-      <span class="tag tag-part">estimated</span> — clicking any cell shows a side-panel plume profile. The <em>width</em> of the plume at each altitude encodes the estimated vertical speed at that height, derived from simple parcel buoyancy theory (no entrainment, no turbulence):
-      <div class="formula">w(z) = √(2 · g/T₀ · ΔT(z) · z<sub>AGL</sub>)</div> where ΔT(z) = ΔT<sub>eff</sub> · (1 − z/H) (linear temperature excess decaying to zero at the ceiling), g = 9.81 m/s², T₀ = 293 K, and H is the thermal top height. Normalised by its maximum, this gives a width profile w(z)/w<sub>max</sub> = 2·√(z/H · (1 − z/H)), which peaks at <em>mid-height</em> (z = H/2). The peak speed label shown in the panel is:
-      <div class="formula">w<sub>max</sub> = √(0.5 · g/T₀ · ΔT<sub>eff</sub> · H)</div>
-      <strong>This is a rough order-of-magnitude estimate only.</strong>
-      Real thermals are slower than this formula predicts because it ignores entrainment of surrounding air (which dilutes buoyancy and dissipates kinetic energy), turbulent drag, and the fact that a thermal is not a closed parcel but a continuous plume. Typical real values for paragliding thermals are 1–4 m/s; the formula may overestimate by a factor of 2–3 in strong conditions. Use it as a relative indicator (stronger ΔT and higher ceiling → faster thermal) rather than an absolute number.
-    </li>
-  </ul>
-
-  
-  <!-- ─── Simplifications ──────────────────────────────────────────────── -->
-  <h2>Simplifications made</h2>
-  
-  <ul>
-    <li><strong>No fluid dynamics</strong> <span class="tag tag-part">simplified</span> — the model is purely diagnostic. It computes where and when the ground heats up, but does not solve the Navier-Stokes equations. There is no pressure field, no mass conservation, and no atmospheric convection feedback. The orographic flow is a proxy, not a CFD result.</li>
-    <li><strong>Always clear sky</strong> <span class="tag tag-part">simplified</span> — cloud cover is not modelled. The simulation represents a theoretical ideal clear-sky day for the chosen date. Real days will be affected by cumulus, morning fog, etc.</li>
-    <li><strong>Fixed ELR</strong> <span class="tag tag-part">simplified</span> — the Environmental Lapse Rate is a single value for the whole domain and the whole day. In reality it varies with altitude, time, and atmospheric sounding. The slider allows manual adjustment.</li>
-    <li><strong>Isotropic diffuse sky</strong> <span class="tag tag-part">simplified</span> — diffuse radiation is assumed to come uniformly from the entire sky hemisphere. In reality it is brighter near the sun (circumsolar region) and near the horizon. A more accurate model (Perez) would require additional parameters.</li>
-    <li><strong>ERA5 calibration resolution</strong> <span class="tag tag-part">simplified</span> — ERA5 has ~28 km resolution. The calibration gives the correct domain-average amplitude, but individual cells can exceed this by a factor related to their thermal factor (e.g. bare rock × 1.8).</li>
-    <li><strong>No intra-day air temperature variation</strong> <span class="tag tag-part">simplified</span> — the model uses a single <em>max_heat</em> value for the whole day. In reality, air temperature rises through the afternoon, slightly reducing dT in the late afternoon relative to the morning at the same insolation level.</li>
-    <li><strong>Thermal triggering mechanism</strong> <span class="tag tag-part">partially modelled</span> — in reality thermals do not release continuously; heat accumulates under a surface inversion until a bubble detaches. The thermal release cooling (Phase 1) and heat advection (Phase 2) together approximate this: release drains excess heat from geometrically-favoured cells each step, while advection transports surrounding warmth into those cells to refuel them. The result is a continuous-release model with spatial heat redistribution. True episodic bubble release (accumulate → burst → reset cycle, O(minutes)) is not modelled.</li>
-  </ul>
-
-
-  <!-- ─── Effects not taken into account ──────────────────────────────── -->
-  <h2>Effects not taken into account</h2>
-
-  <ul>
-    <li><strong>Ambient wind</strong> <span class="tag tag-no">not modelled</span> — no synoptic or valley wind is included. Wind modifies thermal strength (shear, advection) and triggers blue thermals on windward slopes. It is the largest missing physical effect.</li>
-    <li><strong>Soil moisture</strong> <span class="tag tag-no">not modelled</span> — wet soil splits incoming energy between sensible heat (raises air temperature) and latent heat (evaporation). A wet field after rain heats much less than dry bare ground. The ERA5 calibration partially absorbs the seasonal mean, but day-to-day variation is not captured.</li>
-    <li><strong>No thermally-driven convergence or divergence</strong> <span class="tag tag-no">not modelled</span> — the surface flow arrows show anabatic (upslope) wind driven by the terrain gradient, but not the horizontal inflow that feeds the base of a thermal column, nor the lateral outflow at the thermal top. In reality, a strong thermal draws air from a radius of several hundred metres at the surface and spreads it aloft at the capping level. Modelling this correctly requires a divergence-free correction (solving a pressure Poisson equation), which is equivalent to a simplified Navier-Stokes step and would add significant complexity.</li>
-    <li><strong>Clouds and cloud shadows</strong> <span class="tag tag-no">not modelled</span> — cumulus development, cloud shadows, and their suppression of ground heating are ignored.</li>
-    <li><strong>Boundary layer dynamics</strong> <span class="tag tag-no">not modelled</span> — the mixing layer height, thermals overshooting the ELR ceiling, and entrainment are not simulated.</li>
-    <li><strong>Subsidence and compensating sink</strong> <span class="tag tag-no">not modelled</span> — air that rises in a thermal must descend somewhere. This broad, weak sink is not represented.</li>
-    <li><strong>Seasonal vegetation changes</strong> <span class="tag tag-no">not modelled</span> — land cover is static (2021 WorldCover). Spring snowmelt, leaf-out, and summer drought are not reflected.</li>
-    <li><strong>Foehn, valley-exit jets, and local circulation</strong> <span class="tag tag-no">not modelled</span> — complex mountain meteorological phenomena driven by synoptic pressure gradients.</li>
-    <li><strong>Turbulence and thermal structure</strong> <span class="tag tag-no">not modelled</span> — the plume profile is based on simple parcel buoyancy (see "Thermal plume profile" above), not a turbulent plume simulation. Entrainment, vortex ring structure, thermal pulsing, and the widening of real thermals with altitude due to mixing are all absent. The vertical speed shown is an upper-bound estimate.</li>
-  </ul>
-
-
-  <!-- ─── Data sources ─────────────────────────────────────────────────── -->
-  <h2>Data sources</h2>
-  <table>
-    <thead><tr><th>Dataset</th><th>Used for</th><th>Source</th><th>Resolution</th></tr></thead>
-    <tbody>
-      <tr><td>Elevation — simulation</td><td>Shadow casting, slope normals, thermal tops, orographic flow</td><td>SRTM via AWS elevation tiles (Mapzen/Tilezen)</td><td>~30 m</td></tr>
-      <tr><td>Elevation — visual mesh</td><td>3-D terrain surface rendered in the browser</td><td>AWS Terrain Tiles, Terrarium RGB encoding (IGN RGE Alti source for France)</td><td>~7 m</td></tr>
-      <tr><td>Land cover</td><td>Thermal factor per cell</td><td>ESA WorldCover 2021</td><td>10 m</td></tr>
-      <tr><td>Sun position</td><td>Azimuth + elevation at each time step</td><td>pysolar (USNO astronomical algorithm)</td><td>—</td></tr>
-      <tr><td>Calibration temperature</td><td>max_heat scale factor</td><td>ERA5 reanalysis via Open-Meteo archive API</td><td>~28 km</td></tr>
-    </tbody>
-  </table>
-
-  <h3>Dual-resolution elevation strategy</h3>
-  <p>
-    The simulation and the visual terrain use different DEM sources.
-    The <strong>SRTM 30 m</strong> grid is used for all physics computations:
-    slope normals, shadow ray-casting, thermal tops, and orographic flow.
-    A coarser grid keeps the computation and the exported JSON compact (15 time steps × 66 k cells).
-  </p>
-  <p>
-    The <strong>AWS Terrarium ~7 m</strong> tiles are fetched once and used only to build the visual terrain mesh in Three.js.
-    At zoom level 14, the underlying source for France is IGN RGE Alti (LiDAR-derived), giving approximately 4–5× higher
-    surface detail than SRTM. The tiles are RGB-encoded PNGs: <code>elevation = R×256 + G + B/256 − 32768</code>,
-    delivered in Web Mercator (EPSG:3857) and reprojected to WGS84 (EPSG:4326) before use.
-    The mesh elevation is exported once into the JSON alongside the simulation data.
-  </p>
-  <p>
-    Physics overlays (heatmap, thermal flow, etc.) are rendered on the coarser 30 m grid but are visually correct
-    because they cover the same geographic extent and use <code>depthWrite: false</code>, floating just above the terrain surface.
-  </p>
-
-  <footer>
-    Paragliding thermal simulation
-  </footer>
-
-</div>
 </body>
+
 </html>
