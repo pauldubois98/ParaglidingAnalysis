@@ -150,9 +150,6 @@
       letter-spacing: 1px;
       margin-bottom: 6px;
     }
-    .header-links { font-size: 11px; }
-    .header-links a { color: #3a6080; text-decoration: none; margin-right: 12px; }
-    .header-links a:hover { color: #7eb8ff; }
 
     #panel-body {
       flex: 1;
@@ -240,30 +237,65 @@
     }
 
     #panel-footer {
-      padding: 10px 16px 12px;
+      padding: 12px 16px 14px;
       border-top: 1px solid rgba(100,160,255,0.15);
       flex-shrink: 0;
       display: flex;
-      flex-direction: row;
-      gap: 6px;
+      flex-direction: column;
+      gap: 7px;
     }
+    .footer-row { display: flex; gap: 6px; }
     .btn {
       flex: 1;
-      padding: 8px 6px;
-      border: none;
-      border-radius: 7px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 8px;
       font-size: 11px;
+      font-family: inherit;
       font-weight: 600;
+      border-radius: 20px;
+      border: 1px solid;
       cursor: pointer;
-      transition: opacity 0.2s;
+      letter-spacing: 0.2px;
       white-space: nowrap;
+      transition: background 0.18s, border-color 0.18s, color 0.18s;
     }
-    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
-    .btn-blue  { background: #1e4a80; color: #a0ceff; border: 1px solid rgba(100,160,255,0.4); }
-    .btn-green { background: #0f5030; color: #60e0a0; border: 1px solid rgba(60,200,120,0.4); }
-    .btn-dl    { background: #1a2a4a; color: #7eb8ff; border: 1px solid rgba(100,160,255,0.3); display:none; }
-    .btn-map   { background: #50320a; color: #f0b840; border: 1px solid rgba(240,180,60,0.4); }
-    .btn:not(:disabled):hover { opacity: 0.8; }
+    .btn:disabled { opacity: 0.32; cursor: not-allowed; }
+    .btn-fetch { color:#a0ceff; border-color:rgba(100,160,255,0.35); background:rgba(100,160,255,0.09); }
+    .btn-sim   { color:#60e0a0; border-color:rgba(50,195,95,0.35);   background:rgba(50,195,95,0.09);  }
+    .btn-dl    { color:#7eb8ff; border-color:rgba(100,160,255,0.28); background:rgba(100,160,255,0.06); }
+    .btn-map   { color:#f0b840; border-color:rgba(240,175,50,0.35);  background:rgba(240,155,40,0.08); }
+    .btn-fetch:not(:disabled):hover { background:rgba(100,160,255,0.2);  border-color:rgba(100,160,255,0.6); }
+    .btn-sim:not(:disabled):hover   { background:rgba(50,195,95,0.2);    border-color:rgba(50,195,95,0.6);   }
+    .btn-dl:not(:disabled):hover    { background:rgba(100,160,255,0.16); border-color:rgba(100,160,255,0.55);}
+    .btn-map:not(:disabled):hover   { background:rgba(240,155,40,0.2);   border-color:rgba(240,175,50,0.6);  }
+    .footer-nav {
+      display: flex;
+      gap: 6px;
+      padding-top: 5px;
+      border-top: 1px solid rgba(100,160,255,0.1);
+    }
+    .footer-nav a {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      padding: 5px 8px;
+      font-size: 11px;
+      font-family: inherit;
+      border-radius: 20px;
+      border: 1px solid;
+      text-decoration: none;
+      letter-spacing: 0.3px;
+      transition: background 0.18s, border-color 0.18s, color 0.18s;
+    }
+    .link-area  { color:#80d0c0; border-color:rgba(70,200,175,0.28); background:rgba(70,200,175,0.06); }
+    .link-about { color:#99b8d0; border-color:rgba(100,160,255,0.28); background:rgba(100,160,255,0.06); }
+    .link-area:hover  { color:#a8e8d8; border-color:rgba(70,200,175,0.6);  background:rgba(70,200,175,0.15); }
+    .link-about:hover { color:#c8dff0; border-color:rgba(100,160,255,0.6); background:rgba(100,160,255,0.15); }
   </style>
 </head>
 <body>
@@ -317,10 +349,6 @@
 <div id="ui-panel">
   <div id="panel-header">
     <h2>Run Simulation</h2>
-    <div class="header-links">
-      <a href="area.html">Area selection</a>
-      <a href="about.html">About</a>
-    </div>
   </div>
 
   <div id="panel-body">
@@ -476,10 +504,16 @@
   </div><!-- /panel-body -->
 
   <div id="panel-footer">
-    <button class="btn btn-blue" id="btn-fetch" onclick="runFetch()">Fetch Data</button>
-    <button class="btn btn-green" id="btn-sim" onclick="runSim()" disabled>Run Simulation</button>
-    <button class="btn btn-dl" id="btn-dl" onclick="downloadJSON()" disabled>Download JSON simulation cache</button>
-    <button class="btn btn-map" id="btn-map" onclick="openVisualizationTool()" disabled>Visualization Tool</button>
+    <div class="footer-row">
+      <button class="btn btn-fetch" id="btn-fetch" onclick="runFetch()">Fetch Data</button>
+      <button class="btn btn-sim" id="btn-sim" onclick="runSim()" disabled>Run Simulation</button>
+      <!-- <button class="btn btn-dl" id="btn-dl" onclick="downloadJSON()" disabled>Download JSON</button> -->
+      <button class="btn btn-map" id="btn-map" onclick="openVisualizationTool()" disabled>Open Viewer</button>
+    </div>
+    <div class="footer-nav">
+      <a href="area.html" class="link-area">Back to area selection</a>
+      <a href="about.html" class="link-about">About the simulation</a>
+    </div>
   </div>
 </div>
 
@@ -1739,10 +1773,7 @@ async function renderSimPlots() {
 // ═══════════════════════════════════════════════════════════════════
 
 async function runFetch() {
-  document.getElementById('btn-fetch').disabled = true;
-  document.getElementById('btn-sim').disabled = true;
-  document.getElementById('btn-dl').disabled = true;
-  document.getElementById('btn-map').disabled = true;
+  const _dl = document.getElementById('btn-dl'); if (_dl) _dl.disabled = true;
   fetchedData = null; simResult = null;
   document.getElementById('plots-area').style.display = 'none';
   setProgress(0);
@@ -1828,7 +1859,7 @@ async function runSim() {
   if (!fetchedData) { log('No data fetched yet.', 'error'); return; }
   document.getElementById('btn-sim').disabled = true;
   document.getElementById('btn-fetch').disabled = true;
-  document.getElementById('btn-dl').disabled = true;
+  const _dl2 = document.getElementById('btn-dl'); if (_dl2) _dl2.disabled = true;
   document.getElementById('btn-map').disabled = true;
   simResult = null;
   _simPlots = null;
@@ -2146,7 +2177,7 @@ async function runSim() {
     await renderSimPlots();
     setProgress(1.0);
     setStatus('Simulation complete.');
-    document.getElementById('btn-dl').disabled = false;
+    const _dl3 = document.getElementById('btn-dl'); if (_dl3) _dl3.disabled = false;
     document.getElementById('btn-map').disabled = false;
   } catch (e) {
     log(`SIMULATION ERROR: ${e.message || e}`, 'error');

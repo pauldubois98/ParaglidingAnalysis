@@ -81,15 +81,15 @@
       padding: 4px 9px;
       margin: 3px 2px;
       font-size: 11px;
-      border: 1px solid rgba(255,200,80,0.4);
+      border: 1px solid #7eb8ff88;
       border-radius: 20px;
       cursor: pointer;
-      color: #d0b870;
+      color: #7eb8ff;
       background: transparent;
       transition: all 0.2s;
     }
-    .mode-btn.active { background: #c8a040; color: #0a0f1a; border-color: #c8a040; }
-    .mode-btn.active.modified { background: rgba(140,110,30,0.35); color: #b89840; border-color: rgba(180,150,50,0.5); }
+    .mode-btn.active { background: #7eb8ff; color: #0a0f1a; border-color: #7eb8ff; }
+    .mode-btn.active.modified { background: rgba(140,110,30,0.35); color: #7eb8ff; border-color: #7eb8ff88; }
     .colorbar {
       background: rgba(10,15,30,0.82);
       border: 1px solid rgba(100,160,255,0.2);
@@ -201,6 +201,32 @@
       height: 360px;
       border-radius: 4px;
     }
+    .nav-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 13px;
+      font-size: 11.5px;
+      font-family: inherit;
+      border-radius: 20px;
+      border: 1px solid;
+      text-decoration: none;
+      letter-spacing: 0.3px;
+      transition: background 0.18s, border-color 0.18s, color 0.18s;
+      white-space: nowrap;
+    }
+    .nav-btn .nav-icon {
+      font-size: 13px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .nav-btn-info  { color:#99b8d0; border-color:rgba(100,160,255,0.28); background:rgba(100,160,255,0.06); }
+    .nav-btn-area  { color:#80d0c0; border-color:rgba(70,200,175,0.28);  background:rgba(70,200,175,0.06);  }
+    .nav-btn-run   { color:#70e898; border-color:rgba(50,195,95,0.32);   background:rgba(50,195,95,0.07);   }
+    .nav-btn-info:hover  { color:#c8dff0; border-color:rgba(100,160,255,0.6); background:rgba(100,160,255,0.15); }
+    .nav-btn-area:hover  { color:#a8e8d8; border-color:rgba(70,200,175,0.6);  background:rgba(70,200,175,0.15);  }
+    .nav-btn-run:hover   { color:#98ffb8; border-color:rgba(50,195,95,0.62);  background:rgba(50,195,95,0.18);   }
   </style>
 </head>
 <body>
@@ -313,21 +339,10 @@
   <div class="control-group" style="margin-top:10px; font-size:11px; color:#668; line-height:1.5">
     Drag to rotate · Scroll to zoom · Right-drag to pan
   </div>
-  <div style="margin-top:12px; padding-top:10px; border-top:1px solid rgba(100,160,255,0.15); text-align:center">
-    <a href="about.html"
-       style="font-size:11px; color:#5588aa; text-decoration:none; letter-spacing:0.5px">
-      How does the simulation work?
-    </a>
-    &nbsp;·&nbsp;
-    <a href="area.html"
-       style="font-size:11px; color:#5588aa; text-decoration:none; letter-spacing:0.5px">
-      Select area
-    </a>
-    &nbsp;·&nbsp;
-    <a href="simulate.html"
-       style="font-size:11px; color:#5588aa; text-decoration:none; letter-spacing:0.5px">
-      Run simulation
-    </a>
+  <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(100,160,255,0.12); display:flex; flex-direction:column; gap:6px;">
+    <a href="area.html" class="nav-btn nav-btn-area">Back to area selection</a>
+    <a href="simulate.html" class="nav-btn nav-btn-run">Back to simulation</a>
+    <a href="about.html" class="nav-btn nav-btn-info">About the simulation</a>
   </div>
 </div>
 
