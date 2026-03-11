@@ -295,6 +295,15 @@
       input[type="range"]::-webkit-slider-thumb { width: 20px; height: 20px; }
       .scenario-btn, .mode-btn { padding: 7px 13px; font-size: 12px; }
     }
+
+    .panel-footer{
+      margin-top:14px;
+      padding-top:12px;
+      border-top:1px solid rgba(100,160,255,0.12);
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
   </style>
 </head>
 <body>
@@ -407,8 +416,8 @@
   <div class="control-group" style="margin-top:10px; font-size:11px; color:#668; line-height:1.5">
     Drag to rotate · Scroll to zoom · Right-drag to pan
   </div>
-  <div style="margin-top:14px; padding-top:12px; border-top:1px solid rgba(100,160,255,0.12); display:flex; flex-direction:column; gap:6px;">
-    <a href="index.html" class="nav-btn nav-btn-info">← Home</a>
+  <div class="panel-footer">
+    <a href="index.html" class="nav-btn nav-btn-info">Home</a>
     <a href="area.html" class="nav-btn nav-btn-area">Back to area selection</a>
     <a href="simulate.html" class="nav-btn nav-btn-run">Back to simulation</a>
     <a href="about.html" class="nav-btn nav-btn-info">About the simulation</a>
