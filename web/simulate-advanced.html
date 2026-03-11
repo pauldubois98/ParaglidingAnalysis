@@ -173,6 +173,8 @@
       transition: background 0.18s, border-color 0.18s, color 0.18s;
     }
     .btn:disabled { opacity: 0.32; cursor: not-allowed; }
+    .btn-secondary { flex:none; padding:5px 10px; font-size:11px; font-family:inherit; font-weight:600; border-radius:14px; border:1px solid rgba(180,180,180,0.3); cursor:pointer; color:#bbb; background:rgba(255,255,255,0.05); transition:background 0.15s,border-color 0.15s; }
+    .btn-secondary:hover { background:rgba(255,255,255,0.12); border-color:rgba(180,180,180,0.6); }
     .btn-fetch { color: #a0ceff; border-color: rgba(100,160,255,0.35); background: rgba(100,160,255,0.09); }
     .btn-sim   { color: #7eb8ff; border-color: rgba(100,160,255,0.28); background: rgba(100,160,255,0.06); }
     .btn-map   { color: #60e0a0; border-color: rgba(50,195,95,0.35);   background: rgba(50,195,95,0.09); }
@@ -345,24 +347,32 @@
       <div class="field-hint">Time constant for ground heating. ~1 h bare rock, ~1.5 h mixed, ~3 h forest.</div>
 
       <div class="section-title">NS Solver Parameters</div>
+      <div style="display:flex;gap:8px;margin-bottom:6px;">
+        <button class="btn-secondary" style="flex:1" onclick="loadPreset('coarse')">Coarse preset</button>
+        <button class="btn-secondary" style="flex:1" onclick="loadPreset('precise')">Precise preset</button>
+      </div>
       <div class="grid-2">
-        <div><label class="field-label">Vertical layers NZ</label><input type="number" id="ns_nz" step="1" min="10" max="60" value="40"></div>
+        <div><label class="field-label">Horizontal NX</label><input type="number" id="ns_nx" step="4" min="8" max="120" value="80"></div>
+        <div><label class="field-label">Horizontal NY</label><input type="number" id="ns_ny" step="4" min="8" max="120" value="80"></div>
+      </div>
+      <div class="grid-2">
+        <div><label class="field-label">Vertical layers NZ</label><input type="number" id="ns_nz" step="1" min="10" max="80" value="40"></div>
         <div><label class="field-label">Domain height (m)</label><input type="number" id="ns_domH" step="100" min="1000" max="8000" value="4000"></div>
       </div>
       <div class="grid-2">
-        <div><label class="field-label">NS time step (s)</label><input type="number" id="ns_dt" step="5" min="5" max="120" value="30"></div>
+        <div><label class="field-label">NS time step (s)</label><input type="number" id="ns_dt" step="5" min="5" max="300" value="30"></div>
         <div><label class="field-label">Smagorinsky Cs</label><input type="number" id="ns_cs" step="0.01" min="0.05" max="0.5" value="0.18"></div>
       </div>
       <div class="grid-2">
         <div><label class="field-label">SOR omega</label><input type="number" id="ns_omega" step="0.05" min="1.0" max="1.95" value="1.6"></div>
-        <div><label class="field-label">Pressure max iter</label><input type="number" id="ns_maxiter" step="10" min="30" max="300" value="150"></div>
+        <div><label class="field-label">Pressure max iter</label><input type="number" id="ns_maxiter" step="10" min="20" max="500" value="150"></div>
       </div>
       <div class="field-hint">Red-Black SOR pressure solver. Higher iterations = better accuracy, slower.</div>
 
       <div class="section-title">Visualization</div>
       <div class="grid-2">
         <div><label class="field-label">View height (m AGL)</label><input type="number" id="ns_hview" step="50" min="50" max="3000" value="500"></div>
-        <div><label class="field-label">Steps per frame</label><input type="number" id="ns_spf" step="1" min="1" max="30" value="5"></div>
+        <div><label class="field-label">Steps per frame</label><input type="number" id="ns_spf" step="1" min="1" max="60" value="5"></div>
       </div>
       <div class="field-hint">Height for plan-view slice. Steps between UI updates (higher = faster sim).</div>
 
@@ -423,6 +433,19 @@ function updateWeatherMode() {
   }
   validateDate();
 }
+const PRESETS = {
+  coarse:  { ns_nx:50, ns_ny:50, ns_nz:30, ns_dt:90,  ns_cs:0.18, ns_omega:1.75, ns_maxiter:60,  ns_spf:10 },
+  precise: { ns_nx:80, ns_ny:80, ns_nz:40, ns_dt:30,  ns_cs:0.18, ns_omega:1.6,  ns_maxiter:150, ns_spf:5  },
+};
+function loadPreset(name) {
+  const p = PRESETS[name];
+  if (!p) return;
+  for (const [id, val] of Object.entries(p)) {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  }
+}
+
 function validateDate() {
   const mode = getWeatherMode();
   const dateInput = document.getElementById('sim_date');
@@ -1834,8 +1857,9 @@ async function runSim() {
     const diffuseFrac = parseFloat(document.getElementById('diffuse_frac').value);
     const ELR_km      = parseFloat(document.getElementById('elr').value);
 
-    // Cap NS horizontal grid at 80×80
-    const MAX_HNX = 80, MAX_HNY = 80;
+    // NS horizontal grid capped by user-selected NX/NY
+    const MAX_HNX = parseInt(document.getElementById('ns_nx').value) || 80;
+    const MAX_HNY = parseInt(document.getElementById('ns_ny').value) || 80;
     const NX = Math.min(nx_raw, MAX_HNX);
     const NY = Math.min(ny_raw, MAX_HNY);
     const dx = dx_raw * nx_raw / NX;
