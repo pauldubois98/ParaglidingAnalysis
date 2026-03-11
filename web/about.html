@@ -14,7 +14,7 @@
       font-family: 'Segoe UI', system-ui, sans-serif;
       font-size: 15px;
       line-height: 1.7;
-      padding: 40px 20px 80px;
+      padding: 56px 20px 80px;
     }
 
     .page {
@@ -185,8 +185,47 @@
       color: #3a5070;
     }
 
+    /* ── Header nav ── */
+    #header-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 44px;
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 2px;
+      background: rgba(6,10,20,0.92);
+      border-bottom: 1px solid rgba(100,160,255,0.12);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 7px;
+      padding: 5px 9px; margin-right: 4px;
+      color: #7eb8ff; text-decoration: none;
+      font-size: 12px; font-weight: 600;
+      border-radius: 6px; white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .nav-logo img { width: 18px; height: 18px; filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%); }
+    .nav-logo:hover { background: rgba(100,160,255,0.1); }
+    .nav-sep { width: 1px; height: 18px; background: rgba(100,160,255,0.12); margin: 0 2px; flex-shrink: 0; }
+    .nav-link {
+      padding: 5px 10px;
+      color: #4a6888; text-decoration: none;
+      font-size: 12px; border-radius: 6px; white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-link:hover { color: #90b8d8; background: rgba(100,160,255,0.08); }
+    .nav-link.nav-active { color: #7eb8ff; background: rgba(100,160,255,0.1); font-weight: 500; }
+    @media (max-width: 480px) {
+      .nav-logo span { display: none; }
+      .nav-link { padding: 5px 7px; font-size: 11px; }
+    }
+
     @media (max-width: 640px) {
-      body { padding: 20px 14px 60px; }
+      body { padding: 56px 14px 60px; }
       header h1 { font-size: 20px; }
       h2 { font-size: 15px; letter-spacing: 1px; }
       table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
@@ -199,6 +238,14 @@
   </style>
 </head>
 <body>
+<nav id="header-nav">
+  <a href="index.html" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+  <div class="nav-sep"></div>
+  <a href="area.html" class="nav-link">Area</a>
+  <a href="simulate.html" class="nav-link">Simulate</a>
+  <a href="view.html" class="nav-link">View</a>
+  <a href="about.html" class="nav-link nav-active">About</a>
+</nav>
 <div class="page">
 
   <header>
@@ -208,14 +255,6 @@
       Land cover: ESA WorldCover 2021 &nbsp;·&nbsp;
       Calibration: ERA5 reanalysis (Open-Meteo)
     </p>
-    <br>
-    <a href="index.html">Home</a>
-    &nbsp;·&nbsp;
-    <a href="view.html">Visualization tool</a>
-    &nbsp;·&nbsp;
-    <a href="area.html">Area Selection</a>
-    &nbsp;·&nbsp;
-    <a href="simulate.html">Run simulation</a>
   </header>
 
   <!-- ─── Pipeline ─────────────────────────────────────────────────────── -->
@@ -311,26 +350,30 @@ V_advect   ∈ [50, 1 000] m/h</div>
           With k_collect = 0 the model is purely orographic. Raising it (default 1.0) increases the "suction" that drains collector cells into trigger zones regardless of local terrain geometry, more faithfully reproducing pressure-driven surface convergence under an active thermal.</li>
       </ul>
     </li>
-    <li><strong>Thermal plume profile and vertical speed estimate</strong> <span class="tag tag-part">estimated</span> — clicking any cell shows a side-panel plume profile. The <em>width</em> of the plume at each altitude encodes the estimated vertical speed at that height, derived from simple parcel buoyancy theory (no entrainment, no turbulence):
-      <div class="formula">w(z) = √(2 · g/T₀ · ΔT(z) · z<sub>AGL</sub>)</div>
-      where ΔT(z) = ΔT<sub>eff</sub> · (1 − z/H) (linear temperature excess decaying to zero at the ceiling), g = 9.81 m/s², T₀ = 293 K, and H is the thermal top height. Normalised by its maximum, this gives a width profile w(z)/w<sub>max</sub> = 2·√(z/H · (1 − z/H)), which peaks at <em>mid-height</em> (z = H/2). The peak speed label shown in the panel is:
-      <div class="formula">w<sub>max</sub> = √(0.5 · g/T₀ · ΔT<sub>eff</sub> · H)</div>
-      <strong>This is a rough order-of-magnitude estimate only.</strong> Real thermals are slower than this formula predicts because it ignores entrainment of surrounding air (which dilutes buoyancy and dissipates kinetic energy), turbulent drag, and the fact that a thermal is not a closed parcel but a continuous plume. Typical real values for paragliding thermals are 1–4 m/s; the formula may overestimate by a factor of 2–3 in strong conditions. Use it as a relative indicator (stronger ΔT and higher ceiling → faster thermal) rather than an absolute number.</li>
     <li><strong>Trigger threshold</strong> <span class="tag tag-yes">modelled</span> — a user-adjustable minimum temperature anomaly (in K) used as a <em>display filter</em>, not a physical barrier. The simulation computes ground temperature anomalies independently of this value; the threshold is applied afterwards in the browser as <code>max(0, ΔT − threshold)</code> when colouring the Thermal heat, Thermal top, Daily heat, and Collecting zones maps. Raising it masks out weakly heated cells and shows only the strongest sources — it does <strong>not</strong> cause heat to accumulate and release at a higher level. Think of it as a confidence cutoff: "only show zones warmer than X K above the local mean".</li>
+    <li><strong>Thermal inertia by land-cover type</strong> <span class="tag tag-yes">modelled</span> — each cell has its own relaxation time constant τ derived from its ESA WorldCover class. Bare rock (τ ≈ 0.5 h) heats and cools rapidly, peaking sharply at solar noon. Dense forest (τ ≈ 3.75 h) responds slowly and stays warm well into the afternoon. Water (τ ≈ 22 h) barely changes temperature within a single day. Grassland (τ = 1.5 h) is the reference. The per-cell decay factor is applied at every time step: <code>dT(t) = dT(t−1) × exp(−dt/τ) + dT_instant × (1 − exp(−dt/τ))</code>. The τ values are estimates — soil moisture, vegetation density, and slope aspect all affect the true value.</li>
+    <li>
+      <strong>Thermal plume profile and vertical speed estimate</strong>
+      <span class="tag tag-part">estimated</span> — clicking any cell shows a side-panel plume profile. The <em>width</em> of the plume at each altitude encodes the estimated vertical speed at that height, derived from simple parcel buoyancy theory (no entrainment, no turbulence):
+      <div class="formula">w(z) = √(2 · g/T₀ · ΔT(z) · z<sub>AGL</sub>)</div> where ΔT(z) = ΔT<sub>eff</sub> · (1 − z/H) (linear temperature excess decaying to zero at the ceiling), g = 9.81 m/s², T₀ = 293 K, and H is the thermal top height. Normalised by its maximum, this gives a width profile w(z)/w<sub>max</sub> = 2·√(z/H · (1 − z/H)), which peaks at <em>mid-height</em> (z = H/2). The peak speed label shown in the panel is:
+      <div class="formula">w<sub>max</sub> = √(0.5 · g/T₀ · ΔT<sub>eff</sub> · H)</div>
+      <strong>This is a rough order-of-magnitude estimate only.</strong>
+      Real thermals are slower than this formula predicts because it ignores entrainment of surrounding air (which dilutes buoyancy and dissipates kinetic energy), turbulent drag, and the fact that a thermal is not a closed parcel but a continuous plume. Typical real values for paragliding thermals are 1–4 m/s; the formula may overestimate by a factor of 2–3 in strong conditions. Use it as a relative indicator (stronger ΔT and higher ceiling → faster thermal) rather than an absolute number.
+    </li>
   </ul>
 
-
+  
   <!-- ─── Simplifications ──────────────────────────────────────────────── -->
   <h2>Simplifications made</h2>
-
+  
   <ul>
     <li><strong>No fluid dynamics</strong> <span class="tag tag-part">simplified</span> — the model is purely diagnostic. It computes where and when the ground heats up, but does not solve the Navier-Stokes equations. There is no pressure field, no mass conservation, and no atmospheric convection feedback. The orographic flow is a proxy, not a CFD result.</li>
     <li><strong>Always clear sky</strong> <span class="tag tag-part">simplified</span> — cloud cover is not modelled. The simulation represents a theoretical ideal clear-sky day for the chosen date. Real days will be affected by cumulus, morning fog, etc.</li>
     <li><strong>Fixed ELR</strong> <span class="tag tag-part">simplified</span> — the Environmental Lapse Rate is a single value for the whole domain and the whole day. In reality it varies with altitude, time, and atmospheric sounding. The slider allows manual adjustment.</li>
-    <li><strong>Thermal inertia by land-cover type</strong> <span class="tag tag-yes">modelled</span> — each cell has its own relaxation time constant τ derived from its ESA WorldCover class. Bare rock (τ ≈ 0.5 h) heats and cools rapidly, peaking sharply at solar noon. Dense forest (τ ≈ 3.75 h) responds slowly and stays warm well into the afternoon. Water (τ ≈ 22 h) barely changes temperature within a single day. Grassland (τ = 1.5 h) is the reference. The per-cell decay factor is applied at every time step: <code>dT(t) = dT(t−1) × exp(−dt/τ) + dT_instant × (1 − exp(−dt/τ))</code>. The τ values are estimates — soil moisture, vegetation density, and slope aspect all affect the true value.</li>
     <li><strong>Isotropic diffuse sky</strong> <span class="tag tag-part">simplified</span> — diffuse radiation is assumed to come uniformly from the entire sky hemisphere. In reality it is brighter near the sun (circumsolar region) and near the horizon. A more accurate model (Perez) would require additional parameters.</li>
     <li><strong>ERA5 calibration resolution</strong> <span class="tag tag-part">simplified</span> — ERA5 has ~28 km resolution. The calibration gives the correct domain-average amplitude, but individual cells can exceed this by a factor related to their thermal factor (e.g. bare rock × 1.8).</li>
     <li><strong>No intra-day air temperature variation</strong> <span class="tag tag-part">simplified</span> — the model uses a single <em>max_heat</em> value for the whole day. In reality, air temperature rises through the afternoon, slightly reducing dT in the late afternoon relative to the morning at the same insolation level.</li>
+    <li><strong>Thermal triggering mechanism</strong> <span class="tag tag-part">partially modelled</span> — in reality thermals do not release continuously; heat accumulates under a surface inversion until a bubble detaches. The thermal release cooling (Phase 1) and heat advection (Phase 2) together approximate this: release drains excess heat from geometrically-favoured cells each step, while advection transports surrounding warmth into those cells to refuel them. The result is a continuous-release model with spatial heat redistribution. True episodic bubble release (accumulate → burst → reset cycle, O(minutes)) is not modelled.</li>
   </ul>
 
 
@@ -344,7 +387,6 @@ V_advect   ∈ [50, 1 000] m/h</div>
     <li><strong>Clouds and cloud shadows</strong> <span class="tag tag-no">not modelled</span> — cumulus development, cloud shadows, and their suppression of ground heating are ignored.</li>
     <li><strong>Boundary layer dynamics</strong> <span class="tag tag-no">not modelled</span> — the mixing layer height, thermals overshooting the ELR ceiling, and entrainment are not simulated.</li>
     <li><strong>Subsidence and compensating sink</strong> <span class="tag tag-no">not modelled</span> — air that rises in a thermal must descend somewhere. This broad, weak sink is not represented.</li>
-    <li><strong>Thermal triggering mechanism</strong> <span class="tag tag-part">partially modelled</span> — in reality thermals do not release continuously; heat accumulates under a surface inversion until a bubble detaches. The thermal release cooling (Phase 1) and heat advection (Phase 2) together approximate this: release drains excess heat from geometrically-favoured cells each step, while advection transports surrounding warmth into those cells to refuel them. The result is a continuous-release model with spatial heat redistribution. True episodic bubble release (accumulate → burst → reset cycle, O(minutes)) is not modelled.</li>
     <li><strong>Seasonal vegetation changes</strong> <span class="tag tag-no">not modelled</span> — land cover is static (2021 WorldCover). Spring snowmelt, leaf-out, and summer drought are not reflected.</li>
     <li><strong>Foehn, valley-exit jets, and local circulation</strong> <span class="tag tag-no">not modelled</span> — complex mountain meteorological phenomena driven by synoptic pressure gradients.</li>
     <li><strong>Turbulence and thermal structure</strong> <span class="tag tag-no">not modelled</span> — the plume profile is based on simple parcel buoyancy (see "Thermal plume profile" above), not a turbulent plume simulation. Entrainment, vortex ring structure, thermal pulsing, and the widening of real thermals with altitude due to mixing are all absent. The vertical speed shown is an upper-bound estimate.</li>

@@ -21,7 +21,7 @@
     /* ── Main console area ── */
     #console-area {
       position: absolute;
-      inset: 0 366px 28px 0;
+      inset: 44px 366px 28px 0;
       display: flex;
       flex-direction: column;
       padding: 16px;
@@ -125,11 +125,18 @@
     }
 
     /* ── Right panel ── */
-    #ui-panel {
+    #settings-area{
       position: absolute;
-      top: 16px; right: 16px;
+      top: 44px;
+      right: 16px;
       width: 350px;
       bottom: 32px;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+    }
+
+    #ui-panel {
       background: rgba(10,15,30,0.88);
       border: 1px solid rgba(100,160,255,0.3);
       border-radius: 12px;
@@ -264,31 +271,68 @@
     }
     .btn:disabled { opacity: 0.32; cursor: not-allowed; }
     .btn-fetch { color:#a0ceff; border-color:rgba(100,160,255,0.35); background:rgba(100,160,255,0.09); }
-    .btn-sim   { color:#60e0a0; border-color:rgba(50,195,95,0.35);   background:rgba(50,195,95,0.09);  }
-    .btn-dl    { color:#7eb8ff; border-color:rgba(100,160,255,0.28); background:rgba(100,160,255,0.06); }
-    .btn-map   { color:#f0b840; border-color:rgba(240,175,50,0.35);  background:rgba(240,155,40,0.08); }
+    .btn-sim   { color:#7eb8ff; border-color:rgba(100,160,255,0.28); background:rgba(100,160,255,0.06); }
+    .btn-map   { color:#60e0a0; border-color:rgba(50,195,95,0.35);   background:rgba(50,195,95,0.09);  }
+    .btn-dl    { color:#f0b840; border-color:rgba(240,175,50,0.35);  background:rgba(240,155,40,0.08); }
     .btn-fetch:not(:disabled):hover { background:rgba(100,160,255,0.2);  border-color:rgba(100,160,255,0.6); }
-    .btn-sim:not(:disabled):hover   { background:rgba(50,195,95,0.2);    border-color:rgba(50,195,95,0.6);   }
-    .btn-dl:not(:disabled):hover    { background:rgba(100,160,255,0.16); border-color:rgba(100,160,255,0.55);}
-    .btn-map:not(:disabled):hover   { background:rgba(240,155,40,0.2);   border-color:rgba(240,175,50,0.6);  }
-    .footer-nav {
-      display: flex;
-      gap: 6px;
-      padding-top: 5px;
-      border-top: 1px solid rgba(100,160,255,0.1);
-    }
-    .footer-nav a { text-decoration: none; }
+    .btn-sim:not(:disabled):hover   { background:rgba(100,160,255,0.2);  border-color:rgba(100,160,255,0.6); }    
+    .btn-map:not(:disabled):hover   { background:rgba(50,195,95,0.2);    border-color:rgba(50,195,95,0.6);   }
+    .btn-dl:not(:disabled):hover    { background:rgba(240,155,40,0.2);   border-color:rgba(240,175,50,0.6);  }
     .link-area  { color:#80d0c0; border-color:rgba(70,200,175,0.28);  background:rgba(70,200,175,0.06); }
     .link-about { color:#99b8d0; border-color:rgba(100,160,255,0.28); background:rgba(100,160,255,0.06); }
     .link-area:hover  { background:rgba(70,200,175,0.2);  border-color:rgba(70,200,175,0.6);  color:#a8e8d8; }
     .link-about:hover { background:rgba(100,160,255,0.2); border-color:rgba(100,160,255,0.6); color:#c8dff0; }
 
+    /* ── Header nav ── */
+    #header-nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 44px;
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 2px;
+      background: rgba(6,10,20,0.92);
+      border-bottom: 1px solid rgba(100,160,255,0.12);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 7px;
+      padding: 5px 9px; margin-right: 4px;
+      color: #7eb8ff; text-decoration: none;
+      font-size: 12px; font-weight: 600;
+      border-radius: 6px; white-space: nowrap;
+      transition: background 0.15s;
+    }
+    .nav-logo img { width: 18px; height: 18px; filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%); }
+    .nav-logo:hover { background: rgba(100,160,255,0.1); }
+    .nav-sep { width: 1px; height: 18px; background: rgba(100,160,255,0.12); margin: 0 2px; flex-shrink: 0; }
+    .nav-link {
+      padding: 5px 10px;
+      color: #4a6888; text-decoration: none;
+      font-size: 12px; border-radius: 6px; white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-link:hover { color: #90b8d8; background: rgba(100,160,255,0.08); }
+    .nav-link.nav-active { color: #7eb8ff; background: rgba(100,160,255,0.1); font-weight: 500; }
+    @media (max-width: 480px) {
+      .nav-logo span { display: none; }
+      .nav-link { padding: 5px 7px; font-size: 11px; }
+    }
+
     @media (max-width: 768px) {
-      body { overflow-y: auto !important; height: auto !important; min-height: 100vh; }
+      body {
+        overflow-y: auto !important;
+        height: auto !important;
+        min-height: 100vh;
+        padding-top: 44px; /* clear fixed nav */
+      }
 
       #status-bar {
         position: sticky !important;
-        top: 0 !important; bottom: auto !important;
+        top: 44px !important; bottom: auto !important;
         height: auto !important;
         padding: 7px 14px;
         z-index: 100;
@@ -298,8 +342,9 @@
         position: relative !important;
         inset: auto !important;
         width: 100%;
-        min-height: 45vh;
+        min-height: 40vh;
         padding: 10px;
+        margin-top: 0;
       }
 
       #plots-area, #sim-plots-area {
@@ -308,12 +353,15 @@
       }
       .plot-box { flex: 0 0 calc(50% - 5px) !important; height: 140px !important; }
 
-      #ui-panel {
+      #settings-area {
         position: relative !important;
         top: auto !important; right: auto !important; bottom: auto !important;
         width: 100% !important;
         height: auto !important;
-        max-height: none !important;
+        padding: 0;
+      }
+
+      #ui-panel {
         border-radius: 0;
         border-left: none; border-right: none;
       }
@@ -326,6 +374,15 @@
   </style>
 </head>
 <body>
+
+<nav id="header-nav">
+  <a href="index.html" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+  <div class="nav-sep"></div>
+  <a href="area.html" class="nav-link">Area</a>
+  <a href="simulate.html" class="nav-link nav-active">Simulate</a>
+  <a href="view.html" class="nav-link">View</a>
+  <a href="about.html" class="nav-link">About</a>
+</nav>
 
 <!-- ═══════════════════ MAIN CONSOLE ═══════════════════ -->
 <div id="console-area">
@@ -373,174 +430,171 @@
 <div id="status-bar">Idle</div>
 
 <!-- ═══════════════════ RIGHT PANEL ═══════════════════ -->
-<div id="ui-panel">
-  <div id="panel-header">
-    <h2>Run Simulation</h2>
-  </div>
-
-  <div id="panel-body">
-
-    <!-- Date & Time -->
-    <div class="section-title">Date &amp; Time</div>
-    
-    <label class="field-label">Simulation date</label>
-    <input type="date" id="sim_date" value="2024-07-15" onchange="validateDate()">
-    <div class="field-hint" id="date-hint">Target date for sun position and weather data.</div>
-    <div class="grid-2">
-      <div>
-        <label class="field-label">UTC offset (h)</label>
-        <input type="number" id="tz_offset" step="1" min="-12" max="14" value="2">
-      </div>
-      <div>
-        <label class="field-label">Interval (min)</label>
-        <input type="number" id="interval_min" step="15" min="15" max="120" value="60">
-      </div>
-    </div>
-    <label class="field-label">Min sun elevation (°)</label>
-    <input type="number" id="min_elevation" step="1" min="0" max="20" value="0">
-    <div class="field-hint">Scenarios with sun below this angle are skipped.</div>
-
-    <!-- Area -->
-    <div class="section-title hide">Area</div>
-    <div class="grid-2 hide">
-      <div>
-        <label class="field-label">Max lat (N)</label>
-        <input type="number" id="max_lat" step="0.0001" value="43.014963">
-      </div>
-      <div>
-        <label class="field-label">Min lat (S)</label>
-        <input type="number" id="min_lat" step="0.0001" value="42.961061">
-      </div>
-      <div>
-        <label class="field-label">Min lon (W)</label>
-        <input type="number" id="min_lon" step="0.0001" value="0.838481">
-      </div>
-      <div>
-        <label class="field-label">Max lon (E)</label>
-        <input type="number" id="max_lon" step="0.0001" value="0.933902">
-      </div>
+<div id="settings-area">
+  <div id="ui-panel">
+    <div id="panel-header">
+      <h2>Run Simulation</h2>
     </div>
 
-    <!-- Markers -->
-    <div class="section-title hide">Markers</div>
-    <div class="grid-2 hide">
-      <div>
-        <label class="field-label">Takeoff lat</label>
-        <input type="number" id="takeoff_lat" step="0.00001" value="42.96940">
-      </div>
-      <div>
-        <label class="field-label">Takeoff lon</label>
-        <input type="number" id="takeoff_lon" step="0.00001" value="0.88594">
-      </div>
-      <div>
-        <label class="field-label">Landing lat</label>
-        <input type="number" id="landing_lat" step="0.00001" value="42.99216">
-      </div>
-      <div>
-        <label class="field-label">Landing lon</label>
-        <input type="number" id="landing_lon" step="0.00001" value="0.90398">
-      </div>
-    </div>
+    <div id="panel-body">
 
-    <!-- Terrain -->
-    <div class="section-title">Terrain</div>
-    <div class="grid-2">
-      <div>
-        <label class="field-label">Sim zoom</label>
-        <input type="number" id="sim_zoom" min="11" max="14" step="1" value="12">
+      <!-- Date & Time -->
+      <div class="section-title">Date &amp; Time</div>
+      
+      <label class="field-label">Simulation date</label>
+      <input type="date" id="sim_date" value="2024-07-15" onchange="validateDate()">
+      <div class="field-hint" id="date-hint">Target date for sun position and weather data.</div>
+      <div class="grid-2">
+        <div>
+          <label class="field-label">UTC offset (h)</label>
+          <input type="number" id="tz_offset" step="1" min="-12" max="14" value="2">
+        </div>
+        <div>
+          <label class="field-label">Interval (min)</label>
+          <input type="number" id="interval_min" step="15" min="15" max="120" value="60">
+        </div>
       </div>
-      <div>
-        <label class="field-label">Mesh zoom</label>
-        <input type="number" id="mesh_zoom" min="12" max="15" step="1" value="14">
-      </div>
-    </div>
-    <div class="field-hint">Zoom 12 ≈ 30 m/px (sim), zoom 14 ≈ 7 m/px (mesh).</div>
+      <label class="field-label">Min sun elevation (°)</label>
+      <input type="number" id="min_elevation" step="1" min="0" max="20" value="0">
+      <div class="field-hint">Scenarios with sun below this angle are skipped.</div>
 
-    <!-- Heating -->
-    <div class="section-title">Heating</div>
-    <label class="checkbox-row">
-      <input type="checkbox" id="era5_auto" checked>
-      ERA5 auto-calibrate max_heat
-    </label>
-    <div class="field-hint">Fetches ERA5 data to derive max_heat from observations.</div>
-    <label class="field-label">Weather mode</label>
-    <div class="radio-group">
-      <label><input type="radio" name="weather_mode" value="typical" checked onchange="updateWeatherMode()"> Typical (5-years average of ERA5 data around this date.)</label>
-      <label><input type="radio" name="weather_mode" value="exact" onchange="updateWeatherMode()"> Exact (past date only; ERA5 data for specific date)</label>
-    </div>
-    <label class="field-label">max_heat (K) — manual fallback</label>
-    <input type="number" id="max_heat" step="0.5" min="1" max="40" value="15.0" disabled>
-    <div class="field-hint">Peak ground-air temperature anomaly under full insolation.</div>
-    <div class="grid-2">
-      <div>
-        <label class="field-label">ERA5 window (days)</label>
-        <input type="number" id="era5_window" step="1" min="1" max="30" value="7">
+      <!-- Area -->
+      <div class="section-title hide">Area</div>
+      <div class="grid-2 hide">
+        <div>
+          <label class="field-label">Max lat (N)</label>
+          <input type="number" id="max_lat" step="0.0001" value="43.014963">
+        </div>
+        <div>
+          <label class="field-label">Min lat (S)</label>
+          <input type="number" id="min_lat" step="0.0001" value="42.961061">
+        </div>
+        <div>
+          <label class="field-label">Min lon (W)</label>
+          <input type="number" id="min_lon" step="0.0001" value="0.838481">
+        </div>
+        <div>
+          <label class="field-label">Max lon (E)</label>
+          <input type="number" id="max_lon" step="0.0001" value="0.933902">
+        </div>
       </div>
-      <div>
-        <label class="field-label">Diffuse fraction</label>
-        <input type="number" id="diffuse_frac" step="0.05" min="0" max="1" value="0.3">
+
+      <!-- Markers -->
+      <div class="section-title hide">Markers</div>
+      <div class="grid-2 hide">
+        <div>
+          <label class="field-label">Takeoff lat</label>
+          <input type="number" id="takeoff_lat" step="0.00001" value="42.96940">
+        </div>
+        <div>
+          <label class="field-label">Takeoff lon</label>
+          <input type="number" id="takeoff_lon" step="0.00001" value="0.88594">
+        </div>
+        <div>
+          <label class="field-label">Landing lat</label>
+          <input type="number" id="landing_lat" step="0.00001" value="42.99216">
+        </div>
+        <div>
+          <label class="field-label">Landing lon</label>
+          <input type="number" id="landing_lon" step="0.00001" value="0.90398">
+        </div>
       </div>
-    </div>
-    <label class="field-label">Env. lapse rate (K/km)</label>
-    <input type="number" id="elr" step="0.1" min="3" max="10" value="6.5">
-    <div class="field-hint">Environmental lapse rate. Higher = more unstable atmosphere.</div>
 
-    <!-- Thermal inertia -->
-    <div class="section-title">Thermal Inertia</div>
-    <label class="field-label">τ hours (reference grassland)</label>
-    <input type="number" id="tau_hours" step="0.1" min="0.2" max="5" value="1.5">
-    <div class="field-hint">Time constant for ground temperature to reach solar equilibrium. ~1 h bare rock, ~1.5 h mixed, ~3 h forest/water.</div>
-
-    <!-- Release -->
-    <div class="section-title">Thermal Release</div>
-    <div class="grid-2">
-      <div>
-        <label class="field-label">K_release (h⁻¹)</label>
-        <input type="number" id="k_release" step="0.05" min="0" max="2" value="0.3">
+      <!-- Terrain -->
+      <div class="section-title">Terrain</div>
+      <div class="grid-2">
+        <div>
+          <label class="field-label">Sim zoom</label>
+          <input type="number" id="sim_zoom" min="11" max="14" step="1" value="12">
+        </div>
+        <div>
+          <label class="field-label">Mesh zoom</label>
+          <input type="number" id="mesh_zoom" min="12" max="15" step="1" value="14">
+        </div>
       </div>
-      <div>
-        <label class="field-label">Threshold (K)</label>
-        <input type="number" id="release_threshold" step="0.1" min="0" max="10" value="1.5">
+      <div class="field-hint">Zoom 12 ≈ 30 m/px (sim), zoom 14 ≈ 7 m/px (mesh).</div>
+
+      <!-- Heating -->
+      <div class="section-title">Heating</div>
+      <label class="checkbox-row">
+        <input type="checkbox" id="era5_auto" checked>
+        ERA5 auto-calibrate max_heat
+      </label>
+      <div class="field-hint">Fetches ERA5 data to derive max_heat from observations.</div>
+      <label class="field-label">Weather mode</label>
+      <div class="radio-group">
+        <label><input type="radio" name="weather_mode" value="typical" checked onchange="updateWeatherMode()"> Typical (5-years average of ERA5 data around this date.)</label>
+        <label><input type="radio" name="weather_mode" value="exact" onchange="updateWeatherMode()"> Exact (past date only; ERA5 data for specific date)</label>
       </div>
-    </div>
-    <div class="field-hint">Accumulated heat above threshold releases at trigger zones.</div>
-
-    <!-- Advection -->
-    <div class="section-title">Advection</div>
-    <div class="grid-2">
-      <div>
-        <label class="field-label">V_advect_max (m/h)</label>
-        <input type="number" id="v_advect_max" step="50" min="50" max="3000" value="1000">
+      <label class="field-label">max_heat (K) — manual fallback</label>
+      <input type="number" id="max_heat" step="0.5" min="1" max="40" value="15.0" disabled>
+      <div class="field-hint">Peak ground-air temperature anomaly under full insolation.</div>
+      <div class="grid-2">
+        <div>
+          <label class="field-label">ERA5 window (days)</label>
+          <input type="number" id="era5_window" step="1" min="1" max="30" value="7">
+        </div>
+        <div>
+          <label class="field-label">Diffuse fraction</label>
+          <input type="number" id="diffuse_frac" step="0.05" min="0" max="1" value="0.3">
+        </div>
       </div>
-      <div>
-        <label class="field-label">Ref slope</label>
-        <input type="number" id="ref_slope" step="0.05" min="0.05" max="1" value="0.30">
+      <label class="field-label">Env. lapse rate (K/km)</label>
+      <input type="number" id="elr" step="0.1" min="3" max="10" value="6.5">
+      <div class="field-hint">Environmental lapse rate. Higher = more unstable atmosphere.</div>
+
+      <!-- Thermal inertia -->
+      <div class="section-title">Thermal Inertia</div>
+      <label class="field-label">τ hours (reference grassland)</label>
+      <input type="number" id="tau_hours" step="0.1" min="0.2" max="5" value="1.5">
+      <div class="field-hint">Time constant for ground temperature to reach solar equilibrium. ~1 h bare rock, ~1.5 h mixed, ~3 h forest/water.</div>
+
+      <!-- Release -->
+      <div class="section-title">Thermal Release</div>
+      <div class="grid-2">
+        <div>
+          <label class="field-label">K_release (h⁻¹)</label>
+          <input type="number" id="k_release" step="0.05" min="0" max="2" value="0.3">
+        </div>
+        <div>
+          <label class="field-label">Threshold (K)</label>
+          <input type="number" id="release_threshold" step="0.1" min="0" max="10" value="1.5">
+        </div>
       </div>
-    </div>
-    <div class="field-hint">Anabatic flow speed ceiling and reference slope (tan angle).</div>
-    <label class="field-label">K_collect (collector suction)</label>
-    <input type="number" id="k_collect" step="0.25" min="0" max="10" value="1.0">
-    <div class="field-hint">Strength of dT-gradient suction: collectors bleed heat toward trigger zones. 0 = pure orographic flow; higher = stronger collector→trigger funnelling.</div>
+      <div class="field-hint">Accumulated heat above threshold releases at trigger zones.</div>
 
-    <!-- Output -->
-    <div class="section-title">Output</div>
-    <label class="field-label">Arrow step (px)</label>
-    <input type="number" id="arrow_step" step="1" min="2" max="32" value="8">
-    <div class="field-hint">Downsample flow arrows: every N-th sim grid cell.</div>
+      <!-- Advection -->
+      <div class="section-title">Advection</div>
+      <div class="grid-2">
+        <div>
+          <label class="field-label">V_advect_max (m/h)</label>
+          <input type="number" id="v_advect_max" step="50" min="50" max="3000" value="1000">
+        </div>
+        <div>
+          <label class="field-label">Ref slope</label>
+          <input type="number" id="ref_slope" step="0.05" min="0.05" max="1" value="0.30">
+        </div>
+      </div>
+      <div class="field-hint">Anabatic flow speed ceiling and reference slope (tan angle).</div>
+      <label class="field-label">K_collect (collector suction)</label>
+      <input type="number" id="k_collect" step="0.25" min="0" max="10" value="1.0">
+      <div class="field-hint">Strength of dT-gradient suction: collectors bleed heat toward trigger zones. 0 = pure orographic flow; higher = stronger collector→trigger funnelling.</div>
 
-  </div><!-- /panel-body -->
+      <!-- Output -->
+      <div class="section-title">Output</div>
+      <label class="field-label">Arrow step (px)</label>
+      <input type="number" id="arrow_step" step="1" min="2" max="32" value="8">
+      <div class="field-hint">Downsample flow arrows: every N-th sim grid cell.</div>
 
-  <div id="panel-footer">
-    <div class="footer-row">
-      <button class="btn btn-fetch" id="btn-fetch" onclick="runFetch()">Fetch Data</button>
-      <button class="btn btn-sim" id="btn-sim" onclick="runSim()" disabled>Run Simulation</button>
-      <!-- <button class="btn btn-dl" id="btn-dl" onclick="downloadJSON()" disabled>Download JSON</button> -->
-      <button class="btn btn-map" id="btn-map" onclick="openVisualizationTool()" disabled>Open Viewer</button>
-    </div>
-    <div class="footer-nav">
-      <a href="index.html" class="btn link-about">Home</a>
-      <a href="area.html" class="btn link-area">Area selection</a>
-      <a href="about.html" class="btn link-about">About</a>
+    </div><!-- /panel-body -->
+
+    <div id="panel-footer">
+      <div class="footer-row">
+        <button class="btn btn-fetch" id="btn-fetch" onclick="runFetch()">Fetch Data</button>
+        <button class="btn btn-sim" id="btn-sim" onclick="runSim()" disabled>Run Simulation</button>
+        <!-- <button class="btn btn-dl" id="btn-dl" onclick="downloadJSON()" disabled>Download JSON</button> -->
+        <button class="btn btn-map" id="btn-map" onclick="openVisualizationTool()" disabled>Open Viewer</button>
+      </div>
     </div>
   </div>
 </div>
