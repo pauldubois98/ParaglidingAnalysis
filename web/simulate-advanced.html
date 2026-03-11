@@ -76,7 +76,8 @@
       flex-shrink: 0;
     }
     .viz-box canvas {
-      flex: 1; width: 100%; display: block;
+      flex: 1; width: 100%; height: 100%; display: block;
+      object-fit: contain; object-position: top left;
       image-rendering: pixelated;
     }
     #ns-stats {
@@ -1584,10 +1585,13 @@ function divergingColor(t) {
   }
 }
 
-function renderDivergingField(canvas, data, W, H, vMax, label, solid2d) {
-  canvas.width = W; canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  const img = ctx.createImageData(W, H);
+function renderDivergingField(canvas, data, W, H, vMax, label, solid2d, dispW, dispH) {
+  dispW = dispW || W; dispH = dispH || H;
+  // Render at grid resolution then scale to physical aspect ratio
+  const offscreen = document.createElement('canvas');
+  offscreen.width = W; offscreen.height = H;
+  const ctx2 = offscreen.getContext('2d');
+  const img = ctx2.createImageData(W, H);
   for (let j = 0; j < H; j++) {
     for (let i = 0; i < W; i++) {
       const idx = j * W + i;
@@ -1606,25 +1610,29 @@ function renderDivergingField(canvas, data, W, H, vMax, label, solid2d) {
       img.data[idx*4+3] = 255;
     }
   }
-  ctx.putImageData(img, 0, 0);
+  ctx2.putImageData(img, 0, 0);
+  canvas.width = dispW; canvas.height = dispH;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(offscreen, 0, 0, dispW, dispH);
   if (label) {
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillRect(0, H-14, W, 14);
+    ctx.fillRect(0, dispH-14, dispW, 14);
     ctx.fillStyle = '#e0e8f0';
     ctx.font = '9px monospace';
-    ctx.fillText(label, 2, H-3);
+    ctx.fillText(label, 2, dispH-3);
   }
 }
 
-function renderPlanView(canvas, theta_slice, u_slice, v_slice, NX, NY, solid2d) {
-  const W = canvas.parentElement ? Math.max(NX, canvas.clientWidth || NX) : NX;
-  const H = NY;
+function renderPlanView(canvas, theta_slice, u_slice, v_slice, NX, NY, solid2d, dispW, dispH) {
+  dispW = dispW || NX; dispH = dispH || NY;
   let vMax = 0;
   for (let k = 0; k < theta_slice.length; k++) if (Math.abs(theta_slice[k]) > vMax) vMax = Math.abs(theta_slice[k]);
   if (vMax < 0.01) vMax = 1;
-  renderDivergingField(canvas, theta_slice, NX, NY, vMax, `θ' max=${vMax.toFixed(2)} K`, solid2d);
+  renderDivergingField(canvas, theta_slice, NX, NY, vMax, `θ' max=${vMax.toFixed(2)} K`, solid2d, dispW, dispH);
 
-  // Draw wind arrows
+  // Draw wind arrows in display pixel space
+  const scaleX = dispW / NX, scaleY = dispH / NY;
   const ctx = canvas.getContext('2d');
   ctx.strokeStyle = 'rgba(255,230,100,0.7)';
   ctx.lineWidth = 1;
@@ -1637,26 +1645,28 @@ function renderPlanView(canvas, theta_slice, u_slice, v_slice, NX, NY, solid2d) 
   for (let j = Math.floor(step/2); j < NY; j += step) {
     for (let i = Math.floor(step/2); i < NX; i += step) {
       const idx = j * NX + i;
-      const uu = u_slice[idx] / uMax * (step * 0.45);
-      const vv = v_slice[idx] / uMax * (step * 0.45);
+      const uu = u_slice[idx] / uMax * (step * 0.45) * scaleX;
+      const vv = v_slice[idx] / uMax * (step * 0.45) * scaleY;
       ctx.beginPath();
-      ctx.moveTo(i, j);
-      ctx.lineTo(i + uu, j + vv);
+      ctx.moveTo(i * scaleX, j * scaleY);
+      ctx.lineTo(i * scaleX + uu, j * scaleY + vv);
       ctx.stroke();
     }
   }
 }
 
-function renderVerticalSlice(canvas, theta, solid, NW, NH, label) {
+function renderVerticalSlice(canvas, theta, solid, NW, NH, label, dispW, dispH) {
+  dispW = dispW || NW; dispH = dispH || NH;
   // NW = horizontal cells (NX or NY), NH = NZ
   // Render with iz=0 at bottom (flip vertically)
   let vMax = 0;
   for (let k = 0; k < theta.length; k++) if (Math.abs(theta[k]) > vMax) vMax = Math.abs(theta[k]);
   if (vMax < 0.01) vMax = 1;
 
-  canvas.width = NW; canvas.height = NH;
-  const ctx = canvas.getContext('2d');
-  const img = ctx.createImageData(NW, NH);
+  const offscreen = document.createElement('canvas');
+  offscreen.width = NW; offscreen.height = NH;
+  const ctx2 = offscreen.getContext('2d');
+  const img = ctx2.createImageData(NW, NH);
 
   for (let iz = 0; iz < NH; iz++) {
     for (let ih = 0; ih < NW; ih++) {
@@ -1674,15 +1684,24 @@ function renderVerticalSlice(canvas, theta, solid, NW, NH, label) {
       img.data[dst_idx*4+2] = b; img.data[dst_idx*4+3] = 255;
     }
   }
-  ctx.putImageData(img, 0, 0);
+  ctx2.putImageData(img, 0, 0);
+  canvas.width = dispW; canvas.height = dispH;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(offscreen, 0, 0, dispW, dispH);
   if (label) {
-    ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, NH-14, NW, 14);
-    ctx.fillStyle = '#e0e8f0'; ctx.font = '9px monospace'; ctx.fillText(label, 2, NH-3);
+    ctx.fillStyle = 'rgba(0,0,0,0.6)'; ctx.fillRect(0, dispH-14, dispW, 14);
+    ctx.fillStyle = '#e0e8f0'; ctx.font = '9px monospace'; ctx.fillText(label, 2, dispH-3);
   }
 }
 
 function updateVisualization(solver, iz_view) {
-  const {NX, NY, NZ} = solver;
+  const {NX, NY, NZ, dx, dy, dz} = solver;
+  // Physical display dimensions — preserve real-world aspect ratio.
+  // Keep the larger cell-count axis at its native pixel count; scale the other.
+  const planDispW = NX, planDispH = Math.max(1, Math.round(NY * dy / dx));
+  const ewDispW   = NX, ewDispH   = Math.max(1, Math.round(NZ * dz / dx));
+  const nsDispW   = NY, nsDispH   = Math.max(1, Math.round(NZ * dz / dy));
 
   // Plan view: θ' + wind at iz_view
   const theta_plan = solver.getSliceTheta(iz_view);
@@ -1693,7 +1712,7 @@ function updateVisualization(solver, iz_view) {
     solid2d_plan[iy*NX+ix] = solver.solidMask[solver._idx(ix,iy,iz_view)];
 
   const canvasPlan = document.getElementById('canvas-plan');
-  renderPlanView(canvasPlan, theta_plan, u_plan, v_plan, NX, NY, solid2d_plan);
+  renderPlanView(canvasPlan, theta_plan, u_plan, v_plan, NX, NY, solid2d_plan, planDispW, planDispH);
 
   // W slice
   const w_plan = solver.getSliceW(iz_view);
@@ -1701,19 +1720,19 @@ function updateVisualization(solver, iz_view) {
   for (let k=0;k<w_plan.length;k++) if (Math.abs(w_plan[k])>wMax) wMax=Math.abs(w_plan[k]);
   if (wMax<0.01) wMax=1;
   const canvasW = document.getElementById('canvas-w');
-  renderDivergingField(canvasW, w_plan, NX, NY, wMax, `w max=${wMax.toFixed(2)} m/s`, solid2d_plan);
+  renderDivergingField(canvasW, w_plan, NX, NY, wMax, `w max=${wMax.toFixed(2)} m/s`, solid2d_plan, planDispW, planDispH);
 
   // EW vertical slice at NY/2
   const iy_mid = Math.floor(NY / 2);
   const ewSlice = solver.getVerticalSliceEW(iy_mid);
   const canvasEW = document.getElementById('canvas-ew');
-  renderVerticalSlice(canvasEW, ewSlice.theta, ewSlice.solid, NX, NZ, `EW slice at j=${iy_mid}`);
+  renderVerticalSlice(canvasEW, ewSlice.theta, ewSlice.solid, NX, NZ, `EW slice at j=${iy_mid}`, ewDispW, ewDispH);
 
   // NS vertical slice at NX/2
   const ix_mid = Math.floor(NX / 2);
   const nsSlice = solver.getVerticalSliceNS(ix_mid);
   const canvasNS = document.getElementById('canvas-ns');
-  renderVerticalSlice(canvasNS, nsSlice.theta, nsSlice.solid, NY, NZ, `NS slice at i=${ix_mid}`);
+  renderVerticalSlice(canvasNS, nsSlice.theta, nsSlice.solid, NY, NZ, `NS slice at i=${ix_mid}`, nsDispW, nsDispH);
 }
 
 // ═══════════════════════════════════════════════════════════════════
