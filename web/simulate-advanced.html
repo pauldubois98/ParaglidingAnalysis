@@ -230,6 +230,10 @@
         <canvas id="canvas-plan"></canvas>
       </div>
       <div class="plot-box">
+        <div class="plot-title">Wind u/v (speed + arrows)</div>
+        <canvas id="canvas-wind"></canvas>
+      </div>
+      <div class="plot-box">
         <div class="plot-title">Vertical velocity w</div>
         <canvas id="canvas-w"></canvas>
       </div>
@@ -1598,24 +1602,53 @@ function renderDivergingField(canvas, data, W, H, vMax, solid2d, dispW, dispH) {
   ctx.drawImage(offscreen, 0, 0, dispW, dispH);
 }
 
-function renderPlanView(canvas, theta_slice, u_slice, v_slice, NX, NY, solid2d, dispW, dispH) {
+function renderPlanView(canvas, theta_slice, NX, NY, solid2d, dispW, dispH) {
   dispW = dispW || NX; dispH = dispH || NY;
   let vMax = 0;
   for (let k = 0; k < theta_slice.length; k++) if (Math.abs(theta_slice[k]) > vMax) vMax = Math.abs(theta_slice[k]);
   if (vMax < 0.01) vMax = 1;
   renderDivergingField(canvas, theta_slice, NX, NY, vMax, solid2d, dispW, dispH);
+}
 
-  // Draw wind arrows in display pixel space
-  const scaleX = dispW / NX, scaleY = dispH / NY;
-  const ctx = canvas.getContext('2d');
-  ctx.strokeStyle = 'rgba(255,230,100,0.7)';
-  ctx.lineWidth = 1;
-  const step = Math.max(4, Math.round(Math.min(NX, NY) / 12));
+function renderWindView(canvas, u_slice, v_slice, NX, NY, solid2d, dispW, dispH) {
+  dispW = dispW || NX; dispH = dispH || NY;
   let uMax = 1e-6;
   for (let k = 0; k < u_slice.length; k++) {
     if (Math.abs(u_slice[k]) > uMax) uMax = Math.abs(u_slice[k]);
     if (Math.abs(v_slice[k]) > uMax) uMax = Math.abs(v_slice[k]);
   }
+
+  // Background: wind speed magnitude as dark-navy → teal → white
+  const offscreen = document.createElement('canvas');
+  offscreen.width = NX; offscreen.height = NY;
+  const ctx2 = offscreen.getContext('2d');
+  const img = ctx2.createImageData(NX, NY);
+  for (let j = 0; j < NY; j++) {
+    for (let i = 0; i < NX; i++) {
+      const idx = j * NX + i;
+      if (solid2d && solid2d[idx]) {
+        img.data[idx*4]=60; img.data[idx*4+1]=65; img.data[idx*4+2]=80; img.data[idx*4+3]=255;
+        continue;
+      }
+      const spd = Math.sqrt(u_slice[idx]**2 + v_slice[idx]**2);
+      const t = Math.min(1, spd / uMax);
+      img.data[idx*4]   = Math.round(t*t*180);
+      img.data[idx*4+1] = Math.round(t*200);
+      img.data[idx*4+2] = Math.round(60 + t*170);
+      img.data[idx*4+3] = 255;
+    }
+  }
+  ctx2.putImageData(img, 0, 0);
+  canvas.width = dispW; canvas.height = dispH;
+  const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(offscreen, 0, 0, dispW, dispH);
+
+  // Wind arrows
+  const scaleX = dispW / NX, scaleY = dispH / NY;
+  ctx.strokeStyle = 'rgba(255,240,180,0.85)';
+  ctx.lineWidth = 1;
+  const step = Math.max(4, Math.round(Math.min(NX, NY) / 12));
   for (let j = Math.floor(step/2); j < NY; j += step) {
     for (let i = Math.floor(step/2); i < NX; i += step) {
       const idx = j * NX + i;
@@ -1686,7 +1719,10 @@ function updateVisualization(solver, iz_view) {
     solid2d_plan[iy*NX+ix] = solver.solidMask[solver._idx(ix,iy,iz_view)];
 
   const canvasPlan = document.getElementById('canvas-plan');
-  renderPlanView(canvasPlan, theta_plan, u_plan, v_plan, NX, NY, solid2d_plan, planDispW, planDispH);
+  renderPlanView(canvasPlan, theta_plan, NX, NY, solid2d_plan, planDispW, planDispH);
+
+  const canvasWind = document.getElementById('canvas-wind');
+  renderWindView(canvasWind, u_plan, v_plan, NX, NY, solid2d_plan, planDispW, planDispH);
 
   // W slice
   const w_plan = solver.getSliceW(iz_view);
