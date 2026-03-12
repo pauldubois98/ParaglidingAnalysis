@@ -143,6 +143,26 @@
     }
     #info-bar span { color: #5588aa; }
     #info-bar strong { color: #7eb8ff; }
+
+    /* ── Selected point panel ── */
+    #info-panel {
+      position: fixed; top: 52px; left: 16px; width: 240px;
+      background: rgba(10,15,30,0.85); border: 1px solid rgba(100,160,255,0.3);
+      border-radius: 12px; padding: 14px; font-size: 12px; color: #c8d8e8;
+      backdrop-filter: blur(8px); display: none; z-index: 10;
+    }
+    #info-panel h3 {
+      font-size: 13px; color: #7eb8ff; text-transform: uppercase;
+      letter-spacing: 1px; margin-bottom: 4px;
+    }
+    #info-panel .info-coords { font-size: 10px; color: #7eb8ff; margin-bottom: 10px; }
+    #info-panel .info-row {
+      display: flex; justify-content: space-between; gap: 8px;
+      margin-bottom: 5px; border-bottom: 1px solid rgba(100,160,255,0.08); padding-bottom: 5px;
+    }
+    #info-panel .info-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    #info-panel .info-label { color: #6888a0; }
+    #info-panel .info-val { color: #e0f0ff; font-weight: bold; text-align: right; }
   </style>
 </head>
 
@@ -229,9 +249,6 @@
     <input type="range" id="arrow-width" min="1" max="10" step="0.5" value="2"
            oninput="document.getElementById('arrow-width-val').textContent=this.value; updateArrowWidth();">
   </div>
-
-  <div class="section-title">Info</div>
-  <div id="sim-info" style="font-size:10px; color:#3a6080; line-height:1.8;">—</div>
 </div>
 
 <!-- Colorbar -->
@@ -245,8 +262,10 @@
 <canvas id="wind-compass" width="80" height="80" title="Wind direction"></canvas>
 
 <!-- Info bar -->
+<div id="info-panel"><div id="info-rows"></div></div>
+
 <div id="info-bar">
-  <span>Drag to orbit · Scroll to zoom · Right-drag to pan</span>
+  <span>Drag to orbit · Scroll to zoom · Right-drag to pan · Click to inspect</span>
   <span><strong id="info-overlay">Wind Speed</strong></span>
   <span id="info-params"></span>
 </div>
@@ -325,6 +344,7 @@ function animate() {
   controls.update();
   renderer.render(scene, camera);
   updateMarkerLabels();
+  updateClickMarkerLabel();
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -335,6 +355,8 @@ let simData     = null;
 let terrainMesh = null;
 let overlayMesh = null;
 let arrowLines  = null;
+let pickMesh    = null;
+let clickMarker = null;
 let currentOverlay = 'speed';
 let arrowsVisible  = true;
 let arrowColor     = 0xffffff;
@@ -754,7 +776,7 @@ function buildMarkers() {
     div.textContent = `${m.label}  ${m.z.toFixed(0)}m`;
     document.getElementById('canvas-container').appendChild(div);
     cone._labelDiv = div;
-    cone._worldPos = new THREE.Vector3(m.x, m.y, m.z + poleH + 90);
+    cone._worldPos = new THREE.Vector3(m.x, m.y, m.z + poleH);
   });
 }
 
@@ -769,6 +791,155 @@ function updateMarkerLabels() {
     obj._labelDiv.style.display = pos.z > 1 ? 'none' : 'block';
   });
 }
+
+// ═══════════════════════════════════════════════════════════════════
+//  SELECTED POINT INSPECTION
+// ═══════════════════════════════════════════════════════════════════
+
+function buildPickMesh() {
+  if (pickMesh) { scene.remove(pickMesh); pickMesh.geometry.dispose(); pickMesh.material.dispose(); }
+  const T = simData.terrain;
+  const { nx, ny, elevation, x_extent, y_extent } = T;
+  const geom = new THREE.PlaneGeometry(
+    x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+  );
+  const pos = geom.attributes.position;
+  for (let j = 0; j < ny; j++)
+    for (let i = 0; i < nx; i++)
+      pos.setZ(j * nx + i, elevation[j][i]);
+  pos.needsUpdate = true;
+  geom.computeVertexNormals();
+  pickMesh = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ visible: false }));
+  pickMesh.position.set(
+    (x_extent[0] + x_extent[1]) / 2,
+    -(y_extent[0] + y_extent[1]) / 2,
+    0
+  );
+  scene.add(pickMesh);
+}
+
+function buildClickMarker(x, y, z, elevM) {
+  if (clickMarker) {
+    clickMarker.forEach(m => { scene.remove(m); if (m._labelDiv) m._labelDiv.remove(); });
+  }
+  const color = 0x4488ff;
+  const poleH = 120;
+
+  const pole = new THREE.Mesh(
+    new THREE.CylinderGeometry(4, 4, poleH, 8),
+    new THREE.MeshLambertMaterial({ color })
+  );
+  pole.rotation.x = Math.PI / 2;
+  pole.position.set(x, y, z + poleH / 2);
+
+  const cone = new THREE.Mesh(
+    new THREE.ConeGeometry(40, 80, 12),
+    new THREE.MeshLambertMaterial({ color })
+  );
+  cone.rotation.x = Math.PI / 2;
+  cone.position.set(x, y, z + poleH + 40);
+
+  const div = document.createElement('div');
+  div.style.cssText = `
+    position: absolute; pointer-events: none;
+    background: rgba(10,15,30,0.82); border: 1px solid #4488ff;
+    color: #4488ff; font-size: 12px; font-weight: bold;
+    font-family: 'Segoe UI', sans-serif;
+    padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+    transform: translate(-50%, -100%); margin-top: -8px;
+  `;
+  div.textContent = `▶ Selected ${elevM !== undefined ? elevM.toFixed(0) + ' m' : ''}`;
+  document.getElementById('canvas-container').appendChild(div);
+  cone._labelDiv = div;
+  cone._worldPos = new THREE.Vector3(x, y, z + poleH);
+
+  scene.add(pole, cone);
+  clickMarker = [pole, cone];
+}
+
+function updateClickMarkerLabel() {
+  if (!clickMarker) return;
+  clickMarker.forEach(obj => {
+    if (!obj._labelDiv) return;
+    const pos = obj._worldPos.clone().project(camera);
+    const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-pos.y * 0.5 + 0.5) * window.innerHeight;
+    obj._labelDiv.style.left = x + 'px';
+    obj._labelDiv.style.top  = y + 'px';
+    obj._labelDiv.style.display = pos.z > 1 ? 'none' : 'block';
+  });
+}
+
+function updateInfoPanel(pt, gi, gj) {
+  const T   = simData.terrain;
+  const W   = simData.wind;
+  const nx  = T.nx;
+  const idx = gj * nx + gi;
+  const elev = T.elevation[gj][gi];
+  const R = 6371000;
+  const lat = T.lat0 + pt.y / R * (180 / Math.PI);
+  const lon = T.lon0 + pt.x / (R * Math.cos(T.lat0 * Math.PI / 180)) * (180 / Math.PI);
+
+  const spd = W.speed    ? W.speed[idx].toFixed(1)    : '—';
+  const u_v = W.u && W.v ? `${W.u[idx].toFixed(1)} m/s | ${W.v[idx].toFixed(1)} m/s` : '—';
+  const wv  = W.vertical ? W.vertical[idx].toFixed(2) : '—';
+
+  const ov = OVERLAYS[currentOverlay];
+  let ovVal = '—';
+  if (ov && ov.field && W[ov.field]) {
+    const v = W[ov.field][idx];
+    ovVal = v.toFixed(3) + (ov.unit ? ' ' + ov.unit : '');
+  }
+
+  document.getElementById('info-rows').innerHTML = `
+    <h3>Selected point</h3>
+    <div class="info-coords">${lat.toFixed(5)}° N &nbsp; ${lon.toFixed(5)}° E</div>
+    <div class="info-row"><span class="info-label">Elevation</span>    <span class="info-val">${elev.toFixed(0)} m</span></div>
+    <div class="info-row"><span class="info-label">Wind speed</span>   <span class="info-val">${spd} m/s</span></div>
+    <div class="info-row"><span class="info-label">u |/ v (m/s)</span>  <span class="info-val">${u_v}</span></div>
+    <div class="info-row"><span class="info-label">Vertical wind</span><span class="info-val">${wv} m/s</span></div>
+    <div class="info-row"><span class="info-label">${ov ? ov.title : 'Overlay'}</span><span class="info-val">${ovVal}</span></div>
+  `;
+  document.getElementById('info-panel').style.display = 'block';
+}
+
+const _raycaster = new THREE.Raycaster();
+const _mouse     = new THREE.Vector2();
+let _mouseDownX  = 0, _mouseDownY = 0;
+
+renderer.domElement.addEventListener('mousedown', e => {
+  _mouseDownX = e.clientX; _mouseDownY = e.clientY;
+});
+
+renderer.domElement.addEventListener('click', e => {
+  if (Math.hypot(e.clientX - _mouseDownX, e.clientY - _mouseDownY) > 5) return;
+  if (!pickMesh || !simData) return;
+
+  const rect = renderer.domElement.getBoundingClientRect();
+  _mouse.x = ((e.clientX - rect.left) / rect.width)  *  2 - 1;
+  _mouse.y = -((e.clientY - rect.top)  / rect.height) *  2 + 1;
+
+  _raycaster.setFromCamera(_mouse, camera);
+  const hits = _raycaster.intersectObject(pickMesh);
+  if (!hits.length) {
+    document.getElementById('info-panel').style.display = 'none';
+    if (clickMarker) {
+      clickMarker.forEach(m => { scene.remove(m); if (m._labelDiv) m._labelDiv.remove(); });
+      clickMarker = null;
+    }
+    return;
+  }
+
+  const pt  = hits[0].point;
+  const T   = simData.terrain;
+  const gi  = Math.round((pt.x - T.x_extent[0]) / T.dx);
+  const gj  = Math.round((-T.y_extent[0] - pt.y) / T.dy);
+  if (gi < 0 || gi >= T.nx || gj < 0 || gj >= T.ny) return;
+
+  const elev = T.elevation[gj][gi];
+  buildClickMarker(pt.x, pt.y, elev, elev);
+  updateInfoPanel(pt, gi, gj);
+});
 
 // ═══════════════════════════════════════════════════════════════════
 //  WIND DIRECTION COMPASS
@@ -964,6 +1135,7 @@ async function load() {
     loadingMsg.textContent = 'Building terrain…';
     await new Promise(r => setTimeout(r, 0));
     buildTerrain();
+    buildPickMesh();
 
     loadingMsg.textContent = 'Building overlay…';
     await new Promise(r => setTimeout(r, 0));
@@ -979,11 +1151,6 @@ async function load() {
 
     // Info panel
     const p = simData.params;
-    document.getElementById('sim-info').innerHTML =
-      `Wind: <strong style="color:#7eb8ff">${p.wind_dir?.toFixed(0)}° @ ${p.wind_speed_ms?.toFixed(1)} m/s</strong><br>` +
-      `H₀ = ${p.H0} m &nbsp;|&nbsp; g′ = ${p.g_prime} m/s²<br>` +
-      `Grid: ${p.nx}×${p.ny}, dx=${p.dx?.toFixed(0)} m<br>` +
-      `T_sim = ${p.sim_time} s`;
     document.getElementById('info-params').textContent =
       `dir ${p.wind_dir?.toFixed(0)}° · ${p.wind_speed_ms?.toFixed(1)} m/s · H₀=${p.H0}m`;
     drawWindCompass(p.wind_dir ?? 0, p.wind_speed_ms ?? 0);
