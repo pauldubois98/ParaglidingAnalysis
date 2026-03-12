@@ -1202,8 +1202,15 @@ function showInfoPanel(sc, i, j) {
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
+let _pointerDownTime = 0, _pointerDownX = 0, _pointerDownY = 0;
+renderer.domElement.addEventListener('pointerdown', e => {
+  _pointerDownTime = Date.now(); _pointerDownX = e.clientX; _pointerDownY = e.clientY;
+});
 renderer.domElement.addEventListener('click', e => {
   if (!thetaMesh || !simData) return;
+  const dt = Date.now() - _pointerDownTime;
+  const dx = e.clientX - _pointerDownX, dy = e.clientY - _pointerDownY;
+  if (dt > 250 || dx*dx + dy*dy > 25) return; // long press or drag → ignore
   const rect = renderer.domElement.getBoundingClientRect();
   mouse.set(
     ((e.clientX-rect.left)/rect.width)*2-1,
