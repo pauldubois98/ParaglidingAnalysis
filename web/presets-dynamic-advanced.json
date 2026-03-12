@@ -1,17 +1,5 @@
 [
   {
-    "id": "terrain",
-    "label": "Terrain",
-    "surfaceField": "elev",
-    "overlayOpacity": 0,
-    "terrainOpacity": 0.95,
-    "showSlice": false,
-    "sliceField": "speed",
-    "sliceHeight": 500,
-    "showArrows": false,
-    "sections": ["terrain"]
-  },
-  {
     "id": "wind-speed",
     "label": "Wind Speed",
     "surfaceField": "speed",
@@ -21,7 +9,10 @@
     "sliceField": "speed",
     "sliceHeight": 500,
     "showArrows": false,
-    "sections": ["surface", "terrain"]
+    "sections": [
+      "surface",
+      "terrain"
+    ]
   },
   {
     "id": "wind-direction",
@@ -33,7 +24,10 @@
     "sliceField": "speed",
     "sliceHeight": 500,
     "showArrows": true,
-    "sections": ["terrain", "arrows"]
+    "sections": [
+      "terrain",
+      "arrows"
+    ]
   },
   {
     "id": "wind-vertical",
@@ -45,31 +39,9 @@
     "sliceField": "w",
     "sliceHeight": 500,
     "showArrows": false,
-    "sections": ["surface"]
-  },
-  {
-    "id": "pressure",
-    "label": "Pressure",
-    "surfaceField": "p",
-    "overlayOpacity": 0.8,
-    "terrainOpacity": 0.8,
-    "showSlice": false,
-    "sliceField": "p",
-    "sliceHeight": 500,
-    "showArrows": false,
-    "sections": ["surface", "terrain"]
-  },
-  {
-    "id": "vorticity",
-    "label": "Vorticity",
-    "surfaceField": "vort",
-    "overlayOpacity": 0.8,
-    "terrainOpacity": 0.8,
-    "showSlice": false,
-    "sliceField": "speed",
-    "sliceHeight": 500,
-    "showArrows": false,
-    "sections": ["surface", "terrain"]
+    "sections": [
+      "surface"
+    ]
   },
   {
     "id": "slice-wind-speed",
@@ -81,7 +53,10 @@
     "sliceField": "speed",
     "sliceHeight": 500,
     "showArrows": false,
-    "sections": ["slice", "terrain"]
+    "sections": [
+      "slice",
+      "terrain"
+    ]
   },
   {
     "id": "slice-wind-vertical",
@@ -93,7 +68,10 @@
     "sliceField": "w",
     "sliceHeight": 500,
     "showArrows": false,
-    "sections": ["slice", "terrain"]
+    "sections": [
+      "slice",
+      "terrain"
+    ]
   },
   {
     "id": "slice-pressure",
@@ -105,6 +83,68 @@
     "sliceField": "p",
     "sliceHeight": 500,
     "showArrows": false,
-    "sections": ["slice", "terrain"]
+    "sections": [
+      "slice",
+      "terrain"
+    ]
+  },
+  {
+    "id": "slice-vorticity",
+    "label": "Slice · Vorticity",
+    "surfaceField": "elev",
+    "overlayOpacity": 0,
+    "terrainOpacity": 1,
+    "showSlice": true,
+    "sliceField": "vort",
+    "sliceHeight": 500,
+    "showArrows": false,
+    "sections": [
+      "slice",
+      "terrain"
+    ]
+  },
+  {
+    "id": "pressure",
+    "label": "Pressure",
+    "surfaceField": "p",
+    "overlayOpacity": 0.8,
+    "terrainOpacity": 0.8,
+    "showSlice": false,
+    "sliceField": "p",
+    "sliceHeight": 500,
+    "showArrows": false,
+    "sections": [
+      "surface",
+      "terrain"
+    ]
+  },
+  {
+    "id": "vorticity",
+    "label": "Vorticity",
+    "surfaceField": "vort",
+    "overlayOpacity": 0.8,
+    "terrainOpacity": 0.8,
+    "showSlice": false,
+    "sliceField": "speed",
+    "sliceHeight": 500,
+    "showArrows": false,
+    "sections": [
+      "surface",
+      "terrain"
+    ]
+  },
+  {
+    "id": "terrain",
+    "label": "Terrain",
+    "surfaceField": "elev",
+    "overlayOpacity": 0,
+    "terrainOpacity": 0.95,
+    "showSlice": false,
+    "sliceField": "speed",
+    "sliceHeight": 500,
+    "showArrows": false,
+    "sections": [
+      "terrain"
+    ]
   }
 ]

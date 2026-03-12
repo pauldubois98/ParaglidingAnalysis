@@ -87,7 +87,6 @@
     }
     .tab-btn.active { color: #7eb8ff; border-color: rgba(100,160,255,.6); background: rgba(100,160,255,.12); }
     .tab-btn:hover:not(.active) { color: #90b8d8; background: rgba(100,160,255,.08); }
-    #preset-btns .tab-btn { flex: none; }
 
     .toggle-row {
       display: flex; align-items: center; justify-content: space-between;
@@ -178,9 +177,7 @@
 <div id="ui-panel">
   <h2>NS 3D Wind</h2>
 
-  <div class="section-title">Presets</div>
   <div class="tab-row" id="preset-btns" style="flex-wrap:wrap;gap:3px;"></div>
-
   <div id="section-surface">
     <div class="section-title">Surface Field</div>
     <div class="tab-row" id="surf-tabs">
@@ -212,6 +209,7 @@
       <button class="tab-btn active" id="tab-slice-speed" onclick="setSliceField('speed')">Speed</button>
       <button class="tab-btn"        id="tab-slice-w"     onclick="setSliceField('w')">Vert.</button>
       <button class="tab-btn"        id="tab-slice-p"     onclick="setSliceField('p')">Press.</button>
+      <button class="tab-btn"        id="tab-slice-vort"  onclick="setSliceField('vort')">Vort.</button>
     </div>
   </div>
 
@@ -596,6 +594,20 @@ function getSliceField() {
       field3D = simData.fields.w; cmap = 'w'; title = 'Vert. Wind'; unit = 'm/s'; sym = true; break;
     case 'p':
       field3D = simData.fields.p; cmap = 'p'; title = 'Pressure'; unit = 'Pa'; sym = true; break;
+    case 'vort': {
+      const { dx, dy } = simData.grid;
+      const base = k_center * ny * nx;
+      const u3 = simData.fields.u, v3 = simData.fields.v;
+      for (let j = 1; j < ny - 1; j++) {
+        for (let i = 1; i < nx - 1; i++) {
+          const dv_dx = (v3[base + j*nx + i+1] - v3[base + j*nx + i-1]) / (2*dx);
+          const du_dy = (u3[base + (j+1)*nx + i] - u3[base + (j-1)*nx + i]) / (2*dy);
+          arr[j*nx + i] = dv_dx - du_dy;
+        }
+      }
+      cmap = 'vort'; title = 'Vorticity Z'; unit = '1/s'; sym = true;
+      return { arr, cmap, title, unit, sym, k: k_center };
+    }
     default:
       { // speed: compute from u,v,w
         const u3 = simData.fields.u, v3 = simData.fields.v, w3 = simData.fields.w;
