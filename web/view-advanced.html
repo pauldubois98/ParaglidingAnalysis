@@ -1186,10 +1186,6 @@ function drawPlumeProfile(sc, i, j) {
     <span style="color:#ff7755">${fmt(+maxAbsW)}m/s</span>
   </div>` : '';
   xAxis.innerHTML = tRow + wRow;
-
-  // ── Legend ──
-  document.getElementById('plume-leg-theta').textContent = `— θ' ±${fmt(maxAbsT)} K`;
-  if (wCol) document.getElementById('plume-leg-w').textContent = `— w ±${fmt(maxAbsW)} m/s`;
 }
 
 // ── Raycasting (click info) ───────────────────────────────────────────────────
