@@ -58,6 +58,7 @@
       overflow-y: auto;
       transform: translateX(calc(100% + 20px));
       transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      z-index: 1;
     }
     #ui-panel.open { transform: translateX(0); }
     #ui-panel h2 { font-size: 13px; color: #7eb8ff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
@@ -102,17 +103,21 @@
 
     /* ── Panel toggle button ── */
     #panel-toggle {
-      position: fixed; top: 52px; right: 8px; z-index: 2500;
-      width: 36px; height: 36px;
-      background: rgba(10,15,30,0.88);
-      border: 1px solid rgba(100,160,255,0.3);
-      border-radius: 50%; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      color: #7eb8ff; font-size: 16px;
-      transition: background .15s, transform .3s;
+      position: absolute;
+      top: 52px;
+      right: 8px;
+      z-index: 1002;
+      background: rgba(10, 15, 30, 0.88);
+      border: 1px solid rgba(100, 160, 255, 0.35);
+      border-radius: 12px;
+      color: #7eb8ff;
+      padding: 9px 14px;
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      transition: background 0.15s, right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    #panel-toggle:hover { background: rgba(100,160,255,.15); }
-    #panel-toggle.open { transform: translateX(-252px); }
 
     /* ── Colorbar ── */
     #colorbar-wrap {
@@ -133,16 +138,6 @@
       background: rgba(4,8,16,0.75);
       backdrop-filter: blur(6px);
     }
-
-    /* ── Info bar ── */
-    #info-bar {
-      position: fixed; bottom: 0; left: 0; right: 0; height: 26px;
-      background: rgba(4,8,16,0.9); border-top: 1px solid rgba(100,160,255,0.1);
-      display: flex; align-items: center; padding: 0 14px;
-      font-size: 10px; color: #3a6080; gap: 20px;
-    }
-    #info-bar span { color: #5588aa; }
-    #info-bar strong { color: #7eb8ff; }
 
     /* ── Selected point panel ── */
     #info-panel {
@@ -188,7 +183,9 @@
 <div id="canvas-container"></div>
 
 <!-- Panel toggle -->
-<button id="panel-toggle" onclick="togglePanel()" title="Toggle controls">⚙</button>
+  <button id="panel-toggle"
+    onclick="const p=document.getElementById('ui-panel');p.classList.toggle('open');this.textContent=p.classList.contains('open')?'✕':'☰';"
+    title="Toggle controls">✕</button>
 
 <!-- Controls panel -->
 <div id="ui-panel">
@@ -197,8 +194,8 @@
   <div class="section-title">Presets</div>
   <div class="tab-row" id="preset-btns"></div>
 
-  <div class="section-title">Overlay</div>
-  <div class="tab-row">
+  <div class="section-title" style="display: none;">Overlay</div>
+  <div class="tab-row" style="display: none;">
     <button class="tab-btn active" id="tab-speed"    onclick="setOverlay('speed')">Speed</button>
     <button class="tab-btn"        id="tab-froude"   onclick="setOverlay('froude')">Froude</button>
     <button class="tab-btn"        id="tab-depth"    onclick="setOverlay('depth')">Depth</button>
@@ -206,7 +203,7 @@
     <button class="tab-btn"        id="tab-vvert"    onclick="setOverlay('vvert')">Vert.</button>
     <button class="tab-btn"        id="tab-terrain"  onclick="setOverlay('terrain')">Terrain</button>
   </div>
-
+  
   <div class="section-title" id="ctrl-section-terrain">Terrain</div>
   <div class="ctrl-group" id="ctrl-terrain-opacity">
     <div class="ctrl-label">Opacity <span id="terr-opacity-val">0.8</span></div>
@@ -215,6 +212,7 @@
   </div>
 
   <div class="section-title" id="ctrl-section-overlay">Overlay</div>
+  <div style="font-size:11px;color:#7eb8ff;font-weight:600;margin-bottom:6px" id="info-overlay">Wind Speed</div>
   <div class="ctrl-group" id="ctrl-overlay-opacity">
     <div class="ctrl-label">Opacity <span id="ov-opacity-val">0.75</span></div>
     <input type="range" id="ov-opacity" min="0" max="1" step="0.05" value="0.75"
@@ -231,7 +229,7 @@
   </div>
   <div class="ctrl-group" id="ctrl-arrow-step">
     <div class="ctrl-label">Step (cells) <span id="arrow-step-val">10</span></div>
-    <input type="range" id="arrow-step" min="4" max="30" step="2" value="10"
+    <input type="range" id="arrow-step" min="4" max="10" step="1" value="4"
            oninput="document.getElementById('arrow-step-val').textContent=this.value; rebuildArrows();">
   </div>
   <div class="ctrl-group" id="ctrl-arrow-height">
@@ -249,6 +247,10 @@
     <input type="range" id="arrow-width" min="1" max="10" step="0.5" value="2"
            oninput="document.getElementById('arrow-width-val').textContent=this.value; updateArrowWidth();">
   </div>
+
+  <div style="font-size:9px;color:#3a6080;line-height:1.7">
+    Drag to orbit · Scroll to zoom<br>Right-drag to pan · Click to inspect
+  </div>
 </div>
 
 <!-- Colorbar -->
@@ -263,12 +265,6 @@
 
 <!-- Info bar -->
 <div id="info-panel"><div id="info-rows"></div></div>
-
-<div id="info-bar">
-  <span>Drag to orbit · Scroll to zoom · Right-drag to pan · Click to inspect</span>
-  <span><strong id="info-overlay">Wind Speed</strong></span>
-  <span id="info-params"></span>
-</div>
 
 <script type="importmap">
 {
@@ -896,7 +892,7 @@ function updateInfoPanel(pt, gi, gj) {
     <div class="info-coords">${lat.toFixed(5)}° N &nbsp; ${lon.toFixed(5)}° E</div>
     <div class="info-row"><span class="info-label">Elevation</span>    <span class="info-val">${elev.toFixed(0)} m</span></div>
     <div class="info-row"><span class="info-label">Wind speed</span>   <span class="info-val">${spd} m/s</span></div>
-    <div class="info-row"><span class="info-label">u |/ v (m/s)</span>  <span class="info-val">${u_v}</span></div>
+    <div class="info-row"><span class="info-label">u | v (m/s)</span>  <span class="info-val">${u_v}</span></div>
     <div class="info-row"><span class="info-label">Vertical wind</span><span class="info-val">${wv} m/s</span></div>
     <div class="info-row"><span class="info-label">${ov ? ov.title : 'Overlay'}</span><span class="info-val">${ovVal}</span></div>
   `;
@@ -1034,6 +1030,7 @@ async function loadPresets() {
     btn.onclick = () => applyPreset(p);
     container.appendChild(btn);
   });
+  if (_presets.length > 0) applyPreset(_presets[0]);
 }
 
 const ALL_CTRL_IDS = [
@@ -1102,18 +1099,6 @@ function applyPreset(p) {
 window.loadPresets = loadPresets;
 
 // ═══════════════════════════════════════════════════════════════════
-//  PANEL TOGGLE
-// ═══════════════════════════════════════════════════════════════════
-
-let panelOpen = false;
-function togglePanel() {
-  panelOpen = !panelOpen;
-  document.getElementById('ui-panel').classList.toggle('open', panelOpen);
-  document.getElementById('panel-toggle').classList.toggle('open', panelOpen);
-}
-window.togglePanel = togglePanel;
-
-// ═══════════════════════════════════════════════════════════════════
 //  LOAD & INIT
 // ═══════════════════════════════════════════════════════════════════
 
@@ -1151,12 +1136,9 @@ async function load() {
 
     // Info panel
     const p = simData.params;
-    document.getElementById('info-params').textContent =
-      `dir ${p.wind_dir?.toFixed(0)}° · ${p.wind_speed_ms?.toFixed(1)} m/s · H₀=${p.H0}m`;
     drawWindCompass(p.wind_dir ?? 0, p.wind_speed_ms ?? 0);
 
     await loadPresets();
-    togglePanel();
   } catch (e) {
     console.error('view-dynamic load error:', e);
     loadingMsg.textContent = `Error: ${e.message}`;
