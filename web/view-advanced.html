@@ -123,9 +123,10 @@
     .irow:last-child { border:none; margin:0; padding:0; }
     .ilabel { color:#6888a0; }
     .ival { color:#e0f0ff; font-weight:bold; }
-    #plume-canvas { display:none; margin-top:8px; width:100%; height:180px;
-      border:1px solid rgba(100,160,255,0.2); border-radius:4px; }
-    #plume-legend { font-size:10px; margin-top:4px; display:none; line-height:1.5; }
+    #plume-yaxis { font-size:9px; font-family:monospace; color:#5a7890; }
+    #plume-yaxis span { position:absolute; right:4px; transform:translateY(-50%); white-space:nowrap; }
+    #plume-xaxis { font-size:9px; font-family:monospace; margin-top:2px; }
+    .px-row { display:flex; justify-content:space-between; }
 
     @media (max-width:768px) {
       #ui-panel { top:auto; right:0; left:0; bottom:0; width:100%;
@@ -153,9 +154,12 @@
   <div id="info-panel">
     <h3 id="ip-title">—</h3>
     <div id="ip-rows"></div>
-    <canvas id="plume-canvas" width="196" height="180"></canvas>
-    <div id="plume-legend">
-      <span style="color:#6699ff" id="plume-leg-theta">— θ'</span>&nbsp;&nbsp;<span style="color:#ff7755" id="plume-leg-w">— w</span>
+    <div id="plume-wrap" style="display:none; margin-top:8px;">
+      <div style="display:flex; align-items:stretch; gap:0;">
+        <div id="plume-yaxis" style="width:36px; position:relative; flex-shrink:0;"></div>
+        <canvas id="plume-canvas" width="156" height="160" style="display:block; border:1px solid rgba(100,160,255,0.2); border-radius:4px;"></canvas>
+      </div>
+      <div id="plume-xaxis" style="margin-left:36px; width:156px;"></div>
     </div>
   </div>
 </div>
@@ -1000,75 +1004,87 @@ function updateSun(sc) {
 }
 
 // ── Markers ───────────────────────────────────────────────────────────────────
-let markersMade = false;
-function makeMarkerSprite(label, color) {
-  const c = document.createElement('canvas'); c.width=256; c.height=80;
-  const ctx = c.getContext('2d');
-  ctx.fillStyle = color;
-  ctx.font = 'bold 36px sans-serif';
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText(label, 128, 40);
-  const tex = new THREE.CanvasTexture(c);
-  const mat = new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false});
-  const sprite = new THREE.Sprite(mat);
-  sprite.scale.set(300, 90, 1);
-  return sprite;
+const MARKER_CONFIG = {
+  takeoff: { color: 0xff8800, hex: '#ff8800', label: '▲ Take-off' },
+  landing: { color: 0x00ff88, hex: '#00ff88', label: '▼ Landing'  },
+};
+const _markerMeshes = [];  // all 3D marker objects (with optional _labelDiv)
+
+function _makeMarkerLabel(text, hexColor) {
+  const div = document.createElement('div');
+  div.style.cssText = `position:absolute;pointer-events:none;
+    background:rgba(10,15,30,0.82);border:1px solid ${hexColor};color:${hexColor};
+    font-size:12px;font-weight:bold;font-family:'Segoe UI',sans-serif;
+    padding:3px 8px;border-radius:4px;white-space:nowrap;
+    transform:translate(-50%,-100%);margin-top:-50px;`;
+  div.textContent = text;
+  document.getElementById('canvas-container').appendChild(div);
+  return div;
 }
+
+function _addMarker(wx, wy, wz, colorInt, labelText, hexColor) {
+  const poleH = 120;
+  const pole = new THREE.Mesh(
+    new THREE.CylinderGeometry(4, 4, poleH, 8),
+    new THREE.MeshLambertMaterial({color: colorInt}));
+  pole.rotation.x = Math.PI/2;
+  pole.position.set(wx, wy, wz + poleH/2);
+  scene.add(pole);
+  _markerMeshes.push(pole);
+
+  const cone = new THREE.Mesh(
+    new THREE.ConeGeometry(40, 80, 12),
+    new THREE.MeshLambertMaterial({color: colorInt}));
+  cone.rotation.x = Math.PI/2;
+  cone.position.set(wx, wy, wz + poleH + 40);
+  scene.add(cone);
+  cone._labelDiv   = _makeMarkerLabel(labelText, hexColor);
+  cone._worldPos   = new THREE.Vector3(wx, wy, wz + poleH + 90);
+  _markerMeshes.push(cone);
+  return cone;
+}
+
+function updateMarkerLabels() {
+  const rect = renderer.domElement.getBoundingClientRect();
+  _markerMeshes.forEach(obj => {
+    if (!obj._labelDiv) return;
+    const pos = obj._worldPos.clone().project(camera);
+    obj._labelDiv.style.left = ((pos.x*0.5+0.5)*rect.width  + rect.left) + 'px';
+    obj._labelDiv.style.top  = ((-pos.y*0.5+0.5)*rect.height + rect.top)  + 'px';
+    obj._labelDiv.style.display = pos.z > 1 ? 'none' : 'block';
+  });
+}
+
+let markersMade = false;
 function buildMarkers(T) {
   if (markersMade || !simData.markers) return;
   markersMade = true;
   const cx = (T.x_extent[0]+T.x_extent[1])/2;
   const cy = (T.y_extent[0]+T.y_extent[1])/2;
   for (const m of simData.markers) {
-    const isTakeoff = m.type==='takeoff';
-    const color = isTakeoff ? 0x44ff88 : 0xff6644;
-    const hexStr = isTakeoff ? '#44ff88' : '#ff6644';
+    const cfg = MARKER_CONFIG[m.type]; if (!cfg) continue;
     const z0 = (m.z || terrainZMin);
-    // Pole
-    const pole = new THREE.Mesh(
-      new THREE.CylinderGeometry(6, 6, 350, 8),
-      new THREE.MeshBasicMaterial({color}));
-    pole.position.set(m.x-cx, -(m.y-cy), z0 + 175 - 60);
-    pole.rotation.x = Math.PI/2;
-    scene.add(pole);
-    // Sphere
-    const sphere = new THREE.Mesh(
-      new THREE.SphereGeometry(50, 16, 16),
-      new THREE.MeshBasicMaterial({color}));
-    sphere.position.set(m.x-cx, -(m.y-cy), z0 + 350 - 60 + 50);
-    scene.add(sphere);
-    // Label sprite
-    const label = isTakeoff ? '⬆ Takeoff' : '⬇ Landing';
-    const sprite = makeMarkerSprite(label, hexStr);
-    sprite.position.set(m.x-cx, -(m.y-cy), z0 + 350 - 60 + 130);
-    scene.add(sprite);
+    _addMarker(m.x-cx, -(m.y-cy), z0, cfg.color,
+      `${cfg.label}  ${z0.toFixed(0)}m`, cfg.hex);
   }
 }
 
-let clickMarkerGroup = null;
+let _clickCone = null;
 let lastClickIJ = null;
-function setClickMarker(wx, wy, wz) {
-  if (!clickMarkerGroup) {
-    clickMarkerGroup = new THREE.Group();
-    const color = 0x4488ff;
-    const pole = new THREE.Mesh(
-      new THREE.CylinderGeometry(6, 6, 350, 8),
-      new THREE.MeshBasicMaterial({color}));
-    pole.position.set(0, 0, 175 - 60);
-    pole.rotation.x = Math.PI/2;
-    clickMarkerGroup.add(pole);
-    const sphere = new THREE.Mesh(
-      new THREE.SphereGeometry(50, 16, 16),
-      new THREE.MeshBasicMaterial({color}));
-    sphere.position.set(0, 0, 350 - 60 + 50);
-    clickMarkerGroup.add(sphere);
-    const sprite = makeMarkerSprite('📍', '#4488ff');
-    sprite.position.set(0, 0, 350 - 60 + 130);
-    clickMarkerGroup.add(sprite);
-    scene.add(clickMarkerGroup);
+function setClickMarker(wx, wy, wz, elevM) {
+  if (_clickCone) {
+    _clickCone._labelDiv.textContent = `▶ Selected  ${elevM !== undefined ? elevM.toFixed(0)+'m' : ''}`;
+    _clickCone._worldPos.set(wx, wy, wz + 120 + 90);
+    _clickCone.position.set(wx, wy, wz + 120 + 40);
+    _clickCone.parent || scene.add(_clickCone);
+    _clickCone.previousSibling || scene.add(_clickCone._pole);
+    _clickCone.visible = true; _clickCone._pole.visible = true;
+    _clickCone._pole.position.set(wx, wy, wz + 60);
+  } else {
+    _clickCone = _addMarker(wx, wy, wz, 0x4488ff,
+      `▶ Selected  ${elevM !== undefined ? elevM.toFixed(0)+'m' : ''}`, '#4488ff');
+    _clickCone._pole = _markerMeshes[_markerMeshes.length - 2];
   }
-  clickMarkerGroup.position.set(wx, wy, wz);
-  clickMarkerGroup.visible = true;
 }
 
 // ── Scenario update ───────────────────────────────────────────────────────────
@@ -1094,23 +1110,19 @@ function updateScenario(idx) {
 
 // ── Plume profile ─────────────────────────────────────────────────────────────
 function drawPlumeProfile(sc, i, j) {
-  const canvas = document.getElementById('plume-canvas');
-  const legend = document.getElementById('plume-legend');
-  if (!sc.theta_3d) { canvas.style.display='none'; legend.style.display='none'; return; }
-  canvas.style.display = 'block';
-  legend.style.display = 'block';
+  const wrap   = document.getElementById('plume-wrap');
+  if (!sc.theta_3d) { wrap.style.display='none'; return; }
+  wrap.style.display = 'block';
 
+  const canvas = document.getElementById('plume-canvas');
   const NZ = sc.theta_3d.length;
   const ctx = canvas.getContext('2d');
   const W = canvas.width, H = canvas.height;
-  const pad = { l:38, r:8, t:8, b:28 };
-  const plotW = W-pad.l-pad.r, plotH = H-pad.t-pad.b;
 
   ctx.clearRect(0, 0, W, H);
   ctx.fillStyle = 'rgba(5,10,20,0.95)';
   ctx.fillRect(0, 0, W, H);
 
-  // Vertical profile at clicked (j,i) cell
   const thetaCol = sc.theta_3d.map(plane => plane[j]?.[i] ?? 0);
   const wCol     = sc.w_3d    ? sc.w_3d.map(plane => plane[j]?.[i] ?? 0) : null;
 
@@ -1120,32 +1132,37 @@ function drawPlumeProfile(sc, i, j) {
   const ns = simData.ns_solver;
   const z0 = simData.terrain.z_extent[0];
 
-  // Horizontal grid lines + Y axis altitude labels
+  // ── Y axis (HTML) ──
   const nYTicks = 5;
-  ctx.font = '10px monospace'; ctx.textAlign = 'right';
+  const yAxis = document.getElementById('plume-yaxis');
+  yAxis.style.height = H + 'px';
+  yAxis.innerHTML = '';
   for (let k=0; k<=nYTicks; k++) {
-    const y = pad.t + plotH*(1-k/nYTicks);
+    const topPct = (1 - k/nYTicks) * 100;
     const alt = Math.round(z0 + k/nYTicks * ns.domH);
-    ctx.fillStyle = '#5a7890';
-    ctx.fillText(alt+'m', pad.l-4, y+4);
-    ctx.strokeStyle = 'rgba(100,160,255,0.1)'; ctx.lineWidth = 0.5;
-    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+plotW, y); ctx.stroke();
+    const span = document.createElement('span');
+    span.textContent = alt + 'm';
+    span.style.top = topPct + '%';
+    yAxis.appendChild(span);
   }
 
-  // Vertical axis line + zero line
+  // ── Horizontal grid lines + zero line (canvas) ──
+  for (let k=0; k<=nYTicks; k++) {
+    const y = H*(1-k/nYTicks);
+    ctx.strokeStyle = 'rgba(100,160,255,0.1)'; ctx.lineWidth = 0.5;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
   ctx.strokeStyle = 'rgba(100,160,255,0.3)'; ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t+plotH);
-  ctx.moveTo(pad.l+plotW/2, pad.t); ctx.lineTo(pad.l+plotW/2, pad.t+plotH);
-  ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W/2, 0); ctx.lineTo(W/2, H); ctx.stroke();
 
+  // ── Profiles ──
   function drawProfile(colData, maxAbs, color) {
     ctx.strokeStyle = color; ctx.lineWidth = 2;
     ctx.beginPath();
     for (let iz=0; iz<NZ; iz++) {
       const t = 0.5 + (colData[iz] / maxAbs) * 0.5;
-      const x = pad.l + Math.max(0,Math.min(1,t)) * plotW;
-      const y = pad.t + plotH*(1 - iz/Math.max(1,NZ-1));
+      const x = Math.max(0, Math.min(1, t)) * W;
+      const y = H*(1 - iz/Math.max(1,NZ-1));
       if (iz===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
     }
     ctx.stroke();
@@ -1154,27 +1171,22 @@ function drawPlumeProfile(sc, i, j) {
   drawProfile(thetaCol, maxAbsT, '#6699ff');
   if (wCol) drawProfile(wCol, maxAbsW, '#ff7755');
 
-  // X axis value labels — show actual range for each profile
+  // ── X axis (HTML) ──
   const fmt = v => Math.abs(v) < 10 ? v.toFixed(2) : v.toFixed(1);
-  ctx.font = '9px monospace'; ctx.textAlign = 'center';
+  const xAxis = document.getElementById('plume-xaxis');
+  const tRow = `<div class="px-row">
+    <span style="color:#6699ff">${fmt(-maxAbsT)}K</span>
+    <span style="color:#3a5568">0</span>
+    <span style="color:#6699ff">${fmt(+maxAbsT)}K</span>
+  </div>`;
+  const wRow = wCol ? `<div class="px-row">
+    <span style="color:#ff7755">${fmt(-maxAbsW)}m/s</span>
+    <span></span>
+    <span style="color:#ff7755">${fmt(+maxAbsW)}m/s</span>
+  </div>` : '';
+  xAxis.innerHTML = tRow + wRow;
 
-  // θ' labels (blue) at left/right ends
-  ctx.fillStyle = '#6699ff';
-  ctx.fillText(fmt(-maxAbsT)+'K', pad.l, pad.t+plotH+12);
-  ctx.fillText(fmt(+maxAbsT)+'K', pad.l+plotW, pad.t+plotH+12);
-
-  // w labels (orange) below, only if w data exists
-  if (wCol) {
-    ctx.fillStyle = '#ff7755';
-    ctx.fillText(fmt(-maxAbsW), pad.l, pad.t+plotH+23);
-    ctx.fillText(fmt(+maxAbsW)+'m/s', pad.l+plotW, pad.t+plotH+23);
-  }
-
-  // Zero label in middle
-  ctx.fillStyle = '#3a5568'; ctx.font = '9px monospace';
-  ctx.fillText('0', pad.l+plotW/2, pad.t+plotH+12);
-
-  // Update legend spans with actual values
+  // ── Legend ──
   document.getElementById('plume-leg-theta').textContent = `— θ' ±${fmt(maxAbsT)} K`;
   if (wCol) document.getElementById('plume-leg-w').textContent = `— w ±${fmt(maxAbsW)} m/s`;
 }
@@ -1220,7 +1232,7 @@ renderer.domElement.addEventListener('click', e => {
   if (!hits.length) {
     document.getElementById('info-panel').style.display='none';
     lastClickIJ = null;
-    if (clickMarkerGroup) clickMarkerGroup.visible = false;
+    if (_clickCone) { _clickCone.visible = false; _clickCone._pole.visible = false; _clickCone._labelDiv.style.display='none'; }
     return;
   }
   const {uv, point} = hits[0];
@@ -1229,7 +1241,7 @@ renderer.domElement.addEventListener('click', e => {
   const i = Math.min(T.nx-1, Math.round(uv.x*(T.nx-1)));
   const j = Math.min(T.ny-1, Math.round((1-uv.y)*(T.ny-1)));
   lastClickIJ = {i, j};
-  setClickMarker(point.x, point.y, point.z);
+  setClickMarker(point.x, point.y, point.z, T.elevation[j]?.[i]);
   showInfoPanel(sc, i, j);
 });
 
@@ -1253,6 +1265,7 @@ function animate() {
   requestAnimationFrame(animate);
   controls.update();
   updateSunLabelPos();
+  updateMarkerLabels();
   renderer.render(scene, camera);
 }
 animate();
