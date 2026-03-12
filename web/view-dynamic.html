@@ -517,6 +517,7 @@ function buildOverlay(cmapName, field, title, unit) {
     vertexColors: true, transparent: true,
     opacity: parseFloat(document.getElementById('ov-opacity').value),
     depthWrite: false, side: THREE.DoubleSide,
+    polygonOffset: true, polygonOffsetFactor: -25, polygonOffsetUnits: -25,
   });
   overlayMesh = new THREE.Mesh(geom, mat);
   overlayMesh.position.set(cx, cy, 0);
