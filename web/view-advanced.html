@@ -1334,17 +1334,19 @@
       const poleH = 120;
       const pole = new THREE.Mesh(
         new THREE.CylinderGeometry(4, 4, poleH, 8),
-        new THREE.MeshLambertMaterial({ color: colorInt }));
+        new THREE.MeshBasicMaterial({ color: colorInt, depthTest: false, transparent: true }));
       pole.rotation.x = Math.PI / 2;
       pole.position.set(wx, wy, wz + poleH / 2);
+      pole.renderOrder = 10;
       scene.add(pole);
       _markerMeshes.push(pole);
 
       const cone = new THREE.Mesh(
         new THREE.ConeGeometry(40, 80, 12),
-        new THREE.MeshLambertMaterial({ color: colorInt }));
+        new THREE.MeshBasicMaterial({ color: colorInt, depthTest: false, transparent: true }));
       cone.rotation.x = Math.PI / 2;
       cone.position.set(wx, wy, wz + poleH + 40);
+      cone.renderOrder = 10;
       scene.add(cone);
       cone._labelDiv = _makeMarkerLabel(labelText, hexColor);
       cone._worldPos = new THREE.Vector3(wx, wy, wz + poleH + 90);

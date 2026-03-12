@@ -750,20 +750,22 @@ function buildMarkers() {
     // Pole
     const pole = new THREE.Mesh(
       new THREE.CylinderGeometry(4, 4, poleH, 8),
-      new THREE.MeshLambertMaterial({ color: style.poleColor })
+      new THREE.MeshBasicMaterial({ color: style.poleColor, depthTest: false, transparent: true })
     );
     pole.rotation.x = Math.PI / 2;
     pole.position.set(m.x, m.y, m.z + poleH / 2);
+    pole.renderOrder = 10;
     scene.add(pole);
     markerObjects.push(pole);
 
     // Cone
     const cone = new THREE.Mesh(
       new THREE.ConeGeometry(40, 80, 12),
-      new THREE.MeshLambertMaterial({ color: style.coneColor })
+      new THREE.MeshBasicMaterial({ color: style.coneColor, depthTest: false, transparent: true })
     );
     cone.rotation.x = Math.PI / 2;
     cone.position.set(m.x, m.y, m.z + poleH + 40);
+    cone.renderOrder = 10;
     scene.add(cone);
     markerObjects.push(cone);
 
@@ -924,17 +926,19 @@ function buildClickMarker(x, y, z, elevM) {
 
   const pole = new THREE.Mesh(
     new THREE.CylinderGeometry(4, 4, poleH, 8),
-    new THREE.MeshLambertMaterial({ color })
+    new THREE.MeshBasicMaterial({ color, depthTest: false, transparent: true })
   );
   pole.rotation.x = Math.PI / 2;
   pole.position.set(x, y, z + poleH / 2);
+  pole.renderOrder = 10;
 
   const cone = new THREE.Mesh(
     new THREE.ConeGeometry(40, 80, 12),
-    new THREE.MeshLambertMaterial({ color })
+    new THREE.MeshBasicMaterial({ color, depthTest: false, transparent: true })
   );
   cone.rotation.x = Math.PI / 2;
   cone.position.set(x, y, z + poleH + 40);
+  cone.renderOrder = 10;
 
   const div = document.createElement('div');
   div.style.cssText = `
