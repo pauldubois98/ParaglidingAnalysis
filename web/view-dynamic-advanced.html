@@ -139,6 +139,15 @@
     #info-panel .info-label { color: #6888a0; }
     #info-panel .info-val { color: #e0f0ff; font-weight: bold; text-align: right; }
 
+    #plume-section {
+      margin-top: 10px; display: none; gap: 4px; align-items: stretch;
+    }
+    #plume-alt-labels {
+      display: flex; flex-direction: column; justify-content: space-between;
+      font-size: 8px; color: #3a6080; text-align: right; flex-shrink: 0; width: 30px;
+    }
+    #plume-canvas { flex: 1; border-radius: 4px; border: 1px solid rgba(100,160,255,.1); display: block; }
+
     #height-indicator {
       position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
       background: rgba(10,15,30,0.85); border: 1px solid rgba(100,160,255,0.3);
@@ -263,7 +272,14 @@
 </div>
 
 <canvas id="wind-compass" width="80" height="80" title="Wind direction"></canvas>
-<div id="info-panel"><div id="info-rows"></div></div>
+<div id="info-panel">
+  <h3>Point Info</h3>
+  <div id="info-rows"></div>
+  <div id="plume-section">
+    <div id="plume-alt-labels"></div>
+    <canvas id="plume-canvas" width="160" height="180"></canvas>
+  </div>
+</div>
 <div id="height-indicator"></div>
 
 <script type="importmap">
@@ -1013,6 +1029,98 @@ function drawCompass() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+//  PLUME PROFILE
+// ═══════════════════════════════════════════════════════════════════
+
+function drawPlumeProfile(i, j, elev) {
+  const canvas   = document.getElementById('plume-canvas');
+  const labelsEl = document.getElementById('plume-alt-labels');
+  const section  = document.getElementById('plume-section');
+  const { nx, ny, nz, dz, z_base } = simData.grid;
+  const F = simData.fields;
+
+  // Build vertical profiles of w and wind speed at column (i, j)
+  const wPro    = new Float32Array(nz);
+  const spdPro  = new Float32Array(nz);
+  let wMax = 0.01;
+  for (let k = 0; k < nz; k++) {
+    const idx = k * ny * nx + j * nx + i;
+    wPro[k]   = F.w[idx];
+    spdPro[k] = Math.hypot(F.u[idx], F.v[idx]);
+    if (Math.abs(wPro[k]) > wMax) wMax = Math.abs(wPro[k]);
+  }
+
+  // Altitude axis: MSL from terrain to top of domain
+  const axisBottom = z_base;
+  const axisTop    = z_base + nz * dz;
+  const axisSpan   = axisTop - axisBottom;
+
+  const W = canvas.width, H = canvas.height;
+  const PAD_TOP = 8, PAD_BTM = 4, PAD_LR = 4;
+  const drawH = H - PAD_TOP - PAD_BTM;
+  const cx = W / 2;
+  const ctx = canvas.getContext('2d');
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(8,12,24,0.95)';
+  ctx.fillRect(0, 0, W, H);
+
+  // Grid lines
+  const gridStep = Math.pow(10, Math.floor(Math.log10(axisSpan / 4)));
+  const gridStart = Math.ceil(axisBottom / gridStep) * gridStep;
+  ctx.strokeStyle = 'rgba(80,120,160,0.2)'; ctx.lineWidth = 1;
+  for (let alt = gridStart; alt <= axisTop; alt += gridStep) {
+    const y = PAD_TOP + (1 - (alt - axisBottom) / axisSpan) * drawH;
+    ctx.beginPath(); ctx.moveTo(PAD_LR, y); ctx.lineTo(W - PAD_LR, y); ctx.stroke();
+  }
+
+  // Centre axis
+  ctx.strokeStyle = 'rgba(80,120,160,0.4)';
+  ctx.beginPath(); ctx.moveTo(cx, PAD_TOP); ctx.lineTo(cx, PAD_TOP + drawH); ctx.stroke();
+
+  // Draw w profile — filled bars per k level
+  for (let k = 0; k < nz; k++) {
+    const altMid = z_base + (k + 0.5) * dz;
+    const altLo  = z_base + k * dz;
+    const altHi  = z_base + (k + 1) * dz;
+    const yTop   = PAD_TOP + (1 - (altHi - axisBottom) / axisSpan) * drawH;
+    const yBot   = PAD_TOP + (1 - (altLo - axisBottom) / axisSpan) * drawH;
+    const barH   = Math.max(1, yBot - yTop);
+    const w      = wPro[k];
+    const t      = (w / wMax) * 0.5 + 0.5; // 0=down, 0.5=zero, 1=up
+    const [r, g, b] = sampleCmap('w', Math.max(0, Math.min(1, t)));
+    const barW   = (Math.abs(w) / wMax) * (W / 2 - PAD_LR - 2);
+    ctx.fillStyle = `rgba(${(r*255)|0},${(g*255)|0},${(b*255)|0},0.85)`;
+    if (w >= 0) ctx.fillRect(cx, yTop, barW, barH);
+    else        ctx.fillRect(cx - barW, yTop, barW, barH);
+  }
+
+  // Ground level line
+  const groundY = PAD_TOP + (1 - (elev - axisBottom) / axisSpan) * drawH;
+  ctx.setLineDash([2, 4]);
+  ctx.strokeStyle = 'rgba(140,180,100,0.7)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD_LR, groundY); ctx.lineTo(W - PAD_LR, groundY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(140,180,100,0.9)'; ctx.font = '8px monospace'; ctx.textAlign = 'right';
+  ctx.fillText(`${elev.toFixed(0)} m`, W - PAD_LR - 1, groundY - 2);
+
+  // w_max label
+  ctx.fillStyle = 'rgba(220,240,255,0.9)'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+  ctx.fillText(`↕ ${wMax.toFixed(2)} m/s`, cx, PAD_TOP + 10);
+
+  // Altitude labels
+  labelsEl.innerHTML = '';
+  const nLabels = 5;
+  for (let k = 0; k <= nLabels; k++) {
+    const span = document.createElement('span');
+    span.textContent = (axisTop - (k / nLabels) * axisSpan).toFixed(0);
+    labelsEl.appendChild(span);
+  }
+
+  section.style.display = 'flex';
+}
+
+// ═══════════════════════════════════════════════════════════════════
 //  RAYCASTER / CLICK INSPECT
 // ═══════════════════════════════════════════════════════════════════
 
@@ -1032,6 +1140,7 @@ renderer.domElement.addEventListener('click', e => {
   const hits = raycaster.intersectObject(terrainMesh);
   if (hits.length === 0) {
     document.getElementById('info-panel').style.display = 'none';
+    document.getElementById('plume-section').style.display = 'none';
     if (clickMarker) { clickMarker.forEach(o => { scene.remove(o); if (o._labelDiv) o._labelDiv.remove(); }); clickMarker = null; }
     return;
   }
@@ -1071,13 +1180,13 @@ renderer.domElement.addEventListener('click', e => {
 
   const panel = document.getElementById('info-panel');
   panel.style.display = 'block';
-  panel.innerHTML = '<h3>Point Info</h3><div id="info-rows"></div>';
-  const rowsDiv = panel.querySelector('#info-rows');
-  rows.forEach(([label, val]) => {
-    rowsDiv.innerHTML += `<div class="info-row"><span class="info-label">${label}</span><span class="info-val">${val}</span></div>`;
-  });
+  const rowsDiv = document.getElementById('info-rows');
+  rowsDiv.innerHTML = rows.map(([label, val]) =>
+    `<div class="info-row"><span class="info-label">${label}</span><span class="info-val">${val}</span></div>`
+  ).join('');
 
   buildClickMarker(pt.x, pt.y, pt.z, elev);
+  drawPlumeProfile(i, j, elev);
 });
 
 // ═══════════════════════════════════════════════════════════════════
