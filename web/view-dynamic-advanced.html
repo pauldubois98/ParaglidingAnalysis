@@ -861,21 +861,21 @@ function buildMarkers() {
 
     // Vertical pole
     const poleGeo = new THREE.CylinderGeometry(4, 4, poleH, 8);
-    const poleMat = new THREE.MeshLambertMaterial({ color: cfg.poleColor });
+    const poleMat = new THREE.MeshBasicMaterial({ color: cfg.poleColor, depthTest: false, transparent: true });
     const pole = new THREE.Mesh(poleGeo, poleMat);
     pole.rotation.x = Math.PI / 2;
     pole.position.set(m.x, m.y, baseZ + poleH / 2);
-    pole.castShadow = true;
+    pole.renderOrder = 10;
     scene.add(pole);
     markerObjects.push(pole);
 
     // Cone on top
     const coneGeo = new THREE.ConeGeometry(40, 80, 12);
-    const coneMat = new THREE.MeshLambertMaterial({ color: cfg.color });
+    const coneMat = new THREE.MeshBasicMaterial({ color: cfg.color, depthTest: false, transparent: true });
     const cone = new THREE.Mesh(coneGeo, coneMat);
     cone.rotation.x = Math.PI / 2;
     cone.position.set(m.x, m.y, baseZ + poleH + 40);
-    cone.castShadow = true;
+    cone.renderOrder = 10;
     scene.add(cone);
     markerObjects.push(cone);
 
@@ -928,19 +928,17 @@ function buildClickMarker(wx, wy, wz, elevM) {
   const color = 0x4488ff;
   const poleH = 120;
 
-  const pole = new THREE.Mesh(
-    new THREE.CylinderGeometry(4, 4, poleH, 8),
-    new THREE.MeshLambertMaterial({ color })
-  );
+  const markerMat = mat => new THREE.MeshBasicMaterial({ color: mat, depthTest: false, transparent: true });
+
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, poleH, 8), markerMat(color));
   pole.rotation.x = Math.PI / 2;
   pole.position.set(wx, wy, wz + poleH / 2);
+  pole.renderOrder = 10;
 
-  const cone = new THREE.Mesh(
-    new THREE.ConeGeometry(40, 80, 12),
-    new THREE.MeshLambertMaterial({ color })
-  );
+  const cone = new THREE.Mesh(new THREE.ConeGeometry(40, 80, 12), markerMat(color));
   cone.rotation.x = Math.PI / 2;
   cone.position.set(wx, wy, wz + poleH + 40);
+  cone.renderOrder = 10;
 
   const div = document.createElement('div');
   div.style.cssText = `
