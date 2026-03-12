@@ -1146,8 +1146,20 @@ async function runFetchAll() {
 
     await _fetchLC(bbox);
 
+    // Build and preview z₀ map immediately after fetch
+    const fallback_z0 = parseFloat(document.getElementById('log_z0').value) || 0.1;
+    _Z0_MAP = lcData ? buildZ0Map(lcData.lc, lcData.lc_nx, lcData.lc_ny, nx, ny, fallback_z0) : null;
+    if (_Z0_MAP) {
+      let z0min=Infinity, z0max=-Infinity;
+      for (let p=0; p<_Z0_MAP.length; p++) { if(_Z0_MAP[p]<z0min)z0min=_Z0_MAP[p]; if(_Z0_MAP[p]>z0max)z0max=_Z0_MAP[p]; }
+      log(`Per-cell z₀: min=${z0min.toFixed(4)} m, max=${z0max.toFixed(4)} m`, 'success');
+      renderZ0Plot(document.getElementById('plot-z0'), _Z0_MAP, nx, ny);
+    } else {
+      log(`Scalar z₀=${fallback_z0} m (no land cover data).`);
+    }
+
     document.getElementById('btn-sim').disabled = false;
-    setStatus(`Data ready: terrain ${nx}×${ny}, land cover loaded.`);
+    setStatus(`Data ready: terrain ${nx}×${ny}, land cover + z₀ map computed.`);
     setProgress(1);
   } catch(e) {
     if(e.message !== '__STOPPED__') log(`Fetch error: ${e}`, 'error');
@@ -1207,17 +1219,6 @@ async function runSim() {
   log(`ν=${nu} m²/s, pressure iter=${pIter}, yield every ${p_yield}`);
   _PRESSURE_YIELD_EVERY_VAL = p_yield;
   setStatus('Initializing NS3D grid…');
-
-  // Build per-cell z₀ map from land cover data (or null → scalar fallback)
-  _Z0_MAP = lcData ? buildZ0Map(lcData.lc, lcData.lc_nx, lcData.lc_ny, nx, ny, _LOG_Z0) : null;
-  if (_Z0_MAP) {
-    let z0min=Infinity, z0max=-Infinity;
-    for (let p=0; p<_Z0_MAP.length; p++) { if(_Z0_MAP[p]<z0min)z0min=_Z0_MAP[p]; if(_Z0_MAP[p]>z0max)z0max=_Z0_MAP[p]; }
-    log(`Per-cell z₀: min=${z0min.toFixed(4)} m, max=${z0max.toFixed(4)} m`, 'success');
-    renderZ0Plot(document.getElementById('plot-z0'), _Z0_MAP, nx, ny);
-  } else {
-    log(`Scalar z₀=${_LOG_Z0} m (no land cover data).`);
-  }
 
   initNS(Z, nx, ny, dx, dy, nz, h_domain, U0, V0);
   log(`Solid cells: ${_SOLID.reduce((a,b)=>a+b,0)} / ${nz*ny*nx}`, 'success');
