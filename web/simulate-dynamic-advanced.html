@@ -1321,6 +1321,8 @@ async function runSim() {
   setProgress(1);
   _renderPreviews(nx, ny, dx, dy);
 
+  document.getElementById('btn-fetch').disabled = false;
+  document.getElementById('btn-map').disabled = false;
   document.getElementById('btn-sim').disabled  = false;
   document.getElementById('btn-stop').disabled = true;
   setStatus(`Done — T=${T_sim} s, ${nSteps} steps`);
