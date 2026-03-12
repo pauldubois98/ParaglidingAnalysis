@@ -242,8 +242,8 @@
 
   <div class="section-title">Vertical Exaggeration</div>
   <div class="ctrl-group">
-    <div class="ctrl-label">Z scale <span id="zscale-val">1.5</span></div>
-    <input type="range" id="zscale" min="0.5" max="5" step="0.1" value="1.5"
+    <div class="ctrl-label">Z scale <span id="zscale-val">1</span></div>
+    <input type="range" id="zscale" min="0.5" max="5" step="0.1" value="1"
            oninput="document.getElementById('zscale-val').textContent=this.value; rebuildAll();">
   </div>
 
@@ -398,7 +398,7 @@ function terrainCX(T) { return (T.x_extent[0] + T.x_extent[1]) / 2; }
 function terrainCY(T) { return -(T.y_extent[0] + T.y_extent[1]) / 2; }
 
 // Get Z scale multiplier
-function zScale() { return parseFloat(document.getElementById('zscale').value) || 1.5; }
+function zScale() { return parseFloat(document.getElementById('zscale').value) || 1; }
 
 // Get the 3D field value at grid (i, j, k)
 function fieldAt(i, j, k) {
@@ -442,7 +442,7 @@ function buildTerrain() {
   let zmin = Infinity, zmax = -Infinity;
   for (let j = 0; j < mny; j++) {
     for (let i = 0; i < mnx; i++) {
-      const z = elev[j][i] * Zs;
+      const z = elev[mny - 1 - j][i] * Zs; // reverse j: PlaneGeometry j=0 is south, DEM j=0 is north
       pos.setZ(j * mnx + i, z);
       if (z < zmin) zmin = z; if (z > zmax) zmax = z;
     }
@@ -512,10 +512,10 @@ function buildOverlay() {
   const geom = new THREE.PlaneGeometry(xw, yh, nx - 1, ny - 1);
   const pos  = geom.attributes.position;
 
-  // Elevate overlay to terrain surface + small offset
+  // Elevate overlay to terrain surface + small offset (reverse j to match PlaneGeometry→DEM orientation)
   for (let j = 0; j < ny; j++) {
     for (let i = 0; i < nx; i++) {
-      pos.setZ(j * nx + i, T.elevation[j][i] * Zs + 3);
+      pos.setZ(j * nx + i, T.elevation[ny - 1 - j][i] * Zs + 3);
     }
   }
   pos.needsUpdate = true;
@@ -534,10 +534,13 @@ function buildOverlay() {
 
   const colors = new Float32Array(pos.count * 3);
   geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  for (let k = 0; k < pos.count; k++) {
-    const t = (arr[k] - mn) / rng;
-    const [r, g, b] = sampleCmap(cmap, Math.max(0, Math.min(1, t)));
-    colors[k*3] = r; colors[k*3+1] = g; colors[k*3+2] = b;
+  for (let j = 0; j < ny; j++) {
+    for (let i = 0; i < nx; i++) {
+      const k = j * nx + i;
+      const t = (arr[(ny - 1 - j) * nx + i] - mn) / rng; // reverse j: sim j=0=north, PlaneGeometry j=0=south
+      const [r, g, b] = sampleCmap(cmap, Math.max(0, Math.min(1, t)));
+      colors[k*3] = r; colors[k*3+1] = g; colors[k*3+2] = b;
+    }
   }
 
   const mat = new THREE.MeshBasicMaterial({
@@ -623,10 +626,13 @@ function buildSlice() {
 
   const colors = new Float32Array(pos.count * 3);
   geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  for (let p2 = 0; p2 < pos.count; p2++) {
-    const t = (arr[p2] - mn) / rng;
-    const [r, g, b] = sampleCmap(cmap, Math.max(0, Math.min(1, t)));
-    colors[p2*3] = r; colors[p2*3+1] = g; colors[p2*3+2] = b;
+  for (let j = 0; j < ny; j++) {
+    for (let i = 0; i < nx; i++) {
+      const p2 = j * nx + i;
+      const t = (arr[(ny - 1 - j) * nx + i] - mn) / rng; // reverse j: sim j=0=north, PlaneGeometry j=0=south
+      const [r, g, b] = sampleCmap(cmap, Math.max(0, Math.min(1, t)));
+      colors[p2*3] = r; colors[p2*3+1] = g; colors[p2*3+2] = b;
+    }
   }
 
   const mat = new THREE.MeshBasicMaterial({
@@ -834,7 +840,7 @@ renderer.domElement.addEventListener('click', e => {
   const gx  = pt.x - cx + xw/2; // local x in [0, xw]
   const gy  = pt.y - cy + yh/2; // local y in [0, yh], y=0=north
   const gi  = Math.round(gx / xw * (nx - 1));
-  const gj  = Math.round((1 - gy / yh) * (ny - 1)); // j=0=north, gy=0=north
+  const gj  = Math.round(gy / yh * (ny - 1)); // j=0=north at gy=0
   const i   = Math.max(0, Math.min(nx-1, gi));
   const j   = Math.max(0, Math.min(ny-1, gj));
 
