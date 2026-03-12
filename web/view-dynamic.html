@@ -223,6 +223,11 @@
     <input type="range" id="arrow-scale" min="0" max="20" step="1" value="8"
            oninput="document.getElementById('arrow-scale-val').textContent=this.value; rebuildArrows();">
   </div>
+  <div class="ctrl-group" id="ctrl-arrow-width">
+    <div class="ctrl-label">Width (px) <span id="arrow-width-val">2</span></div>
+    <input type="range" id="arrow-width" min="1" max="10" step="0.5" value="2"
+           oninput="document.getElementById('arrow-width-val').textContent=this.value; updateArrowWidth();">
+  </div>
 
   <div class="section-title">Info</div>
   <div id="sim-info" style="font-size:10px; color:#3a6080; line-height:1.8;">—</div>
@@ -257,6 +262,9 @@
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
 // ═══════════════════════════════════════════════════════════════════
 //  SCENE SETUP
@@ -308,6 +316,7 @@ window.addEventListener('resize', () => {
   camera.aspect = w / h;
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
+  if (arrowLines) arrowLines.material.resolution.set(w, h);
 });
 
 function animate() {
@@ -540,7 +549,7 @@ window.updateTerrainOpacity = updateTerrainOpacity;
 window.updateOverlayOpacity = updateOverlayOpacity;
 
 // ═══════════════════════════════════════════════════════════════════
-//  3-D WIND ARROWS (LineSegments)
+//  3-D WIND ARROWS (LineSegments2 — fat lines)
 // ═══════════════════════════════════════════════════════════════════
 
 function buildArrows() {
@@ -553,6 +562,7 @@ function buildArrows() {
   const step  = parseInt(document.getElementById('arrow-step').value);
   const agl   = parseFloat(document.getElementById('arrow-height').value);
   const scale = parseFloat(document.getElementById('arrow-scale').value);
+  const width = parseFloat(document.getElementById('arrow-width').value);
   const cx    = (T.x_extent[0] + T.x_extent[1]) / 2;
   const cy    = -(T.y_extent[0] + T.y_extent[1]) / 2;
   const xw    = T.x_extent[1] - T.x_extent[0];
@@ -562,11 +572,11 @@ function buildArrows() {
   for (let k = 0; k < W.speed.length; k++) if (W.speed[k] > maxSpd) maxSpd = W.speed[k];
   if (maxSpd === 0) maxSpd = 1;
 
+  // LineSegmentsGeometry expects flat [x1,y1,z1, x2,y2,z2, ...] pairs
   const positions = [];
-  const alphas    = [];
 
   const HEAD_FRAC = 0.3;
-  const HEAD_HALF = 0.25;  // radians
+  const HEAD_HALF = 0.25;
 
   for (let j = Math.floor(step/2); j < ny; j += step) {
     for (let i = Math.floor(step/2); i < nx; i += step) {
@@ -575,25 +585,23 @@ function buildArrows() {
       const spd = W.speed[idx];
       if (spd < 0.05) continue;
 
-      // Three.js world position of cell (j,i)
       const wx = (i / (nx-1) - 0.5) * xw + cx;
-      const wy = (0.5 - j / (ny-1)) * yh + cy;   // j=0 = north = +y in Three.js
+      const wy = (0.5 - j / (ny-1)) * yh + cy;
       const wz = T.elevation[j][i] + agl;
 
-      // Arrow direction (u = east = +x, v = north = +y in Three.js)
-      const len  = step * scale * (T.dx || 50) * 0.8 * (spd / maxSpd);
-      const ux   = ui / spd, uy = vi / spd;   // unit vector in 3D (x,y plane)
+      const len = step * scale * (T.dx || 50) * 0.8 * (spd / maxSpd);
+      const ux  = ui / spd, uy = vi / spd;
 
       const ex = wx + ux * len, ey = wy + uy * len;
 
       // Stem
       positions.push(wx, wy, wz,  ex, ey, wz);
 
-      // Arrowhead (two lines)
-      const hl    = len * HEAD_FRAC;
-      const ang   = Math.atan2(uy, ux);
-      const a1    = ang + Math.PI - HEAD_HALF;
-      const a2    = ang + Math.PI + HEAD_HALF;
+      // Arrowhead
+      const hl  = len * HEAD_FRAC;
+      const ang = Math.atan2(uy, ux);
+      const a1  = ang + Math.PI - HEAD_HALF;
+      const a2  = ang + Math.PI + HEAD_HALF;
       positions.push(ex, ey, wz,  ex + Math.cos(a1)*hl, ey + Math.sin(a1)*hl, wz);
       positions.push(ex, ey, wz,  ex + Math.cos(a2)*hl, ey + Math.sin(a2)*hl, wz);
     }
@@ -601,11 +609,25 @@ function buildArrows() {
 
   if (positions.length === 0) return;
 
-  const geom = new THREE.BufferGeometry();
-  geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  const mat = new THREE.LineBasicMaterial({ color: arrowColor, transparent: true, opacity: 0.55 });
-  arrowLines = new THREE.LineSegments(geom, mat);
+  const geom = new LineSegmentsGeometry();
+  geom.setPositions(positions);
+
+  const mat = new LineMaterial({
+    color: arrowColor,
+    linewidth: width,
+    transparent: true,
+    opacity: 0.75,
+    resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
+  });
+
+  arrowLines = new LineSegments2(geom, mat);
   scene.add(arrowLines);
+}
+
+function updateArrowWidth() {
+  if (arrowLines) {
+    arrowLines.material.linewidth = parseFloat(document.getElementById('arrow-width').value);
+  }
 }
 
 function toggleArrows() {
@@ -627,6 +649,7 @@ function toggleArrowColor() {
 window.toggleArrows     = toggleArrows;
 window.toggleArrowColor = toggleArrowColor;
 window.rebuildArrows    = buildArrows;
+window.updateArrowWidth = updateArrowWidth;
 
 // ═══════════════════════════════════════════════════════════════════
 //  OVERLAY SELECTION
@@ -837,7 +860,7 @@ const ALL_CTRL_IDS = [
   'ctrl-section-terrain', 'ctrl-terrain-opacity',
   'ctrl-section-overlay', 'ctrl-overlay-opacity',
   'ctrl-section-arrows',  'ctrl-arrows-toggle',
-  'ctrl-arrow-step',      'ctrl-arrow-height', 'ctrl-arrow-scale',
+  'ctrl-arrow-step',      'ctrl-arrow-height', 'ctrl-arrow-scale', 'ctrl-arrow-width',
 ];
 
 function applyPreset(p) {
@@ -883,6 +906,12 @@ function applyPreset(p) {
   const scaleEl = document.getElementById('arrow-scale');
   scaleEl.value = p.arrowScale;
   document.getElementById('arrow-scale-val').textContent = p.arrowScale;
+
+  if (p.arrowWidth != null) {
+    const widthEl = document.getElementById('arrow-width');
+    widthEl.value = p.arrowWidth;
+    document.getElementById('arrow-width-val').textContent = p.arrowWidth;
+  }
 
   const wantWhite = p.arrowColor === 'white';
   if ((arrowColor === 0xffffff) !== wantWhite) toggleArrowColor();

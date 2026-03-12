@@ -6,16 +6,18 @@
     "terrainOpacity": 0.75,
     "overlayOpacity": 0.80,
     "arrows": true,
-    "arrowStep": 10,
+    "arrowStep": 4,
     "arrowHeight": 80,
-    "arrowScale": 1.5,
+    "arrowScale": 10,
+    "arrowWidth": 2,
     "arrowColor": "white",
     "visibleControls": [
       "ctrl-section-overlay",
       "ctrl-overlay-opacity",
       "ctrl-section-arrows",
       "ctrl-arrows-toggle",
-      "ctrl-arrow-scale"
+      "ctrl-arrow-scale",
+      "ctrl-arrow-width"
     ]
   },
   {
@@ -28,6 +30,7 @@
     "arrowStep": 12,
     "arrowHeight": 60,
     "arrowScale": 1.2,
+    "arrowWidth": 1.5,
     "arrowColor": "black",
     "visibleControls": [
       "ctrl-section-terrain",
@@ -36,7 +39,8 @@
       "ctrl-overlay-opacity",
       "ctrl-section-arrows",
       "ctrl-arrows-toggle",
-      "ctrl-arrow-scale"
+      "ctrl-arrow-scale",
+      "ctrl-arrow-width"
     ]
   },
   {
@@ -49,6 +53,7 @@
     "arrowStep": 8,
     "arrowHeight": 100,
     "arrowScale": 2.0,
+    "arrowWidth": 2,
     "arrowColor": "white",
     "visibleControls": [
       "ctrl-section-terrain",
@@ -57,7 +62,8 @@
       "ctrl-overlay-opacity",
       "ctrl-section-arrows",
       "ctrl-arrows-toggle",
-      "ctrl-arrow-scale"
+      "ctrl-arrow-scale",
+      "ctrl-arrow-width"
     ]
   },
   {
@@ -70,6 +76,7 @@
     "arrowStep": 10,
     "arrowHeight": 80,
     "arrowScale": 1.5,
+    "arrowWidth": 2,
     "arrowColor": "white",
     "visibleControls": [
       "ctrl-section-terrain",
@@ -90,6 +97,7 @@
     "arrowStep": 10,
     "arrowHeight": 80,
     "arrowScale": 1.5,
+    "arrowWidth": 2,
     "arrowColor": "white",
     "visibleControls": [
       "ctrl-section-terrain",
