@@ -620,7 +620,9 @@ function _computeDiv() {
 
 // Jacobi iterations for pressure Poisson: ∇²p = div/dt
 // For solid neighbors: Neumann BC (dp/dn=0) → use cell's own pressure
-function _solvePressure(dt, nIter) {
+// Async: yields every YIELD_P iterations so the stop button is always responsive.
+const _PRESSURE_YIELD_EVERY = 10;
+async function _solvePressure(dt, nIter) {
   const nx=_NX, ny=_NY, nz=_NZ;
   const nxny=nx*ny;
   const idx2=1/(_DX*_DX), idy2=1/(_DY*_DY), idz2=1/(_DZ*_DZ);
@@ -641,10 +643,9 @@ function _solvePressure(dt, nIter) {
         }
       }
     }
-    // Outflow BC: p=0 on outflow faces (pressure reference)
-    // Applied via boundary condition function
     _applyPressureBC();
     _P.set(_P1);
+    if ((iter + 1) % _PRESSURE_YIELD_EVERY === 0) await yieldUI();
   }
 }
 
@@ -769,31 +770,31 @@ function _applyVelocityBC(U0, V0) {
   }
 }
 
-// One full NS time step
-function nsStep(dt, nu, pIter, U0, V0) {
-  const nx=_NX, ny=_NY, nz=_NZ;
-  const nxny=nx*ny;
-
+// One full NS time step — async so each phase can yield to the event loop
+async function nsStep(dt, nu, pIter, U0, V0) {
   // 1. Semi-Lagrangian advection of U, V, W
   _advect(_U1, _U, dt);
   _advect(_V1, _V, dt);
   _advect(_W1, _W, dt);
   _U.set(_U1); _V.set(_V1); _W.set(_W1);
+  await yieldUI();
 
   // 2. Diffusion
   _diffuse(_U1, _U, nu, dt);
   _diffuse(_V1, _V, nu, dt);
   _diffuse(_W1, _W, nu, dt);
   _U.set(_U1); _V.set(_V1); _W.set(_W1);
+  await yieldUI();
 
   // 3. Apply velocity BCs (inflow, outflow, walls)
   _applyVelocityBC(U0, V0);
 
   // 4. Divergence
   _computeDiv();
+  await yieldUI();
 
-  // 5. Pressure solve
-  _solvePressure(dt, pIter);
+  // 5. Pressure solve (internally yields every _PRESSURE_YIELD_EVERY iterations)
+  await _solvePressure(dt, pIter);
 
   // 6. Pressure projection
   _projectVelocity(dt);
@@ -904,19 +905,16 @@ async function runSim() {
   initNS(Z, nx, ny, dx, dy, nz, h_domain, U0, V0);
   log(`Solid cells: ${_SOLID.reduce((a,b)=>a+b,0)} / ${nz*ny*nx}`, 'success');
 
-  const YIELD_EVERY = 20;
   setStatus('Simulating NS3D…');
   try {
     for (let step = 0; step < nSteps; step++) {
-      nsStep(dt, nu, pIter, U0, V0);
-      if (step % YIELD_EVERY === 0) {
-        const rms = rmsDivergence();
-        setProgress(step / nSteps);
-        setStatus(`NS3D step ${step}/${nSteps}, t=${(step*dt).toFixed(0)}s, rms_div=${rms.toExponential(2)}`);
-        if (step % 100 === 0)
-          log(`Step ${step}/${nSteps} — t=${(step*dt).toFixed(0)} s, div_rms=${rms.toExponential(2)}`);
-        await yieldUI();
-      }
+      // nsStep is async and yields internally — stop button works at any moment
+      await nsStep(dt, nu, pIter, U0, V0);
+      const rms = rmsDivergence();
+      setProgress(step / nSteps);
+      setStatus(`NS3D step ${step}/${nSteps}, t=${(step*dt).toFixed(0)}s, div_rms=${rms.toExponential(2)}`);
+      if (step % 50 === 0)
+        log(`Step ${step}/${nSteps} — t=${(step*dt).toFixed(0)} s, div_rms=${rms.toExponential(2)}`);
     }
   } catch(e) {
     if(e.message==='__STOPPED__'){log('Stopped by user.','warn');}
