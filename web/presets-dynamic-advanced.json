@@ -19,7 +19,7 @@
     "label": "Wind Direction",
     "surfaceField": "elev",
     "overlayOpacity": 0,
-    "terrainOpacity": 0.1,
+    "terrainOpacity": 1,
     "showSlice": false,
     "sliceField": "speed",
     "sliceHeight": 500,

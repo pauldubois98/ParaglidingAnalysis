@@ -723,7 +723,7 @@ function buildArrows() {
     for (let i = Math.floor(step/2); i < nx; i += step) {
       // World position
       const wx = T.x_extent[0] + (i + 0.5) * (xw / nx);
-      const wy = -(T.y_extent[1] - (j + 0.5) * (yh / ny)); // j=0=north, Three.js Y=-geog_Y
+      const wy = T.y_extent[1] - (j + 0.5) * (yh / ny); // j=0=north, Y=north in scene
 
       // Z = terrain elevation + h_agl, scaled
       const elev = T.elevation[j] ? T.elevation[j][i] : 0;
@@ -735,9 +735,9 @@ function buildArrows() {
       if (spd < 0.05) continue;
 
       const len = scale * (spd / maxSpd) * (xw / nx) * step * 0.4;
-      // U = east → Three.js +X; V = north → Three.js -Y (since Y=south in scene)
+      // U = east → +X; V = north → +Y (Y=north in scene)
       const dx = (uu / spd) * len;
-      const dyy = -(vv / spd) * len; // flip for Y
+      const dyy = (vv / spd) * len;
       const dz = (ww / Math.max(spd, 0.1)) * len * 0.5;
 
       // Shaft
