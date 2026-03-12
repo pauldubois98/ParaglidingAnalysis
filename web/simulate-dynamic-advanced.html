@@ -181,6 +181,15 @@
       <div class="subtitle">Full 3-D Incompressible Navier–Stokes · wind on terrain</div>
     </div>
     <div id="panel-body">
+      <div class="footer-row" style="margin-bottom:8px;">
+        <button class="btn btn-fetch" onclick="applyPreset('coarse')" style="font-size:10px;">⚡ Coarse</button>
+        <button class="btn btn-sim"   onclick="applyPreset('refined')" style="font-size:10px;">🎯 Refined</button>
+      </div>
+      <div class="field-hint" style="margin-top:-4px;">
+        Coarse: fast preview (40×40×20, 30 p-iter).<br>
+        Refined: high precision (DEM res, 40 NZ, 80 p-iter).
+      </div>
+
       <div class="section-title">Ambient Wind</div>
       <div id="compass-wrap">
         <svg id="compass-svg" width="60" height="60" viewBox="-30 -30 60 60"
@@ -1088,6 +1097,43 @@ async function runSim() {
   document.getElementById('btn-stop').disabled = true;
   document.getElementById('btn-map').disabled  = false;
   setStatus(`Done — T=${T_sim} s, ${nSteps} steps`);
+}
+
+function applyPreset(name) {
+  const s = v => v; // shorthand
+  if (name === 'coarse') {
+    const nx = terrainData ? Math.round(terrainData.nx/2): 40;
+    const ny = terrainData ? Math.round(terrainData.ny/2): 40;
+    document.getElementById('sim_nx').value      = nx;
+    document.getElementById('sim_ny').value      = ny;
+    document.getElementById('nz').value          = 20;
+    document.getElementById('h_domain').value    = 1500;
+    document.getElementById('visc').value        = 150;
+    document.getElementById('p_iter').value      = 30;
+    document.getElementById('p_yield').value     = 5;
+    document.getElementById('sim_time').value    = 1800;
+    document.getElementById('cfl').value         = 2.0;
+    document.getElementById('dt_max').value      = 60;
+    document.getElementById('diff_safety').value = 0.25;
+    document.getElementById('log_z0').value      = 0.1;
+    document.getElementById('log_zref').value    = 100;
+  } else { // refined
+    const nx = terrainData ? terrainData.nx : 64;
+    const ny = terrainData ? terrainData.ny : 64;
+    document.getElementById('sim_nx').value      = nx;
+    document.getElementById('sim_ny').value      = ny;
+    document.getElementById('nz').value          = 40;
+    document.getElementById('h_domain').value    = 2000;
+    document.getElementById('visc').value        = 50;
+    document.getElementById('p_iter').value      = 80;
+    document.getElementById('p_yield').value     = 10;
+    document.getElementById('sim_time').value    = 3600;
+    document.getElementById('cfl').value         = 1.5;
+    document.getElementById('dt_max').value      = 30;
+    document.getElementById('diff_safety').value = 0.30;
+    document.getElementById('log_z0').value      = 0.1;
+    document.getElementById('log_zref').value    = 100;
+  }
 }
 
 function stopSim() {
