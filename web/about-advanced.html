@@ -294,23 +294,73 @@
     }
 
     @media (max-width: 768px) {
-      .page { padding: 52px 16px 60px; }
-      h1 { font-size: 20px; }
-      h2 { font-size: 15px; }
-      h3 { font-size: 13px; }
-      .param-table, .lc-table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
-      .nav-link { padding: 5px 7px; font-size: 11px; }
+      .page {
+        padding: 52px 16px 60px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      h2 {
+        font-size: 15px;
+      }
+
+      h3 {
+        font-size: 13px;
+      }
+
+      .param-table,
+      .lc-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+      }
+
+      .nav-link {
+        padding: 5px 7px;
+        font-size: 11px;
+      }
     }
 
     @media (max-width: 480px) {
-      .page { padding: 48px 10px 40px; }
-      h1 { font-size: 17px; }
-      h2 { font-size: 13px; letter-spacing: 0.5px; margin: 32px 0 14px; }
-      h3 { font-size: 12px; }
-      p, li { font-size: 13px; line-height: 1.6; }
-      .eq { font-size: 11px; padding: 10px 12px; }
-      .step { gap: 8px; }
-      .nav-logo span { display: none; }
+      .page {
+        padding: 48px 10px 40px;
+      }
+
+      h1 {
+        font-size: 17px;
+      }
+
+      h2 {
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        margin: 32px 0 14px;
+      }
+
+      h3 {
+        font-size: 12px;
+      }
+
+      p,
+      li {
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .eq {
+        font-size: 11px;
+        padding: 10px 12px;
+      }
+
+      .step {
+        gap: 8px;
+      }
+
+      .nav-logo span {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -612,7 +662,8 @@
       <div class="step-num">9</div>
       <div class="step-body">
         <b>Helmholtz projection</b> — subtract the pressure gradient to enforce incompressibility:
-        <code>u = u* − ∇p · dt</code>. This guarantees ∇·u = 0 in the fluid domain.
+        <code>u = u* − ∇p · dt</code>. This guarantees ∇·u = 0 (i.e. divergence-free velocity) in the fluid domain. Note
+        that incompressibility is enforced ndirectly via pressure projection.
       </div>
     </div>
 
