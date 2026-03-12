@@ -65,13 +65,47 @@
       margin: 0 auto;
     }
 
+    .card-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: #7eb8ff;
+      background: rgba(30, 60, 120, 0.85);
+      border: 1px solid rgba(100, 160, 255, 0.35);
+      border-radius: 4px;
+      padding: 1px 5px;
+      pointer-events: none;
+    }
+
+    .section-label {
+      text-align: center;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #3a5580;
+      margin-top: 28px;
+      margin-bottom: 10px;
+    }
+
+    .card-shared {
+      display: grid;
+      grid-template-columns: 1fr;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+
     .cards {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 14px;
     }
 
     .card {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -155,12 +189,23 @@
       text-align: center;
     }
 
+    .split {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .workflow {
+      flex: 1;
+      margin: 12px;
+    }
+
     @media (max-width: 480px) {
       header h1 {
         font-size: 22px;
       }
 
       .cards {
+        grid-template-columns: 1fr 1fr;
         gap: 10px;
       }
 
@@ -187,35 +232,70 @@
       <p>Solar heating simulation and 3D thermal visualization for paragliding sites</p>
     </header>
 
-    <div class="cards">
+    <div class="section-label">Shared</div>
+    <div class="card-shared">
       <a href="area" class="card">
         <div class="card-icon"><img src="icons/favicon-area1.svg" data-icon="area" data-count="5" alt=""></div>
         <div class="card-title">Select Area</div>
         <div class="card-desc">Define the bounding box, take-off, and landing points on a map</div>
       </a>
-
-      <a href="simulate" class="card">
-        <div class="card-icon"><img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4" alt="">
-        </div>
-        <div class="card-title">Run Simulation</div>
-        <div class="card-desc">Fetch terrain data and run the thermal physics pipeline</div>
-      </a>
-
-      <a href="view" class="card">
-        <div class="card-icon"><img src="icons/favicon-view1.svg" data-icon="view" data-count="3" alt=""></div>
-        <div class="card-title">Visualize</div>
-        <div class="card-desc">3D terrain with thermal heatmaps, flow arrows, and plume profiles</div>
-      </a>
-
-      <a href="about" class="card">
-        <div class="card-icon"><img src="icons/favicon-about1.svg" data-icon="about" data-count="4" alt=""></div>
-        <div class="card-title">How It Works</div>
-        <div class="card-desc">Physics models, data sources, and simplifications explained</div>
-      </a>
     </div>
 
+    <div class="split">
+      <div class="workflow">
+        <div class="section-label">Basic</div>
+        <div class="cards">
+          <a href="simulate" class="card">
+            <div class="card-icon"><img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4"
+                alt=""></div>
+            <div class="card-title">Simulation</div>
+            <div class="card-desc">Fetch terrain data and run the thermal physics pipeline</div>
+          </a>
+          <a href="view" class="card">
+            <div class="card-icon"><img src="icons/favicon-view1.svg" data-icon="view" data-count="3" alt=""></div>
+            <div class="card-title">Visualize</div>
+            <div class="card-desc">3D terrain with thermal heatmaps, flow arrows, and plume profiles</div>
+          </a>
+          <a href="about" class="card">
+            <div class="card-icon"><img src="icons/favicon-about1.svg" data-icon="about" data-count="4" alt=""></div>
+            <div class="card-title">How It Works</div>
+            <div class="card-desc">Physics models, data sources, and simplifications explained</div>
+          </a>
+        </div>
+      </div>
+
+      <div class="workflow">
+        <div class="section-label">Navier-Stokes</div>
+        <div class="cards">
+          <a href="simulate-advanced" class="card">
+            <div class="card-badge">NS</div>
+            <div class="card-icon"><img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4"
+                alt=""></div>
+            <div class="card-title">Simulate NS</div>
+            <div class="card-desc">Full 3D Navier-Stokes simulation with Boussinesq buoyancy and LES turbulence</div>
+          </a>
+          <a href="view-advanced" class="card">
+            <div class="card-badge">NS</div>
+            <div class="card-icon"><img src="icons/favicon-view1.svg" data-icon="view" data-count="3" alt=""></div>
+            <div class="card-title">View NS</div>
+            <div class="card-desc">3D viewer with cross-section slices, vertical profiles, and wind arrows</div>
+          </a>
+          <a href="about-advanced" class="card">
+            <div class="card-badge">NS</div>
+            <div class="card-icon"><img src="icons/favicon-about1.svg" data-icon="about" data-count="4" alt=""></div>
+            <div class="card-title">About NS</div>
+            <div class="card-desc">Equations, numerical method, parameters, and limitations of the NS solver</div>
+          </a>
+        </div>
+      </div>
+    </div>
+
+
     <div class="pipeline-hint">
-      Workflow: <span>Select Area</span> → <span>Run Simulation</span> → <span>Visualize</span>
+      Workflow: <span>Select Area</span> → <span>Simulate</span> → <span>View</span> | <span>About</span>
+    </div>
+    <div class="pipeline-hint">
+      Workflow NS: <span>Select Area</span> → <span>Simulate NS</span> → <span>View NS</span> | <span>About NS</span>
     </div>
 
     <footer>Paragliding thermal simulation</footer>
