@@ -735,7 +735,6 @@
           const getReq = store.get('latest');
           getReq.onsuccess = () => {
             const raw = getReq.result;
-            if (raw) store.delete('latest'); // consume once
             try {
               resolve(raw ? JSON.parse(raw) : null);
             } catch (e) {
