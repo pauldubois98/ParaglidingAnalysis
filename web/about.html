@@ -432,7 +432,7 @@
       <li><strong>Atmospheric transmittance</strong> <span class="tag tag-yes">modelled</span> — the beam weakens as it
         passes through the atmosphere. Modelled with the Kasten-Young air mass formula and the Bird clear-sky model:
         <div class="formula">AM = 1 / (sin(el) + 0.50572 × (el_deg + 6.07995)⁻¹·⁶³⁶⁴)
-          T_atm = 0.7 ^ (AM ^ 0.678)
+          T_atm = T_base ^ (AM ^ T_exp) [default: T_base=0.70, T_exp=0.678]
 
           At el=68° (midday): T_atm ≈ 0.70
           At el=14° (dawn): T_atm ≈ 0.38</div>
@@ -440,7 +440,7 @@
       </li>
       <li><strong>Diffuse sky radiation</strong> <span class="tag tag-yes">modelled</span> — cells in terrain shadow
         still receive diffuse radiation from the sky dome. Modelled using an isotropic sky assumption:
-        <div class="formula">I_diffuse = 0.3 × (1 − T_atm) × SVF
+        <div class="formula">I_diffuse = diffuse_frac × (1 − T_atm) × SVF [default: diffuse_frac=0.30]
           SVF = (1 + cos(slope)) / 2 ← sky view factor</div>
         More scattering at low sun angles → higher diffuse fraction at dawn and dusk. Flat plateaux see more sky than
         deep valley floors (SVF closer to 1).
@@ -539,7 +539,8 @@
             The map responds to the trigger-threshold slider (same as Daily heat).</li>
           <li><strong>Trigger zones</strong> map — combines terrain convexity (negated Laplacian −∇²Z — ridges and peaks
             have ∇²Z &lt; 0) with land-cover boundary gradient (abrupt surface transitions) into a single static score,
-            blended 60/40. Bright spots on the trigger map at warm locations on the heat or collector map identify the
+            blended with a tunable convexity weight (default 60/40). Bright spots on the trigger map at warm locations
+            on the heat or collector map identify the
             best thermal sources.</li>
         </ul>
       </li>
@@ -563,7 +564,8 @@
           V_advect ∈ [50, 1 000] m/h</div>
         This means advection is nearly idle at dawn (weak heating, slow anabatic flow) and peaks around solar noon
         (strong heating + steep slopes drive fast upslope air). The time step is subdivided adaptively to keep the CFL
-        number ≤ 0.9. The flow field itself combines the orographic term with the collector-suction term (see above), so
+        number ≤ CFL_safety (default 0.9). The flow field itself combines the orographic term with the collector-suction
+        term (see above), so
         trigger zones actively drain their surrounding collectors even when terrain geometry alone would not produce
         convergence there. The dynamic speed also means the collector map naturally weights midday scenarios more
         heavily, matching the period when paragliding thermals are active.
@@ -572,7 +574,8 @@
         the advection velocity field has two components:
         <ul style="margin-top:6px">
           <li><strong>Orographic term</strong> — warm air rises along slopes (anabatic wind). Flow direction is the
-            terrain-slope unit vector weighted by local temperature anomaly, then Gaussian-smoothed (σ = 5 cells).
+            terrain-slope unit vector weighted by local temperature anomaly, then Gaussian-smoothed (σ = flow_smooth,
+            default 5 cells).
             Cross-valley components cancel, leaving valley-channelled upslope flow.</li>
           <li><strong>Collector-suction term</strong> — a dT-gradient component pulls heat down the temperature
             gradient, from warm collectors toward cooler (recently released) trigger zones:
@@ -684,6 +687,226 @@
         due to mixing are all absent. The vertical speed shown is an upper-bound estimate.</li>
     </ul>
 
+
+    <!-- ─── Parameters ──────────────────────────────────────────────────── -->
+    <h2>Parameters and Their Effects</h2>
+
+    <h3>Heating</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Default</th>
+          <th>Effect</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>max_heat (K)</td>
+          <td>15</td>
+          <td>Peak ground–air temperature anomaly under full insolation on grassland. Directly scales all surface heat
+            fluxes. Auto-calibrated from ERA5 when available.</td>
+        </tr>
+        <tr>
+          <td>Diffuse fraction</td>
+          <td>0.30</td>
+          <td>Fraction of solar energy arriving as scattered sky radiation. Higher value → more uniform heating across
+            shadowed and north-facing slopes.</td>
+        </tr>
+        <tr>
+          <td>ELR (K/km)</td>
+          <td>6.5</td>
+          <td>Environmental Lapse Rate. Controls how high thermals rise: h_top = ΔT / (DALR − ELR). Higher ELR →
+            thermals reach greater altitude. At 9.8 K/km (= DALR) the atmosphere is neutral.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Solar Radiation Model</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Default</th>
+          <th>Effect</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>T_atm base</td>
+          <td>0.70</td>
+          <td>Zenith atmospheric transmittance in the Kasten-Czeplak formula T_atm = T_base^(AM^T_exp). Higher → more
+            solar energy reaches the surface. Use 0.80–0.85 for high-altitude clear-sky days; lower for haze or
+            humidity.</td>
+        </tr>
+        <tr>
+          <td>T_atm exponent</td>
+          <td>0.678</td>
+          <td>Controls how sharply transmittance drops at low sun angles (high airmass). Higher exponent → stronger
+            penalty near dawn/dusk; lower → more uniform insolation through the day.</td>
+        </tr>
+        <tr>
+          <td>Incidence smoothing σ</td>
+          <td>1.5 cells</td>
+          <td>Gaussian blur applied to the cos(incidence) field before heating is computed. Smooths sharp artefacts on
+            cliff edges and noisy DEM normals. Set to 0 to disable.</td>
+        </tr>
+        <tr>
+          <td>Clear-sky threshold (W/m²)</td>
+          <td>600</td>
+          <td>Minimum direct radiation for an ERA5 hour to count as "clear-sky" in the max_heat calibration. Lower
+            includes more marginal hours; higher keeps only the sunniest midday observations.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Thermal Inertia</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Default</th>
+          <th>Effect</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>τ hours (reference)</td>
+          <td>1.5 h</td>
+          <td>Reference thermal time constant for grassland (tf=1). Other land-cover types scale from this: rock × 0.35,
+            forest × 2.5, water × 15. Smaller τ → faster, more peaked heating.</td>
+        </tr>
+        <tr>
+          <td>Land cover smoothing σ</td>
+          <td>4 cells</td>
+          <td>Gaussian blur on the land-cover thermal factor map. Blends abrupt forest/grassland boundaries to avoid
+            step-changes in surface heating. Set to 0 for sharp LC boundaries.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Terrain Analysis (Trigger Zones)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Default</th>
+          <th>Effect</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Convexity smooth σ</td>
+          <td>4 cells</td>
+          <td>Gaussian blur on the DEM before computing curvature (Laplacian). Larger σ → peaks and ridges blend
+            together; smaller → sharper but noisier curvature map.</td>
+        </tr>
+        <tr>
+          <td>Trigger blur σ</td>
+          <td>3 cells</td>
+          <td>Post-processing blur on both the convexity and LC boundary maps before blending. Controls the spatial
+            extent of trigger zones around ridges and forest edges.</td>
+        </tr>
+        <tr>
+          <td>Convexity weight</td>
+          <td>0.60</td>
+          <td>Weight w for blending: trigger = w·convexity + (1−w)·LC_boundary. Higher w favours terrain peaks and
+            ridges; lower w favours forest/grassland transitions.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Advection</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Default</th>
+          <th>Effect</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>V_advect_max (m/h)</td>
+          <td>1 000</td>
+          <td>Ceiling for anabatic flow speed. Scales the entire advection velocity field. Higher → heat moves faster
+            upslope.</td>
+        </tr>
+        <tr>
+          <td>Ref slope</td>
+          <td>0.30</td>
+          <td>Characteristic slope angle (tan) used to normalise the terrain gradient in the advection scaling. Lower →
+            advection activates on gentler terrain.</td>
+        </tr>
+        <tr>
+          <td>K_collect</td>
+          <td>1.0</td>
+          <td>Strength of collector-suction term that pulls heat down the ΔT gradient toward trigger zones. 0 = pure
+            orographic flow.</td>
+        </tr>
+        <tr>
+          <td>Flow smooth σ</td>
+          <td>5 cells</td>
+          <td>Gaussian blur on the advection vector field (u, v) before applying it. Reduces checkerboard artefacts from
+            the upwind scheme.</td>
+        </tr>
+        <tr>
+          <td>CFL safety factor</td>
+          <td>0.9</td>
+          <td>Target CFL number for adaptive substep splitting. Lower → more substeps, more stable. Values above 1.0 are
+            unstable.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Thermal Release</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Default</th>
+          <th>Effect</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>K_release (h⁻¹)</td>
+          <td>0.3</td>
+          <td>Rate at which excess heat is removed from trigger-zone cells once the threshold is exceeded. Higher →
+            thermals release more aggressively each step.</td>
+        </tr>
+        <tr>
+          <td>Release threshold (K)</td>
+          <td>1.5</td>
+          <td>Minimum temperature anomaly above which release cooling activates. Acts as a noise floor: only cells that
+            have genuinely accumulated heat release.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Diurnal Model</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Parameter</th>
+          <th>Default</th>
+          <th>Effect</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Diurnal amplitude (K)</td>
+          <td>5</td>
+          <td>Half the daily temperature swing used to fill missing ERA5 hourly values: T(h) = T_mean + A·cos(2π(h −
+            h_max)/24). Used only when ERA5 data has gaps.</td>
+        </tr>
+        <tr>
+          <td>Peak hour (local)</td>
+          <td>14</td>
+          <td>Hour of the daily temperature maximum used in the cosine gap-fill model.</td>
+        </tr>
+      </tbody>
+    </table>
 
     <!-- ─── Data sources ─────────────────────────────────────────────────── -->
     <h2>Data sources</h2>
