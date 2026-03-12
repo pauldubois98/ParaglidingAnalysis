@@ -1982,6 +1982,8 @@ async function runSim() {
       T0 = 293.15;
     } else {
       ({max_heat: MAX_HEAT, T0} = await calibrateMaxHeat(fetchedData.era5Records, scenarios_all, Z, NX, NY, dx, dy, thermal_factor, diffuseFrac));
+      document.getElementById('max_heat').value = MAX_HEAT.toFixed(2);
+          logFn(`Max heat value found: ${MAX_HEAT.toFixed(2)}K…`);
     }
     T0_diurnal = buildDiurnalProfile(fetchedData.era5Diurnal, T0);
     log(`max_heat=${MAX_HEAT.toFixed(2)} K, T0=${T0.toFixed(2)} K`);
