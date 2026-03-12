@@ -161,7 +161,7 @@
 
 <div id="console-area">
   <div id="log-output">
-    <div class="log-info"><span class="log-ts">00:00:00</span>Ready — configure parameters and click <strong>Fetch Terrain</strong>.</div>
+    <div class="log-info"><span class="log-ts">00:00:00</span>Ready — configure parameters and click <strong>Fetch Data</strong>.</div>
   </div>
   <div id="progress-wrap"><div id="progress-bar"></div></div>
   <div id="plots-area">
@@ -282,16 +282,12 @@
     </div>
     <div id="panel-footer">
       <div class="footer-row">
-        <button class="btn btn-fetch" id="btn-fetch"  onclick="runFetch()">Fetch Terrain</button>
-        <button class="btn btn-fetch" id="btn-lc"     onclick="runFetchLC()" disabled>Fetch Land Cover</button>
-      </div>
-      <div class="footer-row">
+        <button class="btn btn-fetch" id="btn-fetch" onclick="runFetchAll()">Fetch Data</button>
         <button class="btn btn-sim"   id="btn-sim"    onclick="runSim()" disabled>Run NS3D</button>
-        <button class="btn btn-stop"  id="btn-stop"   onclick="stopSim()" disabled>Stop</button>
       </div>
       <div class="footer-row">
+        <button class="btn btn-stop"  id="btn-stop"   onclick="stopSim()" disabled>Stop</button>
         <button class="btn btn-map"   id="btn-map"    onclick="openViewer()" disabled>Open Viewer</button>
-      </div>
     </div>
   </div>
 </div>
@@ -669,20 +665,8 @@ async function parseCOGWindow(tiff, min_lon, max_lon, min_lat, max_lat, nx, ny) 
 
 let lcData = null; // { lc: Int16Array, lc_nx, lc_ny } — raw LC grid
 
-async function runFetchLC() {
-  if (!terrainData) { log('Fetch terrain first.', 'error'); return; }
-  _stopRequested = false;
-  document.getElementById('btn-lc').disabled = true;
-  setProgress(0);
-
-  const bbox = {
-    min_lat: parseFloat(document.getElementById('min_lat').value),
-    max_lat: parseFloat(document.getElementById('max_lat').value),
-    min_lon: parseFloat(document.getElementById('min_lon').value),
-    max_lon: parseFloat(document.getElementById('max_lon').value),
-  };
+async function _fetchLC(bbox) {
   const { Z, nx, ny, dx, dy } = terrainData;
-
   try {
     const tileLatSW = Math.floor(bbox.min_lat / 3) * 3;
     const tileLonSW = Math.floor(bbox.min_lon / 3) * 3;
@@ -690,7 +674,7 @@ async function runFetchLC() {
     const lonStr = (tileLonSW >= 0 ? 'E' : 'W') + String(Math.abs(tileLonSW)).padStart(3,'0');
     const s3url  = `https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_${latStr}${lonStr}_Map.tif`;
     log(`Fetching ESA WorldCover (${latStr}${lonStr}) via proxy…`);
-    setProgress(0.1);
+    setProgress(0.8);
 
     const GeoTIFF = window.GeoTIFF;
     if (!GeoTIFF) throw new Error('GeoTIFF.js not loaded');
@@ -709,10 +693,6 @@ async function runFetchLC() {
     renderLCPlot(document.getElementById('plot-lc'), lc, nx, ny);
     _logLCStats(lc, nx, ny);
   }
-
-  setProgress(1);
-  document.getElementById('btn-lc').disabled = false;
-  setStatus('Land cover loaded — z₀ map will be built at sim start.');
 }
 
 function _logLCStats(lc, nx, ny) {
@@ -1089,7 +1069,7 @@ function rmsDivergence() {
 
 let terrainData = null, meshData = null, simResult = null;
 
-async function runFetch() {
+async function runFetchAll() {
   _stopRequested = false;
   document.getElementById('btn-fetch').disabled = true;
   document.getElementById('btn-sim').disabled   = true;
@@ -1109,7 +1089,6 @@ async function runFetch() {
     const { Z, nx, ny, dx, dy } = terrainData;
     log(`Sim grid: ${nx}×${ny}, dx=${dx.toFixed(1)} m, dy=${dy.toFixed(1)} m`, 'success');
 
-    // Populate NX/NY fields with DEM resolution; user can override before running
     document.getElementById('sim_nx').value = nx;
     document.getElementById('sim_ny').value = ny;
     document.getElementById('grid-hint').textContent =
@@ -1121,9 +1100,10 @@ async function runFetch() {
     document.getElementById('plots-area').style.display = 'flex';
     renderPlot(document.getElementById('plot-elev'), Z, nx, ny, cmapElev);
 
+    await _fetchLC(bbox);
+
     document.getElementById('btn-sim').disabled = false;
-    document.getElementById('btn-lc').disabled  = false;
-    setStatus(`Terrain loaded: sim ${nx}×${ny}, mesh ${meshData.nx}×${meshData.ny}`);
+    setStatus(`Data ready: terrain ${nx}×${ny}, land cover loaded.`);
     setProgress(1);
   } catch(e) {
     if(e.message !== '__STOPPED__') log(`Fetch error: ${e}`, 'error');
