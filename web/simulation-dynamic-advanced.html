@@ -235,6 +235,13 @@
       </div>
       <div class="field-hint">Domain top is above the highest terrain point. NZ=32 × H=2000m → dz≈62 m per level.</div>
 
+      <div class="section-title">Wind Profile (Log Law)</div>
+      <div class="grid-2">
+        <div><label class="field-label">Roughness z₀ (m)</label><input type="number" id="log_z0" step="0.01" min="0.001" max="2.0" value="0.1"></div>
+        <div><label class="field-label">Ref. height z_ref (m)</label><input type="number" id="log_zref" step="10" min="10" max="500" value="100"></div>
+      </div>
+      <div class="field-hint">U(z) = U_ref · ln(z/z₀) / ln(z_ref/z₀). z₀: 0.03 grass, 0.1 farmland, 0.5 forest, 1+ urban. Wind speed is set at z_ref AGL.</div>
+
       <div class="section-title">NS Parameters</div>
       <div class="grid-2">
         <div><label class="field-label">Viscosity ν (m²/s)</label><input type="number" id="visc" step="5" min="1" max="500" value="50"></div>
@@ -247,7 +254,14 @@
         <div><label class="field-label">Sim time (s)</label><input type="number" id="sim_time" step="300" min="300" max="14400" value="3600"></div>
         <div><label class="field-label">CFL (semi-Lagr.)</label><input type="number" id="cfl" step="0.1" min="0.5" max="3.0" value="1.5"></div>
       </div>
-      <div class="field-hint">CFL up to ~2.5 stable with semi-Lagrangian advection.</div>
+      <div class="grid-2">
+        <div><label class="field-label">Max dt (s)</label><input type="number" id="dt_max" step="1" min="1" max="120" value="30"></div>
+        <div><label class="field-label">Diff. safety α</label><input type="number" id="diff_safety" step="0.05" min="0.05" max="0.45" value="0.30"></div>
+      </div>
+      <div class="grid-2">
+        <div><label class="field-label">Pressure yield (iter)</label><input type="number" id="p_yield" step="5" min="1" max="100" value="10"></div>
+      </div>
+      <div class="field-hint">CFL up to ~2.5 with semi-Lagrangian. dt = min(CFL·Δx/U, α·Δx²/ν, max_dt). Pressure yield: Jacobi iters between UI refreshes.</div>
 
     </div>
     <div id="panel-footer">
@@ -474,11 +488,14 @@ let _DIV;         // divergence, [NZ*NY*NX]
 
 function _idx(i, j, k) { return k * _NY * _NX + j * _NX + i; }
 
-// Logarithmic wind profile factor relative to z_ref = 100m AGL
+// Log wind profile parameters — set from UI before each simulation run
+let _LOG_Z0   = 0.1;   // surface roughness length (m)
+let _LOG_ZREF = 100;   // reference height where U = U_ref (m)
+
+// Logarithmic wind profile factor: 0 at ground, 1 at z_ref, capped at 1 above
 function _logFactor(z_above_ground) {
-  const z0 = 0.1, z_ref = 100;
-  if (z_above_ground <= z0) return 0;
-  return Math.min(1.0, Math.log(z_above_ground / z0) / Math.log(z_ref / z0));
+  if (z_above_ground <= _LOG_Z0) return 0;
+  return Math.min(1.0, Math.log(z_above_ground / _LOG_Z0) / Math.log(_LOG_ZREF / _LOG_Z0));
 }
 
 function initNS(Z_flat, nx, ny, dx, dy, nz, h_domain, U0, V0) {
@@ -620,8 +637,8 @@ function _computeDiv() {
 
 // Jacobi iterations for pressure Poisson: ∇²p = div/dt
 // For solid neighbors: Neumann BC (dp/dn=0) → use cell's own pressure
-// Async: yields every YIELD_P iterations so the stop button is always responsive.
-const _PRESSURE_YIELD_EVERY = 10;
+// Async: yields every _PRESSURE_YIELD_EVERY_VAL iterations so the stop button is always responsive.
+let _PRESSURE_YIELD_EVERY_VAL = 10;
 async function _solvePressure(dt, nIter) {
   const nx=_NX, ny=_NY, nz=_NZ;
   const nxny=nx*ny;
@@ -645,7 +662,7 @@ async function _solvePressure(dt, nIter) {
     }
     _applyPressureBC();
     _P.set(_P1);
-    if ((iter + 1) % _PRESSURE_YIELD_EVERY === 0) await yieldUI();
+    if ((iter + 1) % _PRESSURE_YIELD_EVERY_VAL === 0) await yieldUI();
   }
 }
 
@@ -882,24 +899,33 @@ async function runSim() {
 
   const { Z, nx, ny, dx, dy } = terrainData;
   const nz       = parseInt(document.getElementById('nz').value);
-  const h_domain = parseFloat(document.getElementById('h_domain').value);
-  const nu       = parseFloat(document.getElementById('visc').value);
-  const pIter    = parseInt(document.getElementById('p_iter').value);
-  const T_sim    = parseFloat(document.getElementById('sim_time').value);
-  const cfl      = parseFloat(document.getElementById('cfl').value);
+  const h_domain   = parseFloat(document.getElementById('h_domain').value);
+  const nu         = parseFloat(document.getElementById('visc').value);
+  const pIter      = parseInt(document.getElementById('p_iter').value);
+  const T_sim      = parseFloat(document.getElementById('sim_time').value);
+  const cfl        = parseFloat(document.getElementById('cfl').value);
+  const dt_max     = parseFloat(document.getElementById('dt_max').value);
+  const diff_safety = parseFloat(document.getElementById('diff_safety').value);
+  const p_yield    = parseInt(document.getElementById('p_yield').value);
   const { U: U0, V: V0 } = windComponents();
+
+  // Apply UI-driven log profile parameters
+  _LOG_Z0   = parseFloat(document.getElementById('log_z0').value);
+  _LOG_ZREF = parseFloat(document.getElementById('log_zref').value);
 
   // dt: limited by semi-Lagrangian CFL and diffusion stability
   const wind_speed = Math.hypot(U0, V0);
   const dt_adv  = wind_speed > 0.1 ? cfl * Math.min(dx, dy) / wind_speed : 9999;
-  const dt_diff = 0.3 * Math.min(dx*dx, dy*dy, (h_domain/nz)**2) / Math.max(nu, 0.01);
-  const dt = Math.min(dt_adv, dt_diff, 30); // cap at 30s
+  const dt_diff = diff_safety * Math.min(dx*dx, dy*dy, (h_domain/nz)**2) / Math.max(nu, 0.01);
+  const dt = Math.min(dt_adv, dt_diff, dt_max);
   const nSteps = Math.ceil(T_sim / dt);
 
   log(`NS3D init: grid ${nx}×${ny}×${nz}`);
-  log(`dz=${(h_domain/nz).toFixed(1)} m, dt=${dt.toFixed(2)} s, steps=${nSteps}`);
+  log(`dz=${(h_domain/nz).toFixed(1)} m, dt=${dt.toFixed(2)} s (adv=${dt_adv.toFixed(1)}, diff=${dt_diff.toFixed(1)}, max=${dt_max}), steps=${nSteps}`);
   log(`Wind: ${windDirDeg.toFixed(0)}°, U=${U0.toFixed(1)} V=${V0.toFixed(1)} m/s`);
-  log(`ν=${nu} m²/s, pressure iter=${pIter}`);
+  log(`Log profile: z₀=${_LOG_Z0} m, z_ref=${_LOG_ZREF} m`);
+  log(`ν=${nu} m²/s, pressure iter=${pIter}, yield every ${p_yield}`);
+  _PRESSURE_YIELD_EVERY_VAL = p_yield;
   setStatus('Initializing NS3D grid…');
 
   initNS(Z, nx, ny, dx, dy, nz, h_domain, U0, V0);
@@ -913,7 +939,7 @@ async function runSim() {
       const rms = rmsDivergence();
       setProgress(step / nSteps);
       setStatus(`NS3D step ${step}/${nSteps}, t=${(step*dt).toFixed(0)}s, div_rms=${rms.toExponential(2)}`);
-      if (step % 50 === 0)
+      if (step % 10 === 0)
         log(`Step ${step}/${nSteps} — t=${(step*dt).toFixed(0)} s, div_rms=${rms.toExponential(2)}`);
     }
   } catch(e) {
