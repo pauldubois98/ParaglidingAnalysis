@@ -294,6 +294,14 @@
       </div>
       <div class="field-hint">Sim zoom 11 ≈ 56 m/px. Mesh zoom for 3-D viewer only.</div>
 
+      <div class="section-title">Markers</div>
+      <div class="grid-2">
+        <div><label class="field-label">Takeoff lat</label><input type="number" id="takeoff_lat" step="0.00001" value="42.96940"></div>
+        <div><label class="field-label">Takeoff lon</label><input type="number" id="takeoff_lon" step="0.00001" value="0.88594"></div>
+        <div><label class="field-label">Landing lat</label><input type="number" id="landing_lat" step="0.00001" value="42.99216"></div>
+        <div><label class="field-label">Landing lon</label><input type="number" id="landing_lon" step="0.00001" value="0.90398"></div>
+      </div>
+
       <div class="section-title">Ambient Wind</div>
       <div id="compass-wrap">
         <svg id="compass-svg" width="60" height="60" viewBox="-30 -30 60 60"
@@ -434,6 +442,27 @@ function updateCompassDisplay() {
 }
 updateCompassDisplay();
 
+// Auto-fill fields from config.json, then override with localStorage
+function setVal(id, v) { const el = document.getElementById(id); if (el && v != null) el.value = v; }
+
+fetch('config.json').then(r => r.json()).then(cfg => {
+  const b = cfg.area?.bbox;
+  if (b) { setVal('min_lat', b.min_lat); setVal('max_lat', b.max_lat); setVal('min_lon', b.min_lon); setVal('max_lon', b.max_lon); }
+  setVal('takeoff_lat', cfg.area?.takeoff?.lat);
+  setVal('takeoff_lon', cfg.area?.takeoff?.lon);
+  setVal('landing_lat', cfg.area?.landing?.lat);
+  setVal('landing_lon', cfg.area?.landing?.lon);
+}).catch(() => {});
+
+try {
+  const saved = JSON.parse(localStorage.getItem('paragliding_area') || 'null');
+  if (saved) {
+    if (saved.bbox) { setVal('min_lat', saved.bbox.min_lat); setVal('max_lat', saved.bbox.max_lat); setVal('min_lon', saved.bbox.min_lon); setVal('max_lon', saved.bbox.max_lon); }
+    if (saved.takeoff) { setVal('takeoff_lat', saved.takeoff.lat); setVal('takeoff_lon', saved.takeoff.lon); }
+    if (saved.landing) { setVal('landing_lat', saved.landing.lat); setVal('landing_lon', saved.landing.lon); }
+  }
+} catch (e) {}
+
 function compassDrag(e0) {
   e0.preventDefault();
   const svg  = document.getElementById('compass-svg');
@@ -525,10 +554,12 @@ async function fetchDEM(bbox, zoom, label) {
 
   const [xmin] = lonlatToLocal(min_lon, lat0, lon0, lat0);
   const [xmax] = lonlatToLocal(max_lon, lat0, lon0, lat0);
-  const [,ymin] = lonlatToLocal(lon0, max_lat, lon0, lat0);  // note: max_lat → smaller y in screen
-  const [,ymax] = lonlatToLocal(lon0, min_lat, lon0, lat0);
+  const [,ynorth] = lonlatToLocal(lon0, max_lat, lon0, lat0);  // positive (north)
+  const [,ysouth] = lonlatToLocal(lon0, min_lat, lon0, lat0);  // negative (south)
 
-  return { Z, nx, ny, dx, dy, x_extent: [xmin, xmax], y_extent: [ymin, ymax], lat0, lon0 };
+  // y_extent stored as [south, north] so yh = y_extent[1]-y_extent[0] > 0,
+  // matching Three.js PlaneGeometry vertex order (iy=0 → top = north = j=0 in tile data).
+  return { Z, nx, ny, dx, dy, x_extent: [xmin, xmax], y_extent: [ysouth, ynorth], lat0, lon0 };
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -777,6 +808,26 @@ async function runSim() {
   renderPlot(document.getElementById('plot-depth'),  h,        nx, ny, cmapDepth,  null);
   renderPlot(document.getElementById('plot-vort'),   vorticity, nx, ny, cmapVort,  null);
 
+  // ── Marker positions ──
+  const mLon0 = terrainData.lon0, mLat0 = terrainData.lat0;
+  function elevAtPoint(mlat, mlon) {
+    const [mx, my] = lonlatToLocal(mlon, mlat, mLon0, mLat0);
+    const i = Math.round((mx - terrainData.x_extent[0]) / (terrainData.x_extent[1] - terrainData.x_extent[0]) * (nx - 1));
+    // Tile data: j=0=north, j=ny-1=south; y_extent=[south,north] so invert:
+    const j = Math.round((terrainData.y_extent[1] - my) / (terrainData.y_extent[1] - terrainData.y_extent[0]) * (ny - 1));
+    return terrainData.Z[Math.max(0, Math.min(ny-1, j)) * nx + Math.max(0, Math.min(nx-1, i))];
+  }
+  const toLat = parseFloat(document.getElementById('takeoff_lat').value);
+  const toLon = parseFloat(document.getElementById('takeoff_lon').value);
+  const laLat = parseFloat(document.getElementById('landing_lat').value);
+  const laLon = parseFloat(document.getElementById('landing_lon').value);
+  const [toX, toY] = lonlatToLocal(toLon, toLat, mLon0, mLat0);
+  const [laX, laY] = lonlatToLocal(laLon, laLat, mLon0, mLat0);
+  const toZ = elevAtPoint(toLat, toLon);
+  const laZ = elevAtPoint(laLat, laLon);
+  log(`Take-off: x=${toX.toFixed(0)} m  y=${toY.toFixed(0)} m  z=${toZ.toFixed(0)} m`);
+  log(`Landing:  x=${laX.toFixed(0)} m  y=${laY.toFixed(0)} m  z=${laZ.toFixed(0)} m`);
+
   // ── Pack result for viewer ──
   // Convert Float32Arrays to plain arrays for JSON serialization
   const elev2d = [];
@@ -813,6 +864,10 @@ async function runSim() {
       wind_dir: windDirDeg, wind_speed_ms: parseFloat(document.getElementById('wind_speed').value),
       U_in: U, V_in: V, sim_time: T_sim, nx, ny, dx, dy,
     },
+    markers: [
+      { type: 'takeoff', label: '▲ Take-off', x: toX, y: toY, z: toZ },
+      { type: 'landing', label: '▼ Landing',  x: laX, y: laY, z: laZ },
+    ],
   };
 
   document.getElementById('btn-sim').disabled  = false;
