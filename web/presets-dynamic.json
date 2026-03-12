@@ -1,0 +1,62 @@
+[
+  {
+    "id": "wind-speed",
+    "label": "Wind Speed",
+    "overlay": "speed",
+    "terrainOpacity": 0.75,
+    "overlayOpacity": 0.80,
+    "arrows": true,
+    "arrowStep": 10,
+    "arrowHeight": 80,
+    "arrowScale": 1.5,
+    "arrowColor": "white"
+  },
+  {
+    "id": "hydraulic",
+    "label": "Hydraulic Jumps",
+    "overlay": "froude",
+    "terrainOpacity": 0.70,
+    "overlayOpacity": 0.85,
+    "arrows": true,
+    "arrowStep": 12,
+    "arrowHeight": 60,
+    "arrowScale": 1.2,
+    "arrowColor": "black"
+  },
+  {
+    "id": "turbulence",
+    "label": "Turbulence",
+    "overlay": "vort",
+    "terrainOpacity": 0.60,
+    "overlayOpacity": 0.90,
+    "arrows": true,
+    "arrowStep": 8,
+    "arrowHeight": 100,
+    "arrowScale": 2.0,
+    "arrowColor": "white"
+  },
+  {
+    "id": "flow-depth",
+    "label": "Flow Depth",
+    "overlay": "depth",
+    "terrainOpacity": 0.70,
+    "overlayOpacity": 0.80,
+    "arrows": false,
+    "arrowStep": 10,
+    "arrowHeight": 80,
+    "arrowScale": 1.5,
+    "arrowColor": "white"
+  },
+  {
+    "id": "terrain",
+    "label": "Terrain",
+    "overlay": "terrain",
+    "terrainOpacity": 1.0,
+    "overlayOpacity": 0.0,
+    "arrows": false,
+    "arrowStep": 10,
+    "arrowHeight": 80,
+    "arrowScale": 1.5,
+    "arrowColor": "white"
+  }
+]

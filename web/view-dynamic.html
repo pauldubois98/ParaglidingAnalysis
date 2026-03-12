@@ -81,7 +81,7 @@
 
     .tab-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
     .tab-btn {
-      flex: 1; min-width: 48px; padding: 4px 6px;
+      flex: 1; padding: 4px 6px;
       font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
       border-radius: 10px; border: 1px solid rgba(100,160,255,.25);
       color: #4a6888; background: transparent; cursor: pointer; transition: .15s;
@@ -173,6 +173,9 @@
 <!-- Controls panel -->
 <div id="ui-panel">
   <h2>Wind Flow</h2>
+
+  <div class="section-title">Presets</div>
+  <div class="tab-row" id="preset-btns"></div>
 
   <div class="section-title">Overlay</div>
   <div class="tab-row">
@@ -808,6 +811,74 @@ function idbGet(key) {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+//  PRESETS
+// ═══════════════════════════════════════════════════════════════════
+
+let _presets = [];
+
+async function loadPresets() {
+  try {
+    _presets = await fetch('presets-dynamic.json').then(r => r.json());
+  } catch { _presets = []; }
+
+  const container = document.getElementById('preset-btns');
+  container.innerHTML = '';
+  _presets.forEach((p, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'tab-btn' + (idx === 0 ? ' active' : '');
+    btn.id = 'preset-' + p.id;
+    btn.textContent = p.label;
+    btn.onclick = () => applyPreset(p);
+    container.appendChild(btn);
+  });
+}
+
+function applyPreset(p) {
+  // Highlight active preset button
+  _presets.forEach(q => {
+    const btn = document.getElementById('preset-' + q.id);
+    if (btn) btn.classList.toggle('active', q.id === p.id);
+  });
+
+  // Terrain opacity
+  const terrEl = document.getElementById('terr-opacity');
+  terrEl.value = p.terrainOpacity;
+  document.getElementById('terr-opacity-val').textContent = p.terrainOpacity;
+  updateTerrainOpacity();
+
+  // Overlay type
+  setOverlay(p.overlay);
+
+  // Overlay opacity
+  const ovEl = document.getElementById('ov-opacity');
+  ovEl.value = p.overlayOpacity;
+  document.getElementById('ov-opacity-val').textContent = p.overlayOpacity;
+  updateOverlayOpacity();
+
+  // Arrows
+  if (arrowsVisible !== p.arrows) toggleArrows();
+
+  const stepEl = document.getElementById('arrow-step');
+  stepEl.value = p.arrowStep;
+  document.getElementById('arrow-step-val').textContent = p.arrowStep;
+
+  const heightEl = document.getElementById('arrow-height');
+  heightEl.value = p.arrowHeight;
+  document.getElementById('arrow-height-val').textContent = p.arrowHeight;
+
+  const scaleEl = document.getElementById('arrow-scale');
+  scaleEl.value = p.arrowScale;
+  document.getElementById('arrow-scale-val').textContent = p.arrowScale;
+
+  const wantWhite = p.arrowColor === 'white';
+  if ((arrowColor === 0xffffff) !== wantWhite) toggleArrowColor();
+
+  rebuildArrows();
+}
+
+window.loadPresets = loadPresets;
+
+// ═══════════════════════════════════════════════════════════════════
 //  PANEL TOGGLE
 // ═══════════════════════════════════════════════════════════════════
 
@@ -865,6 +936,7 @@ async function load() {
       `dir ${p.wind_dir?.toFixed(0)}° · ${p.wind_speed_ms?.toFixed(1)} m/s · H₀=${p.H0}m`;
     drawWindCompass(p.wind_dir ?? 0, p.wind_speed_ms ?? 0);
 
+    await loadPresets();
     togglePanel();
   } catch (e) {
     console.error('view-dynamic load error:', e);
