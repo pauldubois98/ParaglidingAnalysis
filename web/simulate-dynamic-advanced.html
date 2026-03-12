@@ -1085,6 +1085,7 @@ function rmsDivergence() {
 
 let terrainData = null, meshData = null, simResult = null;
 let _surf_u, _surf_v, _surf_w, _surf_p, _surf_speed, _surf_vort;
+let _simCtx = null; // set at sim start so _renderPreviews can pack simResult
 
 function _renderPreviews(nx, ny, dx, dy) {
   _surf_u     = extractSurface2D(_U);
@@ -1106,6 +1107,49 @@ function _renderPreviews(nx, ny, dx, dy) {
   renderPlot(document.getElementById('plot-vert'),  _surf_w,     nx, ny, cmapVert,  null);
   renderPlot(document.getElementById('plot-press'), _surf_p,     nx, ny, cmapPress, null);
   renderPlot(document.getElementById('plot-vort'),  _surf_vort,  nx, ny, cmapVort,  null);
+
+  // Pack simResult so viewer can be opened at any point during the sim
+  if (!_simCtx) return;
+  const { nz, T_sim, U0, V0, nu, toX, toY, toZ, laX, laY, laZ } = _simCtx;
+  const elevArr2d=[]; for(let j=0;j<ny;j++) elevArr2d.push(Array.from(terrainData.Z.slice(j*nx,(j+1)*nx)));
+  const meshElev2d=[]; for(let j=0;j<meshData.ny;j++) meshElev2d.push(Array.from(meshData.Z.slice(j*meshData.nx,(j+1)*meshData.nx)));
+  simResult = {
+    type: 'ns3d',
+    terrain: {
+      elevation: elevArr2d, nx, ny, dx, dy,
+      x_extent: terrainData.x_extent,
+      y_extent: terrainData.y_extent,
+      lat0: terrainData.lat0, lon0: terrainData.lon0,
+      mesh_elevation: meshElev2d,
+      mesh_nx: meshData.nx, mesh_ny: meshData.ny, mesh_dx: meshData.dx,
+    },
+    grid: { nx, ny, nz, dx, dy, dz: _DZ, z_base: _Z_BASE },
+    fields: {
+      u:     Array.from(_U),
+      v:     Array.from(_V),
+      w:     Array.from(_W),
+      p:     Array.from(_P),
+      surf_speed: Array.from(_surf_speed),
+      surf_w:     Array.from(_surf_w),
+      surf_p:     Array.from(_surf_p),
+      surf_vort:  Array.from(_surf_vort),
+      surf_u:     Array.from(_surf_u),
+      surf_v:     Array.from(_surf_v),
+    },
+    params: {
+      wind_dir: windDirDeg,
+      wind_speed_ms: parseFloat(document.getElementById('wind_speed').value),
+      U_in: U0, V_in: V0, nu, nz, h_domain: _simCtx.h_domain, dz: _DZ, z_base: _Z_BASE, sim_time: T_sim,
+    },
+    markers: [
+      { type:'takeoff', label:'▲ Take-off', x:toX, y:toY, z:toZ },
+      { type:'landing', label:'▼ Landing',  x:laX, y:laY, z:laZ },
+    ],
+  };
+  // Only enable viewer when sim is not actively running
+  if (document.getElementById('btn-stop').disabled) {
+    document.getElementById('btn-map').disabled = false;
+  }
 }
 
 async function runFetchAll() {
@@ -1170,6 +1214,7 @@ async function runFetchAll() {
 async function runSim() {
   if (!terrainData) return;
   _stopRequested = false;
+  document.getElementById('btn-fetch').disabled = true;
   document.getElementById('btn-sim').disabled  = true;
   document.getElementById('btn-stop').disabled = false;
   document.getElementById('btn-map').disabled  = true;
@@ -1223,6 +1268,23 @@ async function runSim() {
   initNS(Z, nx, ny, dx, dy, nz, h_domain, U0, V0);
   log(`Solid cells: ${_SOLID.reduce((a,b)=>a+b,0)} / ${nz*ny*nx}`, 'success');
 
+  // Compute marker positions once so _renderPreviews can include them in simResult
+  const mLon0=terrainData.lon0, mLat0=terrainData.lat0;
+  function elevAtPoint(mlat, mlon) {
+    const [mx,my]=lonlatToLocal(mlon,mlat,mLon0,mLat0);
+    const i=Math.round((mx-terrainData.x_extent[0])/(terrainData.x_extent[1]-terrainData.x_extent[0])*(nx-1));
+    const j=Math.round((terrainData.y_extent[1]-my)/(terrainData.y_extent[1]-terrainData.y_extent[0])*(ny-1));
+    return terrainData.Z[Math.max(0,Math.min(ny-1,j))*nx+Math.max(0,Math.min(nx-1,i))];
+  }
+  const toLat=parseFloat(document.getElementById('takeoff_lat').value);
+  const toLon=parseFloat(document.getElementById('takeoff_lon').value);
+  const laLat=parseFloat(document.getElementById('landing_lat').value);
+  const laLon=parseFloat(document.getElementById('landing_lon').value);
+  const [toX,toY]=lonlatToLocal(toLon,toLat,mLon0,mLat0);
+  const [laX,laY]=lonlatToLocal(laLon,laLat,mLon0,mLat0);
+  const toZ=elevAtPoint(toLat,toLon), laZ=elevAtPoint(laLat,laLon);
+  _simCtx = { nz, T_sim, U0, V0, nu, h_domain, toX, toY, toZ, laX, laY, laZ };
+
   document.getElementById('plots-area-sim').style.display = 'flex';
 
   setStatus('Simulating NS3D…');
@@ -1243,8 +1305,13 @@ async function runSim() {
       }
     }
   } catch(e) {
-    if(e.message==='__STOPPED__'){log('Stopped by user.','warn');}
-    else{log(`Solver error: ${e}`,'error');}
+    if(e.message==='__STOPPED__'){
+      log('Stopped by user.','warn');
+      _renderPreviews(nx, ny, dx, dy);
+    } else {
+      log(`Solver error: ${e}`,'error');
+    }
+    document.getElementById('btn-fetch').disabled = false;
     document.getElementById('btn-sim').disabled  = false;
     document.getElementById('btn-stop').disabled = true;
     return;
@@ -1252,70 +1319,10 @@ async function runSim() {
 
   log(`Simulation complete (T=${T_sim} s).`, 'success');
   setProgress(1);
-
-  // ── Derived surface fields + 2D previews (also called mid-sim) ──
   _renderPreviews(nx, ny, dx, dy);
-
-  // ── Marker positions ──
-  const mLon0=terrainData.lon0, mLat0=terrainData.lat0;
-  function elevAtPoint(mlat, mlon) {
-    const [mx,my]=lonlatToLocal(mlon,mlat,mLon0,mLat0);
-    const i=Math.round((mx-terrainData.x_extent[0])/(terrainData.x_extent[1]-terrainData.x_extent[0])*(nx-1));
-    const j=Math.round((terrainData.y_extent[1]-my)/(terrainData.y_extent[1]-terrainData.y_extent[0])*(ny-1));
-    return terrainData.Z[Math.max(0,Math.min(ny-1,j))*nx+Math.max(0,Math.min(nx-1,i))];
-  }
-  const toLat=parseFloat(document.getElementById('takeoff_lat').value);
-  const toLon=parseFloat(document.getElementById('takeoff_lon').value);
-  const laLat=parseFloat(document.getElementById('landing_lat').value);
-  const laLon=parseFloat(document.getElementById('landing_lon').value);
-  const [toX,toY]=lonlatToLocal(toLon,toLat,mLon0,mLat0);
-  const [laX,laY]=lonlatToLocal(laLon,laLat,mLon0,mLat0);
-  const toZ=elevAtPoint(toLat,toLon), laZ=elevAtPoint(laLat,laLon);
-
-  // ── Pack 3D fields for viewer ──
-  // Store as flat arrays; viewer indexes as k*ny*nx + j*nx + i
-  const elevArr2d=[]; for(let j=0;j<ny;j++) elevArr2d.push(Array.from(terrainData.Z.slice(j*nx,(j+1)*nx)));
-  const meshElev2d=[]; for(let j=0;j<meshData.ny;j++) meshElev2d.push(Array.from(meshData.Z.slice(j*meshData.nx,(j+1)*meshData.nx)));
-
-  simResult = {
-    type: 'ns3d',
-    terrain: {
-      elevation: elevArr2d, nx, ny, dx, dy,
-      x_extent: terrainData.x_extent,
-      y_extent: terrainData.y_extent,
-      lat0: terrainData.lat0, lon0: terrainData.lon0,
-      mesh_elevation: meshElev2d,
-      mesh_nx: meshData.nx, mesh_ny: meshData.ny, mesh_dx: meshData.dx,
-    },
-    grid: { nx, ny, nz, dx, dy, dz: _DZ, z_base: _Z_BASE },
-    fields: {
-      // 3D arrays as flat lists, indexed k*ny*nx + j*nx + i
-      u:     Array.from(_U),
-      v:     Array.from(_V),
-      w:     Array.from(_W),
-      p:     Array.from(_P),
-      // Surface fields for quick overlay
-      surf_speed: Array.from(_surf_speed),
-      surf_w:     Array.from(_surf_w),
-      surf_p:     Array.from(_surf_p),
-      surf_vort:  Array.from(_surf_vort),
-      surf_u:     Array.from(_surf_u),
-      surf_v:     Array.from(_surf_v),
-    },
-    params: {
-      wind_dir: windDirDeg,
-      wind_speed_ms: parseFloat(document.getElementById('wind_speed').value),
-      U_in: U0, V_in: V0, nu, nz, h_domain, dz: _DZ, z_base: _Z_BASE, sim_time: T_sim,
-    },
-    markers: [
-      { type:'takeoff', label:'▲ Take-off', x:toX, y:toY, z:toZ },
-      { type:'landing', label:'▼ Landing',  x:laX, y:laY, z:laZ },
-    ],
-  };
 
   document.getElementById('btn-sim').disabled  = false;
   document.getElementById('btn-stop').disabled = true;
-  document.getElementById('btn-map').disabled  = false;
   setStatus(`Done — T=${T_sim} s, ${nSteps} steps`);
 }
 
@@ -1331,7 +1338,7 @@ function applyPreset(name) {
     document.getElementById('visc').value        = 150;
     document.getElementById('p_iter').value      = 30;
     document.getElementById('p_yield').value     = 5;
-    document.getElementById('sim_time').value    = 1200;
+    document.getElementById('sim_time').value    = 900;
     document.getElementById('cfl').value         = 2.0;
     document.getElementById('dt_max').value      = 60;
     document.getElementById('diff_safety').value = 0.25;
@@ -1347,7 +1354,7 @@ function applyPreset(name) {
     document.getElementById('visc').value        = 50;
     document.getElementById('p_iter').value      = 80;
     document.getElementById('p_yield').value     = 10;
-    document.getElementById('sim_time').value    = 3600;
+    document.getElementById('sim_time').value    = 1500;
     document.getElementById('cfl').value         = 1.5;
     document.getElementById('dt_max').value      = 30;
     document.getElementById('diff_safety').value = 0.30;
