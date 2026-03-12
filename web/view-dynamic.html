@@ -808,7 +808,7 @@ function buildNorthArrow() {
     return new THREE.ShapeGeometry(shape);
   }
 
-  function addArrow(color, rotZ, zOffset) {
+  function addArrow(color, rotZ, zOffset, labelText) {
     const mesh = new THREE.Mesh(
       makeArrowGeom(),
       new THREE.MeshBasicMaterial({
@@ -816,21 +816,41 @@ function buildNorthArrow() {
         side: THREE.DoubleSide, depthWrite: false,
       })
     );
-    mesh.position.set(cx, cy, minZ - zOffset);
+    const mz = minZ - zOffset;
+    mesh.position.set(cx, cy, mz);
     mesh.rotation.z = rotZ;
     scene.add(mesh);
     northMarkerObjects.push(mesh);
+
+    // Label at 45% toward the tip (in the arrow's pointing direction)
+    const frac = 0.45;
+    const lx = cx - yh * frac * Math.sin(rotZ);
+    const ly = cy + yh * frac * Math.cos(rotZ);
+    const hexCol = '#' + color.toString(16).padStart(6, '0');
+    const div = document.createElement('div');
+    div.style.cssText = `
+      position: absolute; pointer-events: none;
+      color: ${hexCol}; font-size: 15px; font-weight: bold;
+      font-family: 'Segoe UI', sans-serif; letter-spacing: 2px;
+      text-transform: uppercase;
+      text-shadow: 0 0 6px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.8);
+      transform: translate(-50%, -50%);
+    `;
+    div.textContent = labelText;
+    document.getElementById('canvas-container').appendChild(div);
+    mesh._labelDiv = div;
+    mesh._worldPos = new THREE.Vector3(lx, ly, mz);
   }
 
   // North arrow — points +Y (no rotation), red
-  addArrow(0xee2222, 0, minZ+500);
+  addArrow(0xee2222, 0, minZ+500, 'North');
 
-  // Wind arrow — points where wind blows TO, orange
+  // Wind arrow — points where wind blows TO, light blue
   // wind_dir is FROM direction; TO = FROM + 180, clockwise from north
   // In XY plane (Y=north, X=east): rotate –angle around Z for clockwise
   const windFrom = simData.params?.wind_dir ?? 0;
   const windToRad = ((windFrom + 180) % 360) * Math.PI / 180;
-  addArrow(0x88ccff, -windToRad, minZ);
+  addArrow(0x88ccff, -windToRad, minZ, 'Wind');
 }
 
 function updateMarkerLabels() {
