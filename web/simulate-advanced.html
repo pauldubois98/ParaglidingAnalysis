@@ -330,6 +330,29 @@
       <input type="number" id="tau_hours" step="0.1" min="0.2" max="5" value="1.5">
       <div class="field-hint">Time constant for ground heating. ~1 h bare rock, ~1.5 h mixed, ~3 h forest.</div>
 
+      <div class="section-title">Atmospheric Physics</div>
+      <div class="grid-2">
+        <div><label class="field-label">DALR (K/km)</label><input type="number" id="dalr" step="0.01" min="8" max="11" value="9.76"></div>
+        <div><label class="field-label">Turbulent Prandtl Prₜ</label><input type="number" id="prt" step="0.05" min="0.3" max="2.0" value="0.7"></div>
+      </div>
+      <div class="field-hint">DALR: dry adiabatic rate (fixed physics, 9.76 K/km). Prₜ: ratio of momentum to heat diffusivity — lower = more heat diffusion relative to momentum.</div>
+      <div class="grid-2">
+        <div><label class="field-label">Diffusion CFL factor</label><input type="number" id="cfl_factor" step="0.05" min="0.1" max="0.5" value="0.4"></div>
+      </div>
+      <div class="field-hint">Clamps νₜ for diffusion stability: νₜ ≤ factor·Δ²/dt. Lower = more conservative.</div>
+
+      <div class="section-title">Solar Radiation Model</div>
+      <div class="grid-2">
+        <div><label class="field-label">T_atm base</label><input type="number" id="t_atm_base" step="0.01" min="0.4" max="0.95" value="0.7"></div>
+        <div><label class="field-label">T_atm exponent</label><input type="number" id="t_atm_exp" step="0.01" min="0.3" max="1.0" value="0.678"></div>
+      </div>
+      <div class="field-hint">Kasten-Czeplak transmittance: T_atm = base^(AM^exp). Lower base = hazier sky; higher base = clearer.</div>
+      <div class="grid-2">
+        <div><label class="field-label">Slope smooth σ (cells)</label><input type="number" id="sigma_slope" step="0.5" min="0" max="5" value="1.5"></div>
+        <div><label class="field-label">Land cover smooth σ (cells)</label><input type="number" id="sigma_lc" step="1" min="0" max="15" value="4"></div>
+      </div>
+      <div class="field-hint">Gaussian smoothing applied to slope incidence and land cover thermal factor. Higher σ = smoother heating patterns.</div>
+
       <div class="section-title">NS Solver Parameters</div>
       <div style="display:flex;gap:8px;margin-bottom:6px;">
         <button class="btn-secondary" style="flex:1" onclick="loadPreset('coarse')">Coarse preset</button>
@@ -351,7 +374,10 @@
         <div><label class="field-label">SOR omega</label><input type="number" id="ns_omega" step="0.05" min="1.0" max="1.95" value="1.75"></div>
         <div><label class="field-label">Pressure max iter</label><input type="number" id="ns_maxiter" step="10" min="20" max="500" value="60"></div>
       </div>
-      <div class="field-hint">Red-Black SOR pressure solver. Higher iterations = better accuracy, slower.</div>
+      <div class="grid-2">
+        <div><label class="field-label">SOR mean-removal freq</label><input type="number" id="sor_mean_freq" step="5" min="5" max="100" value="20"></div>
+      </div>
+      <div class="field-hint">Red-Black SOR pressure solver. Mean-removal frequency: remove mean pressure every N iterations to handle Neumann null space.</div>
 
       <div class="section-title">Visualization</div>
       <div class="grid-2">
@@ -915,11 +941,11 @@ async function computeShadowMask(Z, nx, ny, dx, dy, azDeg, elDeg) {
 // ═══════════════════════════════════════════════════════════════════
 //  SOLAR HEATING
 // ═══════════════════════════════════════════════════════════════════
-function computeSolarHeating(Z, nx, ny, dx, dy, azDeg, elDeg, thermalFactor, maxHeat, shadowMask, diffuseFrac) {
+function computeSolarHeating(Z, nx, ny, dx, dy, azDeg, elDeg, thermalFactor, maxHeat, shadowMask, diffuseFrac, t_atm_base=0.7, t_atm_exp=0.678, sigma_slope=1.5) {
   const az=azDeg*Math.PI/180, el=elDeg*Math.PI/180;
   const sx=Math.sin(az)*Math.cos(el), sy=Math.cos(az)*Math.cos(el), sz=Math.sin(el);
   const AM=1/(Math.sin(el)+0.50572*Math.pow(elDeg+6.07995,-1.6364));
-  const T_atm=Math.pow(0.7,Math.pow(AM,0.678));
+  const T_atm=Math.pow(t_atm_base,Math.pow(AM,t_atm_exp));
   const dzdx=gradientAxisI(Z,ny,nx), dzdy=gradientAxisJ(Z,ny,nx);
   const cosInc_raw=new Float32Array(ny*nx);
   for (let idx=0; idx<ny*nx; idx++) {
@@ -927,7 +953,7 @@ function computeSolarHeating(Z, nx, ny, dx, dy, azDeg, elDeg, thermalFactor, max
     const norm=Math.sqrt(nx_*nx_+ny_*ny_+nz_*nz_);
     cosInc_raw[idx]=Math.max(0,(nx_*sx+ny_*sy+nz_*sz)/norm);
   }
-  const cosInc=gaussianFilter2D(cosInc_raw,ny,nx,1.5);
+  const cosInc=gaussianFilter2D(cosInc_raw,ny,nx,sigma_slope);
   const dT=new Float32Array(ny*nx);
   for (let idx=0; idx<ny*nx; idx++) {
     const gx=dzdx[idx]/dx, gy=dzdy[idx]/dy;
@@ -944,7 +970,7 @@ function computeSolarHeating(Z, nx, ny, dx, dy, azDeg, elDeg, thermalFactor, max
 // ═══════════════════════════════════════════════════════════════════
 //  THERMAL FACTOR
 // ═══════════════════════════════════════════════════════════════════
-function buildThermalFactor(lcCodes, lc_ny, lc_nx, sim_ny, sim_nx, tauHours) {
+function buildThermalFactor(lcCodes, lc_ny, lc_nx, sim_ny, sim_nx, tauHours, sigma_lc=4) {
   const tf=new Float32Array(sim_ny*sim_nx), tau=new Float32Array(sim_ny*sim_nx);
   for (let j=0; j<sim_ny; j++) {
     for (let i=0; i<sim_nx; i++) {
@@ -955,7 +981,7 @@ function buildThermalFactor(lcCodes, lc_ny, lc_nx, sim_ny, sim_nx, tauHours) {
       tf[j*sim_nx+i]=lc.tf; tau[j*sim_nx+i]=lc.tau*tauHours;
     }
   }
-  return {thermal_factor:gaussianFilter2D(tf,sim_ny,sim_nx,4), tau_grid:tau};
+  return {thermal_factor:gaussianFilter2D(tf,sim_ny,sim_nx,sigma_lc), tau_grid:tau};
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1115,14 +1141,17 @@ function renderERA5Plot(canvas,records){
 //  NS3D SOLVER
 // ═══════════════════════════════════════════════════════════════════
 class NS3D {
-  constructor({NX, NY, NZ, dx, dy, dz, solidMask, ELR, T_ref, Cs, omega, maxIter}) {
+  constructor({NX, NY, NZ, dx, dy, dz, solidMask, ELR, T_ref, Cs, omega, maxIter, Prt=0.7, cfl_factor=0.4, DALR_km=9.76, sorMeanFreq=20}) {
     this.NX = NX; this.NY = NY; this.NZ = NZ;
     this.dx = dx; this.dy = dy; this.dz = dz;
     this.solidMask = solidMask; // Uint8Array[NZ*NY*NX], 1=solid
-    this.ELR = ELR / 1000;     // K/m (input is K/km)
-    this.DALR = 9.76 / 1000;   // K/m
-    this.T_ref = T_ref;         // reference temperature K
+    this.ELR = ELR / 1000;       // K/m (input is K/km)
+    this.DALR = DALR_km / 1000;  // K/m
+    this.T_ref = T_ref;           // reference temperature K
     this.Cs = Cs;
+    this.Prt = Prt;
+    this.cfl_factor = cfl_factor;
+    this.sorMeanFreq = sorMeanFreq;
     this.omega = omega;
     this.maxIter = maxIter;
     this.g = 9.81;
@@ -1319,7 +1348,7 @@ class NS3D {
       }
 
       // Remove mean pressure every 20 iterations (handle null space)
-      if ((iter + 1) % 20 === 0) {
+      if ((iter + 1) % this.sorMeanFreq === 0) {
         let pmean = 0, cnt = 0;
         for (let k2 = 0; k2 < NX*NY*NZ; k2++) { if (!solidMask[k2]) { pmean += p[k2]; cnt++; } }
         if (cnt > 0) { pmean /= cnt; for (let k2 = 0; k2 < NX*NY*NZ; k2++) if (!solidMask[k2]) p[k2] -= pmean; }
@@ -1330,7 +1359,7 @@ class NS3D {
   // Explicit diffusion applied in-place to u,v,w,theta
   addDiffusion(us, vs, ws, theta_in, dt) {
     const {NX,NY,NZ,dx,dy,dz,solidMask,nu_t} = this;
-    const Prt = 0.7;
+    const Prt = this.Prt;
     const minDim = Math.min(dx,dy,dz);
     const tmp_u = new Float64Array(us.length);
     const tmp_v = new Float64Array(vs.length);
@@ -1343,7 +1372,7 @@ class NS3D {
           const k = this._idx(ix, iy, iz);
           if (solidMask[k]) continue;
           // Clamp nu_t for stability
-          const nu = Math.min(nu_t[k], 0.4 * minDim * minDim / (dt + 1e-30));
+          const nu = Math.min(nu_t[k], this.cfl_factor * minDim * minDim / (dt + 1e-30));
           const kap = nu / Prt;
 
           const lap_u = (this._getF(us,ix+1,iy,iz)-2*us[k]+this._getF(us,ix-1,iy,iz))/(dx*dx)
@@ -1880,6 +1909,14 @@ async function runSim() {
     const tauHours    = parseFloat(document.getElementById('tau_hours').value);
     const diffuseFrac = parseFloat(document.getElementById('diffuse_frac').value);
     const ELR_km      = parseFloat(document.getElementById('elr').value);
+    const dalr_km     = parseFloat(document.getElementById('dalr').value);
+    const prt         = parseFloat(document.getElementById('prt').value);
+    const cfl_factor  = parseFloat(document.getElementById('cfl_factor').value);
+    const t_atm_base  = parseFloat(document.getElementById('t_atm_base').value);
+    const t_atm_exp   = parseFloat(document.getElementById('t_atm_exp').value);
+    const sigma_slope = parseFloat(document.getElementById('sigma_slope').value);
+    const sigma_lc    = parseFloat(document.getElementById('sigma_lc').value);
+    const sor_mean_freq = parseInt(document.getElementById('sor_mean_freq').value);
 
     // NS horizontal grid capped by user-selected NX/NY
     const MAX_HNX = parseInt(document.getElementById('ns_nx').value) || 80;
@@ -1928,7 +1965,7 @@ async function runSim() {
 
     // Build thermal factor for NS grid
     setStatus('Building thermal factor…');
-    const {thermal_factor, tau_grid} = buildThermalFactor(lcCodes, ny_raw, nx_raw, NY, NX, tauHours);
+    const {thermal_factor, tau_grid} = buildThermalFactor(lcCodes, ny_raw, nx_raw, NY, NX, tauHours, sigma_lc);
     log('Thermal factor built.', 'success');
 
     // Calibrate max_heat + T0
@@ -1959,7 +1996,7 @@ async function runSim() {
       setStatus(`Pre-computing scenario ${si+1}/${scenarios_all.length}: ${sc.local_time}`);
       setProgress(0.1 + (si / scenarios_all.length) * 0.25);
       const shadow = await computeShadowMask(Z, NX, NY, dx, dy, sc.sun_azimuth, sc.sun_elevation);
-      const dT_surf = computeSolarHeating(Z, NX, NY, dx, dy, sc.sun_azimuth, sc.sun_elevation, thermal_factor, MAX_HEAT, shadow, diffuseFrac);
+      const dT_surf = computeSolarHeating(Z, NX, NY, dx, dy, sc.sun_azimuth, sc.sun_elevation, thermal_factor, MAX_HEAT, shadow, diffuseFrac, t_atm_base, t_atm_exp, sigma_slope);
       const tau_ref = tauHours * 3600; // typical reference tau in seconds
       const Q_Ks = new Float32Array(NX * NY);
       for (let k = 0; k < NX*NY; k++) Q_Ks[k] = dT_surf[k] / (tau_grid[k] * 3600);
@@ -2087,7 +2124,7 @@ async function runSim() {
       };
       _activeWorker.postMessage({
         type: 'init',
-        solverParams: {NX, NY, NZ, dx, dy, dz, ELR_km, T0, Cs, omega, maxIter},
+        solverParams: {NX, NY, NZ, dx, dy, dz, ELR_km, T0, Cs, omega, maxIter, dalr_km, prt, cfl_factor, sor_mean_freq},
         solidMaskBuf: solidMaskCopy.buffer,
         heatMapsData,
         simParams: {dt, stepsPerFrame, sunrise_s, sunset_s, total_steps, tzOffset, iz_view, scenarios_all, intervalMin},
@@ -2137,14 +2174,17 @@ async function openViewer() {
 <script type="text/worker" id="ns3d-worker-src">
 'use strict';
 class NS3D {
-  constructor({NX, NY, NZ, dx, dy, dz, solidMask, ELR, T_ref, Cs, omega, maxIter}) {
+  constructor({NX, NY, NZ, dx, dy, dz, solidMask, ELR, T_ref, Cs, omega, maxIter, Prt=0.7, cfl_factor=0.4, DALR_km=9.76, sorMeanFreq=20}) {
     this.NX = NX; this.NY = NY; this.NZ = NZ;
     this.dx = dx; this.dy = dy; this.dz = dz;
     this.solidMask = solidMask; // Uint8Array[NZ*NY*NX], 1=solid
-    this.ELR = ELR / 1000;     // K/m (input is K/km)
-    this.DALR = 9.76 / 1000;   // K/m
-    this.T_ref = T_ref;         // reference temperature K
+    this.ELR = ELR / 1000;       // K/m (input is K/km)
+    this.DALR = DALR_km / 1000;  // K/m
+    this.T_ref = T_ref;           // reference temperature K
     this.Cs = Cs;
+    this.Prt = Prt;
+    this.cfl_factor = cfl_factor;
+    this.sorMeanFreq = sorMeanFreq;
     this.omega = omega;
     this.maxIter = maxIter;
     this.g = 9.81;
@@ -2341,7 +2381,7 @@ class NS3D {
       }
 
       // Remove mean pressure every 20 iterations (handle null space)
-      if ((iter + 1) % 20 === 0) {
+      if ((iter + 1) % this.sorMeanFreq === 0) {
         let pmean = 0, cnt = 0;
         for (let k2 = 0; k2 < NX*NY*NZ; k2++) { if (!solidMask[k2]) { pmean += p[k2]; cnt++; } }
         if (cnt > 0) { pmean /= cnt; for (let k2 = 0; k2 < NX*NY*NZ; k2++) if (!solidMask[k2]) p[k2] -= pmean; }
@@ -2352,7 +2392,7 @@ class NS3D {
   // Explicit diffusion applied in-place to u,v,w,theta
   addDiffusion(us, vs, ws, theta_in, dt) {
     const {NX,NY,NZ,dx,dy,dz,solidMask,nu_t} = this;
-    const Prt = 0.7;
+    const Prt = this.Prt;
     const minDim = Math.min(dx,dy,dz);
     const tmp_u = new Float64Array(us.length);
     const tmp_v = new Float64Array(vs.length);
@@ -2365,7 +2405,7 @@ class NS3D {
           const k = this._idx(ix, iy, iz);
           if (solidMask[k]) continue;
           // Clamp nu_t for stability
-          const nu = Math.min(nu_t[k], 0.4 * minDim * minDim / (dt + 1e-30));
+          const nu = Math.min(nu_t[k], this.cfl_factor * minDim * minDim / (dt + 1e-30));
           const kap = nu / Prt;
 
           const lap_u = (this._getF(us,ix+1,iy,iz)-2*us[k]+this._getF(us,ix-1,iy,iz))/(dx*dx)
@@ -2615,11 +2655,12 @@ self.onmessage = function(e) {
 
 async function runSim({solverParams, solidMaskBuf, heatMapsData, simParams}) {
   const solidMask = new Uint8Array(solidMaskBuf);
-  const {NX, NY, NZ, dx, dy, dz, ELR_km, T0, Cs, omega, maxIter} = solverParams;
+  const {NX, NY, NZ, dx, dy, dz, ELR_km, T0, Cs, omega, maxIter, dalr_km, prt, cfl_factor, sor_mean_freq} = solverParams;
   const {dt, stepsPerFrame, sunrise_s, sunset_s, total_steps, tzOffset, iz_view, scenarios_all, intervalMin} = simParams;
 
   const heatMaps = heatMapsData.map(hm => ({time_s: hm.time_s, Q_Ks: new Float32Array(hm.buf)}));
-  const solver = new NS3D({NX, NY, NZ, dx, dy, dz, solidMask, ELR: ELR_km, T_ref: T0, Cs, omega, maxIter});
+  const solver = new NS3D({NX, NY, NZ, dx, dy, dz, solidMask, ELR: ELR_km, T_ref: T0, Cs, omega, maxIter,
+    Prt: prt, cfl_factor, DALR_km: dalr_km, sorMeanFreq: sor_mean_freq});
 
   let t_sim = sunrise_s, step_num = 0;
   const t_start = Date.now();
