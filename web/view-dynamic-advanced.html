@@ -148,8 +148,19 @@
     }
     #plume-canvas { flex: 1; border-radius: 4px; border: 1px solid rgba(100,160,255,.1); display: block; }
 
+    #plume-title {
+      font-size:8px;
+      color:#3a6080;
+      text-align:left;
+      margin-bottom:2px;
+      margin-top: 10px;
+    }
     #plume-controls {
-      display: none; gap: 3px; flex-wrap: wrap; margin-bottom: 4px;
+      display: none;
+      gap: 3px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      justify-content: center;
     }
     .ptoggle {
       padding: 2px 5px; font-size: 9px; background: rgba(30,50,80,0.7);
@@ -287,17 +298,17 @@
 <div id="info-panel">
   <h3>Point Info</h3>
   <div id="info-rows"></div>
+  <div id="plume-title">Alt MSL (m)</div>
+  <div id="plume-section">
+    <div id="plume-alt-labels"></div>
+    <canvas id="plume-canvas" width="160" height="180"></canvas>
+  </div>
   <div id="plume-controls">
     <button class="ptoggle active" data-mode="w">W</button>
     <button class="ptoggle" data-mode="uvw">U/V/W</button>
     <button class="ptoggle" data-mode="spd">Spd</button>
     <button class="ptoggle" data-mode="p">P</button>
     <button class="ptoggle" data-mode="vort">Vort</button>
-  </div>
-  <div id="plume-title" style="font-size:8px;color:#3a6080;text-align:left;margin-bottom:2px;">Alt MSL (m)</div>
-  <div id="plume-section">
-    <div id="plume-alt-labels"></div>
-    <canvas id="plume-canvas" width="160" height="180"></canvas>
   </div>
 </div>
 <div id="height-indicator"></div>
@@ -1302,26 +1313,31 @@ renderer.domElement.addEventListener('click', e => {
   const j   = Math.max(0, Math.min(ny-1, gj));
 
   const elev = T.elevation[j][i];
-  const su   = F.surf_u[j*nx+i];
-  const sv   = F.surf_v[j*nx+i];
-  const sw   = F.surf_w[j*nx+i];
-  const sp   = F.surf_p[j*nx+i];
-  const spd  = Math.hypot(su, sv);
   const { dx, dy } = simData.grid;
   const i0 = Math.max(0, i-1), i1 = Math.min(nx-1, i+1);
   const j0 = Math.max(0, j-1), j1 = Math.min(ny-1, j+1);
-  const sVort = (F.surf_v[j*nx+i1] - F.surf_v[j*nx+i0]) / ((i1-i0)*dx)
-              - (F.surf_u[j1*nx+i] - F.surf_u[j0*nx+i]) / ((j1-j0)*dy);
+
+  // Peak values across the full column
+  let peakW = 0, peakWAlt = 0, peakSpd = 0, peakSpdAlt = 0;
+  let peakVort = 0, peakVortAlt = 0;
+  for (let k = 0; k < nz; k++) {
+    const idx = k * ny * nx + j * nx + i;
+    const w   = F.w[idx];
+    const spd = Math.hypot(F.u[idx], F.v[idx]);
+    const dv_dx = (F.v[k*ny*nx + j*nx + i1] - F.v[k*ny*nx + j*nx + i0]) / ((i1-i0)*dx);
+    const du_dy = (F.u[k*ny*nx + j1*nx + i] - F.u[k*ny*nx + j0*nx + i]) / ((j1-j0)*dy);
+    const vort = dv_dx - du_dy;
+    const alt  = z_base + (k + 0.5) * dz;
+    if (Math.abs(w)    > Math.abs(peakW))    { peakW    = w;    peakWAlt    = alt; }
+    if (spd            > peakSpd)            { peakSpd  = spd;  peakSpdAlt  = alt; }
+    if (Math.abs(vort) > Math.abs(peakVort)) { peakVort = vort; peakVortAlt = alt; }
+  }
 
   const rows = [
-    ['Elevation', `${elev.toFixed(1)} m`],
-    ['Surface U', `${su.toFixed(2)} m/s`],
-    ['Surface V', `${sv.toFixed(2)} m/s`],
-    ['Vertical W', `${sw.toFixed(3)} m/s`],
-    ['Wind speed', `${spd.toFixed(2)} m/s`],
-    ['Pressure',   `${sp.toFixed(1)} Pa`],
-    ['Vorticity',  `${sVort.toExponential(2)} 1/s`],
-    // ['Grid (i,j)', `${i}, ${j}`],
+    ['Elevation',   `${elev.toFixed(1)} m`],
+    ['Peak W',      `${peakW.toFixed(3)} m/s @ ${peakWAlt.toFixed(0)} m`],
+    ['Peak Speed',  `${peakSpd.toFixed(2)} m/s @ ${peakSpdAlt.toFixed(0)} m`],
+    ['Peak Vort',   `${peakVort.toExponential(2)} 1/s @ ${peakVortAlt.toFixed(0)} m`],
   ];
 
   const panel = document.getElementById('info-panel');
