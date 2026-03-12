@@ -155,6 +155,17 @@
       margin-bottom:2px;
       margin-top: 10px;
     }
+    #plume-x-row {
+      display: none; gap: 4px; align-items: center; margin-top: 1px;
+    }
+    #plume-x-spacer { width: 30px; flex-shrink: 0; }
+    #plume-x-labels {
+      flex: 1; display: flex; justify-content: space-between;
+      font-size: 8px; color: #3a6080;
+    }
+    #plume-x-title {
+      display: none; font-size: 8px; color: #3a6080; text-align: center; margin-top: 1px;
+    }
     #plume-controls {
       display: none;
       gap: 3px;
@@ -303,6 +314,15 @@
     <div id="plume-alt-labels"></div>
     <canvas id="plume-canvas" width="160" height="180"></canvas>
   </div>
+  <div id="plume-x-row">
+    <div id="plume-x-spacer"></div>
+    <div id="plume-x-labels">
+      <span id="plume-x-left"></span>
+      <span id="plume-x-center"></span>
+      <span id="plume-x-right"></span>
+    </div>
+  </div>
+  <div id="plume-x-title"></div>
   <div id="plume-controls">
     <button class="ptoggle active" data-mode="w">W</button>
     <button class="ptoggle" data-mode="uvw">U/V/W</button>
@@ -1113,7 +1133,7 @@ function drawPlumeProfile(i, j, elev) {
   const axisSpan   = axisTop - axisBottom;
 
   const W = canvas.width, H = canvas.height;
-  const PAD_TOP = 8, PAD_BTM = 26, PAD_LR = 4;
+  const PAD_TOP = 8, PAD_BTM = 4, PAD_LR = 4;
   const drawH = H - PAD_TOP - PAD_BTM;
   const cx = W / 2;
   const ctx = canvas.getContext('2d');
@@ -1234,27 +1254,6 @@ function drawPlumeProfile(i, j, elev) {
   ctx.fillStyle = 'rgba(140,180,100,0.9)'; ctx.font = '8px monospace'; ctx.textAlign = 'right';
   ctx.fillText(`${elev.toFixed(0)} m`, W - PAD_LR - 1, groundY - 2);
 
-  // X-axis baseline + tick labels
-  const xAxisY = PAD_TOP + drawH;
-  ctx.strokeStyle = 'rgba(180,200,220,0.5)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(PAD_LR, xAxisY); ctx.lineTo(W - PAD_LR, xAxisY); ctx.stroke();
-
-  ctx.fillStyle = 'rgba(200,220,240,0.85)'; ctx.font = '8px monospace';
-  if (plumeMode === 'p' || plumeMode === 'spd') {
-    ctx.textAlign = 'left';  ctx.fillText(xMin.toFixed(plumeMode==='spd'?1:0), PAD_LR, xAxisY + 9);
-    ctx.textAlign = 'right'; ctx.fillText(xMax.toFixed(plumeMode==='spd'?1:0), W - PAD_LR, xAxisY + 9);
-  } else {
-    const fmt = v => Math.abs(v) < 0.01 ? v.toExponential(1) : v.toFixed(Math.abs(v)<1?2:1);
-    ctx.textAlign = 'left';   ctx.fillText(fmt(xMin), PAD_LR, xAxisY + 9);
-    ctx.textAlign = 'center'; ctx.fillText('0', cx, xAxisY + 9);
-    ctx.textAlign = 'right';  ctx.fillText(fmt(xMax), W - PAD_LR, xAxisY + 9);
-  }
-
-  // X-axis title (truncate if long)
-  ctx.fillStyle = 'rgba(160,200,240,0.8)'; ctx.font = '8px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(xLabel, cx, xAxisY + 20);
-
   // Altitude labels (Y axis)
   labelsEl.innerHTML = '';
   const nLabels = 5;
@@ -1264,7 +1263,24 @@ function drawPlumeProfile(i, j, elev) {
     labelsEl.appendChild(span);
   }
 
+  // X-axis tick labels (HTML, below canvas)
+  const fmt = v => Math.abs(v) < 0.01 ? v.toExponential(1) : v.toFixed(Math.abs(v) < 1 ? 2 : 1);
+  const xRow = document.getElementById('plume-x-row');
+  if (plumeMode === 'p' || plumeMode === 'spd') {
+    document.getElementById('plume-x-left').textContent   = fmt(xMin);
+    document.getElementById('plume-x-center').textContent = fmt((xMin + xMax) / 2);
+    document.getElementById('plume-x-right').textContent  = fmt(xMax);
+  } else {
+    document.getElementById('plume-x-left').textContent   = fmt(xMin);
+    document.getElementById('plume-x-center').textContent = '0';
+    document.getElementById('plume-x-right').textContent  = fmt(xMax);
+  }
+  const xTitle = document.getElementById('plume-x-title');
+  xTitle.textContent = xLabel;
+
   section.style.display = 'flex';
+  xRow.style.display = 'flex';
+  xTitle.style.display = 'block';
   controls.style.display = 'flex';
   document.getElementById('plume-title').style.display = 'block';
 }
@@ -1290,6 +1306,8 @@ renderer.domElement.addEventListener('click', e => {
   if (hits.length === 0) {
     document.getElementById('info-panel').style.display = 'none';
     document.getElementById('plume-section').style.display = 'none';
+    document.getElementById('plume-x-row').style.display = 'none';
+    document.getElementById('plume-x-title').style.display = 'none';
     document.getElementById('plume-title').style.display = 'none';
     document.getElementById('plume-controls').style.display = 'none';
     if (clickMarker) { clickMarker.forEach(o => { scene.remove(o); if (o._labelDiv) o._labelDiv.remove(); }); clickMarker = null; }
