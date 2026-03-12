@@ -723,12 +723,11 @@
         req.onsuccess = e => {
           const db = e.target.result;
           if (!db.objectStoreNames.contains('sim')) { resolve(null); return; }
-          const tx = db.transaction('sim', 'readwrite');
+          const tx = db.transaction('sim', 'readonly');
           const store = tx.objectStore('sim');
           const getReq = store.get('latest-ns');
           getReq.onsuccess = () => {
             const raw = getReq.result;
-            if (raw) store.delete('latest-ns');
             try { resolve(raw ? JSON.parse(raw) : null); } catch { resolve(null); }
           };
           getReq.onerror = () => resolve(null);
