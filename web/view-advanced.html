@@ -21,8 +21,8 @@
     }
 
     #canvas-container {
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: calc(100vh - 44px);
       position: relative;
       margin-top: 44px;
     }
@@ -103,6 +103,7 @@
       position: absolute;
       top: 52px;
       right: 8px;
+      z-index: 10;
       width: 260px;
       background: rgba(10, 15, 30, 0.88);
       border: 1px solid rgba(100, 160, 255, 0.3);
@@ -262,17 +263,27 @@
     /* ── Panel toggle ── */
     #panel-toggle {
       position: absolute;
-      top: 8px;
+      top: 52px;
       right: 8px;
       z-index: 1002;
       background: rgba(10, 15, 30, 0.88);
       border: 1px solid rgba(100, 160, 255, 0.35);
       border-radius: 12px;
       color: #7eb8ff;
-      padding: 8px 13px;
-      font-size: 14px;
+      padding: 9px 14px;
+      font-size: 15px;
+      line-height: 1;
       cursor: pointer;
       backdrop-filter: blur(8px);
+      transition: background 0.15s, right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #panel-toggle:active {
+      background: rgba(30, 55, 100, 0.7);
+    }
+
+    #panel-toggle.open {
+      right: calc(260px + 16px);
     }
 
     /* ── Colorbars ── */
@@ -432,6 +443,22 @@
       #ui-panel.open {
         transform: translateY(0);
       }
+
+      #colorbars { max-width: calc(100vw - 32px); }
+      #panel-toggle.open { right: 8px; } /* button stays put when panel slides up from bottom */
+    }
+
+    @media (max-width: 480px) {
+      #ui-panel { max-height: 60vh; }
+      #info-panel { width: 180px; font-size: 11px; }
+      #info-panel h3 { font-size: 12px; }
+      .irow { font-size: 10px; }
+      #colorbars { bottom: 10px; left: 8px; gap: 6px; }
+      .cb-label { font-size: 9px; }
+      .preset-btn { font-size: 10px; padding: 3px 6px; }
+      .nav-logo span { display: none; }
+      .nav-link { padding: 5px 6px; font-size: 11px; }
+      #panel-toggle { top: 52px; }
     }
   </style>
 </head>
@@ -475,10 +502,10 @@
   </div>
 
   <button id="panel-toggle"
-    onclick="const p=document.getElementById('ui-panel');p.classList.toggle('open');this.textContent=p.classList.contains('open')?'✕':'☰';"
-    title="Toggle controls">☰</button>
+    onclick="const p=document.getElementById('ui-panel');p.classList.toggle('open');this.classList.toggle('open');this.textContent=p.classList.contains('open')?'✕':'☰';"
+    title="Toggle controls">✕</button>
 
-  <div id="ui-panel">
+  <div id="ui-panel" class="open">
     <h2>NS Simulation — 3D</h2>
 
     <div id="preset-buttons"></div>
@@ -951,8 +978,8 @@
       drawColorbar('cb-wvel', 'cb-wvel-labels', t => divergingColor(t), -globalMaxW, globalMaxW, v => v.toFixed(2) + 'm/s');
       drawColorbar('cb-conv', 'cb-conv-labels', convColor, 0, 1, v => v.toFixed(2));
 
-      document.getElementById('ui-panel').classList.add('open');
-      document.getElementById('panel-toggle').textContent = '✕';
+      // panel already starts open; ensure button state is in sync
+      document.getElementById('panel-toggle').classList.add('open');
     }
 
     function toggleCb(id, show) {
