@@ -353,6 +353,7 @@ let overlayMesh = null;
 let arrowLines  = null;
 let pickMesh    = null;
 let clickMarker = null;
+let northMarkerObjects = [];
 let currentOverlay = 'speed';
 let arrowsVisible  = true;
 let arrowColor     = 0xffffff;
@@ -776,8 +777,53 @@ function buildMarkers() {
   });
 }
 
+function buildNorthArrow() {
+  northMarkerObjects.forEach(o => scene.remove(o));
+  northMarkerObjects.length = 0;
+
+  const T  = simData.terrain;
+  const xw = T.x_extent[1] - T.x_extent[0];
+  const yh = T.y_extent[1] - T.y_extent[0];
+  const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
+  const cy = -(T.y_extent[0] + T.y_extent[1]) / 2; // world-y centre of terrain
+
+  // Arrow dimensions in local XY space (pointing in +Y = north)
+  const halfH      = yh * 0.38;
+  const shaftHalfW = xw * 0.055;
+  const headHalfW  = xw * 0.14;
+  const headH      = halfH * 0.55;
+  const yBottom    = -halfH;
+  const yHeadBase  = halfH - headH;
+  const yTip       = halfH;
+
+  const shape = new THREE.Shape();
+  shape.moveTo(-shaftHalfW, yBottom);
+  shape.lineTo( shaftHalfW, yBottom);
+  shape.lineTo( shaftHalfW, yHeadBase);
+  shape.lineTo( headHalfW,  yHeadBase);
+  shape.lineTo( 0,          yTip);
+  shape.lineTo(-headHalfW,  yHeadBase);
+  shape.lineTo(-shaftHalfW, yHeadBase);
+  shape.closePath();
+
+  const geom = new THREE.ShapeGeometry(shape);
+
+  let minZ = Infinity;
+  for (const row of T.elevation) for (const z of row) if (z < minZ) minZ = z;
+
+  const mat = new THREE.MeshBasicMaterial({
+    color: 0x44ddff, transparent: true, opacity: 0.45,
+    side: THREE.DoubleSide, depthWrite: false,
+  });
+
+  const mesh = new THREE.Mesh(geom, mat);
+  mesh.position.set(cx, cy, minZ - 80);
+  scene.add(mesh);
+  northMarkerObjects.push(mesh);
+}
+
 function updateMarkerLabels() {
-  markerObjects.forEach(obj => {
+  [...markerObjects, ...northMarkerObjects].forEach(obj => {
     if (!obj._labelDiv) return;
     const pos = obj._worldPos.clone().project(camera);
     const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
@@ -1133,6 +1179,7 @@ async function load() {
     loadingMsg.textContent = 'Building markers…';
     await new Promise(r => setTimeout(r, 0));
     buildMarkers();
+    buildNorthArrow();
 
     // Info panel
     const p = simData.params;
