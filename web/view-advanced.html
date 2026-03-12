@@ -1001,21 +1001,74 @@ function updateSun(sc) {
 
 // ── Markers ───────────────────────────────────────────────────────────────────
 let markersMade = false;
+function makeMarkerSprite(label, color) {
+  const c = document.createElement('canvas'); c.width=256; c.height=80;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = color;
+  ctx.font = 'bold 36px sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(label, 128, 40);
+  const tex = new THREE.CanvasTexture(c);
+  const mat = new THREE.SpriteMaterial({map:tex, transparent:true, depthTest:false});
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(300, 90, 1);
+  return sprite;
+}
 function buildMarkers(T) {
   if (markersMade || !simData.markers) return;
   markersMade = true;
   const cx = (T.x_extent[0]+T.x_extent[1])/2;
   const cy = (T.y_extent[0]+T.y_extent[1])/2;
   for (const m of simData.markers) {
-    const color = m.type==='takeoff' ? 0x44ff88 : 0xff6644;
-    const sphere = new THREE.Mesh(new THREE.SphereGeometry(30,12,12), new THREE.MeshBasicMaterial({color}));
-    sphere.position.set(m.x-cx, -(m.y-cy), (m.z||terrainZMin)+40);
-    scene.add(sphere);
-    const pole = new THREE.Mesh(new THREE.CylinderGeometry(4,4,200,8), new THREE.MeshBasicMaterial({color}));
-    pole.position.set(m.x-cx, -(m.y-cy), (m.z||terrainZMin)-60);
+    const isTakeoff = m.type==='takeoff';
+    const color = isTakeoff ? 0x44ff88 : 0xff6644;
+    const hexStr = isTakeoff ? '#44ff88' : '#ff6644';
+    const z0 = (m.z || terrainZMin);
+    // Pole
+    const pole = new THREE.Mesh(
+      new THREE.CylinderGeometry(6, 6, 350, 8),
+      new THREE.MeshBasicMaterial({color}));
+    pole.position.set(m.x-cx, -(m.y-cy), z0 + 175 - 60);
     pole.rotation.x = Math.PI/2;
     scene.add(pole);
+    // Sphere
+    const sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(50, 16, 16),
+      new THREE.MeshBasicMaterial({color}));
+    sphere.position.set(m.x-cx, -(m.y-cy), z0 + 350 - 60 + 50);
+    scene.add(sphere);
+    // Label sprite
+    const label = isTakeoff ? '⬆ Takeoff' : '⬇ Landing';
+    const sprite = makeMarkerSprite(label, hexStr);
+    sprite.position.set(m.x-cx, -(m.y-cy), z0 + 350 - 60 + 130);
+    scene.add(sprite);
   }
+}
+
+let clickMarkerGroup = null;
+let lastClickIJ = null;
+function setClickMarker(wx, wy, wz) {
+  if (!clickMarkerGroup) {
+    clickMarkerGroup = new THREE.Group();
+    const color = 0x4488ff;
+    const pole = new THREE.Mesh(
+      new THREE.CylinderGeometry(6, 6, 350, 8),
+      new THREE.MeshBasicMaterial({color}));
+    pole.position.set(0, 0, 175 - 60);
+    pole.rotation.x = Math.PI/2;
+    clickMarkerGroup.add(pole);
+    const sphere = new THREE.Mesh(
+      new THREE.SphereGeometry(50, 16, 16),
+      new THREE.MeshBasicMaterial({color}));
+    sphere.position.set(0, 0, 350 - 60 + 50);
+    clickMarkerGroup.add(sphere);
+    const sprite = makeMarkerSprite('📍', '#4488ff');
+    sprite.position.set(0, 0, 350 - 60 + 130);
+    clickMarkerGroup.add(sprite);
+    scene.add(clickMarkerGroup);
+  }
+  clickMarkerGroup.position.set(wx, wy, wz);
+  clickMarkerGroup.visible = true;
 }
 
 // ── Scenario update ───────────────────────────────────────────────────────────
@@ -1036,6 +1089,7 @@ function updateScenario(idx) {
   updateWindArrows(sc, T);
   updateSun(sc);
   buildMarkers(T);
+  if (lastClickIJ) showInfoPanel(sc, lastClickIJ.i, lastClickIJ.j);
 }
 
 // ── Plume profile ─────────────────────────────────────────────────────────────
@@ -1126,29 +1180,14 @@ function drawPlumeProfile(sc, i, j) {
 }
 
 // ── Raycasting (click info) ───────────────────────────────────────────────────
-const raycaster = new THREE.Raycaster();
-const mouse = new THREE.Vector2();
-renderer.domElement.addEventListener('click', e => {
-  if (!thetaMesh || !simData) return;
-  const rect = renderer.domElement.getBoundingClientRect();
-  mouse.set(
-    ((e.clientX-rect.left)/rect.width)*2-1,
-    -((e.clientY-rect.top)/rect.height)*2+1);
-  raycaster.setFromCamera(mouse, camera);
-  const hits = raycaster.intersectObject(thetaMesh);
-  if (!hits.length) { document.getElementById('info-panel').style.display='none'; return; }
-  const {uv} = hits[0];
+function showInfoPanel(sc, i, j) {
   const T = simData.terrain;
-  const sc = simData.scenarios[currentScenario];
-  const i = Math.min(T.nx-1, Math.round(uv.x*(T.nx-1)));
-  const j = Math.min(T.ny-1, Math.round((1-uv.y)*(T.ny-1)));
   const theta = sc.ground_temp_anomaly[j]?.[i] ?? 0;
   const wv    = sc.w_vel?.[j]?.[i] ?? 0;
   const conv  = sc.convergence?.[j]?.[i] ?? 0;
   const u     = sc.u_surface?.[j]?.[i] ?? 0;
   const v     = sc.v_surface?.[j]?.[i] ?? 0;
   const elev  = T.elevation[j]?.[i] ?? 0;
-
   document.getElementById('ip-title').textContent = sc.local_time;
   document.getElementById('ip-rows').innerHTML = `
     <div class="irow"><span class="ilabel">Elevation</span><span class="ival">${elev.toFixed(0)} m</span></div>
@@ -1159,6 +1198,32 @@ renderer.domElement.addEventListener('click', e => {
   `;
   drawPlumeProfile(sc, i, j);
   document.getElementById('info-panel').style.display = 'block';
+}
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+renderer.domElement.addEventListener('click', e => {
+  if (!thetaMesh || !simData) return;
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.set(
+    ((e.clientX-rect.left)/rect.width)*2-1,
+    -((e.clientY-rect.top)/rect.height)*2+1);
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObject(thetaMesh);
+  if (!hits.length) {
+    document.getElementById('info-panel').style.display='none';
+    lastClickIJ = null;
+    if (clickMarkerGroup) clickMarkerGroup.visible = false;
+    return;
+  }
+  const {uv, point} = hits[0];
+  const T = simData.terrain;
+  const sc = simData.scenarios[currentScenario];
+  const i = Math.min(T.nx-1, Math.round(uv.x*(T.nx-1)));
+  const j = Math.min(T.ny-1, Math.round((1-uv.y)*(T.ny-1)));
+  lastClickIJ = {i, j};
+  setClickMarker(point.x, point.y, point.z);
+  showInfoPanel(sc, i, j);
 });
 
 // ── Sun label screen pos ──────────────────────────────────────────────────────
