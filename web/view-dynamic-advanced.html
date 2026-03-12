@@ -954,17 +954,30 @@ function buildNorthArrow() {
     return new THREE.CanvasTexture(cv);
   }
 
-  const texture = makeTexture(0xee2222, 'North');
-  const mesh = new THREE.Mesh(
-    new THREE.PlaneGeometry(bboxW, bboxH),
-    new THREE.MeshBasicMaterial({
-      map: texture, transparent: true,
-      side: THREE.DoubleSide, depthWrite: false,
-    })
-  );
-  mesh.position.set(cx, cy, minZ - 500);
-  scene.add(mesh);
-  northMarkerObjects.push(mesh);
+  function addArrow(color, rotZ, zOffset, label) {
+    const texture = makeTexture(color, label);
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(bboxW, bboxH),
+      new THREE.MeshBasicMaterial({
+        map: texture, transparent: true,
+        side: THREE.DoubleSide, depthWrite: false,
+      })
+    );
+    mesh.position.set(cx, cy, minZ - zOffset);
+    mesh.rotation.z = rotZ;
+    scene.add(mesh);
+    northMarkerObjects.push(mesh);
+  }
+
+  // North arrow — points +Y (no rotation), red
+  addArrow(0xee2222, 0, 500, 'North');
+
+  // Wind arrow — points where wind blows TO, light blue
+  // wind_dir is FROM direction; TO = FROM + 180, clockwise from north
+  // In XY plane (Y=north, X=east): rotation.z = -angle for clockwise from north
+  const windFrom  = simData.params?.wind_dir ?? 0;
+  const windToRad = ((windFrom + 180) % 360) * Math.PI / 180;
+  addArrow(0x88ccff, -windToRad, 250, 'Wind');
 }
 
 // ═══════════════════════════════════════════════════════════════════
