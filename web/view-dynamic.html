@@ -778,7 +778,10 @@ function buildMarkers() {
 }
 
 function buildNorthArrow() {
-  northMarkerObjects.forEach(o => scene.remove(o));
+  northMarkerObjects.forEach(o => {
+    scene.remove(o);
+    if (o.material?.map) o.material.map.dispose();
+  });
   northMarkerObjects.length = 0;
 
   const T  = simData.terrain;
@@ -790,65 +793,79 @@ function buildNorthArrow() {
   let minZ = Infinity;
   for (const row of T.elevation) for (const z of row) if (z < minZ) minZ = z;
 
-  // Shared arrow shape factory — total length = 2*yh, pointing in +Y
-  function makeArrowGeom() {
-    const halfH      = yh;           // half of 2*yh
-    const shaftHalfW = xw * 0.055;
-    const headHalfW  = xw * 0.14;
-    const headH      = halfH * 0.4;
-    const shape = new THREE.Shape();
-    shape.moveTo(-shaftHalfW, -halfH);
-    shape.lineTo( shaftHalfW, -halfH);
-    shape.lineTo( shaftHalfW,  halfH - headH);
-    shape.lineTo( headHalfW,   halfH - headH);
-    shape.lineTo( 0,           halfH);
-    shape.lineTo(-headHalfW,   halfH - headH);
-    shape.lineTo(-shaftHalfW,  halfH - headH);
-    shape.closePath();
-    return new THREE.ShapeGeometry(shape);
+  // Arrow dimensions (pointing in +Y)
+  const halfH      = yh;          // half of total length 2*yh
+  const shaftHalfW = xw * 0.055;
+  const headHalfW  = xw * 0.14;
+  const headH      = halfH * 0.4;
+  const bboxW      = headHalfW * 2;
+  const bboxH      = halfH * 2;
+
+  // Draw arrow + text on a canvas, returns CanvasTexture.
+  // With THREE default flipY=true: canvas (0,0) top-left → UV (0,1) → plane north-west.
+  // tc() maps world-local (x,y) → canvas pixel so tip (+halfH) lands at canvas top (y=0).
+  function makeTexture(color, label) {
+    const CW = 512, CH = Math.round(CW * bboxH / bboxW);
+    const cv  = document.createElement('canvas');
+    cv.width  = CW; cv.height = CH;
+    const ctx = cv.getContext('2d');
+
+    function tc(x, y) {
+      return [(x / bboxW + 0.5) * CW, (0.5 - y / bboxH) * CH];
+    }
+
+    // Arrow shape
+    const pts = [
+      [-shaftHalfW, -halfH], [ shaftHalfW, -halfH],
+      [ shaftHalfW,  halfH - headH], [ headHalfW,  halfH - headH],
+      [ 0,           halfH],
+      [-headHalfW,   halfH - headH], [-shaftHalfW,  halfH - headH],
+    ];
+    ctx.beginPath();
+    ctx.moveTo(...tc(pts[0][0], pts[0][1]));
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(...tc(pts[i][0], pts[i][1]));
+    ctx.closePath();
+    const r = (color >> 16) & 0xff, g = (color >> 8) & 0xff, b = color & 0xff;
+    ctx.fillStyle = `rgba(${r},${g},${b},0.55)`;
+    ctx.fill();
+
+    // Text in shaft centre — drawn normally; flipY makes it appear upright in 3D
+    const shaftCY = (-halfH + halfH - headH) / 2;   // world-y midpoint of shaft
+    const [tx, ty] = tc(0, shaftCY);
+    const fontSize = Math.round(CW * (2 * shaftHalfW / bboxW) * 0.42);
+    ctx.font         = `bold ${fontSize}px 'Segoe UI', sans-serif`;
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor  = 'rgba(0,0,0,0.95)';
+    ctx.shadowBlur   = fontSize * 0.3;
+    ctx.fillStyle    = `rgb(${r},${g},${b})`;
+    ctx.fillText(label.toUpperCase(), tx, ty);
+
+    return new THREE.CanvasTexture(cv);
   }
 
-  function addArrow(color, rotZ, zOffset, labelText) {
+  function addArrow(color, rotZ, zOffset, label) {
+    const texture = makeTexture(color, label);
     const mesh = new THREE.Mesh(
-      makeArrowGeom(),
+      new THREE.PlaneGeometry(bboxW, bboxH),
       new THREE.MeshBasicMaterial({
-        color, transparent: true, opacity: 0.5,
+        map: texture, transparent: true,
         side: THREE.DoubleSide, depthWrite: false,
       })
     );
-    const mz = minZ - zOffset;
-    mesh.position.set(cx, cy, mz);
+    mesh.position.set(cx, cy, minZ - zOffset);
     mesh.rotation.z = rotZ;
     scene.add(mesh);
     northMarkerObjects.push(mesh);
-
-    // Label at 45% toward the tip (in the arrow's pointing direction)
-    const frac = 0.45;
-    const lx = cx - yh * frac * Math.sin(rotZ);
-    const ly = cy + yh * frac * Math.cos(rotZ);
-    const hexCol = '#' + color.toString(16).padStart(6, '0');
-    const div = document.createElement('div');
-    div.style.cssText = `
-      position: absolute; pointer-events: none;
-      color: ${hexCol}; font-size: 15px; font-weight: bold;
-      font-family: 'Segoe UI', sans-serif; letter-spacing: 2px;
-      text-transform: uppercase;
-      text-shadow: 0 0 6px rgba(0,0,0,1), 0 0 12px rgba(0,0,0,0.8);
-      transform: translate(-50%, -50%);
-    `;
-    div.textContent = labelText;
-    document.getElementById('canvas-container').appendChild(div);
-    mesh._labelDiv = div;
-    mesh._worldPos = new THREE.Vector3(lx, ly, mz);
   }
 
   // North arrow — points +Y (no rotation), red
-  addArrow(0xee2222, 0, minZ+500, 'North');
+  addArrow(0xee2222, 0, minZ + 500, 'North');
 
   // Wind arrow — points where wind blows TO, light blue
   // wind_dir is FROM direction; TO = FROM + 180, clockwise from north
-  // In XY plane (Y=north, X=east): rotate –angle around Z for clockwise
-  const windFrom = simData.params?.wind_dir ?? 0;
+  // In XY plane (Y=north, X=east): rotation.z = –angle for clockwise from north
+  const windFrom  = simData.params?.wind_dir ?? 0;
   const windToRad = ((windFrom + 180) % 360) * Math.PI / 180;
   addArrow(0x88ccff, -windToRad, minZ, 'Wind');
 }
