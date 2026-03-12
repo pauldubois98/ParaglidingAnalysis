@@ -230,10 +230,14 @@
 
       <div class="section-title">3-D Grid</div>
       <div class="grid-2">
+        <div><label class="field-label">Sim NX (W–E cells)</label><input type="number" id="sim_nx" min="16" max="256" step="8" value="64"></div>
+        <div><label class="field-label">Sim NY (S–N cells)</label><input type="number" id="sim_ny" min="16" max="256" step="8" value="64"></div>
+      </div>
+      <div class="grid-2">
         <div><label class="field-label">Vertical levels NZ</label><input type="number" id="nz" min="16" max="64" step="4" value="32"></div>
         <div><label class="field-label">Domain top (m AGL)</label><input type="number" id="h_domain" min="500" max="5000" step="100" value="2000"></div>
       </div>
-      <div class="field-hint">Domain top is above the highest terrain point. NZ=32 × H=2000m → dz≈62 m per level.</div>
+      <div class="field-hint" id="grid-hint">NX×NY: simulation horizontal resolution (DEM is bilinearly resampled). Populated from DEM after fetch. Domain top above highest terrain point.</div>
 
       <div class="section-title">Wind Profile (Log Law)</div>
       <div class="grid-2">
@@ -471,6 +475,32 @@ const cmapSpeed = t=>t<0.5?[0,(t*2*200)|0,(255-t*2*55)|0]:[((t-0.5)*2*255)|0,255
 const cmapVert  = t=>t<0.5?[(t*2*255)|0,(t*2*255)|0,255]:[255,((1-t)*2*255)|0,((1-t)*2*255)|0];
 const cmapPress = t=>t<0.5?[0,(t*2*180)|0,(200-t*2*80)|0]:[((t-0.5)*2*220)|0,0,0];
 const cmapVort  = t=>t<0.5?[0,0,((0.5-t)*2*255)|0]:[((t-0.5)*2*255)|0,0,0];
+
+// ═══════════════════════════════════════════════════════════════════
+//  BILINEAR DEM RESAMPLE
+// ═══════════════════════════════════════════════════════════════════
+
+// Resample src[src_ny * src_nx] to dst[dst_ny * dst_nx] using bilinear interpolation.
+// The source and destination grids cover the same geographic extent.
+function resampleDEM(src, src_nx, src_ny, dst_nx, dst_ny) {
+  const dst = new Float32Array(dst_ny * dst_nx);
+  for (let dj = 0; dj < dst_ny; dj++) {
+    const fj = dj / (dst_ny - 1) * (src_ny - 1);
+    const j0 = Math.min(src_ny - 2, Math.floor(fj));
+    const j1 = j0 + 1;
+    const ty = fj - j0;
+    for (let di = 0; di < dst_nx; di++) {
+      const fi = di / (dst_nx - 1) * (src_nx - 1);
+      const i0 = Math.min(src_nx - 2, Math.floor(fi));
+      const i1 = i0 + 1;
+      const tx = fi - i0;
+      dst[dj * dst_nx + di] =
+        (1-ty) * ((1-tx) * src[j0*src_nx+i0] + tx * src[j0*src_nx+i1]) +
+           ty  * ((1-tx) * src[j1*src_nx+i0] + tx * src[j1*src_nx+i1]);
+    }
+  }
+  return dst;
+}
 
 // ═══════════════════════════════════════════════════════════════════
 //  3D INCOMPRESSIBLE NAVIER-STOKES SOLVER
@@ -873,6 +903,12 @@ async function runFetch() {
     const { Z, nx, ny, dx, dy } = terrainData;
     log(`Sim grid: ${nx}×${ny}, dx=${dx.toFixed(1)} m, dy=${dy.toFixed(1)} m`, 'success');
 
+    // Populate NX/NY fields with DEM resolution; user can override before running
+    document.getElementById('sim_nx').value = nx;
+    document.getElementById('sim_ny').value = ny;
+    document.getElementById('grid-hint').textContent =
+      `DEM: ${nx}×${ny} (dx=${dx.toFixed(1)} m). Change NX/NY to resample before simulation. Larger = more precise but slower.`;
+
     meshData = await fetchDEM(bbox, meshZoom, 'mesh DEM');
     log(`Mesh grid: ${meshData.nx}×${meshData.ny}, dx=${meshData.dx.toFixed(1)} m`, 'success');
 
@@ -897,7 +933,20 @@ async function runSim() {
   simResult = null;
   setProgress(0);
 
-  const { Z, nx, ny, dx, dy } = terrainData;
+  const sim_nx = Math.max(2, parseInt(document.getElementById('sim_nx').value) || terrainData.nx);
+  const sim_ny = Math.max(2, parseInt(document.getElementById('sim_ny').value) || terrainData.ny);
+
+  // Resample DEM to simulation resolution (bilinear); recompute cell spacing
+  const Z  = (sim_nx === terrainData.nx && sim_ny === terrainData.ny)
+    ? terrainData.Z
+    : resampleDEM(terrainData.Z, terrainData.nx, terrainData.ny, sim_nx, sim_ny);
+  const nx = sim_nx, ny = sim_ny;
+  const dx = (terrainData.x_extent[1] - terrainData.x_extent[0]) / nx;
+  const dy = (terrainData.y_extent[1] - terrainData.y_extent[0]) / ny;
+
+  if (sim_nx !== terrainData.nx || sim_ny !== terrainData.ny)
+    log(`DEM resampled: ${terrainData.nx}×${terrainData.ny} → ${nx}×${ny}, dx=${dx.toFixed(1)} m, dy=${dy.toFixed(1)} m`);
+
   const nz       = parseInt(document.getElementById('nz').value);
   const h_domain   = parseFloat(document.getElementById('h_domain').value);
   const nu         = parseFloat(document.getElementById('visc').value);
