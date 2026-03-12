@@ -214,8 +214,8 @@
     }
 
     .preset-btn.active.modified {
-      border-color: rgba(255, 200, 80, 0.6);
-      color: #ffc84a;
+      border-color: #7eb8ffa0;
+      color: #7eb8ff;
     }
 
     /* ── Visibility control ── */
@@ -459,12 +459,17 @@
       <h3 id="ip-title">—</h3>
       <div id="ip-rows"></div>
       <div id="plume-wrap" style="display:none; margin-top:8px;">
+        <div id="plume-title"
+          style="text-align:center; font-size:10px; font-weight:bold; color:#8ab4d4; letter-spacing:0.05em; margin-bottom:3px; margin-left:36px;">
+          Vertical Profile</div>
         <div style="display:flex; align-items:stretch; gap:0;">
           <div id="plume-yaxis" style="width:36px; position:relative; flex-shrink:0;"></div>
           <canvas id="plume-canvas" width="156" height="160"
             style="display:block; border:1px solid rgba(100,160,255,0.2); border-radius:4px;"></canvas>
         </div>
         <div id="plume-xaxis" style="margin-left:36px; width:156px;"></div>
+        <div id="plume-legend"
+          style="margin-left:36px; margin-top:4px; display:flex; gap:10px; font-size:9px; font-family:monospace;"></div>
       </div>
     </div>
   </div>
@@ -1492,6 +1497,14 @@
     <span style="color:#ff7755">${fmt(+maxAbsW)}m/s</span>
   </div>` : '';
       xAxis.innerHTML = tRow + wRow;
+
+      // ── Legend ──
+      const legend = document.getElementById('plume-legend');
+      const swatch = (color, label) =>
+        `<span style="display:flex;align-items:center;gap:3px;">` +
+        `<span style="display:inline-block;width:14px;height:2px;background:${color};border-radius:1px;"></span>` +
+        `<span style="color:#8ab4d4;">${label}</span></span>`;
+      legend.innerHTML = swatch('#6699ff', 'θ\'') + (wCol ? swatch('#ff7755', 'w') : '');
     }
 
     // ── Raycasting (click info) ───────────────────────────────────────────────────
