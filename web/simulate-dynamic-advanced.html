@@ -252,12 +252,12 @@
 
       <div class="section-title">3-D Grid</div>
       <div class="grid-2">
-        <div><label class="field-label">Sim NX (W–E cells)</label><input type="number" id="sim_nx" min="16" max="256" step="8" value="64"></div>
-        <div><label class="field-label">Sim NY (S–N cells)</label><input type="number" id="sim_ny" min="16" max="256" step="8" value="64"></div>
+        <div><label class="field-label">Sim NX (W–E cells)</label><input type="number" id="sim_nx" min="16" max="256" step="8" value="40"></div>
+        <div><label class="field-label">Sim NY (S–N cells)</label><input type="number" id="sim_ny" min="16" max="256" step="8" value="40"></div>
       </div>
       <div class="grid-2">
-        <div><label class="field-label">Vertical levels NZ</label><input type="number" id="nz" min="16" max="64" step="4" value="32"></div>
-        <div><label class="field-label">Domain top (m AGL)</label><input type="number" id="h_domain" min="500" max="5000" step="100" value="2000"></div>
+        <div><label class="field-label">Vertical levels NZ</label><input type="number" id="nz" min="16" max="64" step="4" value="20"></div>
+        <div><label class="field-label">Domain top (m AGL)</label><input type="number" id="h_domain" min="500" max="5000" step="100" value="1500"></div>
       </div>
       <div class="field-hint" id="grid-hint">NX×NY: simulation horizontal resolution (DEM is bilinearly resampled). Populated from DEM after fetch. Domain top above highest terrain point.</div>
 
@@ -270,22 +270,22 @@
 
       <div class="section-title">NS Parameters</div>
       <div class="grid-2">
-        <div><label class="field-label">Viscosity ν (m²/s)</label><input type="number" id="visc" step="5" min="1" max="500" value="50"></div>
-        <div><label class="field-label">Pressure iter.</label><input type="number" id="p_iter" min="10" max="500" step="10" value="80"></div>
+        <div><label class="field-label">Viscosity ν (m²/s)</label><input type="number" id="visc" step="5" min="1" max="500" value="150"></div>
+        <div><label class="field-label">Pressure iter.</label><input type="number" id="p_iter" min="10" max="500" step="10" value="30"></div>
       </div>
-      <div class="field-hint">ν = turbulent kinematic viscosity. 80 Jacobi iterations per step; increase for accuracy.</div>
+      <div class="field-hint">ν = turbulent kinematic viscosity. Jacobi iterations per step; increase for accuracy.</div>
 
       <div class="section-title">Solver</div>
       <div class="grid-2">
-        <div><label class="field-label">Sim time (s)</label><input type="number" id="sim_time" step="300" min="300" max="14400" value="3600"></div>
-        <div><label class="field-label">CFL (semi-Lagr.)</label><input type="number" id="cfl" step="0.1" min="0.5" max="3.0" value="1.5"></div>
+        <div><label class="field-label">Sim time (s)</label><input type="number" id="sim_time" step="300" min="300" max="14400" value="1800"></div>
+        <div><label class="field-label">CFL (semi-Lagr.)</label><input type="number" id="cfl" step="0.1" min="0.5" max="3.0" value="2.0"></div>
       </div>
       <div class="grid-2">
-        <div><label class="field-label">Max dt (s)</label><input type="number" id="dt_max" step="1" min="1" max="120" value="30"></div>
-        <div><label class="field-label">Diff. safety α</label><input type="number" id="diff_safety" step="0.05" min="0.05" max="0.45" value="0.30"></div>
+        <div><label class="field-label">Max dt (s)</label><input type="number" id="dt_max" step="1" min="1" max="120" value="60"></div>
+        <div><label class="field-label">Diff. safety α</label><input type="number" id="diff_safety" step="0.05" min="0.05" max="0.45" value="0.25"></div>
       </div>
       <div class="grid-2">
-        <div><label class="field-label">Pressure yield (iter)</label><input type="number" id="p_yield" step="5" min="1" max="100" value="10"></div>
+        <div><label class="field-label">Pressure yield (iter)</label><input type="number" id="p_yield" step="5" min="1" max="100" value="5"></div>
       </div>
       <div class="field-hint">CFL up to ~2.5 with semi-Lagrangian. dt = min(CFL·Δx/U, α·Δx²/ν, max_dt). Pressure yield: Jacobi iters between UI refreshes.</div>
 
@@ -1097,12 +1097,17 @@ async function runFetchAll() {
   try {
     terrainData = await fetchDEM(bbox, simZoom, 'sim DEM');
     const { Z, nx, ny, dx, dy } = terrainData;
-    log(`Sim grid: ${nx}×${ny}, dx=${dx.toFixed(1)} m, dy=${dy.toFixed(1)} m`, 'success');
+    const nx2 = Math.round(nx/2)
+    const ny2 = Math.round(ny/2)
+    const dx2 = dx*2;
+    const dy2 = dx*2;
+    log(`Refined sim grid: ${nx}×${ny}, dx=${dx.toFixed(1)} m, dy=${dy.toFixed(1)} m`, 'success');
+    log(`Coarse sim grid: ${nx2}×${ny2}, dx=${dx2.toFixed(1)} m, dy=${dy2.toFixed(1)} m`, 'success');
 
-    document.getElementById('sim_nx').value = nx;
-    document.getElementById('sim_ny').value = ny;
+    document.getElementById('sim_nx').value = nx2;
+    document.getElementById('sim_ny').value = ny2;
     document.getElementById('grid-hint').textContent =
-      `DEM: ${nx}×${ny} (dx=${dx.toFixed(1)} m). Change NX/NY to resample before simulation. Larger = more precise but slower.`;
+      `DEM: ${nx2}×${ny2} (dx=${dx2.toFixed(1)} m). Change NX/NY to resample before simulation. Larger = more precise but slower.`;
 
     meshData = await fetchDEM(bbox, meshZoom, 'mesh DEM');
     log(`Mesh grid: ${meshData.nx}×${meshData.ny}, dx=${meshData.dx.toFixed(1)} m`, 'success');
