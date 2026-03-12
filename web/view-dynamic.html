@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <title>Wind View — 3-D SWE</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #040810; color: #e0e8f0; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+
+    /* ── Nav ── */
+    #header-nav {
+      position: fixed; top: 0; left: 0; right: 0; height: 44px; z-index: 3000;
+      display: flex; align-items: center; padding: 0 12px; gap: 2px;
+      background: rgba(6,10,20,0.92); border-bottom: 1px solid rgba(100,160,255,0.12);
+      backdrop-filter: blur(14px);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 7px; padding: 5px 9px; margin-right: 4px;
+      color: #7eb8ff; text-decoration: none; font-size: 12px; font-weight: 600;
+      border-radius: 6px; white-space: nowrap; transition: background .15s;
+    }
+    .nav-logo img { width: 18px; height: 18px; filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg); }
+    .nav-logo:hover { background: rgba(100,160,255,.1); }
+    .nav-sep { width: 1px; height: 18px; background: rgba(100,160,255,.12); margin: 0 2px; }
+    .nav-link { padding: 5px 10px; color: #4a6888; text-decoration: none; font-size: 12px; border-radius: 6px; white-space: nowrap; transition: .15s; }
+    .nav-link:hover { color: #90b8d8; background: rgba(100,160,255,.08); }
+    .nav-link.nav-active { color: #7eb8ff; background: rgba(100,160,255,.1); font-weight: 500; }
+
+    #canvas-container { width: 100vw; height: 100vh; margin-top: 44px; }
+    #canvas-container canvas { display: block; }
+
+    /* ── Loading overlay ── */
+    #loading {
+      position: fixed; inset: 0; z-index: 2000;
+      background: rgba(4,8,16,0.92);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      font-size: 13px; color: #5588aa; gap: 12px;
+    }
+    #loading-spinner {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 3px solid rgba(100,160,255,.15);
+      border-top-color: #7eb8ff;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── UI Panel ── */
+    #ui-panel {
+      position: fixed; top: 52px; right: 8px; width: 240px;
+      background: rgba(10,15,30,0.88);
+      border: 1px solid rgba(100,160,255,0.3);
+      border-radius: 12px; padding: 14px 16px;
+      backdrop-filter: blur(8px);
+      max-height: calc(100vh - 68px);
+      overflow-y: auto;
+      transform: translateX(calc(100% + 20px));
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    #ui-panel.open { transform: translateX(0); }
+    #ui-panel h2 { font-size: 13px; color: #7eb8ff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+
+    .ctrl-group { margin-bottom: 12px; }
+    .ctrl-label {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: #99b8d0; margin-bottom: 4px;
+    }
+    .ctrl-label span { color: #7eb8ff; font-weight: 600; }
+
+    input[type="range"] { width: 100%; accent-color: #7eb8ff; cursor: pointer; }
+
+    .section-title {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: #3a6080;
+      margin: 12px 0 6px;
+      border-bottom: 1px solid rgba(100,160,255,0.1); padding-bottom: 3px;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    .tab-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+    .tab-btn {
+      flex: 1; min-width: 48px; padding: 4px 6px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+      border-radius: 10px; border: 1px solid rgba(100,160,255,.25);
+      color: #4a6888; background: transparent; cursor: pointer; transition: .15s;
+    }
+    .tab-btn.active { color: #7eb8ff; border-color: rgba(100,160,255,.6); background: rgba(100,160,255,.12); }
+    .tab-btn:hover:not(.active) { color: #90b8d8; background: rgba(100,160,255,.08); }
+
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 11px; color: #99b8d0; margin-bottom: 8px;
+    }
+    .toggle-btn {
+      padding: 3px 10px; font-size: 10px; font-weight: 600;
+      border-radius: 10px; border: 1px solid rgba(100,160,255,.25);
+      color: #4a6888; background: transparent; cursor: pointer; transition: .15s;
+    }
+    .toggle-btn.on { color: #7eb8ff; border-color: rgba(100,160,255,.6); background: rgba(100,160,255,.12); }
+
+    /* ── Panel toggle button ── */
+    #panel-toggle {
+      position: fixed; top: 52px; right: 8px; z-index: 2500;
+      width: 36px; height: 36px;
+      background: rgba(10,15,30,0.88);
+      border: 1px solid rgba(100,160,255,0.3);
+      border-radius: 50%; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #7eb8ff; font-size: 16px;
+      transition: background .15s, transform .3s;
+    }
+    #panel-toggle:hover { background: rgba(100,160,255,.15); }
+    #panel-toggle.open { transform: translateX(-252px); }
+
+    /* ── Colorbar ── */
+    #colorbar-wrap {
+      position: fixed; left: 16px; bottom: 28px;
+      display: flex; gap: 6px; align-items: center;
+      font-size: 10px; color: #3a6080;
+    }
+    #colorbar-canvas { width: 14px; height: 160px; border-radius: 3px; border: 1px solid rgba(100,160,255,.15); }
+    #colorbar-labels { display: flex; flex-direction: column; justify-content: space-between; height: 160px; }
+    #colorbar-title { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 9px; color: #3a6080; letter-spacing: 1px; margin-right: 4px; }
+
+    /* ── Info bar ── */
+    #info-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 26px;
+      background: rgba(4,8,16,0.9); border-top: 1px solid rgba(100,160,255,0.1);
+      display: flex; align-items: center; padding: 0 14px;
+      font-size: 10px; color: #3a6080; gap: 20px;
+    }
+    #info-bar span { color: #5588aa; }
+    #info-bar strong { color: #7eb8ff; }
+  </style>
+</head>
+
+<body>
+
+<nav id="header-nav">
+  <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+  <div class="nav-sep"></div>
+  <a href="area"              class="nav-link">Area</a>
+  <a href="simulate"          class="nav-link">Simulate</a>
+  <a href="simulate-advanced" class="nav-link">Simulate NS</a>
+  <a href="simulate-dynamic"  class="nav-link">Wind SWE</a>
+  <a href="view"              class="nav-link">View</a>
+  <a href="view-dynamic"      class="nav-link nav-active">Wind View</a>
+  <a href="about"             class="nav-link">About</a>
+</nav>
+
+<div id="loading">
+  <div id="loading-spinner"></div>
+  <div id="loading-msg">Loading wind simulation…</div>
+</div>
+
+<div id="canvas-container"></div>
+
+<!-- Panel toggle -->
+<button id="panel-toggle" onclick="togglePanel()" title="Toggle controls">⚙</button>
+
+<!-- Controls panel -->
+<div id="ui-panel">
+  <h2>Wind Flow</h2>
+
+  <div class="section-title">Overlay</div>
+  <div class="tab-row">
+    <button class="tab-btn active" id="tab-speed"    onclick="setOverlay('speed')">Speed</button>
+    <button class="tab-btn"        id="tab-froude"   onclick="setOverlay('froude')">Froude</button>
+    <button class="tab-btn"        id="tab-depth"    onclick="setOverlay('depth')">Depth</button>
+    <button class="tab-btn"        id="tab-vort"     onclick="setOverlay('vort')">Vort.</button>
+    <button class="tab-btn"        id="tab-terrain"  onclick="setOverlay('terrain')">Terrain</button>
+  </div>
+
+  <div class="section-title">Terrain</div>
+  <div class="ctrl-group">
+    <div class="ctrl-label">Opacity <span id="terr-opacity-val">0.8</span></div>
+    <input type="range" id="terr-opacity" min="0.1" max="1" step="0.05" value="0.8"
+           oninput="document.getElementById('terr-opacity-val').textContent=this.value; updateTerrainOpacity();">
+  </div>
+
+  <div class="section-title">Overlay</div>
+  <div class="ctrl-group">
+    <div class="ctrl-label">Opacity <span id="ov-opacity-val">0.75</span></div>
+    <input type="range" id="ov-opacity" min="0" max="1" step="0.05" value="0.75"
+           oninput="document.getElementById('ov-opacity-val').textContent=this.value; updateOverlayOpacity();">
+  </div>
+
+  <div class="section-title">Arrows</div>
+  <div class="toggle-row">
+    Show arrows
+    <div style="display:flex;gap:4px">
+      <button class="toggle-btn on" id="arrows-toggle" onclick="toggleArrows()">ON</button>
+      <button class="toggle-btn on" id="arrows-color" onclick="toggleArrowColor()">White</button>
+    </div>
+  </div>
+  <div class="ctrl-group">
+    <div class="ctrl-label">Step (cells) <span id="arrow-step-val">10</span></div>
+    <input type="range" id="arrow-step" min="4" max="30" step="2" value="10"
+           oninput="document.getElementById('arrow-step-val').textContent=this.value; rebuildArrows();">
+  </div>
+  <div class="ctrl-group">
+    <div class="ctrl-label">Height AGL (m) <span id="arrow-height-val">80</span></div>
+    <input type="range" id="arrow-height" min="10" max="500" step="10" value="80"
+           oninput="document.getElementById('arrow-height-val').textContent=this.value; rebuildArrows();">
+  </div>
+  <div class="ctrl-group">
+    <div class="ctrl-label">Scale <span id="arrow-scale-val">1.5</span></div>
+    <input type="range" id="arrow-scale" min="0.2" max="5" step="0.1" value="1.5"
+           oninput="document.getElementById('arrow-scale-val').textContent=this.value; rebuildArrows();">
+  </div>
+
+  <div class="section-title">Info</div>
+  <div id="sim-info" style="font-size:10px; color:#3a6080; line-height:1.8;">—</div>
+</div>
+
+<!-- Colorbar -->
+<div id="colorbar-wrap">
+  <div id="colorbar-title">Speed (m/s)</div>
+  <canvas id="colorbar-canvas" width="14" height="160"></canvas>
+  <div id="colorbar-labels"></div>
+</div>
+
+<!-- Info bar -->
+<div id="info-bar">
+  <span>Drag to orbit · Scroll to zoom · Right-drag to pan</span>
+  <span><strong id="info-overlay">Wind Speed</strong></span>
+  <span id="info-params"></span>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ═══════════════════════════════════════════════════════════════════
+//  SCENE SETUP
+// ═══════════════════════════════════════════════════════════════════
+
+const container = document.getElementById('canvas-container');
+const renderer  = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x040810);
+scene.fog = new THREE.Fog(0x040810, 8000, 18000);
+
+const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 10, 30000);
+camera.position.set(0, -2500, 2500);
+camera.up.set(0, 0, 1);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 0, 800);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.minDistance  = 200;
+controls.maxDistance  = 12000;
+controls.maxPolarAngle = Math.PI * 0.48;
+
+// Lighting — identical to view.html
+const ambientLight = new THREE.AmbientLight(0x1a2a3a, 2);
+scene.add(ambientLight);
+const sun = new THREE.DirectionalLight(0xfff0dd, 3);
+sun.position.set(1000, -500, 2000);
+sun.castShadow = true;
+sun.shadow.mapSize.width  = 4096;
+sun.shadow.mapSize.height = 4096;
+sun.shadow.camera.left   = -5500;
+sun.shadow.camera.right  =  5500;
+sun.shadow.camera.top    =  5500;
+sun.shadow.camera.bottom = -5500;
+sun.shadow.camera.near   = 100;
+sun.shadow.camera.far    = 18000;
+sun.shadow.bias = -0.002;
+scene.add(sun);
+
+window.addEventListener('resize', () => {
+  const w = window.innerWidth, h = window.innerHeight - 44;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+// ═══════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════
+
+let simData     = null;
+let terrainMesh = null;
+let overlayMesh = null;
+let arrowLines  = null;
+let currentOverlay = 'speed';
+let arrowsVisible  = true;
+let arrowColor     = 0xffffff;
+
+// ═══════════════════════════════════════════════════════════════════
+//  COLORMAPS (inline — no external file dependency)
+// ═══════════════════════════════════════════════════════════════════
+
+const CMAPS = {
+  speed: [
+    [0,   0,   255],
+    [0,   200, 200],
+    [0,   255, 0  ],
+    [255, 255, 0  ],
+    [255, 0,   0  ],
+  ],
+  froude: [
+    [0,   100, 255],
+    [0,   220, 160],
+    [255, 230, 0  ],
+    [255, 80,  0  ],
+    [180, 0,   0  ],
+  ],
+  depth: [
+    [0,   10,  60 ],
+    [0,   60,  160],
+    [0,   140, 220],
+    [80,  200, 255],
+    [200, 240, 255],
+  ],
+  vort: [
+    [0,   0,   220],
+    [20,  20,  60 ],
+    [10,  10,  10 ],
+    [60,  10,  10 ],
+    [220, 0,   0  ],
+  ],
+  terrain: [
+    [30,  60,  20 ],
+    [80,  110, 50 ],
+    [140, 140, 100],
+    [180, 160, 130],
+    [230, 220, 200],
+    [255, 255, 255],
+  ],
+};
+
+function sampleCmap(name, t) {
+  const stops = CMAPS[name];
+  const n     = stops.length - 1;
+  const idx   = Math.min(Math.floor(t * n), n - 1);
+  const s     = t * n - idx;
+  const lo = stops[idx], hi = stops[idx + 1] || lo;
+  return [
+    (lo[0] + s * (hi[0] - lo[0])) / 255,
+    (lo[1] + s * (hi[1] - lo[1])) / 255,
+    (lo[2] + s * (hi[2] - lo[2])) / 255,
+  ];
+}
+
+function drawColorbar(cmapName, minVal, maxVal, title, fmtFn) {
+  const canvas = document.getElementById('colorbar-canvas');
+  const ctx    = canvas.getContext('2d');
+  const img    = ctx.createImageData(canvas.width, canvas.height);
+  for (let py = 0; py < canvas.height; py++) {
+    const t = 1 - py / (canvas.height - 1);
+    const [r, g, b] = sampleCmap(cmapName, t);
+    for (let px = 0; px < canvas.width; px++) {
+      const base = (py * canvas.width + px) * 4;
+      img.data[base]   = r * 255; img.data[base+1] = g * 255;
+      img.data[base+2] = b * 255; img.data[base+3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+
+  const labDiv = document.getElementById('colorbar-labels');
+  labDiv.innerHTML = '';
+  for (let k = 0; k <= 5; k++) {
+    const v = maxVal - (k / 5) * (maxVal - minVal);
+    const span = document.createElement('span');
+    span.textContent = fmtFn(v);
+    span.style.fontSize = '9px'; span.style.color = '#5588aa';
+    labDiv.appendChild(span);
+  }
+  document.getElementById('colorbar-title').textContent = title;
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  TERRAIN MESH (high-res)
+// ═══════════════════════════════════════════════════════════════════
+
+function buildTerrain() {
+  if (terrainMesh) { scene.remove(terrainMesh); terrainMesh.geometry.dispose(); terrainMesh.material.dispose(); }
+
+  const T = simData.terrain;
+  const useHires = T.mesh_elevation && T.mesh_nx && T.mesh_ny;
+  const elev = useHires ? T.mesh_elevation : T.elevation;
+  const mnx  = useHires ? T.mesh_nx : T.nx;
+  const mny  = useHires ? T.mesh_ny : T.ny;
+
+  const xw = T.x_extent[1] - T.x_extent[0];
+  const yh = T.y_extent[1] - T.y_extent[0];
+
+  const geom = new THREE.PlaneGeometry(xw, yh, mnx - 1, mny - 1);
+  const pos  = geom.attributes.position;
+
+  // Elevation
+  let zmin = Infinity, zmax = -Infinity;
+  for (let j = 0; j < mny; j++)
+    for (let i = 0; i < mnx; i++) {
+      const z = elev[j][i];
+      pos.setZ(j * mnx + i, z);
+      if (z < zmin) zmin = z; if (z > zmax) zmax = z;
+    }
+  pos.needsUpdate = true;
+  geom.computeVertexNormals();
+
+  // Plain elevation colours — MeshLambertMaterial + scene lights provide the shading.
+  const colors = new Float32Array(pos.count * 3);
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  for (let k = 0; k < pos.count; k++) {
+    const t = (pos.getZ(k) - zmin) / (zmax - zmin);
+    const [r, g, b] = sampleCmap('terrain', t);
+    colors[k*3] = r; colors[k*3+1] = g; colors[k*3+2] = b;
+  }
+
+  const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
+  const cy = -(T.y_extent[0] + T.y_extent[1]) / 2;
+
+  const mat = new THREE.MeshLambertMaterial({
+    vertexColors: true, transparent: true,
+    opacity: parseFloat(document.getElementById('terr-opacity').value),
+    side: THREE.DoubleSide,
+  });
+  terrainMesh = new THREE.Mesh(geom, mat);
+  terrainMesh.position.set(cx, cy, 0);
+  terrainMesh.receiveShadow = true;
+  scene.add(terrainMesh);
+
+  // Camera
+  const meanZ = (zmin + zmax) / 2;
+  controls.target.set(0, 0, meanZ);
+  camera.position.set(0, -Math.max(xw, yh) * 0.5, meanZ + Math.max(xw, yh) * 0.35);
+  controls.update();
+
+  return { zmin, zmax, cx, cy };
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  WIND OVERLAY (sim-resolution plane, vertex-coloured)
+// ═══════════════════════════════════════════════════════════════════
+
+let overlayMin = 0, overlayMax = 1;
+
+function buildOverlay(cmapName, field, title, unit) {
+  if (overlayMesh) { scene.remove(overlayMesh); overlayMesh.geometry.dispose(); overlayMesh.material.dispose(); }
+
+  const T   = simData.terrain;
+  const nx  = T.nx, ny = T.ny;
+  const xw  = T.x_extent[1] - T.x_extent[0];
+  const yh  = T.y_extent[1] - T.y_extent[0];
+  const cx  = (T.x_extent[0] + T.x_extent[1]) / 2;
+  const cy  = -(T.y_extent[0] + T.y_extent[1]) / 2;
+
+  const geom = new THREE.PlaneGeometry(xw, yh, nx - 1, ny - 1);
+  const pos  = geom.attributes.position;
+
+  // Lift overlay onto terrain surface + small offset
+  for (let j = 0; j < ny; j++)
+    for (let i = 0; i < nx; i++)
+      pos.setZ(j * nx + i, T.elevation[j][i] + 4);
+  pos.needsUpdate = true;
+
+  // Normalise field
+  let mn = Infinity, mx = -Infinity;
+  for (let i = 0; i < field.length; i++) {
+    if (field[i] < mn) mn = field[i]; if (field[i] > mx) mx = field[i];
+  }
+  overlayMin = mn; overlayMax = mx;
+  const rng = Math.max(mx - mn, 1e-9);
+
+  // Vertex colours
+  const colors = new Float32Array(pos.count * 3);
+  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  for (let k = 0; k < pos.count; k++) {
+    const t = (field[k] - mn) / rng;
+    const [r, g, b] = sampleCmap(cmapName, t);
+    colors[k*3] = r; colors[k*3+1] = g; colors[k*3+2] = b;
+  }
+
+  const mat = new THREE.MeshBasicMaterial({
+    vertexColors: true, transparent: true,
+    opacity: parseFloat(document.getElementById('ov-opacity').value),
+    depthWrite: false, side: THREE.DoubleSide,
+  });
+  overlayMesh = new THREE.Mesh(geom, mat);
+  overlayMesh.position.set(cx, cy, 0);
+  scene.add(overlayMesh);
+
+  const fmtFn = v => mx > 100 ? v.toFixed(0) : v.toFixed(2);
+  drawColorbar(cmapName, mn, mx, `${title} (${unit})`, fmtFn);
+}
+
+function updateTerrainOpacity() {
+  if (terrainMesh) terrainMesh.material.opacity = parseFloat(document.getElementById('terr-opacity').value);
+}
+function updateOverlayOpacity() {
+  if (overlayMesh) overlayMesh.material.opacity = parseFloat(document.getElementById('ov-opacity').value);
+}
+window.updateTerrainOpacity = updateTerrainOpacity;
+window.updateOverlayOpacity = updateOverlayOpacity;
+
+// ═══════════════════════════════════════════════════════════════════
+//  3-D WIND ARROWS (LineSegments)
+// ═══════════════════════════════════════════════════════════════════
+
+function buildArrows() {
+  if (arrowLines) { scene.remove(arrowLines); arrowLines.geometry.dispose(); arrowLines.material.dispose(); arrowLines = null; }
+  if (!arrowsVisible) return;
+
+  const T     = simData.terrain;
+  const W     = simData.wind;
+  const nx    = T.nx, ny = T.ny;
+  const step  = parseInt(document.getElementById('arrow-step').value);
+  const agl   = parseFloat(document.getElementById('arrow-height').value);
+  const scale = parseFloat(document.getElementById('arrow-scale').value);
+  const cx    = (T.x_extent[0] + T.x_extent[1]) / 2;
+  const cy    = -(T.y_extent[0] + T.y_extent[1]) / 2;
+  const xw    = T.x_extent[1] - T.x_extent[0];
+  const yh    = T.y_extent[1] - T.y_extent[0];
+
+  let maxSpd = 0;
+  for (let k = 0; k < W.speed.length; k++) if (W.speed[k] > maxSpd) maxSpd = W.speed[k];
+  if (maxSpd === 0) maxSpd = 1;
+
+  const positions = [];
+  const alphas    = [];
+
+  const HEAD_FRAC = 0.3;
+  const HEAD_HALF = 0.25;  // radians
+
+  for (let j = Math.floor(step/2); j < ny; j += step) {
+    for (let i = Math.floor(step/2); i < nx; i += step) {
+      const idx = j * nx + i;
+      const ui  = W.u[idx], vi = W.v[idx];
+      const spd = W.speed[idx];
+      if (spd < 0.05) continue;
+
+      // Three.js world position of cell (j,i)
+      const wx = (i / (nx-1) - 0.5) * xw + cx;
+      const wy = (0.5 - j / (ny-1)) * yh + cy;   // j=0 = north = +y in Three.js
+      const wz = T.elevation[j][i] + agl;
+
+      // Arrow direction (u = east = +x, v = north = +y in Three.js)
+      const len  = step * scale * (T.dx || 50) * 0.8 * (spd / maxSpd);
+      const ux   = ui / spd, uy = vi / spd;   // unit vector in 3D (x,y plane)
+
+      const ex = wx + ux * len, ey = wy + uy * len;
+
+      // Stem
+      positions.push(wx, wy, wz,  ex, ey, wz);
+
+      // Arrowhead (two lines)
+      const hl    = len * HEAD_FRAC;
+      const ang   = Math.atan2(uy, ux);
+      const a1    = ang + Math.PI - HEAD_HALF;
+      const a2    = ang + Math.PI + HEAD_HALF;
+      positions.push(ex, ey, wz,  ex + Math.cos(a1)*hl, ey + Math.sin(a1)*hl, wz);
+      positions.push(ex, ey, wz,  ex + Math.cos(a2)*hl, ey + Math.sin(a2)*hl, wz);
+    }
+  }
+
+  if (positions.length === 0) return;
+
+  const geom = new THREE.BufferGeometry();
+  geom.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  const mat = new THREE.LineBasicMaterial({ color: arrowColor, transparent: true, opacity: 0.55 });
+  arrowLines = new THREE.LineSegments(geom, mat);
+  scene.add(arrowLines);
+}
+
+function toggleArrows() {
+  arrowsVisible = !arrowsVisible;
+  const btn = document.getElementById('arrows-toggle');
+  btn.textContent = arrowsVisible ? 'ON' : 'OFF';
+  btn.classList.toggle('on', arrowsVisible);
+  buildArrows();
+}
+
+function toggleArrowColor() {
+  arrowColor = arrowColor === 0xffffff ? 0x000000 : 0xffffff;
+  const btn = document.getElementById('arrows-color');
+  btn.textContent = arrowColor === 0xffffff ? 'White' : 'Black';
+  btn.classList.toggle('on', arrowColor === 0xffffff);
+  if (arrowLines) arrowLines.material.color.setHex(arrowColor);
+}
+
+window.toggleArrows     = toggleArrows;
+window.toggleArrowColor = toggleArrowColor;
+window.rebuildArrows    = buildArrows;
+
+// ═══════════════════════════════════════════════════════════════════
+//  OVERLAY SELECTION
+// ═══════════════════════════════════════════════════════════════════
+
+const OVERLAYS = {
+  speed:   { field: 'speed',    cmap: 'speed',   title: 'Wind Speed',  unit: 'm/s' },
+  froude:  { field: 'froude',   cmap: 'froude',  title: 'Froude №',    unit: '' },
+  depth:   { field: 'depth',    cmap: 'depth',   title: 'Flow Depth',  unit: 'm' },
+  vort:    { field: 'vorticity',cmap: 'vort',    title: 'Vorticity',   unit: '1/s' },
+  terrain: { field: null,       cmap: 'terrain', title: 'Elevation',   unit: 'm' },
+};
+
+function setOverlay(name) {
+  currentOverlay = name;
+  ['speed','froude','depth','vort','terrain'].forEach(n => {
+    document.getElementById('tab-' + n).classList.toggle('active', n === name);
+  });
+  const ov = OVERLAYS[name];
+  document.getElementById('info-overlay').textContent = ov.title;
+
+  if (!simData) return;
+
+  if (name === 'terrain') {
+    // Hide overlay, show terrain only
+    if (overlayMesh) { scene.remove(overlayMesh); overlayMesh.geometry.dispose(); overlayMesh.material.dispose(); overlayMesh = null; }
+    const T = simData.terrain;
+    const nx = T.nx, ny = T.ny;
+    const flat = T.elevation.flat();
+    let mn = Infinity, mx = -Infinity;
+    for (const z of flat) { if (z < mn) mn = z; if (z > mx) mx = z; }
+    drawColorbar('terrain', mn, mx, 'Elevation (m)', v => v.toFixed(0));
+  } else {
+    const field = simData.wind[ov.field];
+    buildOverlay(ov.cmap, field, ov.title, ov.unit);
+  }
+}
+
+window.setOverlay = setOverlay;
+
+// ═══════════════════════════════════════════════════════════════════
+//  INDEXEDDB
+// ═══════════════════════════════════════════════════════════════════
+
+function idbGet(key) {
+  return new Promise(resolve => {
+    const req = indexedDB.open('paragliding', 1);
+    req.onupgradeneeded = e => { if (!e.target.result.objectStoreNames.contains('sim')) e.target.result.createObjectStore('sim'); };
+    req.onerror = () => resolve(null);
+    req.onsuccess = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('sim')) { resolve(null); return; }
+      const r = db.transaction('sim','readonly').objectStore('sim').get(key);
+      r.onsuccess = () => { try { resolve(r.result ? JSON.parse(r.result) : null); } catch { resolve(null); } };
+      r.onerror = () => resolve(null);
+    };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  PANEL TOGGLE
+// ═══════════════════════════════════════════════════════════════════
+
+let panelOpen = false;
+function togglePanel() {
+  panelOpen = !panelOpen;
+  document.getElementById('ui-panel').classList.toggle('open', panelOpen);
+  document.getElementById('panel-toggle').classList.toggle('open', panelOpen);
+}
+window.togglePanel = togglePanel;
+
+// ═══════════════════════════════════════════════════════════════════
+//  LOAD & INIT
+// ═══════════════════════════════════════════════════════════════════
+
+async function load() {
+  const loadingEl = document.getElementById('loading');
+  const loadingMsg = document.getElementById('loading-msg');
+
+  try {
+    loadingMsg.textContent = 'Reading IndexedDB…';
+    simData = await idbGet('swe_latest');
+
+    if (!simData) {
+      loadingEl.innerHTML =
+        `<div style="color:#f66;text-align:center">No wind simulation found.<br><br>
+         <a href="simulate-dynamic" style="color:#7eb8ff">Run the SWE simulation first</a></div>`;
+      return;
+    }
+
+    loadingMsg.textContent = 'Building terrain…';
+    await new Promise(r => setTimeout(r, 0));
+    buildTerrain();
+
+    loadingMsg.textContent = 'Building overlay…';
+    await new Promise(r => setTimeout(r, 0));
+    setOverlay('speed');
+
+    loadingMsg.textContent = 'Building arrows…';
+    await new Promise(r => setTimeout(r, 0));
+    buildArrows();
+
+    // Info panel
+    const p = simData.params;
+    document.getElementById('sim-info').innerHTML =
+      `Wind: <strong style="color:#7eb8ff">${p.wind_dir?.toFixed(0)}° @ ${p.wind_speed_ms?.toFixed(1)} m/s</strong><br>` +
+      `H₀ = ${p.H0} m &nbsp;|&nbsp; g′ = ${p.g_prime} m/s²<br>` +
+      `Grid: ${p.nx}×${p.ny}, dx=${p.dx?.toFixed(0)} m<br>` +
+      `T_sim = ${p.sim_time} s`;
+    document.getElementById('info-params').textContent =
+      `dir ${p.wind_dir?.toFixed(0)}° · ${p.wind_speed_ms?.toFixed(1)} m/s · H₀=${p.H0}m`;
+
+    togglePanel();
+  } catch (e) {
+    console.error('view-dynamic load error:', e);
+    loadingMsg.textContent = `Error: ${e.message}`;
+    loadingMsg.style.color = '#f66';
+    // Don't return — fall through to finally so the overlay is hidden
+    // and whatever was built remains visible.
+  } finally {
+    // Always hide the overlay so the Three.js canvas is reachable.
+    loadingEl.style.display = 'none';
+  }
+}
+
+load();
+</script>
+
+</body>
+</html>
