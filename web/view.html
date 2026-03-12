@@ -52,7 +52,7 @@
     }
 
     #ui-panel h2 {
-      font-size: 14px;
+      font-size: 13px;
       color: #7eb8ff;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -204,6 +204,16 @@
       margin: 0 auto 12px;
     }
 
+    .tab-row { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 8px; }
+    .tab-btn {
+      flex: 1; padding: 4px 5px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+      border-radius: 10px; border: 1px solid rgba(100,160,255,.25);
+      color: #4a6888; background: transparent; cursor: pointer; transition: .15s;
+    }
+    .tab-btn.active { color: #7eb8ff; border-color: rgba(100,160,255,.6); background: rgba(100,160,255,.12); }
+    .tab-btn:hover:not(.active) { color: #90b8d8; background: rgba(100,160,255,.08); }
+
     @keyframes spin {
       to {
         transform: rotate(360deg);
@@ -227,7 +237,7 @@
     }
 
     #info-panel h3 {
-      font-size: 14px;
+      font-size: 13px;
       color: #7eb8ff;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -493,10 +503,10 @@
   </div>
 
   <div id="ui-panel" class="panel-open">
-    <h2>Paragliding thermal simulations</h2>
+    <h2>Thermal Flow</h2>
 
     <div class="control-group">
-      <div id="mode-buttons"></div>
+      <div id="preset-buttons" class="tab-row"></div>
     </div>
 
     <div class="control-group" data-for="time-slider">
@@ -1767,7 +1777,7 @@
 
     // ─── modes ──────────────────────────────────────────────────────────────────
     function markModified() {
-      const active = document.querySelector('.mode-btn.active');
+      const active = document.querySelector('.tab-btn.active');
       if (active) active.classList.add('modified');
     }
 
@@ -1781,16 +1791,16 @@
 
     function buildmodeButtons() {
       const modes = window._modesData || [];
-      const container = document.getElementById('mode-buttons');
+      const container = document.getElementById('preset-buttons');
       container.innerHTML = '';
 
       modes.forEach((mode, i) => {
         const btn = document.createElement('button');
-        btn.className = 'mode-btn' + (i === 0 ? ' active' : '');
+        btn.className = 'tab-btn' + (i === 0 ? ' active' : '');
         btn.textContent = mode.label;
         btn.title = mode.tip || '';
         btn.onclick = () => {
-          document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active', 'modified'));
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'modified'));
           btn.classList.add('active');
           for (const [id, val] of Object.entries(mode.sliders)) setSlider(id, val);
           applySliderVisibility(mode);

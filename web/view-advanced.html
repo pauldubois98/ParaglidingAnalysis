@@ -181,43 +181,16 @@
     }
 
     /* ── Preset buttons ── */
-    #preset-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 4px;
-      margin-bottom: 4px;
+    .tab-row { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 8px; }
+    .tab-btn {
+      flex: 1; padding: 4px 5px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+      border-radius: 10px; border: 1px solid rgba(100,160,255,.25);
+      color: #4a6888; background: transparent; cursor: pointer; transition: .15s;
     }
+    .tab-btn.active { color: #7eb8ff; border-color: rgba(100,160,255,.6); background: rgba(100,160,255,.12); }
+    .tab-btn:hover:not(.active) { color: #90b8d8; background: rgba(100,160,255,.08); }
 
-    .preset-btn {
-      font-size: 10px;
-      padding: 4px 8px;
-      flex: 1;
-      min-width: 60px;
-      text-align: center;
-      background: rgba(100, 160, 255, 0.08);
-      border: 1px solid rgba(100, 160, 255, 0.2);
-      color: #5a7890;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
-    }
-
-    .preset-btn:hover {
-      background: rgba(100, 160, 255, 0.18);
-      color: #90b8d8;
-    }
-
-    .preset-btn.active {
-      background: rgba(100, 160, 255, 0.28);
-      color: #7eb8ff;
-      border-color: rgba(100, 160, 255, 0.5);
-      font-weight: 600;
-    }
-
-    .preset-btn.active.modified {
-      border-color: #7eb8ffa0;
-      color: #7eb8ff;
-    }
 
     /* ── Visibility control ── */
     .ctrl-hidden {
@@ -456,7 +429,6 @@
       .irow { font-size: 10px; }
       #colorbars { bottom: 10px; left: 8px; gap: 6px; }
       .cb-label { font-size: 9px; }
-      .preset-btn { font-size: 10px; padding: 3px 6px; }
       .nav-logo span { display: none; }
       .nav-link { padding: 5px 6px; font-size: 11px; }
       #panel-toggle { top: 52px; }
@@ -504,9 +476,9 @@
     title="Toggle controls">✕</button>
 
   <div id="ui-panel" class="open">
-    <h2>NS Simulation — 3D</h2>
+    <h2>Thermal Flow —<br>Simulation</h2>
 
-    <div id="preset-buttons"></div>
+    <div id="preset-buttons" class="tab-row"></div>
 
     <div class="sec" id="sec-time">Time</div>
     <div class="cg" id="cg-time">
@@ -844,11 +816,11 @@
 
       presetsData.forEach((preset, i) => {
         const btn = document.createElement('button');
-        btn.className = 'preset-btn' + (i === 0 ? ' active' : '');
+        btn.className = 'tab-btn' + (i === 0 ? ' active' : '');
         btn.textContent = preset.label;
         btn.title = preset.tip || '';
         btn.addEventListener('click', () => {
-          document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active', 'modified'));
+          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'modified'));
           btn.classList.add('active');
           applyPreset(preset);
         });
@@ -858,7 +830,7 @@
       // Mark active preset as "modified" when any slider is manually changed
       document.getElementById('ui-panel').addEventListener('input', e => {
         if (e.target.type === 'range') {
-          const active = document.querySelector('.preset-btn.active');
+          const active = document.querySelector('.tab-btn.active');
           if (active) active.classList.add('modified');
         }
       }, true);

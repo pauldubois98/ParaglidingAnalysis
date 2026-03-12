@@ -31,6 +31,16 @@
     #canvas-container { width: 100vw; height: 100vh; margin-top: 44px; }
     #canvas-container canvas { display: block; }
 
+    .tab-row { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 8px; }
+    .tab-btn {
+      flex: 1; padding: 4px 5px;
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+      border-radius: 10px; border: 1px solid rgba(100,160,255,.25);
+      color: #4a6888; background: transparent; cursor: pointer; transition: .15s;
+    }
+    .tab-btn.active { color: #7eb8ff; border-color: rgba(100,160,255,.6); background: rgba(100,160,255,.12); }
+    .tab-btn:hover:not(.active) { color: #90b8d8; background: rgba(100,160,255,.08); }
+
     /* ── Loading overlay ── */
     #loading {
       position: fixed; inset: 0; z-index: 2000;
@@ -190,10 +200,7 @@
 <!-- Controls panel -->
 <div id="ui-panel">
   <h2>Wind Flow</h2>
-
-  <div class="section-title">Presets</div>
   <div class="tab-row" id="preset-btns"></div>
-
   <div class="section-title" style="display: none;">Overlay</div>
   <div class="tab-row" style="display: none;">
     <button class="tab-btn active" id="tab-speed"    onclick="setOverlay('speed')">Speed</button>
