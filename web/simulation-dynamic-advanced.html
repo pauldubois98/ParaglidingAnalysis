@@ -139,6 +139,7 @@
     #compass-svg { cursor:pointer; flex-shrink:0; }
     #compass-readout { font-size:11px; color:#99b8d0; line-height:1.7; }
     #compass-readout strong { color:#7eb8ff; font-size:14px; }
+    .hidden{ display:none; }
   </style>
 </head>
 <body>
@@ -180,28 +181,6 @@
       <div class="subtitle">Full 3-D Incompressible Navier–Stokes · wind on terrain</div>
     </div>
     <div id="panel-body">
-
-      <div class="section-title">Area</div>
-      <div class="grid-2">
-        <div><label class="field-label">Max lat (N)</label><input type="number" id="max_lat" step="0.0001" value="43.014963"></div>
-        <div><label class="field-label">Min lat (S)</label><input type="number" id="min_lat" step="0.0001" value="42.961061"></div>
-        <div><label class="field-label">Min lon (W)</label><input type="number" id="min_lon" step="0.0001" value="0.838481"></div>
-        <div><label class="field-label">Max lon (E)</label><input type="number" id="max_lon" step="0.0001" value="0.933902"></div>
-      </div>
-      <div class="grid-2">
-        <div><label class="field-label">Sim zoom</label><input type="number" id="sim_zoom" min="10" max="12" step="1" value="11"></div>
-        <div><label class="field-label">Mesh zoom</label><input type="number" id="mesh_zoom" min="11" max="14" step="1" value="13"></div>
-      </div>
-      <div class="field-hint">Sim zoom 11 ≈ 56 m/px. Mesh zoom for 3-D viewer only.</div>
-
-      <div class="section-title">Markers</div>
-      <div class="grid-2">
-        <div><label class="field-label">Takeoff lat</label><input type="number" id="takeoff_lat" step="0.00001" value="42.96940"></div>
-        <div><label class="field-label">Takeoff lon</label><input type="number" id="takeoff_lon" step="0.00001" value="0.88594"></div>
-        <div><label class="field-label">Landing lat</label><input type="number" id="landing_lat" step="0.00001" value="42.99216"></div>
-        <div><label class="field-label">Landing lon</label><input type="number" id="landing_lon" step="0.00001" value="0.90398"></div>
-      </div>
-
       <div class="section-title">Ambient Wind</div>
       <div id="compass-wrap">
         <svg id="compass-svg" width="60" height="60" viewBox="-30 -30 60 60"
@@ -227,6 +206,27 @@
       <label class="field-label">Wind speed (m/s)</label>
       <input type="number" id="wind_speed" step="0.5" min="0" max="40" value="8" oninput="updateCompassDisplay()">
       <div class="field-hint">Far-field wind at 100 m AGL. Logarithmic profile applied to inflow boundaries.</div>
+
+      <div class="section-title hidden">Area</div>
+      <div class="grid-2 hidden">
+        <div><label class="field-label">Max lat (N)</label><input type="number" id="max_lat" step="0.0001" value="43.014963"></div>
+        <div><label class="field-label">Min lat (S)</label><input type="number" id="min_lat" step="0.0001" value="42.961061"></div>
+        <div><label class="field-label">Min lon (W)</label><input type="number" id="min_lon" step="0.0001" value="0.838481"></div>
+        <div><label class="field-label">Max lon (E)</label><input type="number" id="max_lon" step="0.0001" value="0.933902"></div>
+      </div>
+      <div class="grid-2 hidden">
+        <div><label class="field-label">Sim zoom</label><input type="number" id="sim_zoom" min="10" max="12" step="1" value="11"></div>
+        <div><label class="field-label">Mesh zoom</label><input type="number" id="mesh_zoom" min="11" max="14" step="1" value="13"></div>
+      </div>
+      <div class="field-hint hidden">Sim zoom 11 ≈ 56 m/px. Mesh zoom for 3-D viewer only.</div>
+
+      <div class="section-title hidden">Markers</div>
+      <div class="grid-2 hidden">
+        <div><label class="field-label">Takeoff lat</label><input type="number" id="takeoff_lat" step="0.00001" value="42.96940"></div>
+        <div><label class="field-label">Takeoff lon</label><input type="number" id="takeoff_lon" step="0.00001" value="0.88594"></div>
+        <div><label class="field-label">Landing lat</label><input type="number" id="landing_lat" step="0.00001" value="42.99216"></div>
+        <div><label class="field-label">Landing lon</label><input type="number" id="landing_lon" step="0.00001" value="0.90398"></div>
+      </div>
 
       <div class="section-title">3-D Grid</div>
       <div class="grid-2">
