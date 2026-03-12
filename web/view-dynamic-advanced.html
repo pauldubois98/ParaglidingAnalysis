@@ -217,7 +217,7 @@
     <div class="section-title">Terrain</div>
     <div class="ctrl-group">
       <div class="ctrl-label">Opacity <span id="terr-opacity-val">0.8</span></div>
-      <input type="range" id="terr-opacity" min="0.1" max="1" step="0.05" value="0.8"
+      <input type="range" id="terr-opacity" min="0" max="1" step="0.05" value="0.8"
              oninput="document.getElementById('terr-opacity-val').textContent=this.value; updateTerrainOpacity();">
     </div>
 
@@ -230,8 +230,8 @@
       <button class="toggle-btn on" id="arrows-toggle" onclick="toggleArrows()">ON</button>
     </div>
     <div class="ctrl-group">
-      <div class="ctrl-label">Step (cells) <span id="arrow-step-val">8</span></div>
-      <input type="range" id="arrow-step" min="4" max="16" step="1" value="8"
+      <div class="ctrl-label">Step (cells) <span id="arrow-step-val">4</span></div>
+      <input type="range" id="arrow-step" min="4" max="16" step="1" value="4"
              oninput="document.getElementById('arrow-step-val').textContent=this.value; rebuildArrows();">
     </div>
     <div class="ctrl-group">
@@ -240,8 +240,8 @@
              oninput="document.getElementById('arrow-height-val').textContent=this.value; rebuildArrows();">
     </div>
     <div class="ctrl-group">
-      <div class="ctrl-label">Scale <span id="arrow-scale-val">8</span></div>
-      <input type="range" id="arrow-scale" min="1" max="30" step="1" value="8"
+      <div class="ctrl-label">Scale <span id="arrow-scale-val">1</span></div>
+      <input type="range" id="arrow-scale" min="1" max="30" step="1" value="1"
              oninput="document.getElementById('arrow-scale-val').textContent=this.value; rebuildArrows();">
     </div>
     <div class="ctrl-group">
@@ -1143,6 +1143,9 @@ async function loadAndRender() {
     buildArrows();
     buildMarkers();
     drawCompass();
+
+    const defaultPreset = presets.find(p => p.id === 'terrain') || presets[0];
+    applyPreset(defaultPreset);
 
     // Open panel
     document.getElementById('ui-panel').classList.add('open');
