@@ -567,11 +567,17 @@
 
     <div id="panel-footer">
       <button class="btn" id="btn-simulate"
-        style="background:rgba(30,180,100,0.18);border-color:rgba(30,200,100,0.5);color:#50e898">Run simulation with
-        this area</button>
+        style="background:rgba(30,180,100,0.18);border-color:rgba(30,200,100,0.5);color:#50e898">
+        Run simulation with this area
+      </button>
       <button class="btn" id="btn-simulate-advanced"
-        style="background:rgba(30,180,200,0.18);border-color:rgba(30,200,100,0.5);color:#50e898">Run NS simulation
-        with this area</button>
+        style="background:rgba(30,180,200,0.18);border-color:rgba(30,200,100,0.5);color:#50e898">
+        Run NS simulation with this area
+      </button>
+      <button class="btn" id="btn-simulate-dynamic-advanced"
+        style="background:rgba(30,180,200,0.18);border-color:rgba(30,200,100,0.5);color:#50e898">
+        Run dynamic NS simulation with this area
+      </button>
     </div>
   </div>
 
@@ -949,6 +955,11 @@
     document.getElementById('btn-simulate-advanced').addEventListener('click', () => {
       saveAreaState();
       window.location.href = 'simulate-advanced';
+    });
+
+    document.getElementById('btn-simulate-dynamic-advanced').addEventListener('click', () => {
+      saveAreaState();
+      window.location.href = 'simulate-dynamic-advanced';
     });
 
   </script>
