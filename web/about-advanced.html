@@ -397,7 +397,7 @@
       I_direct = cos(θ_inc) · T_atm · (1 − shadow)<br>
       I_diffuse = diffuseFrac · (1 − T_atm) · SVF<br>
       <br>
-      T_atm = 0.7^(AM^0.678) [Kasten-Czeplak atmospheric transmittance]<br>
+      T_atm = T_base^(AM^T_exp) [Kasten-Czeplak atmospheric transmittance]<br>
       AM = 1 / [sin(el) + 0.50572 · (el_deg + 6.07995)^(−1.6364)] [airmass]<br>
       SVF = (1 + cos(slope)) / 2 [sky view factor for diffuse radiation]
     </div>
@@ -578,8 +578,8 @@
       <div class="step-body">
         <b>Pressure Poisson equation</b> — solve ∇²p = (∇·u*)/dt using Red-Black Successive
         Over-Relaxation (SOR) with ω ≈ 1.75. Boundary conditions are Neumann (∂p/∂n = 0) at terrain
-        and top, periodic horizontally. The mean pressure is removed every 20 iterations to handle
-        the null space of the Neumann problem.
+        and top, periodic horizontally. The mean pressure is removed every N iterations (tunable via
+        <i>SOR mean-removal freq</i>) to handle the null space of the Neumann problem.
       </div>
     </div>
 
@@ -723,12 +723,40 @@
           Typical summer value: 6–8 K/km. <b>Most impactful parameter for thermal height.</b></td>
       </tr>
       <tr>
+        <td>DALR</td>
+        <td>9.76 K/km</td>
+        <td>Dry Adiabatic Lapse Rate — the rate at which an unsaturated rising air parcel cools.
+          This is a physical constant and should normally be left at 9.76 K/km. Reducing it
+          artificially weakens the buoyancy restoring force, making the atmosphere behave as if
+          moister (pseudo-adiabatic conditions). Only change for sensitivity studies.</td>
+      </tr>
+      <tr>
+        <td>Prt (Prandtl)</td>
+        <td>0.7</td>
+        <td>Turbulent Prandtl number: ratio of momentum to thermal eddy diffusivity,
+          <code>κₜ = νₜ / Prt</code>. Higher Prt → less thermal mixing → temperature anomalies
+          stay sharper and thermals are more intense. Lower Prt → more diffuse temperature field.
+          Physically, the atmosphere has Prt ≈ 0.7; values of 1.0–1.5 reduce numerical diffusion
+          of thermals in coarse grids.
+        </td>
+      </tr>
+      <tr>
         <td>Cs (Smagorinsky)</td>
         <td>0.18</td>
         <td>Scales subgrid turbulent viscosity and diffusivity.
           Higher Cs → more dissipation → thermals are weaker and more diffuse.
           Lower Cs → less dissipation → sharper, stronger plumes, but risk of numerical instability.
           Typical range: 0.10–0.25.</td>
+      </tr>
+      <tr>
+        <td>CFL factor</td>
+        <td>0.4</td>
+        <td>Caps the turbulent viscosity νₜ for diffusive stability:
+          <code>νₜ ≤ CFL_factor · Δ² / dt</code>. Reducing this makes the diffusion scheme
+          more conservative (less mixing per step); increasing it allows stronger diffusion but
+          risks numerical instability. Values above ~0.5 may cause blow-up on coarse grids with
+          large νₜ.
+        </td>
       </tr>
       <tr>
         <td>ω (SOR relaxation)</td>
@@ -741,6 +769,14 @@
         <td>60</td>
         <td>Maximum SOR iterations per timestep. More iterations → better satisfaction of
           incompressibility (∇·u ≈ 0) but slower per step. Increase for large or fine grids.</td>
+      </tr>
+      <tr>
+        <td>SOR mean-removal freq</td>
+        <td>20</td>
+        <td>Remove the mean pressure from the pressure field every N SOR iterations. This handles
+          the null space of the all-Neumann Poisson problem (pressure is defined only up to a
+          constant). More frequent removal (smaller N) is safer but adds small overhead. Values
+          of 10–30 are all equivalent in practice.</td>
       </tr>
     </table>
 
@@ -773,6 +809,40 @@
           <code>Q_Ks = dT / (τ · 3600)</code>. Smaller τ → faster, stronger flux for the
           same surface anomaly. Rocky terrain is already set to τ·0.35.
         </td>
+      </tr>
+      <tr>
+        <td>T_atm base</td>
+        <td>0.70</td>
+        <td>Base transmittance in the Kasten-Czeplak formula:
+          <code>T_atm = T_base^(AM^T_exp)</code>. Represents clear-sky atmospheric
+          transparency at the zenith (airmass = 1). Higher values (e.g. 0.80) correspond to
+          a cleaner, drier atmosphere or high-altitude sites — more solar energy reaches the
+          ground, driving stronger thermals. Lower values model haze, humidity, or pollution.
+        </td>
+      </tr>
+      <tr>
+        <td>T_atm exponent</td>
+        <td>0.678</td>
+        <td>Exponent on the airmass in the transmittance formula. Controls how quickly
+          transmittance drops as the sun approaches the horizon (high airmass). A higher
+          exponent steepens the airmass penalty; a lower exponent gives a more uniform
+          insolation throughout the day. The Kasten-Czeplak empirical value is 0.678.</td>
+      </tr>
+      <tr>
+        <td>σ slope (slope smoothing)</td>
+        <td>1.5 cells</td>
+        <td>Gaussian smoothing radius applied to the cos(incidence) field before computing
+          direct solar irradiance. Reduces high-frequency artifacts from steep or noisy terrain
+          normals. Larger σ → smoother heating patterns, less cliff/ridge edge artefacts.
+          Set to 0 to disable smoothing.</td>
+      </tr>
+      <tr>
+        <td>σ land cover (lc smoothing)</td>
+        <td>4 cells</td>
+        <td>Gaussian smoothing radius applied to the land-cover thermal factor map. Blends
+          abrupt forest/grassland boundaries, which are coarser than the simulation grid.
+          Larger σ produces gentler spatial gradients in surface heating. Set to 0 for sharp
+          land-cover boundaries.</td>
       </tr>
     </table>
 
