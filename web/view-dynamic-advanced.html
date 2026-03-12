@@ -678,6 +678,10 @@ function buildSlice() {
   const hi = document.getElementById('height-indicator');
   hi.style.display = 'block';
   hi.textContent = `Slice at ${h_agl.toFixed(0)} m AGL — level k=${k}/${simData.grid.nz-1}`;
+
+  // Colorbar for slice field
+  const fmt = v => Math.abs(mx) > 100 ? v.toFixed(0) : v.toFixed(2);
+  drawColorbar(cmap, mn, mx, `${title} (${unit})`, fmt);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1111,6 +1115,7 @@ window.toggleSlice = function() {
   btn.classList.toggle('on', sliceVisible);
   buildSlice();
   document.getElementById('height-indicator').style.display = sliceVisible ? 'block' : 'none';
+  if (!sliceVisible) buildOverlay(); // restore surface colorbar
 };
 window.toggleArrows = function() {
   arrowsVisible = !arrowsVisible;
