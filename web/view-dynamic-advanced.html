@@ -240,14 +240,7 @@
            oninput="document.getElementById('arrow-width-val').textContent=this.value; updateArrowWidth();">
   </div>
 
-  <div class="section-title">Vertical Exaggeration</div>
-  <div class="ctrl-group">
-    <div class="ctrl-label">Z scale <span id="zscale-val">1.5</span></div>
-    <input type="range" id="zscale" min="0.5" max="5" step="0.1" value="1.5"
-           oninput="document.getElementById('zscale-val').textContent=this.value; rebuildAll();">
-  </div>
-
-  <div style="font-size:9px;color:#3a6080;line-height:1.7;margin-top:10px;">
+<div style="font-size:9px;color:#3a6080;line-height:1.7;margin-top:10px;">
     Drag to orbit · Scroll to zoom<br>Right-drag to pan · Click terrain to inspect
   </div>
 </div>
@@ -417,8 +410,6 @@ function terrainElevAt(x, y) {
               ty  * ((1 - tx) * elev[j0 + 1][i0]  + tx * elev[j0 + 1][i0 + 1]);
 }
 
-// Get Z scale multiplier
-function zScale() { return parseFloat(document.getElementById('zscale').value) || 1.5; }
 
 // Get the 3D field value at grid (i, j, k)
 function fieldAt(i, j, k) {
@@ -454,7 +445,7 @@ function buildTerrain() {
 
   const xw = T.x_extent[1] - T.x_extent[0];
   const yh = T.y_extent[1] - T.y_extent[0];
-  const Zs = zScale();
+  const Zs = 1;
 
   const geom = new THREE.PlaneGeometry(xw, yh, mnx - 1, mny - 1);
   const pos  = geom.attributes.position;
@@ -526,7 +517,7 @@ function buildOverlay() {
   const nx  = T.nx, ny = T.ny;
   const xw  = T.x_extent[1] - T.x_extent[0];
   const yh  = T.y_extent[1] - T.y_extent[0];
-  const Zs  = zScale();
+  const Zs  = 1;
   const { arr, cmap, title, unit, sym } = getOverlayField();
 
   const geom = new THREE.PlaneGeometry(xw, yh, nx - 1, ny - 1);
@@ -621,7 +612,7 @@ function buildSlice() {
   const { nx, ny, nz, dz, z_base } = simData.grid;
   const xw  = T.x_extent[1] - T.x_extent[0];
   const yh  = T.y_extent[1] - T.y_extent[0];
-  const Zs  = zScale();
+  const Zs  = 1;
   const h_agl = parseFloat(document.getElementById('slice-height').value);
   const { arr, cmap, title, unit, sym, k } = getSliceField();
 
@@ -678,7 +669,7 @@ function buildArrows() {
   const step  = parseInt(document.getElementById('arrow-step').value);
   const h_agl = parseFloat(document.getElementById('arrow-height').value);
   const scale = parseFloat(document.getElementById('arrow-scale').value);
-  const Zs    = zScale();
+  const Zs    = 1;
   const cx    = terrainCX(T), cy = terrainCY(T);
   const xw    = T.x_extent[1] - T.x_extent[0];
   const yh    = T.y_extent[1] - T.y_extent[0];
@@ -758,7 +749,7 @@ function buildMarkers() {
   markerObjects = []; labelObjects = [];
 
   if (!simData.markers) return;
-  const Zs = zScale();
+  const Zs = 1;
 
   const MCFG = {
     takeoff: { color: 0xff8800, poleColor: 0xcc6600, css: '#ff8800' },
