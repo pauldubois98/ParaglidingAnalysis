@@ -186,41 +186,41 @@
     <button class="tab-btn"        id="tab-terrain"  onclick="setOverlay('terrain')">Terrain</button>
   </div>
 
-  <div class="section-title">Terrain</div>
-  <div class="ctrl-group">
+  <div class="section-title" id="ctrl-section-terrain">Terrain</div>
+  <div class="ctrl-group" id="ctrl-terrain-opacity">
     <div class="ctrl-label">Opacity <span id="terr-opacity-val">0.8</span></div>
     <input type="range" id="terr-opacity" min="0.1" max="1" step="0.05" value="0.8"
            oninput="document.getElementById('terr-opacity-val').textContent=this.value; updateTerrainOpacity();">
   </div>
 
-  <div class="section-title">Overlay</div>
-  <div class="ctrl-group">
+  <div class="section-title" id="ctrl-section-overlay">Overlay</div>
+  <div class="ctrl-group" id="ctrl-overlay-opacity">
     <div class="ctrl-label">Opacity <span id="ov-opacity-val">0.75</span></div>
     <input type="range" id="ov-opacity" min="0" max="1" step="0.05" value="0.75"
            oninput="document.getElementById('ov-opacity-val').textContent=this.value; updateOverlayOpacity();">
   </div>
 
-  <div class="section-title">Arrows</div>
-  <div class="toggle-row">
+  <div class="section-title" id="ctrl-section-arrows">Arrows</div>
+  <div class="toggle-row" id="ctrl-arrows-toggle">
     Show arrows
     <div style="display:flex;gap:4px">
       <button class="toggle-btn on" id="arrows-toggle" onclick="toggleArrows()">ON</button>
       <button class="toggle-btn on" id="arrows-color" onclick="toggleArrowColor()">White</button>
     </div>
   </div>
-  <div class="ctrl-group">
+  <div class="ctrl-group" id="ctrl-arrow-step">
     <div class="ctrl-label">Step (cells) <span id="arrow-step-val">10</span></div>
     <input type="range" id="arrow-step" min="4" max="30" step="2" value="10"
            oninput="document.getElementById('arrow-step-val').textContent=this.value; rebuildArrows();">
   </div>
-  <div class="ctrl-group">
+  <div class="ctrl-group" id="ctrl-arrow-height">
     <div class="ctrl-label">Height AGL (m) <span id="arrow-height-val">80</span></div>
     <input type="range" id="arrow-height" min="10" max="500" step="10" value="80"
            oninput="document.getElementById('arrow-height-val').textContent=this.value; rebuildArrows();">
   </div>
-  <div class="ctrl-group">
+  <div class="ctrl-group" id="ctrl-arrow-scale">
     <div class="ctrl-label">Scale <span id="arrow-scale-val">1.5</span></div>
-    <input type="range" id="arrow-scale" min="0.2" max="5" step="0.1" value="1.5"
+    <input type="range" id="arrow-scale" min="0" max="20" step="1" value="8"
            oninput="document.getElementById('arrow-scale-val').textContent=this.value; rebuildArrows();">
   </div>
 
@@ -520,7 +520,7 @@ function buildOverlay(cmapName, field, title, unit) {
     vertexColors: true, transparent: true,
     opacity: parseFloat(document.getElementById('ov-opacity').value),
     depthWrite: false, side: THREE.DoubleSide,
-    polygonOffset: true, polygonOffsetFactor: -25, polygonOffsetUnits: -25,
+    polygonOffset: true, polygonOffsetFactor: -50, polygonOffsetUnits: -50,
   });
   overlayMesh = new THREE.Mesh(geom, mat);
   overlayMesh.position.set(cx, cy, 0);
@@ -833,11 +833,25 @@ async function loadPresets() {
   });
 }
 
+const ALL_CTRL_IDS = [
+  'ctrl-section-terrain', 'ctrl-terrain-opacity',
+  'ctrl-section-overlay', 'ctrl-overlay-opacity',
+  'ctrl-section-arrows',  'ctrl-arrows-toggle',
+  'ctrl-arrow-step',      'ctrl-arrow-height', 'ctrl-arrow-scale',
+];
+
 function applyPreset(p) {
   // Highlight active preset button
   _presets.forEach(q => {
     const btn = document.getElementById('preset-' + q.id);
     if (btn) btn.classList.toggle('active', q.id === p.id);
+  });
+
+  // Show/hide controls
+  const visible = new Set(p.visibleControls || ALL_CTRL_IDS);
+  ALL_CTRL_IDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = visible.has(id) ? '' : 'none';
   });
 
   // Terrain opacity
