@@ -282,10 +282,6 @@
       background: rgba(30, 55, 100, 0.7);
     }
 
-    #panel-toggle.open {
-      right: calc(260px + 16px);
-    }
-
     /* ── Colorbars ── */
     #colorbars {
       position: absolute;
@@ -417,6 +413,11 @@
       white-space: nowrap;
     }
 
+    #plume-canvas {
+      flex: 1;
+      min-width: 0;
+    }
+
     #plume-xaxis {
       font-size: 9px;
       font-family: monospace;
@@ -494,7 +495,7 @@
           <canvas id="plume-canvas" width="156" height="160"
             style="display:block; border:1px solid rgba(100,160,255,0.2); border-radius:4px;"></canvas>
         </div>
-        <div id="plume-xaxis" style="margin-left:36px; width:156px;"></div>
+        <div id="plume-xaxis" style="margin-left:36px;"></div>
         <div id="plume-legend"
           style="margin-left:36px; margin-top:4px; display:flex; gap:10px; font-size:9px; font-family:monospace;"></div>
       </div>
@@ -1454,8 +1455,14 @@
 
       const canvas = document.getElementById('plume-canvas');
       const NZ = sc.theta_3d.length;
+      const dpr = window.devicePixelRatio || 1;
+      const W = Math.max(60, canvas.clientWidth);   // actual CSS width from flex layout
+      const H = 160;
+      canvas.style.height = H + 'px';
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
       const ctx = canvas.getContext('2d');
-      const W = canvas.width, H = canvas.height;
+      ctx.scale(dpr, dpr);
 
       ctx.clearRect(0, 0, W, H);
       ctx.fillStyle = 'rgba(5,10,20,0.95)';
@@ -1512,6 +1519,7 @@
       // ── X axis (HTML) ──
       const fmt = v => Math.abs(v) < 10 ? v.toFixed(2) : v.toFixed(1);
       const xAxis = document.getElementById('plume-xaxis');
+      xAxis.style.width = W + 'px';
       const tRow = `<div class="px-row">
     <span style="color:#6699ff">${fmt(-maxAbsT)}K</span>
     <span style="color:#3a5568">0</span>
@@ -1550,8 +1558,8 @@
     <div class="irow"><span class="ilabel">Convergence</span><span class="ival">${conv.toFixed(3)}</span></div>
     <div class="irow"><span class="ilabel">Wind (u,v)</span><span class="ival">${(u / 3600).toFixed(1)}, ${(v / 3600).toFixed(1)} m/s</span></div>
   `;
-      drawPlumeProfile(sc, i, j);
       document.getElementById('info-panel').style.display = 'block';
+      drawPlumeProfile(sc, i, j);
     }
 
     const raycaster = new THREE.Raycaster();
