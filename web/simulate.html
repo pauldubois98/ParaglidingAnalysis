@@ -587,11 +587,8 @@
     <div class="nav-sep"></div>
     <a href="area" class="nav-link">Area</a>
     <a href="simulate" class="nav-link nav-active">Simulate</a>
-    <a href="simulate-advanced" class="nav-link">Simulate NS</a>
     <a href="view" class="nav-link">View</a>
-    <a href="view-advanced" class="nav-link">View NS</a>
     <a href="about" class="nav-link">About</a>
-    <a href="about-advanced" class="nav-link">About NS</a>
   </nav>
 
   <!-- ═══════════════════ MAIN CONSOLE ═══════════════════ -->
@@ -1135,7 +1132,6 @@
           for (let i = 0; i < nx; i++)
             dailyHeat[j * nx + i] += sc.ground_temp_anomaly[j][i] / n;
       _simPlots = { Z, thermal_factor, trigger_factor, conv_field, dailyHeat, nx, ny, dx, dy };
-      await renderSimPlots();
       document.getElementById('btn-map').disabled = false;
       log(`Restored previous simulation (${n} scenario${n !== 1 ? 's' : ''}).`, 'info');
     }
