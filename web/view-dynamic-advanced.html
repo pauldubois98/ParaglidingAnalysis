@@ -275,6 +275,7 @@
 <div id="info-panel">
   <h3>Point Info</h3>
   <div id="info-rows"></div>
+  <div id="plume-title" style="font-size:8px;color:#3a6080;text-align:left;margin-bottom:2px;">Alt MSL (m)</div>
   <div id="plume-section">
     <div id="plume-alt-labels"></div>
     <canvas id="plume-canvas" width="160" height="180"></canvas>
@@ -1056,7 +1057,7 @@ function drawPlumeProfile(i, j, elev) {
   const axisSpan   = axisTop - axisBottom;
 
   const W = canvas.width, H = canvas.height;
-  const PAD_TOP = 8, PAD_BTM = 4, PAD_LR = 4;
+  const PAD_TOP = 8, PAD_BTM = 26, PAD_LR = 4;
   const drawH = H - PAD_TOP - PAD_BTM;
   const cx = W / 2;
   const ctx = canvas.getContext('2d');
@@ -1108,6 +1109,23 @@ function drawPlumeProfile(i, j, elev) {
   ctx.fillStyle = 'rgba(220,240,255,0.9)'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
   ctx.fillText(`↕ ${wMax.toFixed(2)} m/s`, cx, PAD_TOP + 10);
 
+  // X-axis baseline
+  const xAxisY = PAD_TOP + drawH;
+  ctx.strokeStyle = 'rgba(180,200,220,0.5)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(PAD_LR, xAxisY); ctx.lineTo(W - PAD_LR, xAxisY); ctx.stroke();
+
+  // X-axis tick labels: -wMax, 0, +wMax
+  ctx.fillStyle = 'rgba(200,220,240,0.85)'; ctx.font = '8px monospace';
+  const wLabel = wMax.toFixed(1);
+  ctx.textAlign = 'left';  ctx.fillText(`-${wLabel}`, PAD_LR, xAxisY + 9);
+  ctx.textAlign = 'center'; ctx.fillText('0', cx, xAxisY + 9);
+  ctx.textAlign = 'right';  ctx.fillText(`+${wLabel}`, W - PAD_LR, xAxisY + 9);
+
+  // X-axis title
+  ctx.fillStyle = 'rgba(160,200,240,0.8)'; ctx.font = '8px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('w (m/s)', cx, xAxisY + 20);
+
   // Altitude labels
   labelsEl.innerHTML = '';
   const nLabels = 5;
@@ -1118,6 +1136,7 @@ function drawPlumeProfile(i, j, elev) {
   }
 
   section.style.display = 'flex';
+  document.getElementById('plume-title').style.display = 'block';
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -1141,6 +1160,7 @@ renderer.domElement.addEventListener('click', e => {
   if (hits.length === 0) {
     document.getElementById('info-panel').style.display = 'none';
     document.getElementById('plume-section').style.display = 'none';
+    document.getElementById('plume-title').style.display = 'none';
     if (clickMarker) { clickMarker.forEach(o => { scene.remove(o); if (o._labelDiv) o._labelDiv.remove(); }); clickMarker = null; }
     return;
   }
@@ -1175,7 +1195,7 @@ renderer.domElement.addEventListener('click', e => {
     ['Vertical W', `${sw.toFixed(3)} m/s`],
     ['Wind speed', `${spd.toFixed(2)} m/s`],
     ['Pressure',   `${sp.toFixed(1)} Pa`],
-    ['Grid (i,j)', `${i}, ${j}`],
+    // ['Grid (i,j)', `${i}, ${j}`],
   ];
 
   const panel = document.getElementById('info-panel');
