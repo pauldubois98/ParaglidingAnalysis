@@ -239,17 +239,22 @@
       margin: 16px 0;
     }
 
+    .box.note {
+      border-color: rgba(255, 60, 60, 0.3);
+      background: rgba(255, 30, 30, 0.05);
+    }
+
+    .box.note li {
+      color: #c06060;
+    }
+
     .box.warn {
       border-color: rgba(255, 180, 60, 0.3);
       background: rgba(255, 160, 30, 0.05);
     }
 
-    .box.warn p {
+    .box.warn li {
       color: #c09060;
-    }
-
-    .box.warn h3 {
-      color: #c0a060;
     }
 
     .step {
@@ -309,7 +314,7 @@
     <h1>NS Thermal Simulation — Technical Documentation</h1>
     <p class="subtitle">Full 3D Navier-Stokes atmospheric simulation for paragliding thermal analysis</p>
 
-    <!-- ───────────────────────── OVERVIEW ───────────────────────── -->
+    <!-- ─ OVERVIEW ─ -->
     <h2>Overview</h2>
     <p>
       The NS (Navier-Stokes) simulation solves the incompressible Boussinesq equations for atmospheric
@@ -324,7 +329,7 @@
       the first fluid cell above the surface.
     </p>
 
-    <!-- ───────────────────── PHYSICS MODELLED ───────────────────── -->
+    <!-- ─ PHYSICS MODELLED ─ -->
     <h2>Physics Modelled</h2>
 
     <h3>1. Incompressible Boussinesq Navier-Stokes equations</h3>
@@ -510,7 +515,7 @@
       This grounds the simulation in real meteorological data for the chosen date and location.
     </p>
 
-    <!-- ─────────────────────── NUMERICAL METHOD ──────────────────── -->
+    <!-- ─ NUMERICAL METHOD ─ -->
     <h2>Numerical Method (Chorin Projection)</h2>
     <p>
       Each timestep applies the following sequence (Chorin fractional-step / projection method):
@@ -591,7 +596,7 @@
       </div>
     </div>
 
-    <!-- ──────────────────────── GRID AND BCS ─────────────────────── -->
+    <!-- ─ GRID AND BCS ─ -->
     <h2>Grid and Boundary Conditions</h2>
 
     <p>
@@ -629,11 +634,25 @@
       </tr>
     </table>
 
-    <!-- ─────────────────────── WHAT IS NOT MODELLED ─────────────── -->
-    <h2>Simplifications and Limitations</h2>
-
+    <!-- ─ WHAT IS NOT MODELLED ─ -->
+    <h2>Simplifications</h2>
     <div class="box warn">
-      <h3>Not modelled</h3>
+      <ul>
+        <li>Incompressibility (Boussinesq): density is constant except in the buoyancy term.
+          Valid for vertical motions &lt; ~2 km and speeds well below the speed of sound.</li>
+        <li>The ELR is assumed uniform (the same lapse rate throughout the domain), ignoring
+          inversions and local stability variations.</li>
+        <li>The ground heat flux is spatially smooth (Gaussian-filtered land cover) and
+          instantaneously applied, ignoring sub-surface heat conduction.</li>
+        <li>The SOR pressure solver converges to finite precision; residual divergence remains
+          in the velocity field after the projection step.</li>
+        <li>Periodic lateral boundaries mean that thermals that leave one side re-enter from
+          the opposite side — an artefact for small domains.</li>
+      </ul>
+    </div>
+
+    <h2>Limitations</h2>
+    <div class="box note">
       <ul>
         <li><b>Background wind</b> — there is no mean horizontal flow. Orographic lift, rotor zones
           and wind shear are absent. All flow is purely thermally driven.</li>
@@ -653,23 +672,8 @@
       </ul>
     </div>
 
-    <div class="box">
-      <h3>Key simplifications</h3>
-      <ul>
-        <li>Incompressibility (Boussinesq): density is constant except in the buoyancy term.
-          Valid for vertical motions &lt; ~2 km and speeds well below the speed of sound.</li>
-        <li>The ELR is assumed uniform (the same lapse rate throughout the domain), ignoring
-          inversions and local stability variations.</li>
-        <li>The ground heat flux is spatially smooth (Gaussian-filtered land cover) and
-          instantaneously applied, ignoring sub-surface heat conduction.</li>
-        <li>The SOR pressure solver converges to finite precision; residual divergence remains
-          in the velocity field after the projection step.</li>
-        <li>Periodic lateral boundaries mean that thermals that leave one side re-enter from
-          the opposite side — an artefact for small domains.</li>
-      </ul>
-    </div>
 
-    <!-- ─────────────────────────── PARAMETERS ───────────────────── -->
+    <!-- ─ PARAMETERS ─ -->
     <h2>Parameters and Their Effects</h2>
 
     <h3>Domain and grid</h3>
@@ -874,7 +878,7 @@
       </tr>
     </table>
 
-    <!-- ──────────────────────── OUTPUT FIELDS ────────────────────── -->
+    <!-- ─ OUTPUT FIELDS ─ -->
     <h2>Output Fields</h2>
 
     <table class="param-table">
@@ -915,7 +919,7 @@
       </tr>
     </table>
 
-    <!-- ──────────────────────── TIPS ────────────────────── -->
+    <!-- ─ TIPS ─ -->
     <h2>Tips for Realistic Results</h2>
     <ul>
       <li>Use ERA5 calibration to auto-set <code>max_heat</code> for the specific date and site.</li>

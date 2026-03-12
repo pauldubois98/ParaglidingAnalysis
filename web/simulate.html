@@ -580,7 +580,7 @@
     <a href="view" class="nav-link">View</a>
     <a href="view-advanced" class="nav-link">View NS</a>
     <a href="about" class="nav-link">About</a>
-  <a href="about-advanced" class="nav-link">About NS</a>
+    <a href="about-advanced" class="nav-link">About NS</a>
   </nav>
 
   <!-- ═══════════════════ MAIN CONSOLE ═══════════════════ -->
@@ -759,7 +759,8 @@
             <input type="number" id="t_atm_exp" step="0.01" min="0.3" max="1.2" value="0.678">
           </div>
         </div>
-        <div class="field-hint">Kasten-Czeplak transmittance: T_atm = T_base^(AM^exp). Higher base → more solar energy, e.g. 0.80 for high-altitude clear days.</div>
+        <div class="field-hint">Kasten-Czeplak transmittance: T_atm = T_base^(AM^exp). Higher base → more solar energy,
+          e.g. 0.80 for high-altitude clear days.</div>
         <div class="grid-2">
           <div>
             <label class="field-label">Incidence smoothing σ</label>
@@ -770,7 +771,8 @@
             <input type="number" id="clearsky_threshold" step="50" min="200" max="900" value="600">
           </div>
         </div>
-        <div class="field-hint">Incidence smoothing reduces cliff artefacts. Clear-sky threshold filters ERA5 calibration to sunny hours only.</div>
+        <div class="field-hint">Incidence smoothing reduces cliff artefacts. Clear-sky threshold filters ERA5
+          calibration to sunny hours only.</div>
 
         <!-- Thermal inertia -->
         <div class="section-title">Thermal Inertia</div>
@@ -780,7 +782,8 @@
           mixed, ~3 h forest/water.</div>
         <label class="field-label">Land cover smoothing σ</label>
         <input type="number" id="sigma_lc" step="0.5" min="0" max="10" value="4">
-        <div class="field-hint">Gaussian blur on the land-cover thermal factor map. Blends abrupt forest/grassland boundaries.</div>
+        <div class="field-hint">Gaussian blur on the land-cover thermal factor map. Blends abrupt forest/grassland
+          boundaries.</div>
 
         <!-- Terrain Analysis -->
         <div class="section-title">Terrain Analysis</div>
@@ -796,7 +799,8 @@
         </div>
         <label class="field-label">Convexity weight (0–1)</label>
         <input type="number" id="w_convexity" step="0.05" min="0" max="1" value="0.6">
-        <div class="field-hint">Trigger factor = w·convexity + (1−w)·LC boundary. Higher w favours terrain peaks; lower w favours forest edges.</div>
+        <div class="field-hint">Trigger factor = w·convexity + (1−w)·LC boundary. Higher w favours terrain peaks; lower
+          w favours forest edges.</div>
 
         <!-- Release -->
         <div class="section-title">Thermal Release</div>
@@ -839,7 +843,8 @@
             <input type="number" id="cfl_target" step="0.05" min="0.3" max="1.0" value="0.9">
           </div>
         </div>
-        <div class="field-hint">Flow smoothing blurs the advection vector field. CFL safety factor controls substep count (lower = more substeps, more stable).</div>
+        <div class="field-hint">Flow smoothing blurs the advection vector field. CFL safety factor controls substep
+          count (lower = more substeps, more stable).</div>
 
         <!-- Diurnal Model -->
         <div class="section-title">Diurnal Model</div>
@@ -853,7 +858,8 @@
             <input type="number" id="diurnal_peak_h" step="1" min="10" max="16" value="14">
           </div>
         </div>
-        <div class="field-hint">Cosine model for filling missing ERA5 hourly temperature values. Amplitude = daily range / 2.</div>
+        <div class="field-hint">Cosine model for filling missing ERA5 hourly temperature values. Amplitude = daily range
+          / 2.</div>
 
         <!-- Output -->
         <div class="section-title">Output</div>
@@ -1623,7 +1629,7 @@
     //  SOLAR HEATING
     // ═══════════════════════════════════════════════════════════════════
 
-    function computeSolarHeating(Z, nx, ny, dx, dy, azDeg, elDeg, thermalFactor, maxHeat, shadowMask, diffuseFrac, tAtmBase=0.7, tAtmExp=0.678, sigmaInc=1.5) {
+    function computeSolarHeating(Z, nx, ny, dx, dy, azDeg, elDeg, thermalFactor, maxHeat, shadowMask, diffuseFrac, tAtmBase = 0.7, tAtmExp = 0.678, sigmaInc = 1.5) {
       const az = azDeg * Math.PI / 180;
       const el = elDeg * Math.PI / 180;
       // Sun direction in East/North/Up
@@ -1698,7 +1704,7 @@
     //  THERMAL FACTOR (resample LC to sim grid)
     // ═══════════════════════════════════════════════════════════════════
 
-    function buildThermalFactor(lcCodes, lc_ny, lc_nx, sim_ny, sim_nx, tauHours, sigmaLc=4) {
+    function buildThermalFactor(lcCodes, lc_ny, lc_nx, sim_ny, sim_nx, tauHours, sigmaLc = 4) {
       // Nearest-neighbour resample to sim grid
       const tf = new Float32Array(sim_ny * sim_nx);
       const tau = new Float32Array(sim_ny * sim_nx);
@@ -1722,7 +1728,7 @@
     //  TRIGGER FACTOR
     // ═══════════════════════════════════════════════════════════════════
 
-    async function computeTriggerFactor(Z, nx, ny, thermalFactor, sigmaConvexity=4, sigmaTrigger=3, wConvexity=0.6) {
+    async function computeTriggerFactor(Z, nx, ny, thermalFactor, sigmaConvexity = 4, sigmaTrigger = 3, wConvexity = 0.6) {
       // 1. Terrain convexity
       const Z_smooth = gaussianFilter2D(Z, ny, nx, sigmaConvexity);
       const d2zdx2 = gradientAxisI(gradientAxisI(Z_smooth, ny, nx), ny, nx);
@@ -1829,7 +1835,7 @@
       return { records, diurnal };
     }
 
-    async function calibrateMaxHeat(records, scenarios, Z, nx, ny, dx, dy, thermalFactor, diffuseFrac, tAtmBase=0.7, tAtmExp=0.678, sigmaIncidence=1.5) {
+    async function calibrateMaxHeat(records, scenarios, Z, nx, ny, dx, dy, thermalFactor, diffuseFrac, tAtmBase = 0.7, tAtmExp = 0.678, sigmaIncidence = 1.5) {
       log('Calibrating max_heat from ERA5…');
 
       if (!records.length) {
