@@ -181,67 +181,76 @@
   <div class="section-title">Presets</div>
   <div class="tab-row" id="preset-btns" style="flex-wrap:wrap;gap:3px;"></div>
 
-  <div class="section-title">Surface Field</div>
-  <div class="tab-row" id="surf-tabs">
-    <button class="tab-btn active" id="tab-surf-speed"  onclick="setSurfaceField('speed')">Speed</button>
-    <button class="tab-btn"        id="tab-surf-w"      onclick="setSurfaceField('w')">Vert.</button>
-    <button class="tab-btn"        id="tab-surf-p"      onclick="setSurfaceField('p')">Press.</button>
-    <button class="tab-btn"        id="tab-surf-vort"   onclick="setSurfaceField('vort')">Vort.</button>
-    <button class="tab-btn"        id="tab-surf-elev"   onclick="setSurfaceField('elev')">Terrain</button>
+  <div id="section-surface">
+    <div class="section-title">Surface Field</div>
+    <div class="tab-row" id="surf-tabs">
+      <button class="tab-btn active" id="tab-surf-speed"  onclick="setSurfaceField('speed')">Speed</button>
+      <button class="tab-btn"        id="tab-surf-w"      onclick="setSurfaceField('w')">Vert.</button>
+      <button class="tab-btn"        id="tab-surf-p"      onclick="setSurfaceField('p')">Press.</button>
+      <button class="tab-btn"        id="tab-surf-vort"   onclick="setSurfaceField('vort')">Vort.</button>
+      <button class="tab-btn"        id="tab-surf-elev"   onclick="setSurfaceField('elev')">Terrain</button>
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-label">Overlay opacity <span id="ov-opacity-val">0.8</span></div>
+      <input type="range" id="ov-opacity" min="0" max="1" step="0.05" value="0.8"
+      oninput="document.getElementById('ov-opacity-val').textContent=this.value; updateOverlayOpacity();">
+    </div>
   </div>
 
-  <div class="section-title">Height Slice</div>
-  <div class="toggle-row">
-    Show slice
-    <button class="toggle-btn on" id="slice-toggle" onclick="toggleSlice()">ON</button>
-  </div>
-  <div class="ctrl-group">
-    <div class="ctrl-label">Height AGL (m) <span id="slice-height-val">500</span></div>
-    <input type="range" id="slice-height" min="50" max="2000" step="50" value="500"
-           oninput="document.getElementById('slice-height-val').textContent=this.value; updateSlice();">
-  </div>
-  <div class="tab-row" id="slice-field-tabs">
-    <button class="tab-btn active" id="tab-slice-speed" onclick="setSliceField('speed')">Speed</button>
-    <button class="tab-btn"        id="tab-slice-w"     onclick="setSliceField('w')">Vert.</button>
-    <button class="tab-btn"        id="tab-slice-p"     onclick="setSliceField('p')">Press.</button>
-  </div>
-
-  <div class="section-title">Terrain</div>
-  <div class="ctrl-group">
-    <div class="ctrl-label">Opacity <span id="terr-opacity-val">0.8</span></div>
-    <input type="range" id="terr-opacity" min="0.1" max="1" step="0.05" value="0.8"
-           oninput="document.getElementById('terr-opacity-val').textContent=this.value; updateTerrainOpacity();">
-  </div>
-  <div class="ctrl-group">
-    <div class="ctrl-label">Overlay opacity <span id="ov-opacity-val">0.8</span></div>
-    <input type="range" id="ov-opacity" min="0" max="1" step="0.05" value="0.8"
-           oninput="document.getElementById('ov-opacity-val').textContent=this.value; updateOverlayOpacity();">
+  <div id="section-slice">
+    <div class="section-title">Height Slice</div>
+    <div class="toggle-row">
+      Show slice
+      <button class="toggle-btn on" id="slice-toggle" onclick="toggleSlice()">ON</button>
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-label">Height AGL (m) <span id="slice-height-val">500</span></div>
+      <input type="range" id="slice-height" min="50" max="2000" step="50" value="500"
+             oninput="document.getElementById('slice-height-val').textContent=this.value; updateSlice();">
+    </div>
+    <div class="tab-row" id="slice-field-tabs">
+      <button class="tab-btn active" id="tab-slice-speed" onclick="setSliceField('speed')">Speed</button>
+      <button class="tab-btn"        id="tab-slice-w"     onclick="setSliceField('w')">Vert.</button>
+      <button class="tab-btn"        id="tab-slice-p"     onclick="setSliceField('p')">Press.</button>
+    </div>
   </div>
 
-  <div class="section-title">Arrows</div>
-  <div class="toggle-row">
-    Show arrows
-    <button class="toggle-btn on" id="arrows-toggle" onclick="toggleArrows()">ON</button>
+  <div id="section-terrain">
+    <div class="section-title">Terrain</div>
+    <div class="ctrl-group">
+      <div class="ctrl-label">Opacity <span id="terr-opacity-val">0.8</span></div>
+      <input type="range" id="terr-opacity" min="0.1" max="1" step="0.05" value="0.8"
+             oninput="document.getElementById('terr-opacity-val').textContent=this.value; updateTerrainOpacity();">
+    </div>
+
   </div>
-  <div class="ctrl-group">
-    <div class="ctrl-label">Step (cells) <span id="arrow-step-val">8</span></div>
-    <input type="range" id="arrow-step" min="4" max="16" step="1" value="8"
-           oninput="document.getElementById('arrow-step-val').textContent=this.value; rebuildArrows();">
-  </div>
-  <div class="ctrl-group">
-    <div class="ctrl-label">Height AGL (m) <span id="arrow-height-val">100</span></div>
-    <input type="range" id="arrow-height" min="10" max="2000" step="10" value="100"
-           oninput="document.getElementById('arrow-height-val').textContent=this.value; rebuildArrows();">
-  </div>
-  <div class="ctrl-group">
-    <div class="ctrl-label">Scale <span id="arrow-scale-val">8</span></div>
-    <input type="range" id="arrow-scale" min="1" max="30" step="1" value="8"
-           oninput="document.getElementById('arrow-scale-val').textContent=this.value; rebuildArrows();">
-  </div>
-  <div class="ctrl-group">
-    <div class="ctrl-label">Width (px) <span id="arrow-width-val">2</span></div>
-    <input type="range" id="arrow-width" min="1" max="8" step="0.5" value="2"
-           oninput="document.getElementById('arrow-width-val').textContent=this.value; updateArrowWidth();">
+
+  <div id="section-arrows">
+    <div class="section-title">Arrows</div>
+    <div class="toggle-row">
+      Show arrows
+      <button class="toggle-btn on" id="arrows-toggle" onclick="toggleArrows()">ON</button>
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-label">Step (cells) <span id="arrow-step-val">8</span></div>
+      <input type="range" id="arrow-step" min="4" max="16" step="1" value="8"
+             oninput="document.getElementById('arrow-step-val').textContent=this.value; rebuildArrows();">
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-label">Height AGL (m) <span id="arrow-height-val">100</span></div>
+      <input type="range" id="arrow-height" min="10" max="2000" step="10" value="100"
+             oninput="document.getElementById('arrow-height-val').textContent=this.value; rebuildArrows();">
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-label">Scale <span id="arrow-scale-val">8</span></div>
+      <input type="range" id="arrow-scale" min="1" max="30" step="1" value="8"
+             oninput="document.getElementById('arrow-scale-val').textContent=this.value; rebuildArrows();">
+    </div>
+    <div class="ctrl-group">
+      <div class="ctrl-label">Width (px) <span id="arrow-width-val">2</span></div>
+      <input type="range" id="arrow-width" min="1" max="8" step="0.5" value="2"
+             oninput="document.getElementById('arrow-width-val').textContent=this.value; updateArrowWidth();">
+    </div>
   </div>
 
 <div style="font-size:9px;color:#3a6080;line-height:1.7;margin-top:10px;">
@@ -1043,6 +1052,12 @@ function applyPreset(p) {
 
   // Arrows visibility
   if (arrowsVisible !== p.showArrows) window.toggleArrows();
+
+  // Show/hide panel sections
+  ['surface', 'slice', 'terrain', 'arrows'].forEach(id => {
+    document.getElementById('section-' + id).style.display =
+      p.sections.includes(id) ? '' : 'none';
+  });
 
   // Highlight active preset button
   document.querySelectorAll('#preset-btns .tab-btn').forEach(b => b.classList.remove('active'));

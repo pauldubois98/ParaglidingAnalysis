@@ -8,7 +8,8 @@
     "showSlice": false,
     "sliceField": "speed",
     "sliceHeight": 500,
-    "showArrows": false
+    "showArrows": false,
+    "sections": ["terrain"]
   },
   {
     "id": "wind-speed",
@@ -19,7 +20,20 @@
     "showSlice": false,
     "sliceField": "speed",
     "sliceHeight": 500,
-    "showArrows": true
+    "showArrows": false,
+    "sections": ["surface", "terrain"]
+  },
+  {
+    "id": "wind-direction",
+    "label": "Wind Direction",
+    "surfaceField": "speed",
+    "overlayOpacity": 0,
+    "terrainOpacity": 1,
+    "showSlice": false,
+    "sliceField": "speed",
+    "sliceHeight": 500,
+    "showArrows": true,
+    "sections": ["terrain", "arrows"]
   },
   {
     "id": "wind-vertical",
@@ -30,7 +44,8 @@
     "showSlice": false,
     "sliceField": "w",
     "sliceHeight": 500,
-    "showArrows": false
+    "showArrows": false,
+    "sections": ["surface"]
   },
   {
     "id": "pressure",
@@ -41,7 +56,8 @@
     "showSlice": false,
     "sliceField": "p",
     "sliceHeight": 500,
-    "showArrows": false
+    "showArrows": false,
+    "sections": ["surface", "terrain"]
   },
   {
     "id": "vorticity",
@@ -52,7 +68,8 @@
     "showSlice": false,
     "sliceField": "speed",
     "sliceHeight": 500,
-    "showArrows": false
+    "showArrows": false,
+    "sections": ["surface", "terrain"]
   },
   {
     "id": "slice-wind-speed",
@@ -63,7 +80,8 @@
     "showSlice": true,
     "sliceField": "speed",
     "sliceHeight": 500,
-    "showArrows": true
+    "showArrows": false,
+    "sections": ["slice", "terrain"]
   },
   {
     "id": "slice-wind-vertical",
@@ -74,7 +92,8 @@
     "showSlice": true,
     "sliceField": "w",
     "sliceHeight": 500,
-    "showArrows": false
+    "showArrows": false,
+    "sections": ["slice", "terrain"]
   },
   {
     "id": "slice-pressure",
@@ -85,17 +104,7 @@
     "showSlice": true,
     "sliceField": "p",
     "sliceHeight": 500,
-    "showArrows": false
-  },
-  {
-    "id": "slice-vorticity",
-    "label": "Slice · Vorticity",
-    "surfaceField": "elev",
-    "overlayOpacity": 0.25,
-    "terrainOpacity": 0.7,
-    "showSlice": true,
-    "sliceField": "vort",
-    "sliceHeight": 500,
-    "showArrows": false
+    "showArrows": false,
+    "sections": ["slice", "terrain"]
   }
 ]
