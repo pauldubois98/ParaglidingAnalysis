@@ -1189,13 +1189,17 @@ async function runSim() {
   log(`Solid cells: ${_SOLID.reduce((a,b)=>a+b,0)} / ${nz*ny*nx}`, 'success');
 
   setStatus('Simulating NS3D…');
+  const _simStart = performance.now();
   try {
     for (let step = 0; step < nSteps; step++) {
       // nsStep is async and yields internally — stop button works at any moment
       await nsStep(dt, nu, pIter, U0, V0);
       const rms = rmsDivergence();
       setProgress(step / nSteps);
-      setStatus(`NS3D step ${step}/${nSteps}, t=${(step*dt).toFixed(0)}s, div_rms=${rms.toExponential(2)}`);
+      const elapsed = (performance.now() - _simStart) / 1000;
+      const etaSec  = step > 0 ? elapsed / step * (nSteps - step) : null;
+      const etaStr  = etaSec === null ? '…' : `${etaSec.toFixed(0)}s`;
+      setStatus(`NS3D step ${step}/${nSteps} · t=${(step*dt).toFixed(0)}s · div=${rms.toExponential(2)} · ETA ${etaStr}`);
       if (step % 10 === 0)
         log(`Step ${step}/${nSteps} — t=${(step*dt).toFixed(0)} s, div_rms=${rms.toExponential(2)}`);
     }
