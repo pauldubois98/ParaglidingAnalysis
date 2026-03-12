@@ -88,6 +88,29 @@
     ]
   },
   {
+    "id": "vertical-wind",
+    "label": "Vertical Wind",
+    "overlay": "vvert",
+    "terrainOpacity": 0.65,
+    "overlayOpacity": 0.85,
+    "arrows": true,
+    "arrowStep": 6,
+    "arrowHeight": 80,
+    "arrowScale": 8,
+    "arrowWidth": 2,
+    "arrowColor": "white",
+    "visibleControls": [
+      "ctrl-section-terrain",
+      "ctrl-terrain-opacity",
+      "ctrl-section-overlay",
+      "ctrl-overlay-opacity",
+      "ctrl-section-arrows",
+      "ctrl-arrows-toggle",
+      "ctrl-arrow-scale",
+      "ctrl-arrow-width"
+    ]
+  },
+  {
     "id": "terrain",
     "label": "Terrain",
     "overlay": "terrain",

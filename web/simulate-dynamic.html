@@ -274,6 +274,10 @@
       <div class="plot-title">Vorticity (1/s)</div>
       <canvas id="plot-vort"></canvas>
     </div>
+    <div class="plot-box">
+      <div class="plot-title">Vertical Wind (m/s)</div>
+      <canvas id="plot-vert"></canvas>
+    </div>
   </div>
 </div>
 
@@ -627,6 +631,7 @@ const cmapSpeed  = t => t < 0.5 ? [0, (t*2*200)|0, (255-t*2*55)|0] : [((t-0.5)*2
 const cmapFroude = t => t < 0.5 ? [0, (t*2*180)|0, (255-t*2*55)|0] : [((t-0.5)*2*255)|0, ((1-(t-0.5)*2)*180)|0, 0];
 const cmapDepth  = t => [0, (t*180)|0, (80+t*175)|0];
 const cmapVort   = t => t < 0.5 ? [0, 0, ((0.5-t)*2*255)|0] : [((t-0.5)*2*255)|0, 0, 0];
+const cmapVert   = t => t < 0.5 ? [(t*2*255)|0, (t*2*255)|0, 255] : [255, ((1-t)*2*255)|0, ((1-t)*2*255)|0];
 
 // ═══════════════════════════════════════════════════════════════════
 //  SWE SOLVER
@@ -817,6 +822,19 @@ async function runSim() {
       vorticity[idx] = (v[idx+1]-v[idx-1])/(2*dx) - (u[idx+nx]-u[idx-nx])/(2*dy);
     }
 
+  // Vertical wind: orographic lifting (u·∂Z/∂x + v·∂Z/∂y) + convergence (-h·div·u)
+  // j=0=north → ∂/∂y_physical uses flipped j-differences
+  const w_vert = new Float32Array(ny * nx);
+  for (let j = 1; j < ny-1; j++)
+    for (let i = 1; i < nx-1; i++) {
+      const idx = j*nx + i;
+      const dZdx = (Z[idx+1]    - Z[idx-1])    / (2*dx);
+      const dZdy = (Z[(j-1)*nx+i] - Z[(j+1)*nx+i]) / (2*dy); // flipped: j-1=more north
+      const dudx = (u[idx+1]    - u[idx-1])    / (2*dx);
+      const dvdy = (v[(j-1)*nx+i] - v[(j+1)*nx+i]) / (2*dy); // flipped
+      w_vert[idx] = u[idx]*dZdx + v[idx]*dZdy - h[idx]*(dudx + dvdy);
+    }
+
   // ── Render 2D previews ──
   document.getElementById('sim-plots-area').style.display = 'flex';
   const arrowData = { u, v, step: astep };
@@ -824,6 +842,7 @@ async function runSim() {
   renderPlot(document.getElementById('plot-froude'), froude,   nx, ny, cmapFroude, arrowData);
   renderPlot(document.getElementById('plot-depth'),  h,        nx, ny, cmapDepth,  null);
   renderPlot(document.getElementById('plot-vort'),   vorticity, nx, ny, cmapVort,  null);
+  renderPlot(document.getElementById('plot-vert'),   w_vert,   nx, ny, cmapVert,  null);
 
   // ── Marker positions ──
   const mLon0 = terrainData.lon0, mLat0 = terrainData.lat0;
@@ -875,6 +894,7 @@ async function runSim() {
       froude:   Array.from(froude),
       depth:    Array.from(h),
       vorticity: Array.from(vorticity),
+      vertical:  Array.from(w_vert),
     },
     params: {
       H0, g_prime: g, drag_cd: Cd, visc: nu,

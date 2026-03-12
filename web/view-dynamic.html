@@ -183,6 +183,7 @@
     <button class="tab-btn"        id="tab-froude"   onclick="setOverlay('froude')">Froude</button>
     <button class="tab-btn"        id="tab-depth"    onclick="setOverlay('depth')">Depth</button>
     <button class="tab-btn"        id="tab-vort"     onclick="setOverlay('vort')">Vort.</button>
+    <button class="tab-btn"        id="tab-vvert"    onclick="setOverlay('vvert')">Vert.</button>
     <button class="tab-btn"        id="tab-terrain"  onclick="setOverlay('terrain')">Terrain</button>
   </div>
 
@@ -371,6 +372,13 @@ const CMAPS = {
     [10,  10,  10 ],
     [60,  10,  10 ],
     [220, 0,   0  ],
+  ],
+  vvert: [
+    [0,   0,   255],
+    [128, 128, 255],
+    [255, 255, 255],
+    [255, 128, 128],
+    [255, 0,   0  ],
   ],
   terrain: [
     [30,  60,  20 ],
@@ -660,12 +668,13 @@ const OVERLAYS = {
   froude:  { field: 'froude',   cmap: 'froude',  title: 'Froude №',    unit: '' },
   depth:   { field: 'depth',    cmap: 'depth',   title: 'Flow Depth',  unit: 'm' },
   vort:    { field: 'vorticity',cmap: 'vort',    title: 'Vorticity',   unit: '1/s' },
+  vvert:   { field: 'vertical', cmap: 'vvert',   title: 'Vertical Wind', unit: 'm/s' },
   terrain: { field: null,       cmap: 'terrain', title: 'Elevation',   unit: 'm' },
 };
 
 function setOverlay(name) {
   currentOverlay = name;
-  ['speed','froude','depth','vort','terrain'].forEach(n => {
+  ['speed','froude','depth','vort','vvert','terrain'].forEach(n => {
     document.getElementById('tab-' + n).classList.toggle('active', n === name);
   });
   const ov = OVERLAYS[name];
