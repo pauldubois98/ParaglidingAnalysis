@@ -334,6 +334,7 @@ let arrowLines   = null;
 let sliceArrowLines = null;
 let markerObjects   = [];
 let labelObjects    = [];
+let clickMarker     = null;
 let sliceVisible    = true;
 let arrowsVisible   = true;
 
@@ -819,6 +820,56 @@ function updateMarkerLabels() {
     lbl.style.left = x + 'px';
     lbl.style.top  = y + 'px';
   });
+  if (clickMarker) {
+    clickMarker.forEach(obj => {
+      if (!obj._labelDiv) return;
+      const v = obj._worldPos.clone().project(camera);
+      const x = (v.x * 0.5 + 0.5) * window.innerWidth;
+      const y = (-v.y * 0.5 + 0.5) * window.innerHeight;
+      obj._labelDiv.style.display = v.z < 1 ? 'block' : 'none';
+      obj._labelDiv.style.left = x + 'px';
+      obj._labelDiv.style.top  = y + 'px';
+    });
+  }
+}
+
+function buildClickMarker(wx, wy, wz, elevM) {
+  if (clickMarker) {
+    clickMarker.forEach(o => { scene.remove(o); if (o._labelDiv) o._labelDiv.remove(); });
+  }
+  const color = 0x4488ff;
+  const poleH = 120;
+
+  const pole = new THREE.Mesh(
+    new THREE.CylinderGeometry(4, 4, poleH, 8),
+    new THREE.MeshLambertMaterial({ color })
+  );
+  pole.rotation.x = Math.PI / 2;
+  pole.position.set(wx, wy, wz + poleH / 2);
+
+  const cone = new THREE.Mesh(
+    new THREE.ConeGeometry(40, 80, 12),
+    new THREE.MeshLambertMaterial({ color })
+  );
+  cone.rotation.x = Math.PI / 2;
+  cone.position.set(wx, wy, wz + poleH + 40);
+
+  const div = document.createElement('div');
+  div.style.cssText = `
+    position:fixed; pointer-events:none; z-index:200;
+    background:rgba(10,15,30,0.82); border:1px solid #4488ff;
+    color:#4488ff; font-size:12px; font-weight:bold;
+    font-family:'Segoe UI',sans-serif; padding:3px 8px;
+    border-radius:4px; white-space:nowrap;
+    transform:translate(-50%,-100%); margin-top:-8px;
+  `;
+  div.textContent = `▶ Selected  ${elevM.toFixed(0)}m`;
+  document.body.appendChild(div);
+  cone._labelDiv = div;
+  cone._worldPos = new THREE.Vector3(wx, wy, wz + poleH + 90);
+
+  scene.add(pole, cone);
+  clickMarker = [pole, cone];
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -856,13 +907,22 @@ function drawCompass() {
 const raycaster = new THREE.Raycaster();
 const mouse     = new THREE.Vector2();
 
+let _pointerDownX = 0, _pointerDownY = 0;
+renderer.domElement.addEventListener('pointerdown', e => { _pointerDownX = e.clientX; _pointerDownY = e.clientY; });
+
 renderer.domElement.addEventListener('click', e => {
   if (!terrainMesh) return;
+  const dx = e.clientX - _pointerDownX, dy = e.clientY - _pointerDownY;
+  if (dx*dx + dy*dy > 25) return; // drag — ignore
   mouse.x =  (e.clientX / window.innerWidth)  * 2 - 1;
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(mouse, camera);
   const hits = raycaster.intersectObject(terrainMesh);
-  if (hits.length === 0) { document.getElementById('info-panel').style.display='none'; return; }
+  if (hits.length === 0) {
+    document.getElementById('info-panel').style.display = 'none';
+    if (clickMarker) { clickMarker.forEach(o => { scene.remove(o); if (o._labelDiv) o._labelDiv.remove(); }); clickMarker = null; }
+    return;
+  }
 
   const pt  = hits[0].point;
   const T   = simData.terrain;
@@ -904,6 +964,8 @@ renderer.domElement.addEventListener('click', e => {
   rows.forEach(([label, val]) => {
     rowsDiv.innerHTML += `<div class="info-row"><span class="info-label">${label}</span><span class="info-val">${val}</span></div>`;
   });
+
+  buildClickMarker(pt.x, pt.y, pt.z, elev);
 });
 
 // ═══════════════════════════════════════════════════════════════════
@@ -911,6 +973,7 @@ renderer.domElement.addEventListener('click', e => {
 // ═══════════════════════════════════════════════════════════════════
 
 function rebuildAll() {
+  if (clickMarker) { clickMarker.forEach(o => { scene.remove(o); if (o._labelDiv) o._labelDiv.remove(); }); clickMarker = null; }
   buildTerrain();
   buildOverlay();
   buildSlice();
