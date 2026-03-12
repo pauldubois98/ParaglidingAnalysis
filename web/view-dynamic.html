@@ -124,6 +124,16 @@
     #colorbar-labels { display: flex; flex-direction: column; justify-content: space-between; height: 160px; }
     #colorbar-title { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 9px; color: #3a6080; letter-spacing: 1px; margin-right: 4px; }
 
+    /* ── Wind compass ── */
+    #wind-compass {
+      position: fixed; right: 16px; bottom: 32px;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 1px solid rgba(100,160,255,.2);
+      background: rgba(4,8,16,0.75);
+      backdrop-filter: blur(6px);
+    }
+
     /* ── Info bar ── */
     #info-bar {
       position: fixed; bottom: 0; left: 0; right: 0; height: 26px;
@@ -222,6 +232,9 @@
   <div id="colorbar-labels"></div>
 </div>
 
+<!-- Wind compass -->
+<canvas id="wind-compass" width="80" height="80" title="Wind direction"></canvas>
+
 <!-- Info bar -->
 <div id="info-bar">
   <span>Drag to orbit · Scroll to zoom · Right-drag to pan</span>
@@ -298,8 +311,8 @@ function animate() {
   requestAnimationFrame(animate);
   controls.update();
   renderer.render(scene, camera);
+  updateMarkerLabels();
 }
-animate();
 
 // ═══════════════════════════════════════════════════════════════════
 //  STATE
@@ -312,6 +325,7 @@ let arrowLines  = null;
 let currentOverlay = 'speed';
 let arrowsVisible  = true;
 let arrowColor     = 0xffffff;
+const markerObjects = [];
 
 // ═══════════════════════════════════════════════════════════════════
 //  COLORMAPS (inline — no external file dependency)
@@ -650,6 +664,144 @@ function setOverlay(name) {
 window.setOverlay = setOverlay;
 
 // ═══════════════════════════════════════════════════════════════════
+//  COORDINATE HELPER
+// ═══════════════════════════════════════════════════════════════════
+
+function lonlatToLocal(lon, lat, lon0, lat0) {
+  const R = 6371000;
+  const x = (lon - lon0) * Math.PI / 180 * R * Math.cos(lat0 * Math.PI / 180);
+  const y = (lat - lat0) * Math.PI / 180 * R;
+  return [x, y];
+}
+
+function elevationAt(mx, my) {
+  const T = simData.terrain;
+  const i = Math.round((mx - T.x_extent[0]) / (T.x_extent[1] - T.x_extent[0]) * (T.nx - 1));
+  const j = Math.round((my - T.y_extent[0]) / (T.y_extent[1] - T.y_extent[0]) * (T.ny - 1));
+  return T.elevation[Math.max(0, Math.min(T.ny-1, j))][Math.max(0, Math.min(T.nx-1, i))];
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  WAYPOINT MARKERS
+// ═══════════════════════════════════════════════════════════════════
+
+const WAYPOINTS = [
+  { type: 'takeoff', lat: 42.96939867981149, lon: 0.8859389033562173,
+    label: '▲ Take-off', hexColor: '#ff8800', poleColor: 0xcc6600, coneColor: 0xff8800 },
+  { type: 'landing', lat: 42.99216012970225, lon: 0.9039819278411977,
+    label: '▼ Landing',  hexColor: '#00ff88', poleColor: 0x00cc66, coneColor: 0x00ff88 },
+];
+
+function buildMarkers() {
+  markerObjects.forEach(o => { scene.remove(o); if (o._labelDiv) o._labelDiv.remove(); });
+  markerObjects.length = 0;
+
+  const T = simData.terrain;
+  const poleH = 120;
+
+  WAYPOINTS.forEach(wp => {
+    const [mx, my] = lonlatToLocal(wp.lon, wp.lat, T.lon0, T.lat0);
+    const elev = elevationAt(mx, my);
+
+    // Pole
+    const poleGeo = new THREE.CylinderGeometry(4, 4, poleH, 8);
+    const pole = new THREE.Mesh(poleGeo, new THREE.MeshLambertMaterial({ color: wp.poleColor }));
+    pole.rotation.x = Math.PI / 2;
+    pole.position.set(mx, my, elev + poleH / 2);
+    scene.add(pole);
+    markerObjects.push(pole);
+
+    // Cone
+    const coneGeo = new THREE.ConeGeometry(40, 80, 12);
+    const cone = new THREE.Mesh(coneGeo, new THREE.MeshLambertMaterial({ color: wp.coneColor }));
+    cone.rotation.x = Math.PI / 2;
+    cone.position.set(mx, my, elev + poleH + 40);
+    scene.add(cone);
+    markerObjects.push(cone);
+
+    // HTML label
+    const div = document.createElement('div');
+    div.style.cssText = `
+      position: absolute; pointer-events: none;
+      background: rgba(10,15,30,0.82); border: 1px solid ${wp.hexColor};
+      color: ${wp.hexColor};
+      font-size: 12px; font-weight: bold; font-family: 'Segoe UI', sans-serif;
+      padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+      transform: translate(-50%, -100%); margin-top: -8px;
+    `;
+    div.textContent = `${wp.label}  ${elev.toFixed(0)}m`;
+    document.getElementById('canvas-container').appendChild(div);
+    cone._labelDiv = div;
+    cone._worldPos = new THREE.Vector3(mx, my, elev + poleH + 90);
+  });
+}
+
+function updateMarkerLabels() {
+  markerObjects.forEach(obj => {
+    if (!obj._labelDiv) return;
+    const pos = obj._worldPos.clone().project(camera);
+    const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-pos.y * 0.5 + 0.5) * window.innerHeight;
+    obj._labelDiv.style.left = x + 'px';
+    obj._labelDiv.style.top  = y + 'px';
+    obj._labelDiv.style.display = pos.z > 1 ? 'none' : 'block';
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  WIND DIRECTION COMPASS
+// ═══════════════════════════════════════════════════════════════════
+
+function drawWindCompass(dir_deg, speed_ms) {
+  const canvas = document.getElementById('wind-compass');
+  const ctx = canvas.getContext('2d');
+  const cx = 40, cy = 40, r = 32;
+
+  ctx.clearRect(0, 0, 80, 80);
+
+  // Outer ring
+  ctx.strokeStyle = 'rgba(100,160,255,0.25)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+
+  // Cardinal labels
+  ctx.fillStyle = 'rgba(100,160,255,0.55)';
+  ctx.font = 'bold 8px Segoe UI';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('N', cx,      cy - r + 6);
+  ctx.fillText('S', cx,      cy + r - 6);
+  ctx.fillText('E', cx + r - 6, cy);
+  ctx.fillText('W', cx - r + 6, cy);
+
+  // Wind arrow: dir_deg is FROM direction (meteorological).
+  // Arrow points in the TO direction (where the wind is going).
+  const toRad = (dir_deg + 180) * Math.PI / 180;  // TO direction in radians from north
+  const len = r - 10;
+  const tx = cx + Math.sin(toRad) * len;
+  const ty = cy - Math.cos(toRad) * len;
+  const fx = cx - Math.sin(toRad) * len * 0.5;
+  const fy = cy + Math.cos(toRad) * len * 0.5;
+
+  ctx.strokeStyle = '#ff8844';
+  ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(tx, ty); ctx.stroke();
+
+  // Arrowhead
+  const ang = Math.atan2(ty - fy, tx - fx);
+  ctx.fillStyle = '#ff8844';
+  ctx.beginPath();
+  ctx.moveTo(tx, ty);
+  ctx.lineTo(tx - Math.cos(ang - 0.4) * 8, ty - Math.sin(ang - 0.4) * 8);
+  ctx.lineTo(tx - Math.cos(ang + 0.4) * 8, ty - Math.sin(ang + 0.4) * 8);
+  ctx.closePath(); ctx.fill();
+
+  // Speed label
+  ctx.fillStyle = 'rgba(200,220,255,0.8)';
+  ctx.font = '8px Segoe UI';
+  ctx.fillText(`${speed_ms?.toFixed(1)} m/s`, cx, cy + 2);
+}
+
+// ═══════════════════════════════════════════════════════════════════
 //  INDEXEDDB
 // ═══════════════════════════════════════════════════════════════════
 
@@ -711,6 +863,10 @@ async function load() {
     await new Promise(r => setTimeout(r, 0));
     buildArrows();
 
+    loadingMsg.textContent = 'Building markers…';
+    await new Promise(r => setTimeout(r, 0));
+    buildMarkers();
+
     // Info panel
     const p = simData.params;
     document.getElementById('sim-info').innerHTML =
@@ -720,6 +876,7 @@ async function load() {
       `T_sim = ${p.sim_time} s`;
     document.getElementById('info-params').textContent =
       `dir ${p.wind_dir?.toFixed(0)}° · ${p.wind_speed_ms?.toFixed(1)} m/s · H₀=${p.H0}m`;
+    drawWindCompass(p.wind_dir ?? 0, p.wind_speed_ms ?? 0);
 
     togglePanel();
   } catch (e) {
@@ -734,6 +891,7 @@ async function load() {
   }
 }
 
+animate();
 load();
 </script>
 
