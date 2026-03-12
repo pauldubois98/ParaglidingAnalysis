@@ -578,6 +578,12 @@
         style="background:rgba(30,180,200,0.18);border-color:rgba(30,200,100,0.5);color:#50e898">
         Run dynamic NS simulation with this area
       </button>
+        style="background:rgba(30,180,200,0.18);border-color:rgba(30,200,100,0.5);color:#50e898">Run NS simulation
+        with this area</button>
+      <button class="btn" id="btn-simulate-dynamic"
+        style="background:rgba(30,180,200,0.18);border-color:rgba(30,200,100,0.5);color:#50e898">
+        Run dynamic simulation with this area
+      </button>
     </div>
   </div>
 
@@ -960,6 +966,10 @@
     document.getElementById('btn-simulate-dynamic-advanced').addEventListener('click', () => {
       saveAreaState();
       window.location.href = 'simulate-dynamic-advanced';
+    });
+    document.getElementById('btn-simulate-dynamic').addEventListener('click', () => {
+      saveAreaState();
+      window.location.href = 'simulate-dynamic';
     });
 
   </script>

@@ -1,0 +1,120 @@
+[
+  {
+    "id": "wind-speed",
+    "label": "Wind Speed",
+    "overlay": "speed",
+    "terrainOpacity": 0.75,
+    "overlayOpacity": 0.80,
+    "arrows": true,
+    "arrowStep": 4,
+    "arrowHeight": 10,
+    "arrowScale": 10,
+    "arrowWidth": 2,
+    "arrowColor": "white",
+    "visibleControls": [
+      "ctrl-section-overlay",
+      "ctrl-overlay-opacity",
+      "ctrl-section-arrows",
+      "ctrl-arrows-toggle",
+      "ctrl-arrow-scale",
+      "ctrl-arrow-width"
+    ]
+  },
+  {
+    "id": "vertical-wind",
+    "label": "Vertical Wind",
+    "overlay": "vvert",
+    "terrainOpacity": 0.65,
+    "overlayOpacity": 0.85,
+    "arrows": false,
+    "arrowStep": 4,
+    "arrowHeight": 10,
+    "arrowScale": 8,
+    "arrowWidth": 2,
+    "arrowColor": "white",
+    "visibleControls": [
+      "ctrl-section-terrain",
+      "ctrl-terrain-opacity",
+      "ctrl-section-overlay",
+      "ctrl-overlay-opacity",
+      "ctrl-section-arrows",
+      "ctrl-arrows-toggle",
+      "ctrl-arrow-scale",
+      "ctrl-arrow-width"
+    ]
+  },
+  {
+    "id": "terrain",
+    "label": "Terrain",
+    "overlay": "terrain",
+    "terrainOpacity": 1.0,
+    "overlayOpacity": 0.0,
+    "arrows": false,
+    "arrowStep": 4,
+    "arrowHeight": 10,
+    "arrowScale": 1.5,
+    "arrowWidth": 2,
+    "arrowColor": "white",
+    "visibleControls": [
+      "ctrl-section-terrain",
+      "ctrl-terrain-opacity"
+    ]
+  },
+  {
+    "id": "hydraulic",
+    "label": "Hydraulic Jumps",
+    "overlay": "froude",
+    "terrainOpacity": 0.70,
+    "overlayOpacity": 0.85,
+    "arrows": false,
+    "arrowStep": 4,
+    "arrowHeight": 10,
+    "arrowScale": 1.2,
+    "arrowWidth": 1.5,
+    "arrowColor": "black",
+    "visibleControls": [
+      "ctrl-section-terrain",
+      "ctrl-terrain-opacity",
+      "ctrl-section-overlay",
+      "ctrl-overlay-opacity"
+    ]
+  },
+  {
+    "id": "turbulence",
+    "label": "Turbulence",
+    "overlay": "vort",
+    "terrainOpacity": 0.60,
+    "overlayOpacity": 0.90,
+    "arrows": false,
+    "arrowStep": 4,
+    "arrowHeight": 10,
+    "arrowScale": 2.0,
+    "arrowWidth": 2,
+    "arrowColor": "white",
+    "visibleControls": [
+      "ctrl-section-terrain",
+      "ctrl-terrain-opacity",
+      "ctrl-section-overlay",
+      "ctrl-overlay-opacity"
+    ]
+  },
+  {
+    "id": "flow-depth",
+    "label": "Flow Depth",
+    "overlay": "depth",
+    "terrainOpacity": 0.70,
+    "overlayOpacity": 0.80,
+    "arrows": false,
+    "arrowStep": 4,
+    "arrowHeight": 10,
+    "arrowScale": 1.5,
+    "arrowWidth": 2,
+    "arrowColor": "white",
+    "visibleControls": [
+      "ctrl-section-terrain",
+      "ctrl-terrain-opacity",
+      "ctrl-section-overlay",
+      "ctrl-overlay-opacity"
+    ]
+  }
+]
