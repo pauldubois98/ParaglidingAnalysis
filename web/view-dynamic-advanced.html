@@ -148,6 +148,18 @@
     }
     #plume-canvas { flex: 1; border-radius: 4px; border: 1px solid rgba(100,160,255,.1); display: block; }
 
+    #plume-controls {
+      display: none; gap: 3px; flex-wrap: wrap; margin-bottom: 4px;
+    }
+    .ptoggle {
+      padding: 2px 5px; font-size: 9px; background: rgba(30,50,80,0.7);
+      border: 1px solid rgba(80,120,160,0.4); border-radius: 3px;
+      color: #5a90c0; cursor: pointer;
+    }
+    .ptoggle.active {
+      background: rgba(60,100,160,0.8); color: #c8e0ff;
+      border-color: rgba(120,180,255,0.7);
+    }
     #height-indicator {
       position: fixed; bottom: 60px; left: 50%; transform: translateX(-50%);
       background: rgba(10,15,30,0.85); border: 1px solid rgba(100,160,255,0.3);
@@ -275,6 +287,13 @@
 <div id="info-panel">
   <h3>Point Info</h3>
   <div id="info-rows"></div>
+  <div id="plume-controls">
+    <button class="ptoggle active" data-mode="w">W</button>
+    <button class="ptoggle" data-mode="uvw">U/V/W</button>
+    <button class="ptoggle" data-mode="spd">Spd</button>
+    <button class="ptoggle" data-mode="p">P</button>
+    <button class="ptoggle" data-mode="vort">Vort</button>
+  </div>
   <div id="plume-title" style="font-size:8px;color:#3a6080;text-align:left;margin-bottom:2px;">Alt MSL (m)</div>
   <div id="plume-section">
     <div id="plume-alt-labels"></div>
@@ -1033,25 +1052,51 @@ function drawCompass() {
 //  PLUME PROFILE
 // ═══════════════════════════════════════════════════════════════════
 
+let plumeMode = 'w';
+let _plumeState = null; // {i, j, elev} for redraw on toggle
+
+// Toggle button wiring — module scripts are deferred, DOM is ready
+document.querySelectorAll('.ptoggle').forEach(btn => {
+  btn.addEventListener('click', () => {
+    plumeMode = btn.dataset.mode;
+    document.querySelectorAll('.ptoggle').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (_plumeState) drawPlumeProfile(_plumeState.i, _plumeState.j, _plumeState.elev);
+  });
+});
+
 function drawPlumeProfile(i, j, elev) {
+  _plumeState = { i, j, elev };
   const canvas   = document.getElementById('plume-canvas');
   const labelsEl = document.getElementById('plume-alt-labels');
   const section  = document.getElementById('plume-section');
-  const { nx, ny, nz, dz, z_base } = simData.grid;
+  const controls = document.getElementById('plume-controls');
+  const { nx, ny, nz, dz, z_base, dx, dy } = simData.grid;
   const F = simData.fields;
 
-  // Build vertical profiles of w and wind speed at column (i, j)
-  const wPro    = new Float32Array(nz);
-  const spdPro  = new Float32Array(nz);
-  let wMax = 0.01;
+  // Build vertical profiles at column (i, j)
+  const uPro   = new Float32Array(nz);
+  const vPro   = new Float32Array(nz);
+  const wPro   = new Float32Array(nz);
+  const spdPro = new Float32Array(nz);
+  const pPro   = new Float32Array(nz);
+  const vortPro= new Float32Array(nz);
   for (let k = 0; k < nz; k++) {
     const idx = k * ny * nx + j * nx + i;
+    uPro[k]   = F.u[idx];
+    vPro[k]   = F.v[idx];
     wPro[k]   = F.w[idx];
-    spdPro[k] = Math.hypot(F.u[idx], F.v[idx]);
-    if (Math.abs(wPro[k]) > wMax) wMax = Math.abs(wPro[k]);
+    spdPro[k] = Math.hypot(uPro[k], vPro[k]);
+    pPro[k]   = F.p[idx];
+    // vorticity: central diff where possible, edge fallback
+    const i0 = Math.max(0, i-1), i1 = Math.min(nx-1, i+1);
+    const j0 = Math.max(0, j-1), j1 = Math.min(ny-1, j+1);
+    const dv_dx = (F.v[k*ny*nx + j*nx + i1] - F.v[k*ny*nx + j*nx + i0]) / ((i1-i0)*dx);
+    const du_dy = (F.u[k*ny*nx + j1*nx + i] - F.u[k*ny*nx + j0*nx + i]) / ((j1-j0)*dy);
+    vortPro[k] = dv_dx - du_dy;
   }
 
-  // Altitude axis: MSL from terrain to top of domain
+  // Altitude axis
   const axisBottom = z_base;
   const axisTop    = z_base + nz * dz;
   const axisSpan   = axisTop - axisBottom;
@@ -1066,7 +1111,7 @@ function drawPlumeProfile(i, j, elev) {
   ctx.fillStyle = 'rgba(8,12,24,0.95)';
   ctx.fillRect(0, 0, W, H);
 
-  // Grid lines
+  // Horizontal grid lines
   const gridStep = Math.pow(10, Math.floor(Math.log10(axisSpan / 4)));
   const gridStart = Math.ceil(axisBottom / gridStep) * gridStep;
   ctx.strokeStyle = 'rgba(80,120,160,0.2)'; ctx.lineWidth = 1;
@@ -1075,29 +1120,102 @@ function drawPlumeProfile(i, j, elev) {
     ctx.beginPath(); ctx.moveTo(PAD_LR, y); ctx.lineTo(W - PAD_LR, y); ctx.stroke();
   }
 
-  // Centre axis
-  ctx.strokeStyle = 'rgba(80,120,160,0.4)';
-  ctx.beginPath(); ctx.moveTo(cx, PAD_TOP); ctx.lineTo(cx, PAD_TOP + drawH); ctx.stroke();
+  // Helpers
+  const altY = alt => PAD_TOP + (1 - (alt - axisBottom) / axisSpan) * drawH;
+  const halfW = W / 2 - PAD_LR - 2;
 
-  // Draw w profile — filled bars per k level
-  for (let k = 0; k < nz; k++) {
-    const altMid = z_base + (k + 0.5) * dz;
-    const altLo  = z_base + k * dz;
-    const altHi  = z_base + (k + 1) * dz;
-    const yTop   = PAD_TOP + (1 - (altHi - axisBottom) / axisSpan) * drawH;
-    const yBot   = PAD_TOP + (1 - (altLo - axisBottom) / axisSpan) * drawH;
-    const barH   = Math.max(1, yBot - yTop);
-    const w      = wPro[k];
-    const t      = (w / wMax) * 0.5 + 0.5; // 0=down, 0.5=zero, 1=up
-    const [r, g, b] = sampleCmap('w', Math.max(0, Math.min(1, t)));
-    const barW   = (Math.abs(w) / wMax) * (W / 2 - PAD_LR - 2);
-    ctx.fillStyle = `rgba(${(r*255)|0},${(g*255)|0},${(b*255)|0},0.85)`;
-    if (w >= 0) ctx.fillRect(cx, yTop, barW, barH);
-    else        ctx.fillRect(cx - barW, yTop, barW, barH);
+  // Draw a symmetric bar profile (value ±, from center)
+  function drawSymBars(pro, vMax, cmapName) {
+    ctx.strokeStyle = 'rgba(80,120,160,0.4)';
+    ctx.beginPath(); ctx.moveTo(cx, PAD_TOP); ctx.lineTo(cx, PAD_TOP + drawH); ctx.stroke();
+    for (let k = 0; k < nz; k++) {
+      const yTop = altY(z_base + (k+1)*dz), yBot = altY(z_base + k*dz);
+      const barH = Math.max(1, yBot - yTop);
+      const v = pro[k];
+      const t = (v / vMax) * 0.5 + 0.5;
+      const [r, g, b] = sampleCmap(cmapName, Math.max(0, Math.min(1, t)));
+      const barW = (Math.abs(v) / vMax) * halfW;
+      ctx.fillStyle = `rgba(${(r*255)|0},${(g*255)|0},${(b*255)|0},0.85)`;
+      if (v >= 0) ctx.fillRect(cx, yTop, barW, barH);
+      else        ctx.fillRect(cx - barW, yTop, barW, barH);
+    }
+  }
+
+  // Draw a one-sided bar profile (always positive, from left edge)
+  function drawPosBars(pro, vMin, vMax, cmapName) {
+    for (let k = 0; k < nz; k++) {
+      const yTop = altY(z_base + (k+1)*dz), yBot = altY(z_base + k*dz);
+      const barH = Math.max(1, yBot - yTop);
+      const v = pro[k];
+      const t = (v - vMin) / (vMax - vMin || 1);
+      const [r, g, b] = sampleCmap(cmapName, Math.max(0, Math.min(1, t)));
+      const barW = t * (W - 2*PAD_LR);
+      ctx.fillStyle = `rgba(${(r*255)|0},${(g*255)|0},${(b*255)|0},0.85)`;
+      ctx.fillRect(PAD_LR, yTop, barW, barH);
+    }
+  }
+
+  // Draw a polyline profile (value → x position)
+  function drawLine(pro, vMin, vMax, color, xLeft, xRight) {
+    const xRange = xRight - xLeft;
+    ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let k = 0; k < nz; k++) {
+      const yMid = altY(z_base + (k+0.5)*dz);
+      const x = xLeft + ((pro[k] - vMin) / (vMax - vMin || 1)) * xRange;
+      if (k === 0) ctx.moveTo(x, yMid); else ctx.lineTo(x, yMid);
+    }
+    ctx.stroke();
+  }
+
+  // ── Mode-specific rendering ───────────────────────────────────────
+  let xLabel = '', xMin = 0, xMax = 1;
+
+  if (plumeMode === 'w') {
+    const vMax = Math.max(0.01, ...Array.from(wPro).map(Math.abs));
+    drawSymBars(wPro, vMax, 'w');
+    xLabel = 'w (m/s)'; xMin = -vMax; xMax = vMax;
+    ctx.fillStyle = 'rgba(220,240,255,0.9)'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+    ctx.fillText(`↕ ${vMax.toFixed(2)} m/s`, cx, PAD_TOP + 10);
+
+  } else if (plumeMode === 'uvw') {
+    const allVals = [...uPro, ...vPro, ...wPro].map(Math.abs);
+    const vMax = Math.max(0.01, ...allVals);
+    // Vertical guide lines at -vMax and +vMax
+    ctx.strokeStyle = 'rgba(80,120,160,0.4)';
+    ctx.beginPath(); ctx.moveTo(cx, PAD_TOP); ctx.lineTo(cx, PAD_TOP + drawH); ctx.stroke();
+    // Draw 3 polylines
+    drawLine(uPro, -vMax, vMax, 'rgba(255,140,60,0.9)',  PAD_LR, W - PAD_LR);
+    drawLine(vPro, -vMax, vMax, 'rgba(60,220,140,0.9)',  PAD_LR, W - PAD_LR);
+    drawLine(wPro, -vMax, vMax, 'rgba(100,180,255,0.9)', PAD_LR, W - PAD_LR);
+    // Legend
+    ctx.font = '8px monospace';
+    ctx.fillStyle = 'rgba(255,140,60,0.9)';  ctx.textAlign = 'left'; ctx.fillText('U', PAD_LR+1, PAD_TOP+9);
+    ctx.fillStyle = 'rgba(60,220,140,0.9)';  ctx.fillText('V', PAD_LR+13, PAD_TOP+9);
+    ctx.fillStyle = 'rgba(100,180,255,0.9)'; ctx.fillText('W', PAD_LR+25, PAD_TOP+9);
+    xLabel = 'm/s'; xMin = -vMax; xMax = vMax;
+
+  } else if (plumeMode === 'spd') {
+    const sMax = Math.max(0.01, ...spdPro);
+    drawPosBars(spdPro, 0, sMax, 'speed');
+    xLabel = 'Wind speed (m/s)'; xMin = 0; xMax = sMax;
+
+  } else if (plumeMode === 'p') {
+    const pMin = Math.min(...pPro), pMax = Math.max(...pPro);
+    drawPosBars(pPro, pMin, pMax, 'speed');
+    xLabel = `P (Pa) [${pMin.toFixed(0)}–${pMax.toFixed(0)}]`;
+    xMin = pMin; xMax = pMax;
+
+  } else if (plumeMode === 'vort') {
+    const vMax = Math.max(0.001, ...Array.from(vortPro).map(Math.abs));
+    drawSymBars(vortPro, vMax, 'vort');
+    xLabel = 'ωz (1/s)'; xMin = -vMax; xMax = vMax;
+    ctx.fillStyle = 'rgba(220,240,255,0.9)'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+    ctx.fillText(`↕ ${vMax.toFixed(4)} 1/s`, cx, PAD_TOP + 10);
   }
 
   // Ground level line
-  const groundY = PAD_TOP + (1 - (elev - axisBottom) / axisSpan) * drawH;
+  const groundY = altY(elev);
   ctx.setLineDash([2, 4]);
   ctx.strokeStyle = 'rgba(140,180,100,0.7)'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(PAD_LR, groundY); ctx.lineTo(W - PAD_LR, groundY); ctx.stroke();
@@ -1105,28 +1223,28 @@ function drawPlumeProfile(i, j, elev) {
   ctx.fillStyle = 'rgba(140,180,100,0.9)'; ctx.font = '8px monospace'; ctx.textAlign = 'right';
   ctx.fillText(`${elev.toFixed(0)} m`, W - PAD_LR - 1, groundY - 2);
 
-  // w_max label
-  ctx.fillStyle = 'rgba(220,240,255,0.9)'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
-  ctx.fillText(`↕ ${wMax.toFixed(2)} m/s`, cx, PAD_TOP + 10);
-
-  // X-axis baseline
+  // X-axis baseline + tick labels
   const xAxisY = PAD_TOP + drawH;
   ctx.strokeStyle = 'rgba(180,200,220,0.5)'; ctx.lineWidth = 1;
   ctx.beginPath(); ctx.moveTo(PAD_LR, xAxisY); ctx.lineTo(W - PAD_LR, xAxisY); ctx.stroke();
 
-  // X-axis tick labels: -wMax, 0, +wMax
   ctx.fillStyle = 'rgba(200,220,240,0.85)'; ctx.font = '8px monospace';
-  const wLabel = wMax.toFixed(1);
-  ctx.textAlign = 'left';  ctx.fillText(`-${wLabel}`, PAD_LR, xAxisY + 9);
-  ctx.textAlign = 'center'; ctx.fillText('0', cx, xAxisY + 9);
-  ctx.textAlign = 'right';  ctx.fillText(`+${wLabel}`, W - PAD_LR, xAxisY + 9);
+  if (plumeMode === 'p' || plumeMode === 'spd') {
+    ctx.textAlign = 'left';  ctx.fillText(xMin.toFixed(plumeMode==='spd'?1:0), PAD_LR, xAxisY + 9);
+    ctx.textAlign = 'right'; ctx.fillText(xMax.toFixed(plumeMode==='spd'?1:0), W - PAD_LR, xAxisY + 9);
+  } else {
+    const fmt = v => Math.abs(v) < 0.01 ? v.toExponential(1) : v.toFixed(Math.abs(v)<1?2:1);
+    ctx.textAlign = 'left';   ctx.fillText(fmt(xMin), PAD_LR, xAxisY + 9);
+    ctx.textAlign = 'center'; ctx.fillText('0', cx, xAxisY + 9);
+    ctx.textAlign = 'right';  ctx.fillText(fmt(xMax), W - PAD_LR, xAxisY + 9);
+  }
 
-  // X-axis title
+  // X-axis title (truncate if long)
   ctx.fillStyle = 'rgba(160,200,240,0.8)'; ctx.font = '8px sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('w (m/s)', cx, xAxisY + 20);
+  ctx.fillText(xLabel, cx, xAxisY + 20);
 
-  // Altitude labels
+  // Altitude labels (Y axis)
   labelsEl.innerHTML = '';
   const nLabels = 5;
   for (let k = 0; k <= nLabels; k++) {
@@ -1136,6 +1254,7 @@ function drawPlumeProfile(i, j, elev) {
   }
 
   section.style.display = 'flex';
+  controls.style.display = 'flex';
   document.getElementById('plume-title').style.display = 'block';
 }
 
@@ -1151,8 +1270,8 @@ renderer.domElement.addEventListener('pointerdown', e => { _pointerDownX = e.cli
 
 renderer.domElement.addEventListener('click', e => {
   if (!terrainMesh) return;
-  const dx = e.clientX - _pointerDownX, dy = e.clientY - _pointerDownY;
-  if (dx*dx + dy*dy > 25) return; // drag — ignore
+  const pdx = e.clientX - _pointerDownX, pdy = e.clientY - _pointerDownY;
+  if (pdx*pdx + pdy*pdy > 25) return; // drag — ignore
   mouse.x =  (e.clientX / window.innerWidth)  * 2 - 1;
   mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
   raycaster.setFromCamera(mouse, camera);
@@ -1161,6 +1280,7 @@ renderer.domElement.addEventListener('click', e => {
     document.getElementById('info-panel').style.display = 'none';
     document.getElementById('plume-section').style.display = 'none';
     document.getElementById('plume-title').style.display = 'none';
+    document.getElementById('plume-controls').style.display = 'none';
     if (clickMarker) { clickMarker.forEach(o => { scene.remove(o); if (o._labelDiv) o._labelDiv.remove(); }); clickMarker = null; }
     return;
   }
@@ -1187,6 +1307,11 @@ renderer.domElement.addEventListener('click', e => {
   const sw   = F.surf_w[j*nx+i];
   const sp   = F.surf_p[j*nx+i];
   const spd  = Math.hypot(su, sv);
+  const { dx, dy } = simData.grid;
+  const i0 = Math.max(0, i-1), i1 = Math.min(nx-1, i+1);
+  const j0 = Math.max(0, j-1), j1 = Math.min(ny-1, j+1);
+  const sVort = (F.surf_v[j*nx+i1] - F.surf_v[j*nx+i0]) / ((i1-i0)*dx)
+              - (F.surf_u[j1*nx+i] - F.surf_u[j0*nx+i]) / ((j1-j0)*dy);
 
   const rows = [
     ['Elevation', `${elev.toFixed(1)} m`],
@@ -1195,6 +1320,7 @@ renderer.domElement.addEventListener('click', e => {
     ['Vertical W', `${sw.toFixed(3)} m/s`],
     ['Wind speed', `${spd.toFixed(2)} m/s`],
     ['Pressure',   `${sp.toFixed(1)} Pa`],
+    ['Vorticity',  `${sVort.toExponential(2)} 1/s`],
     // ['Grid (i,j)', `${i}, ${j}`],
   ];
 
