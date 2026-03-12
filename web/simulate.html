@@ -393,6 +393,17 @@
       border-color: rgba(240, 175, 50, 0.6);
     }
 
+    .btn-stop {
+      color: #ff8080;
+      border-color: rgba(255, 80, 80, 0.35);
+      background: rgba(255, 80, 80, 0.09);
+    }
+
+    .btn-stop:not(:disabled):hover {
+      background: rgba(255, 80, 80, 0.2);
+      border-color: rgba(255, 80, 80, 0.6);
+    }
+
     .link-area {
       color: #80d0c0;
       border-color: rgba(70, 200, 175, 0.28);
@@ -874,6 +885,9 @@
           <button class="btn btn-fetch" id="btn-fetch" onclick="runFetch()">Fetch Data</button>
           <button class="btn btn-sim" id="btn-sim" onclick="runSim()" disabled>Run Simulation</button>
           <!-- <button class="btn btn-dl" id="btn-dl" onclick="downloadJSON()" disabled>Download JSON</button> -->
+        </div>
+        <div class="footer-row">
+          <button class="btn btn-stop" id="btn-stop" onclick="stopSim()" disabled>Stop</button>
           <button class="btn btn-map" id="btn-map" onclick="openVisualizationTool()" disabled>Open Viewer</button>
         </div>
       </div>
@@ -885,7 +899,11 @@
     //  UTILITY FUNCTIONS
     // ═══════════════════════════════════════════════════════════════════
 
-    const yieldUI = () => new Promise(r => setTimeout(r, 0));
+    let _stopRequested = false;
+    const yieldUI = async () => {
+      await new Promise(r => setTimeout(r, 0));
+      if (_stopRequested) throw new Error('__STOPPED__');
+    };
 
     // In-memory tile cache
     const TILE_CACHE = {};
@@ -2028,6 +2046,7 @@
     // ═══════════════════════════════════════════════════════════════════
 
     let _simPlots = null; // set by runSim before renderSimPlots()
+    let _partialSim = null; // live references for partial results on stop
 
     /** Generic canvas renderer: arr is Float32Array, colorFn maps [0,1]→[r,g,b] */
     function renderGridPlot(canvas, arr, nx, ny, colorFn, label) {
@@ -2208,14 +2227,22 @@
     //  MAIN PIPELINE: RUN SIMULATION
     // ═══════════════════════════════════════════════════════════════════
 
+    function stopSim() {
+      _stopRequested = true;
+      document.getElementById('btn-stop').disabled = true;
+    }
+
     async function runSim() {
       if (!fetchedData) { log('No data fetched yet.', 'error'); return; }
+      _stopRequested = false;
+      document.getElementById('btn-stop').disabled = false;
       document.getElementById('btn-sim').disabled = true;
       document.getElementById('btn-fetch').disabled = true;
       const _dl2 = document.getElementById('btn-dl'); if (_dl2) _dl2.disabled = true;
       document.getElementById('btn-map').disabled = true;
       simResult = null;
       _simPlots = null;
+      _partialSim = null;
       document.getElementById('sim-plots-area').style.display = 'none';
       setProgress(0);
 
@@ -2381,6 +2408,9 @@
         const dT_sum = new Float32Array(ny * nx);
         let V_ADVECT = vAdvectMax;
 
+        // Stash live references so catch block can produce partial results
+        _partialSim = { output, convergence_sum, dT_weight_sum, dT_sum, Z, thermal_factor, trigger_factor, nx, ny, dx, dy, totalSteps: scenarios.length };
+
         for (let si = 0; si < scenarios.length; si++) {
           const sc = scenarios[si];
           setStatus(`Step ${si + 1}/${scenarios.length}: ${sc.local_time}  az=${sc.sun_azimuth}°  el=${sc.sun_elevation}°`);
@@ -2543,11 +2573,36 @@
         const _dl3 = document.getElementById('btn-dl'); if (_dl3) _dl3.disabled = false;
         document.getElementById('btn-map').disabled = false;
       } catch (e) {
-        log(`SIMULATION ERROR: ${e.message || e}`, 'error');
-        console.error(e);
-        setStatus('Simulation failed.');
+        if (e.message === '__STOPPED__') {
+          const n = _partialSim?.output?.scenarios?.length ?? 0;
+          log(`Simulation stopped by user after ${n} step(s).`, 'info');
+          if (n > 0) {
+            const { output, convergence_sum, dT_weight_sum, dT_sum, Z, thermal_factor, trigger_factor, nx, ny, dx, dy } = _partialSim;
+            const conv_field = new Float32Array(nx * ny);
+            for (let idx = 0; idx < nx * ny; idx++)
+              conv_field[idx] = dT_weight_sum[idx] > 0 ? convergence_sum[idx] / dT_weight_sum[idx] : 0;
+            const p99conv = percentile(conv_field, 99, true);
+            for (let idx = 0; idx < nx * ny; idx++)
+              conv_field[idx] = Math.min(1, Math.max(0, conv_field[idx] / (p99conv + 1e-9)));
+            output.terrain.convergence = float32ToNested(conv_field, ny, nx);
+            const dailyHeat = dT_sum.map(v => v / n);
+            simResult = output;
+            _simPlots = { Z, thermal_factor, trigger_factor, conv_field, dailyHeat, nx, ny, dx, dy };
+            _stopRequested = false; // allow yieldUI inside renderSimPlots
+            await renderSimPlots();
+            document.getElementById('btn-map').disabled = false;
+            setStatus(`Simulation stopped (${n}/${_partialSim.totalSteps} steps — partial results available).`);
+          } else {
+            setStatus('Simulation stopped.');
+          }
+        } else {
+          log(`SIMULATION ERROR: ${e.message || e}`, 'error');
+          console.error(e);
+          setStatus('Simulation failed.');
+        }
       }
 
+      document.getElementById('btn-stop').disabled = true;
       document.getElementById('btn-fetch').disabled = false;
       document.getElementById('btn-sim').disabled = false;
     }
