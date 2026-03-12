@@ -1,0 +1,101 @@
+[
+  {
+    "id": "terrain",
+    "label": "Terrain",
+    "surfaceField": "elev",
+    "overlayOpacity": 0,
+    "terrainOpacity": 0.95,
+    "showSlice": false,
+    "sliceField": "speed",
+    "sliceHeight": 500,
+    "showArrows": false
+  },
+  {
+    "id": "wind-speed",
+    "label": "Wind Speed",
+    "surfaceField": "speed",
+    "overlayOpacity": 0.8,
+    "terrainOpacity": 0.8,
+    "showSlice": false,
+    "sliceField": "speed",
+    "sliceHeight": 500,
+    "showArrows": true
+  },
+  {
+    "id": "wind-vertical",
+    "label": "Vertical Wind",
+    "surfaceField": "w",
+    "overlayOpacity": 0.8,
+    "terrainOpacity": 0.8,
+    "showSlice": false,
+    "sliceField": "w",
+    "sliceHeight": 500,
+    "showArrows": false
+  },
+  {
+    "id": "pressure",
+    "label": "Pressure",
+    "surfaceField": "p",
+    "overlayOpacity": 0.8,
+    "terrainOpacity": 0.8,
+    "showSlice": false,
+    "sliceField": "p",
+    "sliceHeight": 500,
+    "showArrows": false
+  },
+  {
+    "id": "vorticity",
+    "label": "Vorticity",
+    "surfaceField": "vort",
+    "overlayOpacity": 0.8,
+    "terrainOpacity": 0.8,
+    "showSlice": false,
+    "sliceField": "speed",
+    "sliceHeight": 500,
+    "showArrows": false
+  },
+  {
+    "id": "slice-wind-speed",
+    "label": "Slice · Speed",
+    "surfaceField": "elev",
+    "overlayOpacity": 0,
+    "terrainOpacity": 1,
+    "showSlice": true,
+    "sliceField": "speed",
+    "sliceHeight": 500,
+    "showArrows": true
+  },
+  {
+    "id": "slice-wind-vertical",
+    "label": "Slice · Vertical",
+    "surfaceField": "elev",
+    "overlayOpacity": 0,
+    "terrainOpacity": 1,
+    "showSlice": true,
+    "sliceField": "w",
+    "sliceHeight": 500,
+    "showArrows": false
+  },
+  {
+    "id": "slice-pressure",
+    "label": "Slice · Pressure",
+    "surfaceField": "elev",
+    "overlayOpacity": 0,
+    "terrainOpacity": 1,
+    "showSlice": true,
+    "sliceField": "p",
+    "sliceHeight": 500,
+    "showArrows": false
+  },
+  {
+    "id": "slice-vorticity",
+    "label": "Slice · Vorticity",
+    "surfaceField": "elev",
+    "overlayOpacity": 0.25,
+    "terrainOpacity": 0.7,
+    "showSlice": true,
+    "sliceField": "vort",
+    "sliceHeight": 500,
+    "showArrows": false
+  }
+]

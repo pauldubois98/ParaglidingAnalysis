@@ -87,6 +87,7 @@
     }
     .tab-btn.active { color: #7eb8ff; border-color: rgba(100,160,255,.6); background: rgba(100,160,255,.12); }
     .tab-btn:hover:not(.active) { color: #90b8d8; background: rgba(100,160,255,.08); }
+    #preset-btns .tab-btn { flex: none; }
 
     .toggle-row {
       display: flex; align-items: center; justify-content: space-between;
@@ -176,6 +177,9 @@
 
 <div id="ui-panel">
   <h2>NS 3D Wind</h2>
+
+  <div class="section-title">Presets</div>
+  <div class="tab-row" id="preset-btns" style="flex-wrap:wrap;gap:3px;"></div>
 
   <div class="section-title">Surface Field</div>
   <div class="tab-row" id="surf-tabs">
@@ -1013,6 +1017,39 @@ window.updateOverlayOpacity = function() {
   if (overlayMesh) overlayMesh.material.opacity = parseFloat(document.getElementById('ov-opacity').value);
 };
 
+function applyPreset(p) {
+  // Surface field
+  window.setSurfaceField(p.surfaceField);
+
+  // Overlay opacity
+  document.getElementById('ov-opacity').value = p.overlayOpacity;
+  document.getElementById('ov-opacity-val').textContent = p.overlayOpacity;
+  window.updateOverlayOpacity();
+
+  // Terrain opacity
+  document.getElementById('terr-opacity').value = p.terrainOpacity;
+  document.getElementById('terr-opacity-val').textContent = p.terrainOpacity;
+  window.updateTerrainOpacity();
+
+  // Slice visibility
+  if (sliceVisible !== p.showSlice) window.toggleSlice();
+
+  // Slice height
+  document.getElementById('slice-height').value = p.sliceHeight;
+  document.getElementById('slice-height-val').textContent = p.sliceHeight;
+
+  // Slice field (also rebuilds slice)
+  window.setSliceField(p.sliceField);
+
+  // Arrows visibility
+  if (arrowsVisible !== p.showArrows) window.toggleArrows();
+
+  // Highlight active preset button
+  document.querySelectorAll('#preset-btns .tab-btn').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('preset-' + p.id);
+  if (btn) btn.classList.add('active');
+}
+
 // ═══════════════════════════════════════════════════════════════════
 //  ANIMATION LOOP
 // ═══════════════════════════════════════════════════════════════════
@@ -1049,8 +1086,23 @@ function idbGet(key) {
 async function loadAndRender() {
   document.getElementById('loading-msg').textContent = 'Loading from IndexedDB…';
   try {
-    const raw = await idbGet('ns3d_latest');
+    const [raw, presets] = await Promise.all([
+      idbGet('ns3d_latest'),
+      fetch('presets-dynamic-advanced.json').then(r => r.json()),
+    ]);
     if (!raw) throw new Error('No ns3d_latest data found. Run the NS3D simulation first.');
+
+    // Build preset buttons
+    const presetBtns = document.getElementById('preset-btns');
+    presets.forEach(p => {
+      const btn = document.createElement('button');
+      btn.className = 'tab-btn';
+      btn.id = 'preset-' + p.id;
+      btn.textContent = p.label;
+      btn.onclick = () => applyPreset(p);
+      presetBtns.appendChild(btn);
+    });
+
     document.getElementById('loading-msg').textContent = 'Parsing data…';
     simData = JSON.parse(raw);
     if (simData.type !== 'ns3d') throw new Error('Data is not NS3D type. Run NS3D simulation first.');
