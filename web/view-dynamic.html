@@ -20,7 +20,7 @@
       overflow: hidden;
     }
 
-    /* ── Nav ── */
+    /* ── Header nav ── */
     #header-nav {
       position: fixed;
       top: 0;
@@ -35,6 +35,7 @@
       background: rgba(6, 10, 20, 0.92);
       border-bottom: 1px solid rgba(100, 160, 255, 0.12);
       backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
     }
 
     .nav-logo {
@@ -49,24 +50,25 @@
       font-weight: 600;
       border-radius: 6px;
       white-space: nowrap;
-      transition: background .15s;
+      transition: background 0.15s;
     }
 
     .nav-logo img {
       width: 18px;
       height: 18px;
-      filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg);
+      filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%);
     }
 
     .nav-logo:hover {
-      background: rgba(100, 160, 255, .1);
+      background: rgba(100, 160, 255, 0.1);
     }
 
     .nav-sep {
       width: 1px;
       height: 18px;
-      background: rgba(100, 160, 255, .12);
+      background: rgba(100, 160, 255, 0.12);
       margin: 0 2px;
+      flex-shrink: 0;
     }
 
     .nav-link {
@@ -76,18 +78,117 @@
       font-size: 12px;
       border-radius: 6px;
       white-space: nowrap;
-      transition: .15s;
+      transition: background 0.15s, color 0.15s;
     }
 
     .nav-link:hover {
       color: #90b8d8;
-      background: rgba(100, 160, 255, .08);
+      background: rgba(100, 160, 255, 0.08);
     }
 
     .nav-link.nav-active {
       color: #7eb8ff;
-      background: rgba(100, 160, 255, .1);
+      background: rgba(100, 160, 255, 0.1);
       font-weight: 500;
+    }
+
+    .nav-dropdown {
+      position: relative;
+    }
+
+    .nav-dropdown-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      color: #4a6888;
+      font-size: 12px;
+      font-family: inherit;
+      border-radius: 6px;
+      white-space: nowrap;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-dropdown-btn::after {
+      content: '▾';
+      font-size: 9px;
+      opacity: 0.6;
+    }
+
+    .nav-dropdown:hover .nav-dropdown-btn,
+    .nav-dropdown-btn:hover {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, 0.08);
+    }
+
+    .nav-dropdown-btn.nav-active {
+      color: #7eb8ff;
+      background: rgba(100, 160, 255, 0.1);
+      font-weight: 500;
+    }
+
+    .nav-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 120px;
+      background: rgba(8, 14, 28, 0.97);
+      border: 1px solid rgba(100, 160, 255, 0.18);
+      border-radius: 8px;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 0.15s, transform 0.15s;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 100;
+    }
+
+    .nav-dropdown:hover .nav-dropdown-menu,
+    .nav-dropdown.open .nav-dropdown-menu {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .nav-dropdown-item {
+      padding: 6px 10px;
+      color: #4a6888;
+      text-decoration: none;
+      font-size: 12px;
+      border-radius: 5px;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-dropdown-item:hover {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, 0.08);
+    }
+
+    .nav-dropdown-item.nav-active {
+      color: #7eb8ff;
+      background: rgba(100, 160, 255, 0.1);
+      font-weight: 500;
+    }
+
+    @media (max-width: 480px) {
+      .nav-logo span {
+        display: none;
+      }
+
+      .nav-link,
+      .nav-dropdown-btn {
+        padding: 5px 7px;
+        font-size: 11px;
+      }
     }
 
     #canvas-container {
@@ -456,12 +557,37 @@
     <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
     <div class="nav-sep"></div>
     <a href="area" class="nav-link">Area</a>
-    <a href="simulate" class="nav-link">Simulate</a>
-    <a href="simulate-advanced" class="nav-link">Simulate NS</a>
-    <a href="simulate-dynamic" class="nav-link">Wind SWE</a>
-    <a href="view" class="nav-link">View</a>
-    <a href="view-dynamic" class="nav-link nav-active">Wind View</a>
-    <a href="about" class="nav-link">About</a>
+    <div class="nav-sep"></div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Thermal</button>
+      <div class="nav-dropdown-menu">
+        <a href="simulate" class="nav-dropdown-item">Simulate</a>
+        <a href="view" class="nav-dropdown-item">View</a>
+        <a href="about" class="nav-dropdown-item">About</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Thermal NS</button>
+      <div class="nav-dropdown-menu">
+        <a href="simulate-advanced" class="nav-dropdown-item">Simulate</a>
+        <a href="view-advanced" class="nav-dropdown-item">View</a>
+        <a href="about-advanced" class="nav-dropdown-item">About</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn nav-active">Wind</button>
+      <div class="nav-dropdown-menu">
+        <a href="simulate-dynamic" class="nav-dropdown-item">Simulate</a>
+        <a href="view-dynamic" class="nav-dropdown-item nav-active">View</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Wind NS</button>
+      <div class="nav-dropdown-menu">
+        <a href="simulate-dynamic-advanced" class="nav-dropdown-item">Simulate</a>
+        <a href="view-dynamic-advanced" class="nav-dropdown-item">View</a>
+      </div>
+    </div>
   </nav>
 
   <div id="loading">
@@ -1486,6 +1612,20 @@
 
     animate();
     load();
+
+    // Nav dropdown touch support
+    document.querySelectorAll('.nav-dropdown-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        var dd = btn.closest('.nav-dropdown');
+        var isOpen = dd.classList.contains('open');
+        document.querySelectorAll('.nav-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
+        if (!isOpen) dd.classList.add('open');
+        e.stopPropagation();
+      });
+    });
+    document.addEventListener('click', function() {
+      document.querySelectorAll('.nav-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
+    });
   </script>
 
 </body>
