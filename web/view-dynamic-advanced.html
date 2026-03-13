@@ -109,21 +109,11 @@
     }
     #panel-toggle:active { background: rgba(30,55,100,0.7); }
 
-    #colorbar-wrap {
-      position: fixed; left: 16px; bottom: 28px;
-      display: flex; gap: 6px; align-items: center;
-      font-size: 10px; color: #3a6080;
-    }
-    #colorbar-canvas { width: 14px; height: 160px; border-radius: 3px; border: 1px solid rgba(100,160,255,.15); }
-    #colorbar-labels { display: flex; flex-direction: column; justify-content: space-between; height: 160px; }
-    #colorbar-title { writing-mode: vertical-rl; transform: rotate(180deg); font-size: 9px; color: #3a6080; letter-spacing: 1px; margin-right: 4px; }
-
-    #wind-compass {
-      position: fixed; right: 16px; bottom: 32px;
-      width: 80px; height: 80px; border-radius: 50%;
-      border: 1px solid rgba(100,160,255,.2);
-      background: rgba(4,8,16,0.75); backdrop-filter: blur(6px);
-    }
+    #colorbar-wrap { position: fixed; left: 16px; bottom: 20px; background: rgba(10,15,30,0.82); border: 1px solid rgba(100,160,255,0.2); border-radius: 8px; padding: 8px 10px; }
+    #colorbar-title { text-align: center; margin-bottom: 5px; font-weight: bold; color: #7eb8ff; font-size: 10px; }
+    #colorbar-body { display: flex; gap: 5px; align-items: stretch; }
+    #colorbar-canvas { width: 20px; height: 160px; border-radius: 3px; border: 1px solid rgba(100,160,255,.15); }
+    #colorbar-labels { display: flex; flex-direction: column; justify-content: space-between; height: 160px; font-size: 9px; color: #99b8d0; line-height: 1; }
 
     #info-panel {
       position: fixed; top: 52px; left: 16px; width: 240px;
@@ -302,11 +292,12 @@
 
 <div id="colorbar-wrap">
   <div id="colorbar-title">Speed (m/s)</div>
-  <canvas id="colorbar-canvas" width="14" height="160"></canvas>
-  <div id="colorbar-labels"></div>
+  <div id="colorbar-body">
+    <canvas id="colorbar-canvas" width="20" height="160"></canvas>
+    <div id="colorbar-labels"></div>
+  </div>
 </div>
 
-<canvas id="wind-compass" width="80" height="80" title="Wind direction"></canvas>
 <div id="info-panel">
   <h3>Selected point</h3>
   <div id="info-rows"></div>
@@ -1051,34 +1042,6 @@ function buildNorthArrow() {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-//  WIND COMPASS
-// ═══════════════════════════════════════════════════════════════════
-
-function drawCompass() {
-  if (!simData || !simData.params) return;
-  const canvas = document.getElementById('wind-compass');
-  const ctx = canvas.getContext('2d');
-  const cx = 40, cy = 40, r = 34;
-  ctx.clearRect(0, 0, 80, 80);
-  ctx.strokeStyle = 'rgba(100,160,255,0.3)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.stroke();
-  const { U_in: U, V_in: V } = simData.params;
-  const dir = Math.atan2(-U, -V); // direction wind is blowing toward, in screen coords
-  const len = r - 6;
-  ctx.strokeStyle = '#7eb8ff'; ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(cx + Math.sin(dir)*len, cy - Math.cos(dir)*len);
-  ctx.stroke();
-  ctx.fillStyle = '#7eb8ff';
-  ctx.font = '9px Segoe UI'; ctx.textAlign = 'center';
-  ctx.fillText('N', cx, cy - r + 11);
-  ctx.fillText('S', cx, cy + r - 4);
-  ctx.fillText('E', cx + r - 6, cy + 4);
-  ctx.fillText('W', cx - r + 6, cy + 4);
-}
-
-// ═══════════════════════════════════════════════════════════════════
 //  PLUME PROFILE
 // ═══════════════════════════════════════════════════════════════════
 
@@ -1528,7 +1491,6 @@ async function loadAndRender() {
     buildArrows();
     buildMarkers();
     buildNorthArrow();
-    drawCompass();
 
     const defaultPreset = presets.find(p => p.id === 'terrain') || presets[0];
     applyPreset(defaultPreset);
