@@ -449,10 +449,6 @@
         transform: translateY(0);
       }
 
-      #colorbars {
-        max-width: calc(100vw - 32px);
-      }
-
       #panel-toggle.open {
         right: 8px;
       }
@@ -472,12 +468,6 @@
 
       .info-row {
         font-size: 10px;
-      }
-
-      #colorbars {
-        bottom: 10px;
-        left: 8px;
-        gap: 6px;
       }
 
       .colorbar-labels {
@@ -637,28 +627,28 @@
     <div class="colorbar" id="cb-elev-wrap">
       <div class="colorbar-title">Elevation (m)</div>
       <div class="colorbar-body">
-        <canvas class="colorbar-canvas" id="cb-elev" width="20" height="120"></canvas>
+        <canvas class="colorbar-canvas" id="cb-elev" width="20" height="160"></canvas>
         <div class="colorbar-labels" id="cb-elev-labels"></div>
       </div>
     </div>
     <div class="colorbar" id="cb-theta-wrap">
       <div class="colorbar-title">θ' (K)</div>
       <div class="colorbar-body">
-        <canvas class="colorbar-canvas" id="cb-theta" width="20" height="120"></canvas>
+        <canvas class="colorbar-canvas" id="cb-theta" width="20" height="160"></canvas>
         <div class="colorbar-labels" id="cb-theta-labels"></div>
       </div>
     </div>
     <div class="colorbar" id="cb-wvel-wrap">
       <div class="colorbar-title">w (m/s)</div>
       <div class="colorbar-body">
-        <canvas class="colorbar-canvas" id="cb-wvel" width="20" height="120"></canvas>
+        <canvas class="colorbar-canvas" id="cb-wvel" width="20" height="160"></canvas>
         <div class="colorbar-labels" id="cb-wvel-labels"></div>
       </div>
     </div>
     <div class="colorbar" id="cb-conv-wrap">
       <div class="colorbar-title">Convergence</div>
       <div class="colorbar-body">
-        <canvas class="colorbar-canvas" id="cb-conv" width="20" height="120"></canvas>
+        <canvas class="colorbar-canvas" id="cb-conv" width="20" height="160"></canvas>
         <div class="colorbar-labels" id="cb-conv-labels"></div>
       </div>
     </div>
