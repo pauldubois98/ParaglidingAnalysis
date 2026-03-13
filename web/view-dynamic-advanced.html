@@ -109,6 +109,20 @@
     }
     #panel-toggle:active { background: rgba(30,55,100,0.7); }
 
+    @media (max-width: 768px) {
+      #ui-panel {
+        top: auto; right: 0; left: 0; bottom: 0;
+        width: 100%; max-height: 72vh; max-height: 72dvh;
+        border-radius: 14px 14px 0 0;
+        transform: translateY(100%);
+      }
+      #ui-panel.open { transform: translateY(0); }
+      #panel-toggle.open { right: 8px; }
+    }
+    @media (max-width: 480px) {
+      #ui-panel { max-height: 60vh; }
+    }
+
     #colorbar-wrap { position: fixed; left: 16px; bottom: 20px; background: rgba(10,15,30,0.82); border: 1px solid rgba(100,160,255,0.2); border-radius: 8px; padding: 8px 10px; }
     #colorbar-title { text-align: center; margin-bottom: 5px; font-weight: bold; color: #7eb8ff; font-size: 10px; }
     #colorbar-body { display: flex; gap: 5px; align-items: stretch; }
