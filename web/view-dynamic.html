@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
-  <title>Wind View — 3-D SWE</title>
+  <title>Wind Flow — View</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: #040810; color: #e0e8f0; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
@@ -1206,6 +1206,7 @@ async function load() {
     // and whatever was built remains visible.
   } finally {
     // Always hide the overlay so the Three.js canvas is reachable.
+    document.getElementById('ui-panel').classList.add('open');
     loadingEl.style.display = 'none';
   }
 }
