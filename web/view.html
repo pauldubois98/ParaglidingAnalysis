@@ -36,19 +36,21 @@
       top: 52px;
       right: 8px;
       width: 250px;
-      background: rgba(10, 15, 30, 0.85);
-      border: 1px solid rgba(100, 160, 255, 0.3);
+      background: rgba(10,15,30,0.88);
+      border: 1px solid rgba(100,160,255,0.3);
       border-radius: 12px;
-      padding: 16px;
+      padding: 14px 16px;
       backdrop-filter: blur(8px);
       transform: translateX(calc(100% + 20px));
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
       max-height: calc(100vh - 68px);
       overflow-y: auto;
       z-index: 1;
     }
+    #ui-panel::-webkit-scrollbar { width: 4px; }
+    #ui-panel::-webkit-scrollbar-thumb { background: rgba(100,160,255,0.2); border-radius: 2px; }
 
-    #ui-panel.panel-open {
+    #ui-panel.open {
       transform: translateX(0);
     }
 
@@ -57,8 +59,22 @@
       color: #7eb8ff;
       text-transform: uppercase;
       letter-spacing: 1px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
+
+    .section-title {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1.5px; color: #3a6080;
+      margin: 12px 0 6px;
+      border-bottom: 1px solid rgba(100,160,255,0.1); padding-bottom: 3px;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    .ctrl-label {
+      display: flex; justify-content: space-between;
+      font-size: 11px; color: #99b8d0; margin-bottom: 4px;
+    }
+    .ctrl-label span { color: #7eb8ff; font-weight: 600; }
 
     .control-group {
       margin-bottom: 12px;
@@ -77,24 +93,7 @@
       font-weight: bold;
     }
 
-    input[type="range"] {
-      width: 100%;
-      appearance: none;
-      -webkit-appearance: none;
-      height: 4px;
-      background: rgba(100, 160, 255, 0.2);
-      border-radius: 2px;
-      outline: none;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #7eb8ff;
-      cursor: pointer;
-    }
+    input[type="range"] { width: 100%; accent-color: #7eb8ff; cursor: pointer; }
 
     .scenario-btn {
       display: inline-block;
@@ -435,7 +434,7 @@
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      #ui-panel.panel-open {
+      #ui-panel.open {
         transform: translateY(0);
       }
 
@@ -504,7 +503,7 @@
     </div>
   </div>
 
-  <div id="ui-panel" class="panel-open">
+  <div id="ui-panel" class="open">
     <h2>Thermal Flow</h2>
 
     <div class="control-group">
@@ -607,7 +606,7 @@
   </nav>
 
   <button id="panel-toggle"
-    onclick="const p=document.getElementById('ui-panel');p.classList.toggle('panel-open');this.textContent=p.classList.contains('panel-open')?'✕':'☰';"
+    onclick="const p=document.getElementById('ui-panel');p.classList.toggle('open');this.textContent=p.classList.contains('open')?'✕':'☰';"
     title="Toggle controls">✕</button>
 
   <div id="colorbars">
