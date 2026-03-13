@@ -852,6 +852,7 @@
       if (globalMaxW < 0.01) globalMaxW = 1;
 
       buildTerrain(T);
+      buildNorthArrow();
       buildOverlay(T, 'theta');
       buildOverlay(T, 'wvel');
       buildOverlay(T, 'conv');
@@ -1359,6 +1360,63 @@
         obj._labelDiv.style.top = ((-pos.y * 0.5 + 0.5) * rect.height + rect.top) + 'px';
         obj._labelDiv.style.display = pos.z > 1 ? 'none' : 'block';
       });
+    }
+
+    // ─── North Arrow ────────────────────────────────────────────────────────────
+    const northArrowObjects = [];
+    function buildNorthArrow() {
+      northArrowObjects.forEach(o => { scene.remove(o); if (o.material?.map) o.material.map.dispose(); });
+      northArrowObjects.length = 0;
+
+      const T   = simData.terrain;
+      const xw  = T.x_extent[1] - T.x_extent[0];
+      const yh  = T.y_extent[1] - T.y_extent[0];
+      const cx  = (T.x_extent[0] + T.x_extent[1]) / 2;
+      const cy  = -(T.y_extent[0] + T.y_extent[1]) / 2;
+
+      const halfH      = yh;
+      const shaftHalfW = xw * 0.055;
+      const headHalfW  = xw * 0.14;
+      const headH      = halfH * 0.4;
+      const bboxW      = headHalfW * 2;
+      const bboxH      = halfH * 2;
+
+      const CW = 512, CH = Math.round(CW * bboxH / bboxW);
+      const cv = document.createElement('canvas');
+      cv.width = CW; cv.height = CH;
+      const ctx = cv.getContext('2d');
+      function tc(x, y) { return [(x / bboxW + 0.5) * CW, (0.5 - y / bboxH) * CH]; }
+
+      const pts = [
+        [-shaftHalfW, -halfH], [ shaftHalfW, -halfH],
+        [ shaftHalfW,  halfH - headH], [ headHalfW,  halfH - headH],
+        [ 0,           halfH],
+        [-headHalfW,   halfH - headH], [-shaftHalfW,  halfH - headH],
+      ];
+      ctx.beginPath();
+      ctx.moveTo(...tc(pts[0][0], pts[0][1]));
+      for (let i = 1; i < pts.length; i++) ctx.lineTo(...tc(pts[i][0], pts[i][1]));
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(238,34,34,0.55)';
+      ctx.fill();
+
+      const shaftCY = (-halfH + halfH - headH) / 2;
+      const [tx, ty] = tc(0, shaftCY);
+      const fontSize = Math.round(CW * (2 * shaftHalfW / bboxW) * 0.42);
+      ctx.font = `bold ${fontSize}px 'Segoe UI', sans-serif`;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0,0,0,0.95)'; ctx.shadowBlur = fontSize * 0.3;
+      ctx.fillStyle = 'rgb(238,34,34)';
+      ctx.fillText('North', tx, ty);
+
+      const texture = new THREE.CanvasTexture(cv);
+      const mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(bboxW, bboxH),
+        new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, depthWrite: false })
+      );
+      mesh.position.set(cx, cy, terrainZMin - 500);
+      scene.add(mesh);
+      northArrowObjects.push(mesh);
     }
 
     let markersMade = false;
