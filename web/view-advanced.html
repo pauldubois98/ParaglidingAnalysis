@@ -265,7 +265,7 @@
       display: block;
     }
 
-    .cb-title {
+    .colorbar-title {
       font-size: 10px;
       font-weight: bold;
       color: #7eb8ff;
@@ -273,13 +273,18 @@
       margin-bottom: 5px;
     }
 
-    .cb-body {
+    .colorbar-body {
       display: flex;
       gap: 5px;
       align-items: stretch;
     }
 
-    .cb-labels {
+    .colorbar-canvas {
+      border-radius: 3px;
+      border: 1px solid rgba(100, 160, 255, 0.15);
+    }
+
+    .colorbar-labels {
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -419,7 +424,7 @@
       #info-panel { width: 180px; font-size: 11px; }
       .info-row { font-size: 10px; }
       #colorbars { bottom: 10px; left: 8px; gap: 6px; }
-      .cb-label { font-size: 9px; }
+      .colorbar-labels { font-size: 8px; }
       .nav-logo span { display: none; }
       .nav-link { padding: 5px 6px; font-size: 11px; }
       #panel-toggle { top: 52px; }
@@ -562,31 +567,31 @@
 
   <div id="colorbars">
     <div class="colorbar" id="cb-elev-wrap">
-      <div class="cb-title">Elevation (m)</div>
-      <div class="cb-body">
-        <canvas id="cb-elev" width="20" height="120"></canvas>
-        <div class="cb-labels" id="cb-elev-labels"></div>
+      <div class="colorbar-title">Elevation (m)</div>
+      <div class="colorbar-body">
+        <canvas class="colorbar-canvas" id="cb-elev" width="20" height="120"></canvas>
+        <div class="colorbar-labels" id="cb-elev-labels"></div>
       </div>
     </div>
     <div class="colorbar" id="cb-theta-wrap">
-      <div class="cb-title">θ' (K)</div>
-      <div class="cb-body">
-        <canvas id="cb-theta" width="20" height="120"></canvas>
-        <div class="cb-labels" id="cb-theta-labels"></div>
+      <div class="colorbar-title">θ' (K)</div>
+      <div class="colorbar-body">
+        <canvas class="colorbar-canvas" id="cb-theta" width="20" height="120"></canvas>
+        <div class="colorbar-labels" id="cb-theta-labels"></div>
       </div>
     </div>
     <div class="colorbar" id="cb-wvel-wrap">
-      <div class="cb-title">w (m/s)</div>
-      <div class="cb-body">
-        <canvas id="cb-wvel" width="20" height="120"></canvas>
-        <div class="cb-labels" id="cb-wvel-labels"></div>
+      <div class="colorbar-title">w (m/s)</div>
+      <div class="colorbar-body">
+        <canvas class="colorbar-canvas" id="cb-wvel" width="20" height="120"></canvas>
+        <div class="colorbar-labels" id="cb-wvel-labels"></div>
       </div>
     </div>
     <div class="colorbar" id="cb-conv-wrap">
-      <div class="cb-title">Convergence</div>
-      <div class="cb-body">
-        <canvas id="cb-conv" width="20" height="120"></canvas>
-        <div class="cb-labels" id="cb-conv-labels"></div>
+      <div class="colorbar-title">Convergence</div>
+      <div class="colorbar-body">
+        <canvas class="colorbar-canvas" id="cb-conv" width="20" height="120"></canvas>
+        <div class="colorbar-labels" id="cb-conv-labels"></div>
       </div>
     </div>
   </div>
