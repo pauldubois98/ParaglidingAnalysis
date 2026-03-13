@@ -22,6 +22,7 @@
       width: 100vw;
     }
 
+
     #console-area {
       position: absolute;
       inset: 44px 366px 28px 0;
@@ -440,6 +441,10 @@
       color: #7eb8ff;
       font-size: 14px;
     }
+
+    .hidden {
+      display: none;
+    }
   </style>
 </head>
 
@@ -509,42 +514,6 @@
       </div>
 
       <div id="panel-body">
-
-        <div class="section-title">Area</div>
-        <div class="grid-2">
-          <div><label class="field-label">Max lat (N)</label><input type="number" id="max_lat" step="0.0001"
-              value="43.014963"></div>
-          <div><label class="field-label">Min lat (S)</label><input type="number" id="min_lat" step="0.0001"
-              value="42.961061"></div>
-          <div><label class="field-label">Min lon (W)</label><input type="number" id="min_lon" step="0.0001"
-              value="0.838481"></div>
-          <div><label class="field-label">Max lon (E)</label><input type="number" id="max_lon" step="0.0001"
-              value="0.933902"></div>
-        </div>
-        <div class="grid-2">
-          <div>
-            <label class="field-label">Sim zoom</label>
-            <input type="number" id="sim_zoom" min="10" max="12" step="1" value="11">
-          </div>
-          <div>
-            <label class="field-label">Mesh zoom</label>
-            <input type="number" id="mesh_zoom" min="11" max="14" step="1" value="13">
-          </div>
-        </div>
-        <div class="field-hint">Sim zoom 11 ≈ 56 m/px. Mesh zoom for 3-D viewer only.</div>
-
-        <div class="section-title">Markers</div>
-        <div class="grid-2">
-          <div><label class="field-label">Takeoff lat</label><input type="number" id="takeoff_lat" step="0.00001"
-              value="42.96940"></div>
-          <div><label class="field-label">Takeoff lon</label><input type="number" id="takeoff_lon" step="0.00001"
-              value="0.88594"></div>
-          <div><label class="field-label">Landing lat</label><input type="number" id="landing_lat" step="0.00001"
-              value="42.99216"></div>
-          <div><label class="field-label">Landing lon</label><input type="number" id="landing_lon" step="0.00001"
-              value="0.90398"></div>
-        </div>
-
         <div class="section-title">Ambient Wind</div>
         <div id="compass-wrap">
           <svg id="compass-svg" width="60" height="60" viewBox="-30 -30 60 60" onmousedown="compassDrag(event)"
@@ -570,6 +539,41 @@
         <label class="field-label">Wind speed (m/s)</label>
         <input type="number" id="wind_speed" step="0.5" min="0" max="40" value="8" oninput="updateCompassDisplay()">
         <div class="field-hint">Ambient far-field speed. Inflow applied on all upwind boundaries.</div>
+
+        <div class="section-title hidden">Area</div>
+        <div class="grid-2 hidden">
+          <div><label class="field-label">Max lat (N)</label><input type="number" id="max_lat" step="0.0001"
+              value="43.014963"></div>
+          <div><label class="field-label">Min lat (S)</label><input type="number" id="min_lat" step="0.0001"
+              value="42.961061"></div>
+          <div><label class="field-label">Min lon (W)</label><input type="number" id="min_lon" step="0.0001"
+              value="0.838481"></div>
+          <div><label class="field-label">Max lon (E)</label><input type="number" id="max_lon" step="0.0001"
+              value="0.933902"></div>
+        </div>
+        <div class="grid-2 hidden">
+          <div>
+            <label class="field-label">Sim zoom</label>
+            <input type="number" id="sim_zoom" min="10" max="12" step="1" value="11">
+          </div>
+          <div>
+            <label class="field-label">Mesh zoom</label>
+            <input type="number" id="mesh_zoom" min="11" max="14" step="1" value="13">
+          </div>
+        </div>
+        <div class="field-hint">Sim zoom 11 ≈ 56 m/px. Mesh zoom for 3-D viewer only.</div>
+
+        <div class="section-title hidden">Markers</div>
+        <div class="grid-2 hidden">
+          <div><label class="field-label">Takeoff lat</label><input type="number" id="takeoff_lat" step="0.00001"
+              value="42.96940"></div>
+          <div><label class="field-label">Takeoff lon</label><input type="number" id="takeoff_lon" step="0.00001"
+              value="0.88594"></div>
+          <div><label class="field-label">Landing lat</label><input type="number" id="landing_lat" step="0.00001"
+              value="42.99216"></div>
+          <div><label class="field-label">Landing lon</label><input type="number" id="landing_lon" step="0.00001"
+              value="0.90398"></div>
+        </div>
 
         <div class="section-title">Atmospheric Layer</div>
         <div class="grid-2">
