@@ -105,18 +105,25 @@
       right: 8px;
       z-index: 1;
       width: 250px;
-      background: rgba(10,15,30,0.88);
-      border: 1px solid rgba(100,160,255,0.3);
+      background: rgba(10, 15, 30, 0.88);
+      border: 1px solid rgba(100, 160, 255, 0.3);
       border-radius: 12px;
       padding: 14px 16px;
       backdrop-filter: blur(8px);
       max-height: calc(100vh - 68px);
       overflow-y: auto;
       transform: translateX(calc(100% + 20px));
-      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    #ui-panel::-webkit-scrollbar { width: 4px; }
-    #ui-panel::-webkit-scrollbar-thumb { background: rgba(100,160,255,0.2); border-radius: 2px; }
+
+    #ui-panel::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #ui-panel::-webkit-scrollbar-thumb {
+      background: rgba(100, 160, 255, 0.2);
+      border-radius: 2px;
+    }
 
     #ui-panel.open {
       transform: translateX(0);
@@ -147,7 +154,11 @@
       font-weight: bold;
     }
 
-    input[type=range] { width: 100%; accent-color: #7eb8ff; cursor: pointer; }
+    input[type=range] {
+      width: 100%;
+      accent-color: #7eb8ff;
+      cursor: pointer;
+    }
 
     .sec {
       font-size: 10px;
@@ -167,15 +178,38 @@
     }
 
     /* ── Preset buttons ── */
-    .tab-row { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 8px; }
-    .tab-btn {
-      flex: 1; padding: 4px 5px;
-      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
-      border-radius: 10px; border: 1px solid rgba(100,160,255,.25);
-      color: #4a6888; background: transparent; cursor: pointer; transition: .15s;
+    .tab-row {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
     }
-    .tab-btn.active { color: #7eb8ff; border-color: rgba(100,160,255,.6); background: rgba(100,160,255,.12); }
-    .tab-btn:hover:not(.active) { color: #90b8d8; background: rgba(100,160,255,.08); }
+
+    .tab-btn {
+      flex: 1;
+      padding: 4px 5px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      border-radius: 10px;
+      border: 1px solid rgba(100, 160, 255, .25);
+      color: #4a6888;
+      background: transparent;
+      cursor: pointer;
+      transition: .15s;
+    }
+
+    .tab-btn.active {
+      color: #7eb8ff;
+      border-color: rgba(100, 160, 255, .6);
+      background: rgba(100, 160, 255, .12);
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, .08);
+    }
 
 
     /* ── Visibility control ── */
@@ -415,19 +449,53 @@
         transform: translateY(0);
       }
 
-      #colorbars { max-width: calc(100vw - 32px); }
-      #panel-toggle.open { right: 8px; } /* button stays put when panel slides up from bottom */
+      #colorbars {
+        max-width: calc(100vw - 32px);
+      }
+
+      #panel-toggle.open {
+        right: 8px;
+      }
+
+      /* button stays put when panel slides up from bottom */
     }
 
     @media (max-width: 480px) {
-      #ui-panel { max-height: 60vh; }
-      #info-panel { width: 180px; font-size: 11px; }
-      .info-row { font-size: 10px; }
-      #colorbars { bottom: 10px; left: 8px; gap: 6px; }
-      .colorbar-labels { font-size: 8px; }
-      .nav-logo span { display: none; }
-      .nav-link { padding: 5px 6px; font-size: 11px; }
-      #panel-toggle { top: 52px; }
+      #ui-panel {
+        max-height: 60vh;
+      }
+
+      #info-panel {
+        width: 180px;
+        font-size: 11px;
+      }
+
+      .info-row {
+        font-size: 10px;
+      }
+
+      #colorbars {
+        bottom: 10px;
+        left: 8px;
+        gap: 6px;
+      }
+
+      .colorbar-labels {
+        font-size: 8px;
+      }
+
+      .nav-logo span {
+        display: none;
+      }
+
+      .nav-link {
+        padding: 5px 6px;
+        font-size: 11px;
+      }
+
+      #panel-toggle {
+        top: 52px;
+      }
     }
   </style>
 </head>
@@ -1368,18 +1436,18 @@
       northArrowObjects.forEach(o => { scene.remove(o); if (o.material?.map) o.material.map.dispose(); });
       northArrowObjects.length = 0;
 
-      const T   = simData.terrain;
-      const xw  = T.x_extent[1] - T.x_extent[0];
-      const yh  = T.y_extent[1] - T.y_extent[0];
-      const cx  = (T.x_extent[0] + T.x_extent[1]) / 2;
-      const cy  = -(T.y_extent[0] + T.y_extent[1]) / 2;
+      const T = simData.terrain;
+      const xw = T.x_extent[1] - T.x_extent[0];
+      const yh = T.y_extent[1] - T.y_extent[0];
+      const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
+      const cy = -(T.y_extent[0] + T.y_extent[1]) / 2;
 
-      const halfH      = yh;
+      const halfH = yh;
       const shaftHalfW = xw * 0.055;
-      const headHalfW  = xw * 0.14;
-      const headH      = halfH * 0.4;
-      const bboxW      = headHalfW * 2;
-      const bboxH      = halfH * 2;
+      const headHalfW = xw * 0.14;
+      const headH = halfH * 0.4;
+      const bboxW = headHalfW * 2;
+      const bboxH = halfH * 2;
 
       const CW = 512, CH = Math.round(CW * bboxH / bboxW);
       const cv = document.createElement('canvas');
@@ -1388,10 +1456,10 @@
       function tc(x, y) { return [(x / bboxW + 0.5) * CW, (0.5 - y / bboxH) * CH]; }
 
       const pts = [
-        [-shaftHalfW, -halfH], [ shaftHalfW, -halfH],
-        [ shaftHalfW,  halfH - headH], [ headHalfW,  halfH - headH],
-        [ 0,           halfH],
-        [-headHalfW,   halfH - headH], [-shaftHalfW,  halfH - headH],
+        [-shaftHalfW, -halfH], [shaftHalfW, -halfH],
+        [shaftHalfW, halfH - headH], [headHalfW, halfH - headH],
+        [0, halfH],
+        [-headHalfW, halfH - headH], [-shaftHalfW, halfH - headH],
       ];
       ctx.beginPath();
       ctx.moveTo(...tc(pts[0][0], pts[0][1]));

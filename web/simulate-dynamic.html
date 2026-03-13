@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
   <title>Wind Flow — Simulation</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
     body {
       background: #0a0f1a;
@@ -24,6 +29,7 @@
       flex-direction: column;
       padding: 16px;
     }
+
     #log-output {
       flex: 1;
       overflow-y: auto;
@@ -35,11 +41,27 @@
       border: 1px solid rgba(100, 160, 255, 0.15);
       border-radius: 8px;
     }
-    #log-output .log-info    { color: #5588aa; }
-    #log-output .log-success { color: #30c870; }
-    #log-output .log-warn    { color: #c8a040; }
-    #log-output .log-error   { color: #cc4444; }
-    .log-ts { color: #334455; margin-right: 6px; }
+
+    #log-output .log-info {
+      color: #5588aa;
+    }
+
+    #log-output .log-success {
+      color: #30c870;
+    }
+
+    #log-output .log-warn {
+      color: #c8a040;
+    }
+
+    #log-output .log-error {
+      color: #cc4444;
+    }
+
+    .log-ts {
+      color: #334455;
+      margin-right: 6px;
+    }
 
     #progress-wrap {
       margin-top: 10px;
@@ -48,6 +70,7 @@
       border-radius: 3px;
       overflow: hidden;
     }
+
     #progress-bar {
       height: 100%;
       width: 0%;
@@ -111,7 +134,9 @@
 
     #status-bar {
       position: absolute;
-      bottom: 0; left: 0; right: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
       height: 28px;
       background: rgba(5, 8, 18, 0.9);
       border-top: 1px solid rgba(100, 160, 255, 0.15);
@@ -125,38 +150,90 @@
     /* ── Right panel ── */
     #settings-area {
       position: absolute;
-      top: 44px; right: 16px;
-      width: 350px; bottom: 32px;
-      display: flex; flex-direction: column;
+      top: 44px;
+      right: 16px;
+      width: 350px;
+      bottom: 32px;
+      display: flex;
+      flex-direction: column;
       padding: 16px;
     }
+
     #ui-panel {
       background: rgba(10, 15, 30, 0.88);
       border: 1px solid rgba(100, 160, 255, 0.3);
       border-radius: 12px;
       backdrop-filter: blur(8px);
-      display: flex; flex-direction: column;
+      display: flex;
+      flex-direction: column;
       overflow: hidden;
     }
-    #panel-header { padding: 14px 16px 10px; border-bottom: 1px solid rgba(100, 160, 255, 0.15); flex-shrink: 0; }
-    #panel-header h2 { font-size: 14px; color: #7eb8ff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-    #panel-header .subtitle { font-size: 10px; color: #3a6080; }
-    #panel-body { flex: 1; overflow-y: auto; padding: 12px 16px; }
-    #panel-body::-webkit-scrollbar { width: 4px; }
-    #panel-body::-webkit-scrollbar-thumb { background: rgba(100, 160, 255, 0.2); border-radius: 2px; }
+
+    #panel-header {
+      padding: 14px 16px 10px;
+      border-bottom: 1px solid rgba(100, 160, 255, 0.15);
+      flex-shrink: 0;
+    }
+
+    #panel-header h2 {
+      font-size: 14px;
+      color: #7eb8ff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    #panel-header .subtitle {
+      font-size: 10px;
+      color: #3a6080;
+    }
+
+    #panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px 16px;
+    }
+
+    #panel-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #panel-body::-webkit-scrollbar-thumb {
+      background: rgba(100, 160, 255, 0.2);
+      border-radius: 2px;
+    }
 
     .section-title {
-      font-size: 10px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 1.5px; color: #3a6080;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #3a6080;
       margin: 14px 0 6px;
       border-bottom: 1px solid rgba(100, 160, 255, 0.1);
       padding-bottom: 4px;
     }
-    .section-title:first-child { margin-top: 0; }
-    .field-label { font-size: 11px; color: #99b8d0; margin-bottom: 2px; display: block; }
-    .field-hint  { font-size: 10px; color: #3a6080; margin-bottom: 8px; line-height: 1.4; }
 
-    input[type="number"], input[type="range"] {
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    .field-label {
+      font-size: 11px;
+      color: #99b8d0;
+      margin-bottom: 2px;
+      display: block;
+    }
+
+    .field-hint {
+      font-size: 10px;
+      color: #3a6080;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+
+    input[type="number"],
+    input[type="range"] {
       width: 100%;
       background: rgba(100, 160, 255, 0.07);
       border: 1px solid rgba(100, 160, 255, 0.2);
@@ -167,790 +244,940 @@
       outline: none;
       margin-bottom: 2px;
     }
-    input[type="range"]  { padding: 4px 2px; accent-color: #7eb8ff; cursor: pointer; }
-    input[type="number"]:focus { border-color: rgba(100, 160, 255, 0.5); }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 2px; }
-    .grid-2 .field-label { font-size: 10px; }
+
+    input[type="range"] {
+      padding: 4px 2px;
+      accent-color: #7eb8ff;
+      cursor: pointer;
+    }
+
+    input[type="number"]:focus {
+      border-color: rgba(100, 160, 255, 0.5);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .grid-2 .field-label {
+      font-size: 10px;
+    }
 
     #panel-footer {
       padding: 12px 16px 14px;
       border-top: 1px solid rgba(100, 160, 255, 0.15);
       flex-shrink: 0;
-      display: flex; flex-direction: column; gap: 7px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
     }
-    .footer-row { display: flex; gap: 6px; }
+
+    .footer-row {
+      display: flex;
+      gap: 6px;
+    }
+
     .btn {
-      flex: 1; display: inline-flex;
-      align-items: center; justify-content: center; gap: 6px;
-      padding: 7px 8px; font-size: 11px;
-      font-family: inherit; font-weight: 600;
-      border-radius: 20px; border: 1px solid;
-      cursor: pointer; letter-spacing: .2px;
-      white-space: nowrap; transition: .18s;
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 8px;
+      font-size: 11px;
+      font-family: inherit;
+      font-weight: 600;
+      border-radius: 20px;
+      border: 1px solid;
+      cursor: pointer;
+      letter-spacing: .2px;
+      white-space: nowrap;
+      transition: .18s;
     }
-    .btn:disabled { opacity: .32; cursor: not-allowed; }
-    .btn-fetch { color: #a0ceff; border-color: rgba(100,160,255,.35); background: rgba(100,160,255,.09); }
-    .btn-sim   { color: #7eb8ff; border-color: rgba(100,160,255,.28); background: rgba(100,160,255,.06); }
-    .btn-stop  { color: #ff8080; border-color: rgba(255,80,80,.35);   background: rgba(255,80,80,.09);  }
-    .btn-map   { color: #60e0a0; border-color: rgba(50,195,95,.35);   background: rgba(50,195,95,.09);  }
-    .btn-fetch:not(:disabled):hover { background: rgba(100,160,255,.2); border-color: rgba(100,160,255,.6); }
-    .btn-sim:not(:disabled):hover   { background: rgba(100,160,255,.2); border-color: rgba(100,160,255,.6); }
-    .btn-stop:not(:disabled):hover  { background: rgba(255,80,80,.2);   border-color: rgba(255,80,80,.6);  }
-    .btn-map:not(:disabled):hover   { background: rgba(50,195,95,.2);   border-color: rgba(50,195,95,.6);  }
+
+    .btn:disabled {
+      opacity: .32;
+      cursor: not-allowed;
+    }
+
+    .btn-fetch {
+      color: #a0ceff;
+      border-color: rgba(100, 160, 255, .35);
+      background: rgba(100, 160, 255, .09);
+    }
+
+    .btn-sim {
+      color: #7eb8ff;
+      border-color: rgba(100, 160, 255, .28);
+      background: rgba(100, 160, 255, .06);
+    }
+
+    .btn-stop {
+      color: #ff8080;
+      border-color: rgba(255, 80, 80, .35);
+      background: rgba(255, 80, 80, .09);
+    }
+
+    .btn-map {
+      color: #60e0a0;
+      border-color: rgba(50, 195, 95, .35);
+      background: rgba(50, 195, 95, .09);
+    }
+
+    .btn-fetch:not(:disabled):hover {
+      background: rgba(100, 160, 255, .2);
+      border-color: rgba(100, 160, 255, .6);
+    }
+
+    .btn-sim:not(:disabled):hover {
+      background: rgba(100, 160, 255, .2);
+      border-color: rgba(100, 160, 255, .6);
+    }
+
+    .btn-stop:not(:disabled):hover {
+      background: rgba(255, 80, 80, .2);
+      border-color: rgba(255, 80, 80, .6);
+    }
+
+    .btn-map:not(:disabled):hover {
+      background: rgba(50, 195, 95, .2);
+      border-color: rgba(50, 195, 95, .6);
+    }
 
     /* ── Nav ── */
     #header-nav {
-      position: fixed; top: 0; left: 0; right: 0; height: 44px;
-      z-index: 3000; display: flex; align-items: center;
-      padding: 0 12px; gap: 2px;
-      background: rgba(6,10,20,0.92);
-      border-bottom: 1px solid rgba(100,160,255,0.12);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 44px;
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 2px;
+      background: rgba(6, 10, 20, 0.92);
+      border-bottom: 1px solid rgba(100, 160, 255, 0.12);
       backdrop-filter: blur(14px);
     }
+
     .nav-logo {
-      display: flex; align-items: center; gap: 7px;
-      padding: 5px 9px; margin-right: 4px;
-      color: #7eb8ff; text-decoration: none;
-      font-size: 12px; font-weight: 600; border-radius: 6px;
-      white-space: nowrap; transition: background .15s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 9px;
+      margin-right: 4px;
+      color: #7eb8ff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: background .15s;
     }
-    .nav-logo img { width: 18px; height: 18px; filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg); }
-    .nav-logo:hover { background: rgba(100,160,255,.1); }
-    .nav-sep { width: 1px; height: 18px; background: rgba(100,160,255,.12); margin: 0 2px; }
-    .nav-link { padding: 5px 10px; color: #4a6888; text-decoration: none; font-size: 12px; border-radius: 6px; white-space: nowrap; transition: background .15s, color .15s; }
-    .nav-link:hover { color: #90b8d8; background: rgba(100,160,255,.08); }
-    .nav-link.nav-active { color: #7eb8ff; background: rgba(100,160,255,.1); font-weight: 500; }
+
+    .nav-logo img {
+      width: 18px;
+      height: 18px;
+      filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg);
+    }
+
+    .nav-logo:hover {
+      background: rgba(100, 160, 255, .1);
+    }
+
+    .nav-sep {
+      width: 1px;
+      height: 18px;
+      background: rgba(100, 160, 255, .12);
+      margin: 0 2px;
+    }
+
+    .nav-link {
+      padding: 5px 10px;
+      color: #4a6888;
+      text-decoration: none;
+      font-size: 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: background .15s, color .15s;
+    }
+
+    .nav-link:hover {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, .08);
+    }
+
+    .nav-link.nav-active {
+      color: #7eb8ff;
+      background: rgba(100, 160, 255, .1);
+      font-weight: 500;
+    }
 
     /* ── Compass widget ── */
-    #compass-wrap { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
-    #compass-svg { cursor: pointer; flex-shrink: 0; }
-    #compass-readout { font-size: 11px; color: #99b8d0; line-height: 1.7; }
-    #compass-readout strong { color: #7eb8ff; font-size: 14px; }
+    #compass-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    #compass-svg {
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    #compass-readout {
+      font-size: 11px;
+      color: #99b8d0;
+      line-height: 1.7;
+    }
+
+    #compass-readout strong {
+      color: #7eb8ff;
+      font-size: 14px;
+    }
   </style>
 </head>
 
 <body>
 
-<nav id="header-nav">
-  <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
-  <div class="nav-sep"></div>
-  <a href="area"             class="nav-link">Area</a>
-  <a href="simulate"         class="nav-link">Simulate</a>
-  <a href="simulate-advanced" class="nav-link">Simulate NS</a>
-  <a href="simulate-dynamic" class="nav-link nav-active">Wind SWE</a>
-  <a href="view"             class="nav-link">View</a>
-  <a href="view-dynamic"     class="nav-link">Wind View</a>
-  <a href="about"            class="nav-link">About</a>
-</nav>
+  <nav id="header-nav">
+    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+    <div class="nav-sep"></div>
+    <a href="area" class="nav-link">Area</a>
+    <a href="simulate" class="nav-link">Simulate</a>
+    <a href="simulate-advanced" class="nav-link">Simulate NS</a>
+    <a href="simulate-dynamic" class="nav-link nav-active">Wind SWE</a>
+    <a href="view" class="nav-link">View</a>
+    <a href="view-dynamic" class="nav-link">Wind View</a>
+    <a href="about" class="nav-link">About</a>
+  </nav>
 
-<!-- ═══════════════ CONSOLE ═══════════════ -->
-<div id="console-area">
-  <div id="log-output">
-    <div class="log-info"><span class="log-ts">00:00:00</span>Ready — configure parameters and click <strong>Fetch Terrain</strong>.</div>
-  </div>
-  <div id="progress-wrap"><div id="progress-bar"></div></div>
-
-  <div id="plots-area">
-    <div class="plot-box">
-      <div class="plot-title">Elevation (DEM)</div>
-      <canvas id="plot-elev"></canvas>
+  <!-- ═══════════════ CONSOLE ═══════════════ -->
+  <div id="console-area">
+    <div id="log-output">
+      <div class="log-info"><span class="log-ts">00:00:00</span>Ready — configure parameters and click <strong>Fetch
+          Terrain</strong>.</div>
     </div>
-  </div>
-
-  <div id="sim-plots-area">
-    <div class="plot-box">
-      <div class="plot-title">Wind Speed (m/s)</div>
-      <canvas id="plot-speed"></canvas>
-    </div>
-    <div class="plot-box">
-      <div class="plot-title">Froude Number</div>
-      <canvas id="plot-froude"></canvas>
-    </div>
-    <div class="plot-box">
-      <div class="plot-title">Flow Depth (m)</div>
-      <canvas id="plot-depth"></canvas>
-    </div>
-    <div class="plot-box">
-      <div class="plot-title">Vorticity (1/s)</div>
-      <canvas id="plot-vort"></canvas>
-    </div>
-    <div class="plot-box">
-      <div class="plot-title">Vertical Wind (m/s)</div>
-      <canvas id="plot-vert"></canvas>
-    </div>
-  </div>
-</div>
-
-<div id="status-bar">Idle</div>
-
-<!-- ═══════════════ RIGHT PANEL ═══════════════ -->
-<div id="settings-area">
-  <div id="ui-panel">
-    <div id="panel-header">
-      <h2>Wind Flow — SWE</h2>
-      <div class="subtitle">2-D Shallow-Water Equations · wind on terrain</div>
+    <div id="progress-wrap">
+      <div id="progress-bar"></div>
     </div>
 
-    <div id="panel-body">
-
-      <div class="section-title">Area</div>
-      <div class="grid-2">
-        <div><label class="field-label">Max lat (N)</label><input type="number" id="max_lat" step="0.0001" value="43.014963"></div>
-        <div><label class="field-label">Min lat (S)</label><input type="number" id="min_lat" step="0.0001" value="42.961061"></div>
-        <div><label class="field-label">Min lon (W)</label><input type="number" id="min_lon" step="0.0001" value="0.838481"></div>
-        <div><label class="field-label">Max lon (E)</label><input type="number" id="max_lon" step="0.0001" value="0.933902"></div>
+    <div id="plots-area">
+      <div class="plot-box">
+        <div class="plot-title">Elevation (DEM)</div>
+        <canvas id="plot-elev"></canvas>
       </div>
-      <div class="grid-2">
-        <div>
-          <label class="field-label">Sim zoom</label>
-          <input type="number" id="sim_zoom" min="10" max="12" step="1" value="11">
-        </div>
-        <div>
-          <label class="field-label">Mesh zoom</label>
-          <input type="number" id="mesh_zoom" min="11" max="14" step="1" value="13">
-        </div>
-      </div>
-      <div class="field-hint">Sim zoom 11 ≈ 56 m/px. Mesh zoom for 3-D viewer only.</div>
-
-      <div class="section-title">Markers</div>
-      <div class="grid-2">
-        <div><label class="field-label">Takeoff lat</label><input type="number" id="takeoff_lat" step="0.00001" value="42.96940"></div>
-        <div><label class="field-label">Takeoff lon</label><input type="number" id="takeoff_lon" step="0.00001" value="0.88594"></div>
-        <div><label class="field-label">Landing lat</label><input type="number" id="landing_lat" step="0.00001" value="42.99216"></div>
-        <div><label class="field-label">Landing lon</label><input type="number" id="landing_lon" step="0.00001" value="0.90398"></div>
-      </div>
-
-      <div class="section-title">Ambient Wind</div>
-      <div id="compass-wrap">
-        <svg id="compass-svg" width="60" height="60" viewBox="-30 -30 60 60"
-             onmousedown="compassDrag(event)" ontouchstart="compassDrag(event)">
-          <circle r="28" fill="rgba(100,160,255,.06)" stroke="rgba(100,160,255,.25)" stroke-width="1"/>
-          <line x1="0" y1="-22" x2="0" y2="22" stroke="rgba(100,160,255,.12)" stroke-width="1"/>
-          <line x1="-22" y1="0" x2="22" y2="0"  stroke="rgba(100,160,255,.12)" stroke-width="1"/>
-          <text y="-17" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">N</text>
-          <text y="22"  text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">S</text>
-          <text x="21"  y="2" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">E</text>
-          <text x="-21" y="2" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">W</text>
-          <g id="compass-arrow">
-            <polygon points="0,-21 3.5,-9 0,-13 -3.5,-9" fill="#7eb8ff" opacity=".9"/>
-            <polygon points="0,21  3.5,9  0,13  -3.5,9"  fill="#3a6080" opacity=".6"/>
-          </g>
-        </svg>
-        <div id="compass-readout">
-          <strong id="wind-dir-val">210°</strong> from SW<br>
-          U = <span id="wind-u-val">+6.1</span> m/s &nbsp; V = <span id="wind-v-val">+5.3</span> m/s<br>
-          <span style="color:#3a6080;font-size:10px">Drag the compass to change</span>
-        </div>
-      </div>
-      <label class="field-label">Wind speed (m/s)</label>
-      <input type="number" id="wind_speed" step="0.5" min="0" max="40" value="8" oninput="updateCompassDisplay()">
-      <div class="field-hint">Ambient far-field speed. Inflow applied on all upwind boundaries.</div>
-
-      <div class="section-title">Atmospheric Layer</div>
-      <div class="grid-2">
-        <div>
-          <label class="field-label">Layer depth H₀ (m)</label>
-          <input type="number" id="init_h" step="50" min="50" max="5000" value="500">
-        </div>
-        <div>
-          <label class="field-label">Red. gravity g′ (m/s²)</label>
-          <input type="number" id="g_prime" step="0.005" min="0.005" max="1" value="0.05">
-        </div>
-      </div>
-      <div class="field-hint">Mountains taller than H₀ block flow. g′ controls wave speed and hydraulic-jump Froude.</div>
-
-      <div class="section-title">Friction &amp; Diffusion</div>
-      <div class="grid-2">
-        <div>
-          <label class="field-label">Drag C<sub>d</sub></label>
-          <input type="number" id="drag_cd" step="0.0005" min="0" max="0.05" value="0.003">
-        </div>
-        <div>
-          <label class="field-label">Viscosity ν (m²/s)</label>
-          <input type="number" id="visc" step="10" min="0" max="2000" value="100">
-        </div>
-      </div>
-      <div class="field-hint">C<sub>d</sub> = bottom roughness. ν = turbulent diffusion (prevents sharp shocks).</div>
-
-      <div class="section-title">Solver</div>
-      <div class="grid-2">
-        <div>
-          <label class="field-label">Sim time (s)</label>
-          <input type="number" id="sim_time" step="300" min="300" max="14400" value="3600">
-        </div>
-        <div>
-          <label class="field-label">CFL factor</label>
-          <input type="number" id="cfl" step="0.05" min="0.1" max="0.85" value="0.45">
-        </div>
-      </div>
-      <div class="field-hint">3600 s ≈ 5 domain transit times at 8 m/s → near-steady state.</div>
-
-      <div class="section-title">Output</div>
-      <label class="field-label">Arrow step (px)</label>
-      <input type="number" id="arrow_step" step="1" min="4" max="30" value="10">
-      <div class="field-hint">Plot arrow density — every N-th sim cell.</div>
-
     </div>
 
-    <div id="panel-footer">
-      <div class="footer-row">
-        <button class="btn btn-fetch" id="btn-fetch" onclick="runFetch()">Fetch Terrain</button>
-        <button class="btn btn-sim"   id="btn-sim"   onclick="runSim()" disabled>Run Simulation</button>
+    <div id="sim-plots-area">
+      <div class="plot-box">
+        <div class="plot-title">Wind Speed (m/s)</div>
+        <canvas id="plot-speed"></canvas>
       </div>
-      <div class="footer-row">
-        <button class="btn btn-stop" id="btn-stop" onclick="stopSim()" disabled>Stop</button>
-        <button class="btn btn-map"  id="btn-map"  onclick="openViewer()" disabled>Open Viewer</button>
+      <div class="plot-box">
+        <div class="plot-title">Froude Number</div>
+        <canvas id="plot-froude"></canvas>
+      </div>
+      <div class="plot-box">
+        <div class="plot-title">Flow Depth (m)</div>
+        <canvas id="plot-depth"></canvas>
+      </div>
+      <div class="plot-box">
+        <div class="plot-title">Vorticity (1/s)</div>
+        <canvas id="plot-vort"></canvas>
+      </div>
+      <div class="plot-box">
+        <div class="plot-title">Vertical Wind (m/s)</div>
+        <canvas id="plot-vert"></canvas>
       </div>
     </div>
   </div>
-</div>
 
-<script>
-// ═══════════════════════════════════════════════════════════════════
-//  UI UTILITIES
-// ═══════════════════════════════════════════════════════════════════
+  <div id="status-bar">Idle</div>
 
-let _stopRequested = false;
-const yieldUI = async () => {
-  await new Promise(r => setTimeout(r, 0));
-  if (_stopRequested) throw new Error('__STOPPED__');
-};
+  <!-- ═══════════════ RIGHT PANEL ═══════════════ -->
+  <div id="settings-area">
+    <div id="ui-panel">
+      <div id="panel-header">
+        <h2>Wind Flow — SWE</h2>
+        <div class="subtitle">2-D Shallow-Water Equations · wind on terrain</div>
+      </div>
 
-const logEl      = document.getElementById('log-output');
-const statusEl   = document.getElementById('status-bar');
-const progressEl = document.getElementById('progress-bar');
+      <div id="panel-body">
 
-function ts() {
-  const d = new Date();
-  return [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2,'0')).join(':');
-}
-function log(msg, level = 'info') {
-  const div = document.createElement('div');
-  div.className = `log-${level}`;
-  div.innerHTML = `<span class="log-ts">${ts()}</span>${msg}`;
-  logEl.appendChild(div);
-  logEl.scrollTop = logEl.scrollHeight;
-}
-function setStatus(msg) { statusEl.textContent = msg; }
-function setProgress(f)  { progressEl.style.width = (Math.min(1, Math.max(0, f)) * 100) + '%'; }
+        <div class="section-title">Area</div>
+        <div class="grid-2">
+          <div><label class="field-label">Max lat (N)</label><input type="number" id="max_lat" step="0.0001"
+              value="43.014963"></div>
+          <div><label class="field-label">Min lat (S)</label><input type="number" id="min_lat" step="0.0001"
+              value="42.961061"></div>
+          <div><label class="field-label">Min lon (W)</label><input type="number" id="min_lon" step="0.0001"
+              value="0.838481"></div>
+          <div><label class="field-label">Max lon (E)</label><input type="number" id="max_lon" step="0.0001"
+              value="0.933902"></div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">Sim zoom</label>
+            <input type="number" id="sim_zoom" min="10" max="12" step="1" value="11">
+          </div>
+          <div>
+            <label class="field-label">Mesh zoom</label>
+            <input type="number" id="mesh_zoom" min="11" max="14" step="1" value="13">
+          </div>
+        </div>
+        <div class="field-hint">Sim zoom 11 ≈ 56 m/px. Mesh zoom for 3-D viewer only.</div>
 
-// ═══════════════════════════════════════════════════════════════════
-//  COMPASS WIDGET
-// ═══════════════════════════════════════════════════════════════════
+        <div class="section-title">Markers</div>
+        <div class="grid-2">
+          <div><label class="field-label">Takeoff lat</label><input type="number" id="takeoff_lat" step="0.00001"
+              value="42.96940"></div>
+          <div><label class="field-label">Takeoff lon</label><input type="number" id="takeoff_lon" step="0.00001"
+              value="0.88594"></div>
+          <div><label class="field-label">Landing lat</label><input type="number" id="landing_lat" step="0.00001"
+              value="42.99216"></div>
+          <div><label class="field-label">Landing lon</label><input type="number" id="landing_lon" step="0.00001"
+              value="0.90398"></div>
+        </div>
 
-let windDirDeg = 210;
+        <div class="section-title">Ambient Wind</div>
+        <div id="compass-wrap">
+          <svg id="compass-svg" width="60" height="60" viewBox="-30 -30 60 60" onmousedown="compassDrag(event)"
+            ontouchstart="compassDrag(event)">
+            <circle r="28" fill="rgba(100,160,255,.06)" stroke="rgba(100,160,255,.25)" stroke-width="1" />
+            <line x1="0" y1="-22" x2="0" y2="22" stroke="rgba(100,160,255,.12)" stroke-width="1" />
+            <line x1="-22" y1="0" x2="22" y2="0" stroke="rgba(100,160,255,.12)" stroke-width="1" />
+            <text y="-17" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">N</text>
+            <text y="22" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">S</text>
+            <text x="21" y="2" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">E</text>
+            <text x="-21" y="2" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">W</text>
+            <g id="compass-arrow">
+              <polygon points="0,-21 3.5,-9 0,-13 -3.5,-9" fill="#7eb8ff" opacity=".9" />
+              <polygon points="0,21  3.5,9  0,13  -3.5,9" fill="#3a6080" opacity=".6" />
+            </g>
+          </svg>
+          <div id="compass-readout">
+            <strong id="wind-dir-val">210°</strong> from SW<br>
+            U = <span id="wind-u-val">+6.1</span> m/s &nbsp; V = <span id="wind-v-val">+5.3</span> m/s<br>
+            <span style="color:#3a6080;font-size:10px">Drag the compass to change</span>
+          </div>
+        </div>
+        <label class="field-label">Wind speed (m/s)</label>
+        <input type="number" id="wind_speed" step="0.5" min="0" max="40" value="8" oninput="updateCompassDisplay()">
+        <div class="field-hint">Ambient far-field speed. Inflow applied on all upwind boundaries.</div>
 
-function windComponents() {
-  const speed = parseFloat(document.getElementById('wind_speed').value) || 0;
-  const rad   = windDirDeg * Math.PI / 180;
-  return { U: -speed * Math.sin(rad), V: -speed * Math.cos(rad) };
-}
+        <div class="section-title">Atmospheric Layer</div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">Layer depth H₀ (m)</label>
+            <input type="number" id="init_h" step="50" min="50" max="5000" value="500">
+          </div>
+          <div>
+            <label class="field-label">Red. gravity g′ (m/s²)</label>
+            <input type="number" id="g_prime" step="0.005" min="0.005" max="1" value="0.05">
+          </div>
+        </div>
+        <div class="field-hint">Mountains taller than H₀ block flow. g′ controls wave speed and hydraulic-jump Froude.
+        </div>
 
-function updateCompassDisplay() {
-  document.getElementById('compass-arrow').setAttribute('transform', `rotate(${windDirDeg})`);
-  document.getElementById('wind-dir-val').textContent = windDirDeg.toFixed(0) + '°';
-  const { U, V } = windComponents();
-  const dir = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-  const idx  = Math.round(windDirDeg / 22.5) % 16;
-  document.getElementById('compass-readout').innerHTML =
-    `<strong id="wind-dir-val">${windDirDeg.toFixed(0)}°</strong> from ${dir[idx]}<br>` +
-    `U = <span style="color:#7eb8ff">${U >= 0 ? '+' : ''}${U.toFixed(1)}</span> &nbsp; ` +
-    `V = <span style="color:#7eb8ff">${V >= 0 ? '+' : ''}${V.toFixed(1)}</span> m/s<br>` +
-    `<span style="color:#3a6080;font-size:10px">Drag the compass to change</span>`;
-}
-updateCompassDisplay();
+        <div class="section-title">Friction &amp; Diffusion</div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">Drag C<sub>d</sub></label>
+            <input type="number" id="drag_cd" step="0.0005" min="0" max="0.05" value="0.003">
+          </div>
+          <div>
+            <label class="field-label">Viscosity ν (m²/s)</label>
+            <input type="number" id="visc" step="10" min="0" max="2000" value="100">
+          </div>
+        </div>
+        <div class="field-hint">C<sub>d</sub> = bottom roughness. ν = turbulent diffusion (prevents sharp shocks).</div>
 
-// Auto-fill fields from config.json, then override with localStorage
-function setVal(id, v) { const el = document.getElementById(id); if (el && v != null) el.value = v; }
+        <div class="section-title">Solver</div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">Sim time (s)</label>
+            <input type="number" id="sim_time" step="300" min="300" max="14400" value="3600">
+          </div>
+          <div>
+            <label class="field-label">CFL factor</label>
+            <input type="number" id="cfl" step="0.05" min="0.1" max="0.85" value="0.45">
+          </div>
+        </div>
+        <div class="field-hint">3600 s ≈ 5 domain transit times at 8 m/s → near-steady state.</div>
 
-function applyLocalStorage() {
-  try {
-    const saved = JSON.parse(localStorage.getItem('paragliding_area') || 'null');
-    if (saved) {
-      if (saved.bbox) { setVal('min_lat', saved.bbox.min_lat); setVal('max_lat', saved.bbox.max_lat); setVal('min_lon', saved.bbox.min_lon); setVal('max_lon', saved.bbox.max_lon); }
-      if (saved.takeoff) { setVal('takeoff_lat', saved.takeoff.lat); setVal('takeoff_lon', saved.takeoff.lon); }
-      if (saved.landing) { setVal('landing_lat', saved.landing.lat); setVal('landing_lon', saved.landing.lon); }
+        <div class="section-title">Output</div>
+        <label class="field-label">Arrow step (px)</label>
+        <input type="number" id="arrow_step" step="1" min="4" max="30" value="10">
+        <div class="field-hint">Plot arrow density — every N-th sim cell.</div>
+
+      </div>
+
+      <div id="panel-footer">
+        <div class="footer-row">
+          <button class="btn btn-fetch" id="btn-fetch" onclick="runFetch()">Fetch Terrain</button>
+          <button class="btn btn-sim" id="btn-sim" onclick="runSim()" disabled>Run Simulation</button>
+        </div>
+        <div class="footer-row">
+          <button class="btn btn-stop" id="btn-stop" onclick="stopSim()" disabled>Stop</button>
+          <button class="btn btn-map" id="btn-map" onclick="openViewer()" disabled>Open Viewer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════════════════
+    //  UI UTILITIES
+    // ═══════════════════════════════════════════════════════════════════
+
+    let _stopRequested = false;
+    const yieldUI = async () => {
+      await new Promise(r => setTimeout(r, 0));
+      if (_stopRequested) throw new Error('__STOPPED__');
+    };
+
+    const logEl = document.getElementById('log-output');
+    const statusEl = document.getElementById('status-bar');
+    const progressEl = document.getElementById('progress-bar');
+
+    function ts() {
+      const d = new Date();
+      return [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2, '0')).join(':');
     }
-  } catch (e) {}
-}
+    function log(msg, level = 'info') {
+      const div = document.createElement('div');
+      div.className = `log-${level}`;
+      div.innerHTML = `<span class="log-ts">${ts()}</span>${msg}`;
+      logEl.appendChild(div);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+    function setStatus(msg) { statusEl.textContent = msg; }
+    function setProgress(f) { progressEl.style.width = (Math.min(1, Math.max(0, f)) * 100) + '%'; }
 
-// Load config.json first, then override with localStorage (localStorage wins)
-fetch('config.json').then(r => r.json()).then(cfg => {
-  const b = cfg.area?.bbox;
-  if (b) { setVal('min_lat', b.min_lat); setVal('max_lat', b.max_lat); setVal('min_lon', b.min_lon); setVal('max_lon', b.max_lon); }
-  setVal('takeoff_lat', cfg.area?.takeoff?.lat);
-  setVal('takeoff_lon', cfg.area?.takeoff?.lon);
-  setVal('landing_lat', cfg.area?.landing?.lat);
-  setVal('landing_lon', cfg.area?.landing?.lon);
-}).catch(() => {}).finally(() => applyLocalStorage());
+    // ═══════════════════════════════════════════════════════════════════
+    //  COMPASS WIDGET
+    // ═══════════════════════════════════════════════════════════════════
 
-function compassDrag(e0) {
-  e0.preventDefault();
-  const svg  = document.getElementById('compass-svg');
-  const rect = svg.getBoundingClientRect();
-  const cx   = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
-  function onMove(e) {
-    const ex = e.touches ? e.touches[0].clientX : e.clientX;
-    const ey = e.touches ? e.touches[0].clientY : e.clientY;
-    let deg = Math.round(Math.atan2(ex - cx, -(ey - cy)) * 180 / Math.PI);
-    windDirDeg = (deg + 360) % 360;
+    let windDirDeg = 210;
+
+    function windComponents() {
+      const speed = parseFloat(document.getElementById('wind_speed').value) || 0;
+      const rad = windDirDeg * Math.PI / 180;
+      return { U: -speed * Math.sin(rad), V: -speed * Math.cos(rad) };
+    }
+
+    function updateCompassDisplay() {
+      document.getElementById('compass-arrow').setAttribute('transform', `rotate(${windDirDeg})`);
+      document.getElementById('wind-dir-val').textContent = windDirDeg.toFixed(0) + '°';
+      const { U, V } = windComponents();
+      const dir = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+      const idx = Math.round(windDirDeg / 22.5) % 16;
+      document.getElementById('compass-readout').innerHTML =
+        `<strong id="wind-dir-val">${windDirDeg.toFixed(0)}°</strong> from ${dir[idx]}<br>` +
+        `U = <span style="color:#7eb8ff">${U >= 0 ? '+' : ''}${U.toFixed(1)}</span> &nbsp; ` +
+        `V = <span style="color:#7eb8ff">${V >= 0 ? '+' : ''}${V.toFixed(1)}</span> m/s<br>` +
+        `<span style="color:#3a6080;font-size:10px">Drag the compass to change</span>`;
+    }
     updateCompassDisplay();
-  }
-  function onUp() {
-    window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp);
-    window.removeEventListener('touchmove', onMove); window.removeEventListener('touchend', onUp);
-  }
-  window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
-  window.addEventListener('touchmove', onMove); window.addEventListener('touchend', onUp);
-  onMove(e0);
-}
 
-// ═══════════════════════════════════════════════════════════════════
-//  DEM FETCHING (Terrarium tiles)
-// ═══════════════════════════════════════════════════════════════════
+    // Auto-fill fields from config.json, then override with localStorage
+    function setVal(id, v) { const el = document.getElementById(id); if (el && v != null) el.value = v; }
 
-const TILE_CACHE = {};
+    function applyLocalStorage() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('paragliding_area') || 'null');
+        if (saved) {
+          if (saved.bbox) { setVal('min_lat', saved.bbox.min_lat); setVal('max_lat', saved.bbox.max_lat); setVal('min_lon', saved.bbox.min_lon); setVal('max_lon', saved.bbox.max_lon); }
+          if (saved.takeoff) { setVal('takeoff_lat', saved.takeoff.lat); setVal('takeoff_lon', saved.takeoff.lon); }
+          if (saved.landing) { setVal('landing_lat', saved.landing.lat); setVal('landing_lon', saved.landing.lon); }
+        }
+      } catch (e) { }
+    }
 
-function lonlatToTile(lon, lat, z) {
-  const n    = Math.pow(2, z);
-  const lat_r = lat * Math.PI / 180;
-  return [
-    (lon + 180) / 360 * n,
-    (1 - Math.log(Math.tan(lat_r) + 1 / Math.cos(lat_r)) / Math.PI) / 2 * n
-  ];
-}
+    // Load config.json first, then override with localStorage (localStorage wins)
+    fetch('config.json').then(r => r.json()).then(cfg => {
+      const b = cfg.area?.bbox;
+      if (b) { setVal('min_lat', b.min_lat); setVal('max_lat', b.max_lat); setVal('min_lon', b.min_lon); setVal('max_lon', b.max_lon); }
+      setVal('takeoff_lat', cfg.area?.takeoff?.lat);
+      setVal('takeoff_lon', cfg.area?.takeoff?.lon);
+      setVal('landing_lat', cfg.area?.landing?.lat);
+      setVal('landing_lon', cfg.area?.landing?.lon);
+    }).catch(() => { }).finally(() => applyLocalStorage());
 
-function lonlatToLocal(lon, lat, lon0, lat0) {
-  const R = 6371000;
-  const x = (lon - lon0) * Math.PI / 180 * R * Math.cos(lat0 * Math.PI / 180);
-  const y = (lat - lat0) * Math.PI / 180 * R;
-  return [x, y];
-}
-
-async function fetchDEM(bbox, zoom, label) {
-  const { min_lat, max_lat, min_lon, max_lon } = bbox;
-  const [tx0f, ty0f] = lonlatToTile(min_lon, max_lat, zoom);
-  const [tx1f, ty1f] = lonlatToTile(max_lon, min_lat, zoom);
-  const x0 = Math.floor(tx0f), y0 = Math.floor(ty0f);
-  const x1 = Math.floor(tx1f), y1 = Math.floor(ty1f);
-
-  const PX = 256, tw = x1 - x0 + 1, th = y1 - y0 + 1;
-  const canvas = document.createElement('canvas');
-  canvas.width = tw * PX; canvas.height = th * PX;
-  const ctx = canvas.getContext('2d');
-
-  let loaded = 0, total = tw * th;
-  log(`Fetching ${label}: ${tw}×${th} Terrarium tiles (zoom ${zoom})…`);
-
-  for (let ty = y0; ty <= y1; ty++) {
-    for (let tx = x0; tx <= x1; tx++) {
-      const key = `${zoom}/${tx}/${ty}`;
-      let img = TILE_CACHE[key];
-      if (!img) {
-        img = await new Promise((res, rej) => {
-          const im = new Image(); im.crossOrigin = 'anonymous';
-          im.onload = () => res(im); im.onerror = rej;
-          im.src = `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${key}.png`;
-        });
-        TILE_CACHE[key] = img;
+    function compassDrag(e0) {
+      e0.preventDefault();
+      const svg = document.getElementById('compass-svg');
+      const rect = svg.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+      function onMove(e) {
+        const ex = e.touches ? e.touches[0].clientX : e.clientX;
+        const ey = e.touches ? e.touches[0].clientY : e.clientY;
+        let deg = Math.round(Math.atan2(ex - cx, -(ey - cy)) * 180 / Math.PI);
+        windDirDeg = (deg + 360) % 360;
+        updateCompassDisplay();
       }
-      ctx.drawImage(img, (tx - x0) * PX, (ty - y0) * PX);
-      setProgress(++loaded / total * 0.5);
-      if (loaded % 4 === 0) await yieldUI();
-    }
-  }
-
-  const px0 = (tx0f - x0) * PX, py0 = (ty0f - y0) * PX;
-  const px1 = (tx1f - x0) * PX, py1 = (ty1f - y0) * PX;
-  const nx  = Math.round(px1 - px0), ny = Math.round(py1 - py0);
-
-  const raw = ctx.getImageData(Math.round(px0), Math.round(py0), nx, ny).data;
-  const Z   = new Float32Array(ny * nx);
-  for (let i = 0; i < Z.length; i++)
-    Z[i] = raw[i*4] * 256 + raw[i*4+1] + raw[i*4+2] / 256 - 32768;
-
-  const lat0 = (min_lat + max_lat) / 2, lon0 = (min_lon + max_lon) / 2;
-  const dx = (max_lon - min_lon) * Math.PI / 180 * 6371000 * Math.cos(lat0 * Math.PI / 180) / nx;
-  const dy = (max_lat - min_lat) * Math.PI / 180 * 6371000 / ny;
-
-  const [xmin] = lonlatToLocal(min_lon, lat0, lon0, lat0);
-  const [xmax] = lonlatToLocal(max_lon, lat0, lon0, lat0);
-  const [,ynorth] = lonlatToLocal(lon0, max_lat, lon0, lat0);  // positive (north)
-  const [,ysouth] = lonlatToLocal(lon0, min_lat, lon0, lat0);  // negative (south)
-
-  // y_extent stored as [south, north] so yh = y_extent[1]-y_extent[0] > 0,
-  // matching Three.js PlaneGeometry vertex order (iy=0 → top = north = j=0 in tile data).
-  return { Z, nx, ny, dx, dy, x_extent: [xmin, xmax], y_extent: [ysouth, ynorth], lat0, lon0 };
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  2-D PLOT HELPERS
-// ═══════════════════════════════════════════════════════════════════
-
-function renderPlot(canvasEl, arr, nx, ny, colorFn, arrowData) {
-  canvasEl.width = nx; canvasEl.height = ny;
-  const ctx = canvasEl.getContext('2d');
-  const img = ctx.createImageData(nx, ny);
-  let mn = Infinity, mx = -Infinity;
-  for (let i = 0; i < arr.length; i++) { if (arr[i] < mn) mn = arr[i]; if (arr[i] > mx) mx = arr[i]; }
-  const rng = Math.max(mx - mn, 1e-9);
-  for (let i = 0; i < arr.length; i++) {
-    const [r, g, b] = colorFn((arr[i] - mn) / rng);
-    img.data[i*4] = r; img.data[i*4+1] = g; img.data[i*4+2] = b; img.data[i*4+3] = 255;
-  }
-  ctx.putImageData(img, 0, 0);
-
-  if (arrowData) {
-    const { u, v, step } = arrowData;
-    const maxSpd = Math.max(...u.map((ui, i) => Math.hypot(ui, v[i]))) || 1;
-    ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-    ctx.fillStyle   = 'rgba(255,255,255,0.6)';
-    ctx.lineWidth   = 0.8;
-    for (let j = Math.floor(step/2); j < ny; j += step) {
-      for (let i = Math.floor(step/2); i < nx; i += step) {
-        const idx = j * nx + i;
-        const ui = u[idx], vi = v[idx];
-        const spd = Math.hypot(ui, vi);
-        if (spd < 0.05) continue;
-        const len = step * 0.55 * (spd / maxSpd);
-        const ex = i + (ui / spd) * len, ey = j - (vi / spd) * len;
-        ctx.beginPath(); ctx.moveTo(i, j); ctx.lineTo(ex, ey); ctx.stroke();
-        const hl = len * 0.3, ang = Math.atan2(-(ey-j), ex-i);
-        ctx.beginPath();
-        ctx.moveTo(ex, ey);
-        ctx.lineTo(ex - hl*Math.cos(ang-0.4), ey - hl*Math.sin(ang-0.4));
-        ctx.lineTo(ex - hl*Math.cos(ang+0.4), ey - hl*Math.sin(ang+0.4));
-        ctx.closePath(); ctx.fill();
+      function onUp() {
+        window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp);
+        window.removeEventListener('touchmove', onMove); window.removeEventListener('touchend', onUp);
       }
+      window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
+      window.addEventListener('touchmove', onMove); window.addEventListener('touchend', onUp);
+      onMove(e0);
     }
-  }
-}
 
-const cmapElev   = t => { const v = t*200+30;  return [v*0.6|0, v*0.8|0, v*0.5|0]; };
-const cmapSpeed  = t => t < 0.5 ? [0, (t*2*200)|0, (255-t*2*55)|0] : [((t-0.5)*2*255)|0, 255, 0];
-const cmapFroude = t => t < 0.5 ? [0, (t*2*180)|0, (255-t*2*55)|0] : [((t-0.5)*2*255)|0, ((1-(t-0.5)*2)*180)|0, 0];
-const cmapDepth  = t => [0, (t*180)|0, (80+t*175)|0];
-const cmapVort   = t => t < 0.5 ? [0, 0, ((0.5-t)*2*255)|0] : [((t-0.5)*2*255)|0, 0, 0];
-const cmapVert   = t => t < 0.5 ? [(t*2*255)|0, (t*2*255)|0, 255] : [255, ((1-t)*2*255)|0, ((1-t)*2*255)|0];
+    // ═══════════════════════════════════════════════════════════════════
+    //  DEM FETCHING (Terrarium tiles)
+    // ═══════════════════════════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════════════════════════
-//  SWE SOLVER
-// ═══════════════════════════════════════════════════════════════════
+    const TILE_CACHE = {};
 
-function sweStep(h, u, v, Z, nx, ny, dx, dy, dt, g, Cd, nu, H0, U_in, V_in) {
-  const h_min = 0.5;
-  const hn = new Float32Array(h), un = new Float32Array(u), vn = new Float32Array(v);
-
-  for (let j = 1; j < ny - 1; j++) {
-    for (let i = 1; i < nx - 1; i++) {
-      const idx = j*nx + i;
-      const hi = h[idx], ui = u[idx], vi = v[idx];
-      if (hi < h_min) { hn[idx] = h_min; un[idx] = 0; vn[idx] = 0; continue; }
-
-      const speed = Math.sqrt(ui*ui + vi*vi);
-
-      // Continuity (conservative flux)
-      const div = (h[idx+1]*u[idx+1] - h[idx-1]*u[idx-1]) / (2*dx)
-                + (h[idx+nx]*v[idx+nx] - h[idx-nx]*v[idx-nx]) / (2*dy);
-      hn[idx] = hi - dt * div;
-
-      // Momentum (upwind advection)
-      const dui_dx = ui > 0 ? (ui - u[idx-1])  / dx : (u[idx+1]  - ui) / dx;
-      const dui_dy = vi > 0 ? (ui - u[idx-nx]) / dy : (u[idx+nx] - ui) / dy;
-      const dvi_dx = ui > 0 ? (vi - v[idx-1])  / dx : (v[idx+1]  - vi) / dx;
-      const dvi_dy = vi > 0 ? (vi - v[idx-nx]) / dy : (v[idx+nx] - vi) / dy;
-
-      // Free-surface gradient (η = h + Z)
-      const deta_dx = (h[idx+1]+Z[idx+1] - h[idx-1]-Z[idx-1]) / (2*dx);
-      const deta_dy = (h[idx+nx]+Z[idx+nx] - h[idx-nx]-Z[idx-nx]) / (2*dy);
-
-      // Laplacian
-      const lap_u = (u[idx+1]-2*ui+u[idx-1])/(dx*dx) + (u[idx+nx]-2*ui+u[idx-nx])/(dy*dy);
-      const lap_v = (v[idx+1]-2*vi+v[idx-1])/(dx*dx) + (v[idx+nx]-2*vi+v[idx-nx])/(dy*dy);
-
-      un[idx] = ui - dt*(ui*dui_dx + vi*dui_dy + g*deta_dx + Cd*speed*ui/hi - nu*lap_u);
-      vn[idx] = vi - dt*(ui*dvi_dx + vi*dvi_dy + g*deta_dy + Cd*speed*vi/hi - nu*lap_v);
-
-      if (hn[idx] < h_min) { hn[idx] = h_min; un[idx] = 0; vn[idx] = 0; }
+    function lonlatToTile(lon, lat, z) {
+      const n = Math.pow(2, z);
+      const lat_r = lat * Math.PI / 180;
+      return [
+        (lon + 180) / 360 * n,
+        (1 - Math.log(Math.tan(lat_r) + 1 / Math.cos(lat_r)) / Math.PI) / 2 * n
+      ];
     }
-  }
 
-  // Boundary conditions
-  // Left edge: inflow if U_in >= 0, else Neumann outflow
-  for (let j = 0; j < ny; j++) {
-    const idx = j*nx;
-    if (U_in >= 0) { hn[idx] = Math.max(H0-Z[idx], h_min); un[idx] = U_in; vn[idx] = V_in; }
-    else           { hn[idx] = hn[idx+1]; un[idx] = un[idx+1]; vn[idx] = vn[idx+1]; }
-  }
-  // Right edge
-  for (let j = 0; j < ny; j++) {
-    const idx = j*nx + (nx-1);
-    if (U_in <= 0) { hn[idx] = Math.max(H0-Z[idx], h_min); un[idx] = U_in; vn[idx] = V_in; }
-    else           { hn[idx] = hn[idx-1]; un[idx] = un[idx-1]; vn[idx] = vn[idx-1]; }
-  }
-  // Top edge (j=0 = geographic north)
-  for (let i = 0; i < nx; i++) {
-    const idx = i;
-    if (V_in <= 0) { hn[idx] = Math.max(H0-Z[idx], h_min); un[idx] = U_in; vn[idx] = V_in; }
-    else           { hn[idx] = hn[idx+nx]; un[idx] = un[idx+nx]; vn[idx] = vn[idx+nx]; }
-  }
-  // Bottom edge (j=ny-1 = geographic south)
-  for (let i = 0; i < nx; i++) {
-    const idx = (ny-1)*nx + i;
-    if (V_in >= 0) { hn[idx] = Math.max(H0-Z[idx], h_min); un[idx] = U_in; vn[idx] = V_in; }
-    else           { hn[idx] = hn[idx-nx]; un[idx] = un[idx-nx]; vn[idx] = vn[idx-nx]; }
-  }
+    function lonlatToLocal(lon, lat, lon0, lat0) {
+      const R = 6371000;
+      const x = (lon - lon0) * Math.PI / 180 * R * Math.cos(lat0 * Math.PI / 180);
+      const y = (lat - lat0) * Math.PI / 180 * R;
+      return [x, y];
+    }
 
-  h.set(hn); u.set(un); v.set(vn);
-}
+    async function fetchDEM(bbox, zoom, label) {
+      const { min_lat, max_lat, min_lon, max_lon } = bbox;
+      const [tx0f, ty0f] = lonlatToTile(min_lon, max_lat, zoom);
+      const [tx1f, ty1f] = lonlatToTile(max_lon, min_lat, zoom);
+      const x0 = Math.floor(tx0f), y0 = Math.floor(ty0f);
+      const x1 = Math.floor(tx1f), y1 = Math.floor(ty1f);
 
-// ═══════════════════════════════════════════════════════════════════
-//  MAIN FETCH & SIMULATION FLOWS
-// ═══════════════════════════════════════════════════════════════════
+      const PX = 256, tw = x1 - x0 + 1, th = y1 - y0 + 1;
+      const canvas = document.createElement('canvas');
+      canvas.width = tw * PX; canvas.height = th * PX;
+      const ctx = canvas.getContext('2d');
 
-let terrainData = null;   // { Z, nx, ny, dx, dy, x_extent, y_extent, lat0, lon0 }
-let meshData    = null;   // high-res mesh for 3-D viewer
-let simResult   = null;
+      let loaded = 0, total = tw * th;
+      log(`Fetching ${label}: ${tw}×${th} Terrarium tiles (zoom ${zoom})…`);
 
-async function runFetch() {
-  _stopRequested = false;
-  document.getElementById('btn-fetch').disabled = true;
-  document.getElementById('btn-sim').disabled   = true;
-  setProgress(0);
+      for (let ty = y0; ty <= y1; ty++) {
+        for (let tx = x0; tx <= x1; tx++) {
+          const key = `${zoom}/${tx}/${ty}`;
+          let img = TILE_CACHE[key];
+          if (!img) {
+            img = await new Promise((res, rej) => {
+              const im = new Image(); im.crossOrigin = 'anonymous';
+              im.onload = () => res(im); im.onerror = rej;
+              im.src = `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${key}.png`;
+            });
+            TILE_CACHE[key] = img;
+          }
+          ctx.drawImage(img, (tx - x0) * PX, (ty - y0) * PX);
+          setProgress(++loaded / total * 0.5);
+          if (loaded % 4 === 0) await yieldUI();
+        }
+      }
 
-  const bbox = {
-    min_lat: parseFloat(document.getElementById('min_lat').value),
-    max_lat: parseFloat(document.getElementById('max_lat').value),
-    min_lon: parseFloat(document.getElementById('min_lon').value),
-    max_lon: parseFloat(document.getElementById('max_lon').value),
-  };
-  const simZoom  = parseInt(document.getElementById('sim_zoom').value);
-  const meshZoom = parseInt(document.getElementById('mesh_zoom').value);
+      const px0 = (tx0f - x0) * PX, py0 = (ty0f - y0) * PX;
+      const px1 = (tx1f - x0) * PX, py1 = (ty1f - y0) * PX;
+      const nx = Math.round(px1 - px0), ny = Math.round(py1 - py0);
 
-  try {
-    terrainData = await fetchDEM(bbox, simZoom, 'sim DEM');
-    const { Z, nx, ny, dx, dy } = terrainData;
-    log(`Sim grid: ${nx}×${ny}, dx=${dx.toFixed(1)} m, dy=${dy.toFixed(1)} m`, 'success');
+      const raw = ctx.getImageData(Math.round(px0), Math.round(py0), nx, ny).data;
+      const Z = new Float32Array(ny * nx);
+      for (let i = 0; i < Z.length; i++)
+        Z[i] = raw[i * 4] * 256 + raw[i * 4 + 1] + raw[i * 4 + 2] / 256 - 32768;
 
-    meshData = await fetchDEM(bbox, meshZoom, 'mesh DEM');
-    log(`Mesh grid: ${meshData.nx}×${meshData.ny}, dx=${meshData.dx.toFixed(1)} m`, 'success');
+      const lat0 = (min_lat + max_lat) / 2, lon0 = (min_lon + max_lon) / 2;
+      const dx = (max_lon - min_lon) * Math.PI / 180 * 6371000 * Math.cos(lat0 * Math.PI / 180) / nx;
+      const dy = (max_lat - min_lat) * Math.PI / 180 * 6371000 / ny;
 
-    document.getElementById('plots-area').style.display = 'flex';
-    renderPlot(document.getElementById('plot-elev'), Z, nx, ny, cmapElev);
+      const [xmin] = lonlatToLocal(min_lon, lat0, lon0, lat0);
+      const [xmax] = lonlatToLocal(max_lon, lat0, lon0, lat0);
+      const [, ynorth] = lonlatToLocal(lon0, max_lat, lon0, lat0);  // positive (north)
+      const [, ysouth] = lonlatToLocal(lon0, min_lat, lon0, lat0);  // negative (south)
 
-    document.getElementById('btn-sim').disabled = false;
-    setStatus(`Terrain loaded: sim ${nx}×${ny}, mesh ${meshData.nx}×${meshData.ny}`);
-    setProgress(1);
-  } catch (e) {
-    if (e.message !== '__STOPPED__') log(`Fetch error: ${e}`, 'error');
-  }
-  document.getElementById('btn-fetch').disabled = false;
-}
+      // y_extent stored as [south, north] so yh = y_extent[1]-y_extent[0] > 0,
+      // matching Three.js PlaneGeometry vertex order (iy=0 → top = north = j=0 in tile data).
+      return { Z, nx, ny, dx, dy, x_extent: [xmin, xmax], y_extent: [ysouth, ynorth], lat0, lon0 };
+    }
 
-async function runSim() {
-  if (!terrainData) return;
-  _stopRequested = false;
+    // ═══════════════════════════════════════════════════════════════════
+    //  2-D PLOT HELPERS
+    // ═══════════════════════════════════════════════════════════════════
 
-  document.getElementById('btn-sim').disabled  = true;
-  document.getElementById('btn-stop').disabled = false;
-  document.getElementById('btn-map').disabled  = true;
-  simResult = null;
-  setProgress(0);
+    function renderPlot(canvasEl, arr, nx, ny, colorFn, arrowData) {
+      canvasEl.width = nx; canvasEl.height = ny;
+      const ctx = canvasEl.getContext('2d');
+      const img = ctx.createImageData(nx, ny);
+      let mn = Infinity, mx = -Infinity;
+      for (let i = 0; i < arr.length; i++) { if (arr[i] < mn) mn = arr[i]; if (arr[i] > mx) mx = arr[i]; }
+      const rng = Math.max(mx - mn, 1e-9);
+      for (let i = 0; i < arr.length; i++) {
+        const [r, g, b] = colorFn((arr[i] - mn) / rng);
+        img.data[i * 4] = r; img.data[i * 4 + 1] = g; img.data[i * 4 + 2] = b; img.data[i * 4 + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
 
-  const { Z, nx, ny, dx, dy } = terrainData;
-  const H0     = parseFloat(document.getElementById('init_h').value);
-  const g      = parseFloat(document.getElementById('g_prime').value);
-  const Cd     = parseFloat(document.getElementById('drag_cd').value);
-  const nu     = parseFloat(document.getElementById('visc').value);
-  const cfl    = parseFloat(document.getElementById('cfl').value);
-  const T_sim  = parseFloat(document.getElementById('sim_time').value);
-  const astep  = parseInt(document.getElementById('arrow_step').value);
-  const { U, V } = windComponents();
-
-  const h_min = 0.5;
-  const h = new Float32Array(ny * nx);
-  const u = new Float32Array(ny * nx);
-  const v = new Float32Array(ny * nx);
-  for (let i = 0; i < ny*nx; i++) {
-    h[i] = Math.max(H0 - Z[i], h_min);
-    // Start at rest; wind enters through boundary conditions
-  }
-
-  // Estimate dt from CFL
-  const wave_est = Math.sqrt(U*U + V*V) + Math.sqrt(g * H0);
-  const dt = cfl * Math.min(dx, dy) / Math.max(wave_est, 0.1);
-  const nSteps = Math.ceil(T_sim / dt);
-  const YIELD_EVERY = 50;
-
-  log(`SWE: dt=${dt.toFixed(2)} s, steps=${nSteps}, T=${T_sim} s`);
-  log(`Wind: dir=${windDirDeg.toFixed(0)}°, U=${U.toFixed(1)} V=${V.toFixed(1)} m/s`);
-  log(`Grid: ${nx}×${ny}, H₀=${H0} m, g′=${g} m/s²`);
-  setStatus('Simulating…');
-
-  try {
-    for (let step = 0; step < nSteps; step++) {
-      sweStep(h, u, v, Z, nx, ny, dx, dy, dt, g, Cd, nu, H0, U, V);
-
-      if (step % YIELD_EVERY === 0) {
-        setProgress(step / nSteps);
-        setStatus(`SWE: step ${step}/${nSteps}, t=${(step*dt).toFixed(0)} s`);
-        await yieldUI();
+      if (arrowData) {
+        const { u, v, step } = arrowData;
+        const maxSpd = Math.max(...u.map((ui, i) => Math.hypot(ui, v[i]))) || 1;
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.lineWidth = 0.8;
+        for (let j = Math.floor(step / 2); j < ny; j += step) {
+          for (let i = Math.floor(step / 2); i < nx; i += step) {
+            const idx = j * nx + i;
+            const ui = u[idx], vi = v[idx];
+            const spd = Math.hypot(ui, vi);
+            if (spd < 0.05) continue;
+            const len = step * 0.55 * (spd / maxSpd);
+            const ex = i + (ui / spd) * len, ey = j - (vi / spd) * len;
+            ctx.beginPath(); ctx.moveTo(i, j); ctx.lineTo(ex, ey); ctx.stroke();
+            const hl = len * 0.3, ang = Math.atan2(-(ey - j), ex - i);
+            ctx.beginPath();
+            ctx.moveTo(ex, ey);
+            ctx.lineTo(ex - hl * Math.cos(ang - 0.4), ey - hl * Math.sin(ang - 0.4));
+            ctx.lineTo(ex - hl * Math.cos(ang + 0.4), ey - hl * Math.sin(ang + 0.4));
+            ctx.closePath(); ctx.fill();
+          }
+        }
       }
     }
-  } catch (e) {
-    if (e.message === '__STOPPED__') { log('Stopped by user.', 'warn'); }
-    else { log(`Solver error: ${e}`, 'error'); }
-    document.getElementById('btn-sim').disabled  = false;
-    document.getElementById('btn-stop').disabled = true;
-    return;
-  }
 
-  log(`Simulation complete (T=${T_sim} s).`, 'success');
-  setProgress(1);
+    const cmapElev = t => { const v = t * 200 + 30; return [v * 0.6 | 0, v * 0.8 | 0, v * 0.5 | 0]; };
+    const cmapSpeed = t => t < 0.5 ? [0, (t * 2 * 200) | 0, (255 - t * 2 * 55) | 0] : [((t - 0.5) * 2 * 255) | 0, 255, 0];
+    const cmapFroude = t => t < 0.5 ? [0, (t * 2 * 180) | 0, (255 - t * 2 * 55) | 0] : [((t - 0.5) * 2 * 255) | 0, ((1 - (t - 0.5) * 2) * 180) | 0, 0];
+    const cmapDepth = t => [0, (t * 180) | 0, (80 + t * 175) | 0];
+    const cmapVort = t => t < 0.5 ? [0, 0, ((0.5 - t) * 2 * 255) | 0] : [((t - 0.5) * 2 * 255) | 0, 0, 0];
+    const cmapVert = t => t < 0.5 ? [(t * 2 * 255) | 0, (t * 2 * 255) | 0, 255] : [255, ((1 - t) * 2 * 255) | 0, ((1 - t) * 2 * 255) | 0];
 
-  // ── Derived fields ──
-  const speed    = new Float32Array(ny * nx);
-  const froude   = new Float32Array(ny * nx);
-  const vorticity = new Float32Array(ny * nx);
-  for (let i = 0; i < ny*nx; i++) {
-    speed[i]  = Math.sqrt(u[i]*u[i] + v[i]*v[i]);
-    froude[i] = speed[i] / Math.sqrt(g * Math.max(h[i], 0.01));
-  }
-  for (let j = 1; j < ny-1; j++)
-    for (let i = 1; i < nx-1; i++) {
-      const idx = j*nx + i;
-      vorticity[idx] = (v[idx+1]-v[idx-1])/(2*dx) - (u[idx+nx]-u[idx-nx])/(2*dy);
+    // ═══════════════════════════════════════════════════════════════════
+    //  SWE SOLVER
+    // ═══════════════════════════════════════════════════════════════════
+
+    function sweStep(h, u, v, Z, nx, ny, dx, dy, dt, g, Cd, nu, H0, U_in, V_in) {
+      const h_min = 0.5;
+      const hn = new Float32Array(h), un = new Float32Array(u), vn = new Float32Array(v);
+
+      for (let j = 1; j < ny - 1; j++) {
+        for (let i = 1; i < nx - 1; i++) {
+          const idx = j * nx + i;
+          const hi = h[idx], ui = u[idx], vi = v[idx];
+          if (hi < h_min) { hn[idx] = h_min; un[idx] = 0; vn[idx] = 0; continue; }
+
+          const speed = Math.sqrt(ui * ui + vi * vi);
+
+          // Continuity (conservative flux)
+          const div = (h[idx + 1] * u[idx + 1] - h[idx - 1] * u[idx - 1]) / (2 * dx)
+            + (h[idx + nx] * v[idx + nx] - h[idx - nx] * v[idx - nx]) / (2 * dy);
+          hn[idx] = hi - dt * div;
+
+          // Momentum (upwind advection)
+          const dui_dx = ui > 0 ? (ui - u[idx - 1]) / dx : (u[idx + 1] - ui) / dx;
+          const dui_dy = vi > 0 ? (ui - u[idx - nx]) / dy : (u[idx + nx] - ui) / dy;
+          const dvi_dx = ui > 0 ? (vi - v[idx - 1]) / dx : (v[idx + 1] - vi) / dx;
+          const dvi_dy = vi > 0 ? (vi - v[idx - nx]) / dy : (v[idx + nx] - vi) / dy;
+
+          // Free-surface gradient (η = h + Z)
+          const deta_dx = (h[idx + 1] + Z[idx + 1] - h[idx - 1] - Z[idx - 1]) / (2 * dx);
+          const deta_dy = (h[idx + nx] + Z[idx + nx] - h[idx - nx] - Z[idx - nx]) / (2 * dy);
+
+          // Laplacian
+          const lap_u = (u[idx + 1] - 2 * ui + u[idx - 1]) / (dx * dx) + (u[idx + nx] - 2 * ui + u[idx - nx]) / (dy * dy);
+          const lap_v = (v[idx + 1] - 2 * vi + v[idx - 1]) / (dx * dx) + (v[idx + nx] - 2 * vi + v[idx - nx]) / (dy * dy);
+
+          un[idx] = ui - dt * (ui * dui_dx + vi * dui_dy + g * deta_dx + Cd * speed * ui / hi - nu * lap_u);
+          vn[idx] = vi - dt * (ui * dvi_dx + vi * dvi_dy + g * deta_dy + Cd * speed * vi / hi - nu * lap_v);
+
+          if (hn[idx] < h_min) { hn[idx] = h_min; un[idx] = 0; vn[idx] = 0; }
+        }
+      }
+
+      // Boundary conditions
+      // Left edge: inflow if U_in >= 0, else Neumann outflow
+      for (let j = 0; j < ny; j++) {
+        const idx = j * nx;
+        if (U_in >= 0) { hn[idx] = Math.max(H0 - Z[idx], h_min); un[idx] = U_in; vn[idx] = V_in; }
+        else { hn[idx] = hn[idx + 1]; un[idx] = un[idx + 1]; vn[idx] = vn[idx + 1]; }
+      }
+      // Right edge
+      for (let j = 0; j < ny; j++) {
+        const idx = j * nx + (nx - 1);
+        if (U_in <= 0) { hn[idx] = Math.max(H0 - Z[idx], h_min); un[idx] = U_in; vn[idx] = V_in; }
+        else { hn[idx] = hn[idx - 1]; un[idx] = un[idx - 1]; vn[idx] = vn[idx - 1]; }
+      }
+      // Top edge (j=0 = geographic north)
+      for (let i = 0; i < nx; i++) {
+        const idx = i;
+        if (V_in <= 0) { hn[idx] = Math.max(H0 - Z[idx], h_min); un[idx] = U_in; vn[idx] = V_in; }
+        else { hn[idx] = hn[idx + nx]; un[idx] = un[idx + nx]; vn[idx] = vn[idx + nx]; }
+      }
+      // Bottom edge (j=ny-1 = geographic south)
+      for (let i = 0; i < nx; i++) {
+        const idx = (ny - 1) * nx + i;
+        if (V_in >= 0) { hn[idx] = Math.max(H0 - Z[idx], h_min); un[idx] = U_in; vn[idx] = V_in; }
+        else { hn[idx] = hn[idx - nx]; un[idx] = un[idx - nx]; vn[idx] = vn[idx - nx]; }
+      }
+
+      h.set(hn); u.set(un); v.set(vn);
     }
 
-  // Vertical wind: orographic lifting (u·∂Z/∂x + v·∂Z/∂y) + convergence (-h·div·u)
-  // j=0=north → ∂/∂y_physical uses flipped j-differences
-  const w_vert = new Float32Array(ny * nx);
-  for (let j = 1; j < ny-1; j++)
-    for (let i = 1; i < nx-1; i++) {
-      const idx = j*nx + i;
-      const dZdx = (Z[idx+1]    - Z[idx-1])    / (2*dx);
-      const dZdy = (Z[(j-1)*nx+i] - Z[(j+1)*nx+i]) / (2*dy); // flipped: j-1=more north
-      const dudx = (u[idx+1]    - u[idx-1])    / (2*dx);
-      const dvdy = (v[(j-1)*nx+i] - v[(j+1)*nx+i]) / (2*dy); // flipped
-      w_vert[idx] = u[idx]*dZdx + v[idx]*dZdy - h[idx]*(dudx + dvdy);
+    // ═══════════════════════════════════════════════════════════════════
+    //  MAIN FETCH & SIMULATION FLOWS
+    // ═══════════════════════════════════════════════════════════════════
+
+    let terrainData = null;   // { Z, nx, ny, dx, dy, x_extent, y_extent, lat0, lon0 }
+    let meshData = null;   // high-res mesh for 3-D viewer
+    let simResult = null;
+
+    async function runFetch() {
+      _stopRequested = false;
+      document.getElementById('btn-fetch').disabled = true;
+      document.getElementById('btn-sim').disabled = true;
+      setProgress(0);
+
+      const bbox = {
+        min_lat: parseFloat(document.getElementById('min_lat').value),
+        max_lat: parseFloat(document.getElementById('max_lat').value),
+        min_lon: parseFloat(document.getElementById('min_lon').value),
+        max_lon: parseFloat(document.getElementById('max_lon').value),
+      };
+      const simZoom = parseInt(document.getElementById('sim_zoom').value);
+      const meshZoom = parseInt(document.getElementById('mesh_zoom').value);
+
+      try {
+        terrainData = await fetchDEM(bbox, simZoom, 'sim DEM');
+        const { Z, nx, ny, dx, dy } = terrainData;
+        log(`Sim grid: ${nx}×${ny}, dx=${dx.toFixed(1)} m, dy=${dy.toFixed(1)} m`, 'success');
+
+        meshData = await fetchDEM(bbox, meshZoom, 'mesh DEM');
+        log(`Mesh grid: ${meshData.nx}×${meshData.ny}, dx=${meshData.dx.toFixed(1)} m`, 'success');
+
+        document.getElementById('plots-area').style.display = 'flex';
+        renderPlot(document.getElementById('plot-elev'), Z, nx, ny, cmapElev);
+
+        document.getElementById('btn-sim').disabled = false;
+        setStatus(`Terrain loaded: sim ${nx}×${ny}, mesh ${meshData.nx}×${meshData.ny}`);
+        setProgress(1);
+      } catch (e) {
+        if (e.message !== '__STOPPED__') log(`Fetch error: ${e}`, 'error');
+      }
+      document.getElementById('btn-fetch').disabled = false;
     }
 
-  // ── Render 2D previews ──
-  document.getElementById('sim-plots-area').style.display = 'flex';
-  const arrowData = { u, v, step: astep };
-  renderPlot(document.getElementById('plot-speed'),  speed,    nx, ny, cmapSpeed,  arrowData);
-  renderPlot(document.getElementById('plot-froude'), froude,   nx, ny, cmapFroude, arrowData);
-  renderPlot(document.getElementById('plot-depth'),  h,        nx, ny, cmapDepth,  null);
-  renderPlot(document.getElementById('plot-vort'),   vorticity, nx, ny, cmapVort,  null);
-  renderPlot(document.getElementById('plot-vert'),   w_vert,   nx, ny, cmapVert,  null);
+    async function runSim() {
+      if (!terrainData) return;
+      _stopRequested = false;
 
-  // ── Marker positions ──
-  const mLon0 = terrainData.lon0, mLat0 = terrainData.lat0;
-  function elevAtPoint(mlat, mlon) {
-    const [mx, my] = lonlatToLocal(mlon, mlat, mLon0, mLat0);
-    const i = Math.round((mx - terrainData.x_extent[0]) / (terrainData.x_extent[1] - terrainData.x_extent[0]) * (nx - 1));
-    // Tile data: j=0=north, j=ny-1=south; y_extent=[south,north] so invert:
-    const j = Math.round((terrainData.y_extent[1] - my) / (terrainData.y_extent[1] - terrainData.y_extent[0]) * (ny - 1));
-    return terrainData.Z[Math.max(0, Math.min(ny-1, j)) * nx + Math.max(0, Math.min(nx-1, i))];
-  }
-  const toLat = parseFloat(document.getElementById('takeoff_lat').value);
-  const toLon = parseFloat(document.getElementById('takeoff_lon').value);
-  const laLat = parseFloat(document.getElementById('landing_lat').value);
-  const laLon = parseFloat(document.getElementById('landing_lon').value);
-  const [toX, toY] = lonlatToLocal(toLon, toLat, mLon0, mLat0);
-  const [laX, laY] = lonlatToLocal(laLon, laLat, mLon0, mLat0);
-  const toZ = elevAtPoint(toLat, toLon);
-  const laZ = elevAtPoint(laLat, laLon);
-  log(`Take-off: x=${toX.toFixed(0)} m  y=${toY.toFixed(0)} m  z=${toZ.toFixed(0)} m`);
-  log(`Landing:  x=${laX.toFixed(0)} m  y=${laY.toFixed(0)} m  z=${laZ.toFixed(0)} m`);
+      document.getElementById('btn-sim').disabled = true;
+      document.getElementById('btn-stop').disabled = false;
+      document.getElementById('btn-map').disabled = true;
+      simResult = null;
+      setProgress(0);
 
-  // ── Pack result for viewer ──
-  // Convert Float32Arrays to plain arrays for JSON serialization
-  const elev2d = [];
-  for (let j = 0; j < ny; j++) elev2d.push(Array.from(terrainData.Z.slice(j*nx, (j+1)*nx)));
+      const { Z, nx, ny, dx, dy } = terrainData;
+      const H0 = parseFloat(document.getElementById('init_h').value);
+      const g = parseFloat(document.getElementById('g_prime').value);
+      const Cd = parseFloat(document.getElementById('drag_cd').value);
+      const nu = parseFloat(document.getElementById('visc').value);
+      const cfl = parseFloat(document.getElementById('cfl').value);
+      const T_sim = parseFloat(document.getElementById('sim_time').value);
+      const astep = parseInt(document.getElementById('arrow_step').value);
+      const { U, V } = windComponents();
 
-  const meshElev2d = [];
-  for (let j = 0; j < meshData.ny; j++)
-    meshElev2d.push(Array.from(meshData.Z.slice(j*meshData.nx, (j+1)*meshData.nx)));
+      const h_min = 0.5;
+      const h = new Float32Array(ny * nx);
+      const u = new Float32Array(ny * nx);
+      const v = new Float32Array(ny * nx);
+      for (let i = 0; i < ny * nx; i++) {
+        h[i] = Math.max(H0 - Z[i], h_min);
+        // Start at rest; wind enters through boundary conditions
+      }
 
-  simResult = {
-    type: 'swe',
-    terrain: {
-      elevation: elev2d,
-      nx, ny, dx, dy,
-      x_extent: terrainData.x_extent,
-      y_extent: terrainData.y_extent,
-      lat0: terrainData.lat0,
-      lon0: terrainData.lon0,
-      mesh_elevation: meshElev2d,
-      mesh_nx: meshData.nx,
-      mesh_ny: meshData.ny,
-      mesh_dx: meshData.dx,
-    },
-    wind: {
-      u:        Array.from(u),
-      v:        Array.from(v),
-      speed:    Array.from(speed),
-      froude:   Array.from(froude),
-      depth:    Array.from(h),
-      vorticity: Array.from(vorticity),
-      vertical:  Array.from(w_vert),
-    },
-    params: {
-      H0, g_prime: g, drag_cd: Cd, visc: nu,
-      wind_dir: windDirDeg, wind_speed_ms: parseFloat(document.getElementById('wind_speed').value),
-      U_in: U, V_in: V, sim_time: T_sim, nx, ny, dx, dy,
-    },
-    markers: [
-      { type: 'takeoff', label: '▲ Take-off', x: toX, y: toY, z: toZ },
-      { type: 'landing', label: '▼ Landing',  x: laX, y: laY, z: laZ },
-    ],
-  };
+      // Estimate dt from CFL
+      const wave_est = Math.sqrt(U * U + V * V) + Math.sqrt(g * H0);
+      const dt = cfl * Math.min(dx, dy) / Math.max(wave_est, 0.1);
+      const nSteps = Math.ceil(T_sim / dt);
+      const YIELD_EVERY = 50;
 
-  document.getElementById('btn-sim').disabled  = false;
-  document.getElementById('btn-stop').disabled = true;
-  document.getElementById('btn-map').disabled  = false;
-  setStatus(`Done — T=${T_sim} s simulated`);
-}
+      log(`SWE: dt=${dt.toFixed(2)} s, steps=${nSteps}, T=${T_sim} s`);
+      log(`Wind: dir=${windDirDeg.toFixed(0)}°, U=${U.toFixed(1)} V=${V.toFixed(1)} m/s`);
+      log(`Grid: ${nx}×${ny}, H₀=${H0} m, g′=${g} m/s²`);
+      setStatus('Simulating…');
 
-function stopSim() {
-  _stopRequested = true;
-  document.getElementById('btn-stop').disabled = true;
-}
+      try {
+        for (let step = 0; step < nSteps; step++) {
+          sweStep(h, u, v, Z, nx, ny, dx, dy, dt, g, Cd, nu, H0, U, V);
 
-// ═══════════════════════════════════════════════════════════════════
-//  INDEXEDDB & VIEWER NAVIGATION
-// ═══════════════════════════════════════════════════════════════════
+          if (step % YIELD_EVERY === 0) {
+            setProgress(step / nSteps);
+            setStatus(`SWE: step ${step}/${nSteps}, t=${(step * dt).toFixed(0)} s`);
+            await yieldUI();
+          }
+        }
+      } catch (e) {
+        if (e.message === '__STOPPED__') { log('Stopped by user.', 'warn'); }
+        else { log(`Solver error: ${e}`, 'error'); }
+        document.getElementById('btn-sim').disabled = false;
+        document.getElementById('btn-stop').disabled = true;
+        return;
+      }
 
-function idbPut(key, json) {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open('paragliding', 1);
-    req.onupgradeneeded = e => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains('sim')) db.createObjectStore('sim');
-    };
-    req.onerror = () => reject(req.error);
-    req.onsuccess = e => {
-      const db = e.target.result;
-      const tx = db.transaction('sim', 'readwrite');
-      tx.objectStore('sim').put(json, key);
-      tx.oncomplete = resolve;
-      tx.onerror = () => reject(tx.error);
-    };
-  });
-}
+      log(`Simulation complete (T=${T_sim} s).`, 'success');
+      setProgress(1);
 
-async function openViewer() {
-  if (!simResult) { log('No simulation result yet.', 'error'); return; }
-  try {
-    log('Saving to IndexedDB…');
-    await idbPut('swe_latest', JSON.stringify(simResult));
-    window.location.href = 'view-dynamic';
-  } catch(e) {
-    log(`IndexedDB error: ${e.message}`, 'error');
-  }
-}
-</script>
+      // ── Derived fields ──
+      const speed = new Float32Array(ny * nx);
+      const froude = new Float32Array(ny * nx);
+      const vorticity = new Float32Array(ny * nx);
+      for (let i = 0; i < ny * nx; i++) {
+        speed[i] = Math.sqrt(u[i] * u[i] + v[i] * v[i]);
+        froude[i] = speed[i] / Math.sqrt(g * Math.max(h[i], 0.01));
+      }
+      for (let j = 1; j < ny - 1; j++)
+        for (let i = 1; i < nx - 1; i++) {
+          const idx = j * nx + i;
+          vorticity[idx] = (v[idx + 1] - v[idx - 1]) / (2 * dx) - (u[idx + nx] - u[idx - nx]) / (2 * dy);
+        }
+
+      // Vertical wind: orographic lifting (u·∂Z/∂x + v·∂Z/∂y) + convergence (-h·div·u)
+      // j=0=north → ∂/∂y_physical uses flipped j-differences
+      const w_vert = new Float32Array(ny * nx);
+      for (let j = 1; j < ny - 1; j++)
+        for (let i = 1; i < nx - 1; i++) {
+          const idx = j * nx + i;
+          const dZdx = (Z[idx + 1] - Z[idx - 1]) / (2 * dx);
+          const dZdy = (Z[(j - 1) * nx + i] - Z[(j + 1) * nx + i]) / (2 * dy); // flipped: j-1=more north
+          const dudx = (u[idx + 1] - u[idx - 1]) / (2 * dx);
+          const dvdy = (v[(j - 1) * nx + i] - v[(j + 1) * nx + i]) / (2 * dy); // flipped
+          w_vert[idx] = u[idx] * dZdx + v[idx] * dZdy - h[idx] * (dudx + dvdy);
+        }
+
+      // ── Render 2D previews ──
+      document.getElementById('sim-plots-area').style.display = 'flex';
+      const arrowData = { u, v, step: astep };
+      renderPlot(document.getElementById('plot-speed'), speed, nx, ny, cmapSpeed, arrowData);
+      renderPlot(document.getElementById('plot-froude'), froude, nx, ny, cmapFroude, arrowData);
+      renderPlot(document.getElementById('plot-depth'), h, nx, ny, cmapDepth, null);
+      renderPlot(document.getElementById('plot-vort'), vorticity, nx, ny, cmapVort, null);
+      renderPlot(document.getElementById('plot-vert'), w_vert, nx, ny, cmapVert, null);
+
+      // ── Marker positions ──
+      const mLon0 = terrainData.lon0, mLat0 = terrainData.lat0;
+      function elevAtPoint(mlat, mlon) {
+        const [mx, my] = lonlatToLocal(mlon, mlat, mLon0, mLat0);
+        const i = Math.round((mx - terrainData.x_extent[0]) / (terrainData.x_extent[1] - terrainData.x_extent[0]) * (nx - 1));
+        // Tile data: j=0=north, j=ny-1=south; y_extent=[south,north] so invert:
+        const j = Math.round((terrainData.y_extent[1] - my) / (terrainData.y_extent[1] - terrainData.y_extent[0]) * (ny - 1));
+        return terrainData.Z[Math.max(0, Math.min(ny - 1, j)) * nx + Math.max(0, Math.min(nx - 1, i))];
+      }
+      const toLat = parseFloat(document.getElementById('takeoff_lat').value);
+      const toLon = parseFloat(document.getElementById('takeoff_lon').value);
+      const laLat = parseFloat(document.getElementById('landing_lat').value);
+      const laLon = parseFloat(document.getElementById('landing_lon').value);
+      const [toX, toY] = lonlatToLocal(toLon, toLat, mLon0, mLat0);
+      const [laX, laY] = lonlatToLocal(laLon, laLat, mLon0, mLat0);
+      const toZ = elevAtPoint(toLat, toLon);
+      const laZ = elevAtPoint(laLat, laLon);
+      log(`Take-off: x=${toX.toFixed(0)} m  y=${toY.toFixed(0)} m  z=${toZ.toFixed(0)} m`);
+      log(`Landing:  x=${laX.toFixed(0)} m  y=${laY.toFixed(0)} m  z=${laZ.toFixed(0)} m`);
+
+      // ── Pack result for viewer ──
+      // Convert Float32Arrays to plain arrays for JSON serialization
+      const elev2d = [];
+      for (let j = 0; j < ny; j++) elev2d.push(Array.from(terrainData.Z.slice(j * nx, (j + 1) * nx)));
+
+      const meshElev2d = [];
+      for (let j = 0; j < meshData.ny; j++)
+        meshElev2d.push(Array.from(meshData.Z.slice(j * meshData.nx, (j + 1) * meshData.nx)));
+
+      simResult = {
+        type: 'swe',
+        terrain: {
+          elevation: elev2d,
+          nx, ny, dx, dy,
+          x_extent: terrainData.x_extent,
+          y_extent: terrainData.y_extent,
+          lat0: terrainData.lat0,
+          lon0: terrainData.lon0,
+          mesh_elevation: meshElev2d,
+          mesh_nx: meshData.nx,
+          mesh_ny: meshData.ny,
+          mesh_dx: meshData.dx,
+        },
+        wind: {
+          u: Array.from(u),
+          v: Array.from(v),
+          speed: Array.from(speed),
+          froude: Array.from(froude),
+          depth: Array.from(h),
+          vorticity: Array.from(vorticity),
+          vertical: Array.from(w_vert),
+        },
+        params: {
+          H0, g_prime: g, drag_cd: Cd, visc: nu,
+          wind_dir: windDirDeg, wind_speed_ms: parseFloat(document.getElementById('wind_speed').value),
+          U_in: U, V_in: V, sim_time: T_sim, nx, ny, dx, dy,
+        },
+        markers: [
+          { type: 'takeoff', label: '▲ Take-off', x: toX, y: toY, z: toZ },
+          { type: 'landing', label: '▼ Landing', x: laX, y: laY, z: laZ },
+        ],
+      };
+
+      document.getElementById('btn-sim').disabled = false;
+      document.getElementById('btn-stop').disabled = true;
+      document.getElementById('btn-map').disabled = false;
+      setStatus(`Done — T=${T_sim} s simulated`);
+    }
+
+    function stopSim() {
+      _stopRequested = true;
+      document.getElementById('btn-stop').disabled = true;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  INDEXEDDB & VIEWER NAVIGATION
+    // ═══════════════════════════════════════════════════════════════════
+
+    function idbPut(key, json) {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open('paragliding', 1);
+        req.onupgradeneeded = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('sim')) db.createObjectStore('sim');
+        };
+        req.onerror = () => reject(req.error);
+        req.onsuccess = e => {
+          const db = e.target.result;
+          const tx = db.transaction('sim', 'readwrite');
+          tx.objectStore('sim').put(json, key);
+          tx.oncomplete = resolve;
+          tx.onerror = () => reject(tx.error);
+        };
+      });
+    }
+
+    async function openViewer() {
+      if (!simResult) { log('No simulation result yet.', 'error'); return; }
+      try {
+        log('Saving to IndexedDB…');
+        await idbPut('swe_latest', JSON.stringify(simResult));
+        window.location.href = 'view-dynamic';
+      } catch (e) {
+        log(`IndexedDB error: ${e.message}`, 'error');
+      }
+    }
+  </script>
 
 </body>
+
 </html>

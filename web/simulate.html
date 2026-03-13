@@ -1121,10 +1121,10 @@
       const T = simResult.terrain;
       const { nx, ny, dx, dy } = T;
       const nestedToFlat = nested => Float32Array.from(nested.flatMap(r => r));
-      const Z              = nestedToFlat(T.elevation);
+      const Z = nestedToFlat(T.elevation);
       const thermal_factor = nestedToFlat(T.thermal_factor);
       const trigger_factor = nestedToFlat(T.trigger_factor);
-      const conv_field     = nestedToFlat(T.convergence);
+      const conv_field = nestedToFlat(T.convergence);
       const n = simResult.scenarios.length;
       const dailyHeat = new Float32Array(ny * nx);
       for (const sc of simResult.scenarios)
@@ -1136,7 +1136,7 @@
       log(`Restored previous simulation (${n} scenario${n !== 1 ? 's' : ''}).`, 'info');
     }
 
-    tryRestoreFromIdb().catch(() => {});
+    tryRestoreFromIdb().catch(() => { });
 
     // ── Load defaults from config.json ───────────────────────────────
     function setVal(id, v) {
@@ -2576,7 +2576,7 @@
 
         simResult = output;
         _simPlots = { Z, thermal_factor, trigger_factor, conv_field, dailyHeat, nx, ny, dx, dy };
-        idbPut(JSON.stringify(simResult)).catch(() => {});
+        idbPut(JSON.stringify(simResult)).catch(() => { });
         await renderSimPlots();
         setProgress(1.0);
         setStatus('Simulation complete.');
@@ -2598,7 +2598,7 @@
             const dailyHeat = dT_sum.map(v => v / n);
             simResult = output;
             _simPlots = { Z, thermal_factor, trigger_factor, conv_field, dailyHeat, nx, ny, dx, dy };
-            idbPut(JSON.stringify(simResult)).catch(() => {});
+            idbPut(JSON.stringify(simResult)).catch(() => { });
             _stopRequested = false; // allow yieldUI inside renderSimPlots
             await renderSimPlots();
             document.getElementById('btn-map').disabled = false;

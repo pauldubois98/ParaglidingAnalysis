@@ -1,117 +1,304 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
   <title>Wind Flow — View</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #040810; color: #e0e8f0; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #040810;
+      color: #e0e8f0;
+      font-family: 'Segoe UI', sans-serif;
+      overflow: hidden;
+    }
 
     /* ── Nav ── */
     #header-nav {
-      position: fixed; top: 0; left: 0; right: 0; height: 44px; z-index: 3000;
-      display: flex; align-items: center; padding: 0 12px; gap: 2px;
-      background: rgba(6,10,20,0.92); border-bottom: 1px solid rgba(100,160,255,0.12);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 44px;
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 2px;
+      background: rgba(6, 10, 20, 0.92);
+      border-bottom: 1px solid rgba(100, 160, 255, 0.12);
       backdrop-filter: blur(14px);
     }
+
     .nav-logo {
-      display: flex; align-items: center; gap: 7px; padding: 5px 9px; margin-right: 4px;
-      color: #7eb8ff; text-decoration: none; font-size: 12px; font-weight: 600;
-      border-radius: 6px; white-space: nowrap; transition: background .15s;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 9px;
+      margin-right: 4px;
+      color: #7eb8ff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: background .15s;
     }
-    .nav-logo img { width: 18px; height: 18px; filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg); }
-    .nav-logo:hover { background: rgba(100,160,255,.1); }
-    .nav-sep { width: 1px; height: 18px; background: rgba(100,160,255,.12); margin: 0 2px; }
-    .nav-link { padding: 5px 10px; color: #4a6888; text-decoration: none; font-size: 12px; border-radius: 6px; white-space: nowrap; transition: .15s; }
-    .nav-link:hover { color: #90b8d8; background: rgba(100,160,255,.08); }
-    .nav-link.nav-active { color: #7eb8ff; background: rgba(100,160,255,.1); font-weight: 500; }
 
-    #canvas-container { width: 100vw; height: 100vh; margin-top: 44px; }
-    #canvas-container canvas { display: block; }
+    .nav-logo img {
+      width: 18px;
+      height: 18px;
+      filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg);
+    }
 
-    .tab-row { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 8px; }
+    .nav-logo:hover {
+      background: rgba(100, 160, 255, .1);
+    }
+
+    .nav-sep {
+      width: 1px;
+      height: 18px;
+      background: rgba(100, 160, 255, .12);
+      margin: 0 2px;
+    }
+
+    .nav-link {
+      padding: 5px 10px;
+      color: #4a6888;
+      text-decoration: none;
+      font-size: 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: .15s;
+    }
+
+    .nav-link:hover {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, .08);
+    }
+
+    .nav-link.nav-active {
+      color: #7eb8ff;
+      background: rgba(100, 160, 255, .1);
+      font-weight: 500;
+    }
+
+    #canvas-container {
+      width: 100vw;
+      height: 100vh;
+      margin-top: 44px;
+    }
+
+    #canvas-container canvas {
+      display: block;
+    }
+
+    .tab-row {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
     .tab-btn {
-      flex: 1; padding: 4px 5px;
-      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
-      border-radius: 10px; border: 1px solid rgba(100,160,255,.25);
-      color: #4a6888; background: transparent; cursor: pointer; transition: .15s;
+      flex: 1;
+      padding: 4px 5px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      border-radius: 10px;
+      border: 1px solid rgba(100, 160, 255, .25);
+      color: #4a6888;
+      background: transparent;
+      cursor: pointer;
+      transition: .15s;
     }
-    .tab-btn.active { color: #7eb8ff; border-color: rgba(100,160,255,.6); background: rgba(100,160,255,.12); }
-    .tab-btn:hover:not(.active) { color: #90b8d8; background: rgba(100,160,255,.08); }
+
+    .tab-btn.active {
+      color: #7eb8ff;
+      border-color: rgba(100, 160, 255, .6);
+      background: rgba(100, 160, 255, .12);
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, .08);
+    }
 
     /* ── Loading overlay ── */
     #loading {
-      position: fixed; inset: 0; z-index: 2000;
-      background: rgba(4,8,16,0.92);
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      font-size: 13px; color: #5588aa; gap: 12px;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(4, 8, 16, 0.92);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: #5588aa;
+      gap: 12px;
     }
+
     #loading-spinner {
-      width: 32px; height: 32px; border-radius: 50%;
-      border: 3px solid rgba(100,160,255,.15);
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 3px solid rgba(100, 160, 255, .15);
       border-top-color: #7eb8ff;
       animation: spin 0.9s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
     /* ── UI Panel ── */
     #ui-panel {
-      position: fixed; top: 52px; right: 8px; width: 250px;
-      background: rgba(10,15,30,0.88);
-      border: 1px solid rgba(100,160,255,0.3);
-      border-radius: 12px; padding: 14px 16px;
+      position: fixed;
+      top: 52px;
+      right: 8px;
+      width: 250px;
+      background: rgba(10, 15, 30, 0.88);
+      border: 1px solid rgba(100, 160, 255, 0.3);
+      border-radius: 12px;
+      padding: 14px 16px;
       backdrop-filter: blur(8px);
       max-height: calc(100vh - 68px);
       overflow-y: auto;
       transform: translateX(calc(100% + 20px));
-      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 1;
     }
-    #ui-panel.open { transform: translateX(0); }
-    #ui-panel::-webkit-scrollbar { width: 4px; }
-    #ui-panel::-webkit-scrollbar-thumb { background: rgba(100,160,255,0.2); border-radius: 2px; }
-    #ui-panel h2 { font-size: 13px; color: #7eb8ff; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
 
-    .ctrl-group { margin-bottom: 12px; }
-    .ctrl-label {
-      display: flex; justify-content: space-between;
-      font-size: 11px; color: #99b8d0; margin-bottom: 4px;
+    #ui-panel.open {
+      transform: translateX(0);
     }
-    .ctrl-label span { color: #7eb8ff; font-weight: 600; }
 
-    input[type="range"] { width: 100%; accent-color: #7eb8ff; cursor: pointer; }
+    #ui-panel::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    #ui-panel::-webkit-scrollbar-thumb {
+      background: rgba(100, 160, 255, 0.2);
+      border-radius: 2px;
+    }
+
+    #ui-panel h2 {
+      font-size: 13px;
+      color: #7eb8ff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .ctrl-group {
+      margin-bottom: 12px;
+    }
+
+    .ctrl-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #99b8d0;
+      margin-bottom: 4px;
+    }
+
+    .ctrl-label span {
+      color: #7eb8ff;
+      font-weight: 600;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: #7eb8ff;
+      cursor: pointer;
+    }
 
     .section-title {
-      font-size: 9px; font-weight: 700; text-transform: uppercase;
-      letter-spacing: 1.5px; color: #3a6080;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #3a6080;
       margin: 12px 0 6px;
-      border-bottom: 1px solid rgba(100,160,255,0.1); padding-bottom: 3px;
+      border-bottom: 1px solid rgba(100, 160, 255, 0.1);
+      padding-bottom: 3px;
     }
-    .section-title:first-child { margin-top: 0; }
 
-    .tab-row { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 8px; }
-    .tab-btn {
-      flex: 1; padding: 4px 5px;
-      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
-      border-radius: 10px; border: 1px solid rgba(100,160,255,.25);
-      color: #4a6888; background: transparent; cursor: pointer; transition: .15s;
+    .section-title:first-child {
+      margin-top: 0;
     }
-    .tab-btn.active { color: #7eb8ff; border-color: rgba(100,160,255,.6); background: rgba(100,160,255,.12); }
-    .tab-btn:hover:not(.active) { color: #90b8d8; background: rgba(100,160,255,.08); }
+
+    .tab-row {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 4px 5px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      border-radius: 10px;
+      border: 1px solid rgba(100, 160, 255, .25);
+      color: #4a6888;
+      background: transparent;
+      cursor: pointer;
+      transition: .15s;
+    }
+
+    .tab-btn.active {
+      color: #7eb8ff;
+      border-color: rgba(100, 160, 255, .6);
+      background: rgba(100, 160, 255, .12);
+    }
+
+    .tab-btn:hover:not(.active) {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, .08);
+    }
 
     .toggle-row {
-      display: flex; align-items: center; justify-content: space-between;
-      font-size: 11px; color: #99b8d0; margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #99b8d0;
+      margin-bottom: 8px;
     }
+
     .toggle-btn {
-      padding: 3px 10px; font-size: 10px; font-weight: 600;
-      border-radius: 10px; border: 1px solid rgba(100,160,255,.25);
-      color: #4a6888; background: transparent; cursor: pointer; transition: .15s;
+      padding: 3px 10px;
+      font-size: 10px;
+      font-weight: 600;
+      border-radius: 10px;
+      border: 1px solid rgba(100, 160, 255, .25);
+      color: #4a6888;
+      background: transparent;
+      cursor: pointer;
+      transition: .15s;
     }
-    .toggle-btn.on { color: #7eb8ff; border-color: rgba(100,160,255,.6); background: rgba(100,160,255,.12); }
+
+    .toggle-btn.on {
+      color: #7eb8ff;
+      border-color: rgba(100, 160, 255, .6);
+      background: rgba(100, 160, 255, .12);
+    }
 
     /* ── Panel toggle button ── */
     #panel-toggle {
@@ -130,158 +317,244 @@
       backdrop-filter: blur(8px);
       transition: background 0.15s, right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    #panel-toggle:active { background: rgba(30,55,100,0.7); }
+
+    #panel-toggle:active {
+      background: rgba(30, 55, 100, 0.7);
+    }
 
     @media (max-width: 768px) {
       #ui-panel {
-        top: auto; right: 0; left: 0; bottom: 0;
-        width: 100%; max-height: 72vh; max-height: 72dvh;
+        top: auto;
+        right: 0;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        max-height: 72vh;
+        max-height: 72dvh;
         border-radius: 14px 14px 0 0;
         transform: translateY(100%);
       }
-      #ui-panel.open { transform: translateY(0); }
-      #panel-toggle.open { right: 8px; }
+
+      #ui-panel.open {
+        transform: translateY(0);
+      }
+
+      #panel-toggle.open {
+        right: 8px;
+      }
     }
+
     @media (max-width: 480px) {
-      #ui-panel { max-height: 60vh; }
+      #ui-panel {
+        max-height: 60vh;
+      }
     }
 
     /* ── Colorbar ── */
     #colorbar-wrap {
-      position: fixed; left: 16px; bottom: 20px;
-      background: rgba(10,15,30,0.82);
-      border: 1px solid rgba(100,160,255,0.2);
-      border-radius: 8px; padding: 8px 10px;
+      position: fixed;
+      left: 16px;
+      bottom: 20px;
+      background: rgba(10, 15, 30, 0.82);
+      border: 1px solid rgba(100, 160, 255, 0.2);
+      border-radius: 8px;
+      padding: 8px 10px;
     }
-    #colorbar-title { text-align: center; margin-bottom: 5px; font-weight: bold; color: #7eb8ff; font-size: 10px; }
-    #colorbar-body { display: flex; gap: 5px; align-items: stretch; }
-    #colorbar-canvas { width: 20px; height: 160px; border-radius: 3px; border: 1px solid rgba(100,160,255,.15); }
-    #colorbar-labels { display: flex; flex-direction: column; justify-content: space-between; height: 160px; font-size: 9px; color: #99b8d0; line-height: 1; }
+
+    #colorbar-title {
+      text-align: center;
+      margin-bottom: 5px;
+      font-weight: bold;
+      color: #7eb8ff;
+      font-size: 10px;
+    }
+
+    #colorbar-body {
+      display: flex;
+      gap: 5px;
+      align-items: stretch;
+    }
+
+    #colorbar-canvas {
+      width: 20px;
+      height: 160px;
+      border-radius: 3px;
+      border: 1px solid rgba(100, 160, 255, .15);
+    }
+
+    #colorbar-labels {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 160px;
+      font-size: 9px;
+      color: #99b8d0;
+      line-height: 1;
+    }
 
     /* ── Selected point panel ── */
     #info-panel {
-      position: fixed; top: 52px; left: 16px; width: 240px;
-      background: rgba(10,15,30,0.85); border: 1px solid rgba(100,160,255,0.3);
-      border-radius: 12px; padding: 14px; font-size: 12px; color: #c8d8e8;
-      backdrop-filter: blur(8px); display: none; z-index: 10;
+      position: fixed;
+      top: 52px;
+      left: 16px;
+      width: 240px;
+      background: rgba(10, 15, 30, 0.85);
+      border: 1px solid rgba(100, 160, 255, 0.3);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 12px;
+      color: #c8d8e8;
+      backdrop-filter: blur(8px);
+      display: none;
+      z-index: 10;
     }
+
     #info-panel h3 {
-      font-size: 13px; color: #7eb8ff; text-transform: uppercase;
-      letter-spacing: 1px; margin-bottom: 4px;
+      font-size: 13px;
+      color: #7eb8ff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
     }
-    #info-panel .info-coords { font-size: 10px; color: #7eb8ff; margin-bottom: 10px; }
+
+    #info-panel .info-coords {
+      font-size: 10px;
+      color: #7eb8ff;
+      margin-bottom: 10px;
+    }
+
     #info-panel .info-row {
-      display: flex; justify-content: space-between; gap: 8px;
-      margin-bottom: 5px; border-bottom: 1px solid rgba(100,160,255,0.08); padding-bottom: 5px;
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 5px;
+      border-bottom: 1px solid rgba(100, 160, 255, 0.08);
+      padding-bottom: 5px;
     }
-    #info-panel .info-row:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-    #info-panel .info-label { color: #6888a0; }
-    #info-panel .info-val { color: #e0f0ff; font-weight: bold; text-align: right; }
+
+    #info-panel .info-row:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    #info-panel .info-label {
+      color: #6888a0;
+    }
+
+    #info-panel .info-val {
+      color: #e0f0ff;
+      font-weight: bold;
+      text-align: right;
+    }
   </style>
 </head>
 
 <body>
 
-<nav id="header-nav">
-  <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
-  <div class="nav-sep"></div>
-  <a href="area"              class="nav-link">Area</a>
-  <a href="simulate"          class="nav-link">Simulate</a>
-  <a href="simulate-advanced" class="nav-link">Simulate NS</a>
-  <a href="simulate-dynamic"  class="nav-link">Wind SWE</a>
-  <a href="view"              class="nav-link">View</a>
-  <a href="view-dynamic"      class="nav-link nav-active">Wind View</a>
-  <a href="about"             class="nav-link">About</a>
-</nav>
+  <nav id="header-nav">
+    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+    <div class="nav-sep"></div>
+    <a href="area" class="nav-link">Area</a>
+    <a href="simulate" class="nav-link">Simulate</a>
+    <a href="simulate-advanced" class="nav-link">Simulate NS</a>
+    <a href="simulate-dynamic" class="nav-link">Wind SWE</a>
+    <a href="view" class="nav-link">View</a>
+    <a href="view-dynamic" class="nav-link nav-active">Wind View</a>
+    <a href="about" class="nav-link">About</a>
+  </nav>
 
-<div id="loading">
-  <div id="loading-spinner"></div>
-  <div id="loading-msg">Loading wind simulation…</div>
-</div>
+  <div id="loading">
+    <div id="loading-spinner"></div>
+    <div id="loading-msg">Loading wind simulation…</div>
+  </div>
 
-<div id="canvas-container"></div>
+  <div id="canvas-container"></div>
 
-<!-- Panel toggle -->
+  <!-- Panel toggle -->
   <button id="panel-toggle"
     onclick="const p=document.getElementById('ui-panel');p.classList.toggle('open');this.textContent=p.classList.contains('open')?'✕':'☰';"
     title="Toggle controls">✕</button>
 
-<!-- Controls panel -->
-<div id="ui-panel">
-  <h2>Wind Flow</h2>
-  <div class="tab-row" id="preset-btns"></div>
-  <div class="section-title" style="display: none;">Overlay</div>
-  <div class="tab-row" style="display: none;">
-    <button class="tab-btn active" id="tab-speed"    onclick="setOverlay('speed')">Speed</button>
-    <button class="tab-btn"        id="tab-froude"   onclick="setOverlay('froude')">Froude</button>
-    <button class="tab-btn"        id="tab-depth"    onclick="setOverlay('depth')">Depth</button>
-    <button class="tab-btn"        id="tab-vort"     onclick="setOverlay('vort')">Vort.</button>
-    <button class="tab-btn"        id="tab-vvert"    onclick="setOverlay('vvert')">Vert.</button>
-    <button class="tab-btn"        id="tab-terrain"  onclick="setOverlay('terrain')">Terrain</button>
-  </div>
-  
-  <div class="section-title" id="ctrl-section-terrain">Terrain</div>
-  <div class="ctrl-group" id="ctrl-terrain-opacity">
-    <div class="ctrl-label">Opacity <span id="terr-opacity-val">0.8</span></div>
-    <input type="range" id="terr-opacity" min="0.1" max="1" step="0.05" value="0.8"
-           oninput="document.getElementById('terr-opacity-val').textContent=this.value; updateTerrainOpacity();">
-  </div>
+  <!-- Controls panel -->
+  <div id="ui-panel">
+    <h2>Wind Flow</h2>
+    <div class="tab-row" id="preset-btns"></div>
+    <div class="section-title" style="display: none;">Overlay</div>
+    <div class="tab-row" style="display: none;">
+      <button class="tab-btn active" id="tab-speed" onclick="setOverlay('speed')">Speed</button>
+      <button class="tab-btn" id="tab-froude" onclick="setOverlay('froude')">Froude</button>
+      <button class="tab-btn" id="tab-depth" onclick="setOverlay('depth')">Depth</button>
+      <button class="tab-btn" id="tab-vort" onclick="setOverlay('vort')">Vort.</button>
+      <button class="tab-btn" id="tab-vvert" onclick="setOverlay('vvert')">Vert.</button>
+      <button class="tab-btn" id="tab-terrain" onclick="setOverlay('terrain')">Terrain</button>
+    </div>
 
-  <div class="section-title" id="ctrl-section-overlay">Overlay</div>
-  <div style="font-size:11px;color:#7eb8ff;font-weight:600;margin-bottom:6px" id="info-overlay">Wind Speed</div>
-  <div class="ctrl-group" id="ctrl-overlay-opacity">
-    <div class="ctrl-label">Opacity <span id="ov-opacity-val">0.75</span></div>
-    <input type="range" id="ov-opacity" min="0" max="1" step="0.05" value="0.75"
-           oninput="document.getElementById('ov-opacity-val').textContent=this.value; updateOverlayOpacity();">
-  </div>
+    <div class="section-title" id="ctrl-section-terrain">Terrain</div>
+    <div class="ctrl-group" id="ctrl-terrain-opacity">
+      <div class="ctrl-label">Opacity <span id="terr-opacity-val">0.8</span></div>
+      <input type="range" id="terr-opacity" min="0.1" max="1" step="0.05" value="0.8"
+        oninput="document.getElementById('terr-opacity-val').textContent=this.value; updateTerrainOpacity();">
+    </div>
 
-  <div class="section-title" id="ctrl-section-arrows">Arrows</div>
-  <div class="toggle-row" id="ctrl-arrows-toggle">
-    Show arrows
-    <div style="display:flex;gap:4px">
-      <button class="toggle-btn on" id="arrows-toggle" onclick="toggleArrows()">ON</button>
-      <button class="toggle-btn on" id="arrows-color" onclick="toggleArrowColor()">White</button>
+    <div class="section-title" id="ctrl-section-overlay">Overlay</div>
+    <div style="font-size:11px;color:#7eb8ff;font-weight:600;margin-bottom:6px" id="info-overlay">Wind Speed</div>
+    <div class="ctrl-group" id="ctrl-overlay-opacity">
+      <div class="ctrl-label">Opacity <span id="ov-opacity-val">0.75</span></div>
+      <input type="range" id="ov-opacity" min="0" max="1" step="0.05" value="0.75"
+        oninput="document.getElementById('ov-opacity-val').textContent=this.value; updateOverlayOpacity();">
+    </div>
+
+    <div class="section-title" id="ctrl-section-arrows">Arrows</div>
+    <div class="toggle-row" id="ctrl-arrows-toggle">
+      Show arrows
+      <div style="display:flex;gap:4px">
+        <button class="toggle-btn on" id="arrows-toggle" onclick="toggleArrows()">ON</button>
+        <button class="toggle-btn on" id="arrows-color" onclick="toggleArrowColor()">White</button>
+      </div>
+    </div>
+    <div class="ctrl-group" id="ctrl-arrow-step">
+      <div class="ctrl-label">Step (cells) <span id="arrow-step-val">10</span></div>
+      <input type="range" id="arrow-step" min="4" max="10" step="1" value="4"
+        oninput="document.getElementById('arrow-step-val').textContent=this.value; rebuildArrows();">
+    </div>
+    <div class="ctrl-group" id="ctrl-arrow-height">
+      <div class="ctrl-label">Height AGL (m) <span id="arrow-height-val">80</span></div>
+      <input type="range" id="arrow-height" min="10" max="500" step="10" value="80"
+        oninput="document.getElementById('arrow-height-val').textContent=this.value; rebuildArrows();">
+    </div>
+    <div class="ctrl-group" id="ctrl-arrow-scale">
+      <div class="ctrl-label">Scale <span id="arrow-scale-val">1.5</span></div>
+      <input type="range" id="arrow-scale" min="0" max="20" step="1" value="8"
+        oninput="document.getElementById('arrow-scale-val').textContent=this.value; rebuildArrows();">
+    </div>
+    <div class="ctrl-group" id="ctrl-arrow-width">
+      <div class="ctrl-label">Width (px) <span id="arrow-width-val">2</span></div>
+      <input type="range" id="arrow-width" min="1" max="10" step="0.5" value="2"
+        oninput="document.getElementById('arrow-width-val').textContent=this.value; updateArrowWidth();">
+    </div>
+
+    <div style="font-size:9px;color:#3a6080;line-height:1.7">
+      Drag to orbit · Scroll to zoom<br>Right-drag to pan · Click to inspect
     </div>
   </div>
-  <div class="ctrl-group" id="ctrl-arrow-step">
-    <div class="ctrl-label">Step (cells) <span id="arrow-step-val">10</span></div>
-    <input type="range" id="arrow-step" min="4" max="10" step="1" value="4"
-           oninput="document.getElementById('arrow-step-val').textContent=this.value; rebuildArrows();">
-  </div>
-  <div class="ctrl-group" id="ctrl-arrow-height">
-    <div class="ctrl-label">Height AGL (m) <span id="arrow-height-val">80</span></div>
-    <input type="range" id="arrow-height" min="10" max="500" step="10" value="80"
-           oninput="document.getElementById('arrow-height-val').textContent=this.value; rebuildArrows();">
-  </div>
-  <div class="ctrl-group" id="ctrl-arrow-scale">
-    <div class="ctrl-label">Scale <span id="arrow-scale-val">1.5</span></div>
-    <input type="range" id="arrow-scale" min="0" max="20" step="1" value="8"
-           oninput="document.getElementById('arrow-scale-val').textContent=this.value; rebuildArrows();">
-  </div>
-  <div class="ctrl-group" id="ctrl-arrow-width">
-    <div class="ctrl-label">Width (px) <span id="arrow-width-val">2</span></div>
-    <input type="range" id="arrow-width" min="1" max="10" step="0.5" value="2"
-           oninput="document.getElementById('arrow-width-val').textContent=this.value; updateArrowWidth();">
+
+  <!-- Colorbar -->
+  <div id="colorbar-wrap">
+    <div id="colorbar-title">Speed (m/s)</div>
+    <div id="colorbar-body">
+      <canvas id="colorbar-canvas" width="20" height="160"></canvas>
+      <div id="colorbar-labels"></div>
+    </div>
   </div>
 
-  <div style="font-size:9px;color:#3a6080;line-height:1.7">
-    Drag to orbit · Scroll to zoom<br>Right-drag to pan · Click to inspect
+  <!-- Info bar -->
+  <div id="info-panel">
+    <h3>Selected point</h3>
+    <div id="info-rows"></div>
   </div>
-</div>
 
-<!-- Colorbar -->
-<div id="colorbar-wrap">
-  <div id="colorbar-title">Speed (m/s)</div>
-  <div id="colorbar-body">
-    <canvas id="colorbar-canvas" width="20" height="160"></canvas>
-    <div id="colorbar-labels"></div>
-  </div>
-</div>
-
-<!-- Info bar -->
-<div id="info-panel"><h3>Selected point</h3><div id="info-rows"></div></div>
-
-<script type="importmap">
+  <script type="importmap">
 {
   "imports": {
     "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
@@ -290,496 +563,496 @@
 }
 </script>
 
-<script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
-import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
-import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
+    import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+    import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 
-// ═══════════════════════════════════════════════════════════════════
-//  SCENE SETUP
-// ═══════════════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════════════
+    //  SCENE SETUP
+    // ═══════════════════════════════════════════════════════════════════
 
-const container = document.getElementById('canvas-container');
-const renderer  = new THREE.WebGLRenderer({ antialias: true });
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-container.appendChild(renderer.domElement);
+    const container = document.getElementById('canvas-container');
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x040810);
-scene.fog = new THREE.Fog(0x040810, 8000, 18000);
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x040810);
+    scene.fog = new THREE.Fog(0x040810, 8000, 18000);
 
-const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 10, 30000);
-camera.position.set(0, -2500, 2500);
-camera.up.set(0, 0, 1);
+    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 10, 30000);
+    camera.position.set(0, -2500, 2500);
+    camera.up.set(0, 0, 1);
 
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 0, 800);
-controls.enableDamping = true;
-controls.dampingFactor = 0.06;
-controls.minDistance  = 200;
-controls.maxDistance  = 12000;
-controls.maxPolarAngle = Math.PI * 0.48;
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, 0, 800);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.minDistance = 200;
+    controls.maxDistance = 12000;
+    controls.maxPolarAngle = Math.PI * 0.48;
 
-// Lighting — identical to view.html
-const ambientLight = new THREE.AmbientLight(0x1a2a3a, 2);
-scene.add(ambientLight);
-const sun = new THREE.DirectionalLight(0xfff0dd, 3);
-sun.position.set(1000, -500, 2000);
-sun.castShadow = true;
-sun.shadow.mapSize.width  = 4096;
-sun.shadow.mapSize.height = 4096;
-sun.shadow.camera.left   = -5500;
-sun.shadow.camera.right  =  5500;
-sun.shadow.camera.top    =  5500;
-sun.shadow.camera.bottom = -5500;
-sun.shadow.camera.near   = 100;
-sun.shadow.camera.far    = 18000;
-sun.shadow.bias = -0.002;
-scene.add(sun);
+    // Lighting — identical to view.html
+    const ambientLight = new THREE.AmbientLight(0x1a2a3a, 2);
+    scene.add(ambientLight);
+    const sun = new THREE.DirectionalLight(0xfff0dd, 3);
+    sun.position.set(1000, -500, 2000);
+    sun.castShadow = true;
+    sun.shadow.mapSize.width = 4096;
+    sun.shadow.mapSize.height = 4096;
+    sun.shadow.camera.left = -5500;
+    sun.shadow.camera.right = 5500;
+    sun.shadow.camera.top = 5500;
+    sun.shadow.camera.bottom = -5500;
+    sun.shadow.camera.near = 100;
+    sun.shadow.camera.far = 18000;
+    sun.shadow.bias = -0.002;
+    scene.add(sun);
 
-window.addEventListener('resize', () => {
-  const w = window.innerWidth, h = window.innerHeight - 44;
-  camera.aspect = w / h;
-  camera.updateProjectionMatrix();
-  renderer.setSize(w, h);
-  if (arrowLines) arrowLines.material.resolution.set(w, h);
-});
+    window.addEventListener('resize', () => {
+      const w = window.innerWidth, h = window.innerHeight - 44;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      if (arrowLines) arrowLines.material.resolution.set(w, h);
+    });
 
-function animate() {
-  requestAnimationFrame(animate);
-  controls.update();
-  renderer.render(scene, camera);
-  updateMarkerLabels();
-  updateClickMarkerLabel();
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  STATE
-// ═══════════════════════════════════════════════════════════════════
-
-let simData     = null;
-let terrainMesh = null;
-let overlayMesh = null;
-let arrowLines  = null;
-let pickMesh    = null;
-let clickMarker = null;
-let northMarkerObjects = [];
-let currentOverlay = 'speed';
-let arrowsVisible  = true;
-let arrowColor     = 0xffffff;
-const markerObjects = [];
-
-// ═══════════════════════════════════════════════════════════════════
-//  COLORMAPS (inline — no external file dependency)
-// ═══════════════════════════════════════════════════════════════════
-
-const CMAPS = {
-  speed: [
-    [0,   0,   255],
-    [0,   200, 200],
-    [0,   255, 0  ],
-    [255, 255, 0  ],
-    [255, 0,   0  ],
-  ],
-  froude: [
-    [0,   100, 255],
-    [0,   220, 160],
-    [255, 230, 0  ],
-    [255, 80,  0  ],
-    [180, 0,   0  ],
-  ],
-  depth: [
-    [0,   10,  60 ],
-    [0,   60,  160],
-    [0,   140, 220],
-    [80,  200, 255],
-    [200, 240, 255],
-  ],
-  vort: [
-    [0,   0,   220],
-    [20,  20,  60 ],
-    [10,  10,  10 ],
-    [60,  10,  10 ],
-    [220, 0,   0  ],
-  ],
-  vvert: [
-    [0,   0,   255],
-    [128, 128, 255],
-    [255, 255, 255],
-    [255, 128, 128],
-    [255, 0,   0  ],
-  ],
-  terrain: [
-    [30,  60,  20 ],
-    [80,  110, 50 ],
-    [140, 140, 100],
-    [180, 160, 130],
-    [230, 220, 200],
-    [255, 255, 255],
-  ],
-};
-
-function sampleCmap(name, t) {
-  const stops = CMAPS[name];
-  const n     = stops.length - 1;
-  const idx   = Math.min(Math.floor(t * n), n - 1);
-  const s     = t * n - idx;
-  const lo = stops[idx], hi = stops[idx + 1] || lo;
-  return [
-    (lo[0] + s * (hi[0] - lo[0])) / 255,
-    (lo[1] + s * (hi[1] - lo[1])) / 255,
-    (lo[2] + s * (hi[2] - lo[2])) / 255,
-  ];
-}
-
-function drawColorbar(cmapName, minVal, maxVal, title, fmtFn) {
-  const canvas = document.getElementById('colorbar-canvas');
-  const ctx    = canvas.getContext('2d');
-  const img    = ctx.createImageData(canvas.width, canvas.height);
-  for (let py = 0; py < canvas.height; py++) {
-    const t = 1 - py / (canvas.height - 1);
-    const [r, g, b] = sampleCmap(cmapName, t);
-    for (let px = 0; px < canvas.width; px++) {
-      const base = (py * canvas.width + px) * 4;
-      img.data[base]   = r * 255; img.data[base+1] = g * 255;
-      img.data[base+2] = b * 255; img.data[base+3] = 255;
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+      updateMarkerLabels();
+      updateClickMarkerLabel();
     }
-  }
-  ctx.putImageData(img, 0, 0);
 
-  const labDiv = document.getElementById('colorbar-labels');
-  labDiv.innerHTML = '';
-  for (let k = 0; k <= 5; k++) {
-    const v = maxVal - (k / 5) * (maxVal - minVal);
-    const span = document.createElement('span');
-    span.textContent = fmtFn(v);
-    span.style.fontSize = '9px'; span.style.color = '#5588aa';
-    labDiv.appendChild(span);
-  }
-  document.getElementById('colorbar-title').textContent = title;
-}
+    // ═══════════════════════════════════════════════════════════════════
+    //  STATE
+    // ═══════════════════════════════════════════════════════════════════
 
-// ═══════════════════════════════════════════════════════════════════
-//  TERRAIN MESH (high-res)
-// ═══════════════════════════════════════════════════════════════════
+    let simData = null;
+    let terrainMesh = null;
+    let overlayMesh = null;
+    let arrowLines = null;
+    let pickMesh = null;
+    let clickMarker = null;
+    let northMarkerObjects = [];
+    let currentOverlay = 'speed';
+    let arrowsVisible = true;
+    let arrowColor = 0xffffff;
+    const markerObjects = [];
 
-function buildTerrain() {
-  if (terrainMesh) { scene.remove(terrainMesh); terrainMesh.geometry.dispose(); terrainMesh.material.dispose(); }
+    // ═══════════════════════════════════════════════════════════════════
+    //  COLORMAPS (inline — no external file dependency)
+    // ═══════════════════════════════════════════════════════════════════
 
-  const T = simData.terrain;
-  const useHires = T.mesh_elevation && T.mesh_nx && T.mesh_ny;
-  const elev = useHires ? T.mesh_elevation : T.elevation;
-  const mnx  = useHires ? T.mesh_nx : T.nx;
-  const mny  = useHires ? T.mesh_ny : T.ny;
+    const CMAPS = {
+      speed: [
+        [0, 0, 255],
+        [0, 200, 200],
+        [0, 255, 0],
+        [255, 255, 0],
+        [255, 0, 0],
+      ],
+      froude: [
+        [0, 100, 255],
+        [0, 220, 160],
+        [255, 230, 0],
+        [255, 80, 0],
+        [180, 0, 0],
+      ],
+      depth: [
+        [0, 10, 60],
+        [0, 60, 160],
+        [0, 140, 220],
+        [80, 200, 255],
+        [200, 240, 255],
+      ],
+      vort: [
+        [0, 0, 220],
+        [20, 20, 60],
+        [10, 10, 10],
+        [60, 10, 10],
+        [220, 0, 0],
+      ],
+      vvert: [
+        [0, 0, 255],
+        [128, 128, 255],
+        [255, 255, 255],
+        [255, 128, 128],
+        [255, 0, 0],
+      ],
+      terrain: [
+        [30, 60, 20],
+        [80, 110, 50],
+        [140, 140, 100],
+        [180, 160, 130],
+        [230, 220, 200],
+        [255, 255, 255],
+      ],
+    };
 
-  const xw = T.x_extent[1] - T.x_extent[0];
-  const yh = T.y_extent[1] - T.y_extent[0];
-
-  const geom = new THREE.PlaneGeometry(xw, yh, mnx - 1, mny - 1);
-  const pos  = geom.attributes.position;
-
-  // Elevation
-  let zmin = Infinity, zmax = -Infinity;
-  for (let j = 0; j < mny; j++)
-    for (let i = 0; i < mnx; i++) {
-      const z = elev[j][i];
-      pos.setZ(j * mnx + i, z);
-      if (z < zmin) zmin = z; if (z > zmax) zmax = z;
+    function sampleCmap(name, t) {
+      const stops = CMAPS[name];
+      const n = stops.length - 1;
+      const idx = Math.min(Math.floor(t * n), n - 1);
+      const s = t * n - idx;
+      const lo = stops[idx], hi = stops[idx + 1] || lo;
+      return [
+        (lo[0] + s * (hi[0] - lo[0])) / 255,
+        (lo[1] + s * (hi[1] - lo[1])) / 255,
+        (lo[2] + s * (hi[2] - lo[2])) / 255,
+      ];
     }
-  pos.needsUpdate = true;
-  geom.computeVertexNormals();
 
-  // Plain elevation colours — MeshLambertMaterial + scene lights provide the shading.
-  const colors = new Float32Array(pos.count * 3);
-  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  for (let k = 0; k < pos.count; k++) {
-    const t = (pos.getZ(k) - zmin) / (zmax - zmin);
-    const [r, g, b] = sampleCmap('terrain', t);
-    colors[k*3] = r; colors[k*3+1] = g; colors[k*3+2] = b;
-  }
+    function drawColorbar(cmapName, minVal, maxVal, title, fmtFn) {
+      const canvas = document.getElementById('colorbar-canvas');
+      const ctx = canvas.getContext('2d');
+      const img = ctx.createImageData(canvas.width, canvas.height);
+      for (let py = 0; py < canvas.height; py++) {
+        const t = 1 - py / (canvas.height - 1);
+        const [r, g, b] = sampleCmap(cmapName, t);
+        for (let px = 0; px < canvas.width; px++) {
+          const base = (py * canvas.width + px) * 4;
+          img.data[base] = r * 255; img.data[base + 1] = g * 255;
+          img.data[base + 2] = b * 255; img.data[base + 3] = 255;
+        }
+      }
+      ctx.putImageData(img, 0, 0);
 
-  const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
-  const cy = -(T.y_extent[0] + T.y_extent[1]) / 2;
-
-  const mat = new THREE.MeshLambertMaterial({
-    vertexColors: true, transparent: true,
-    opacity: parseFloat(document.getElementById('terr-opacity').value),
-    side: THREE.DoubleSide,
-  });
-  terrainMesh = new THREE.Mesh(geom, mat);
-  terrainMesh.position.set(cx, cy, 0);
-  terrainMesh.receiveShadow = true;
-  scene.add(terrainMesh);
-
-  // Camera
-  const meanZ = (zmin + zmax) / 2;
-  controls.target.set(0, 0, meanZ);
-  camera.position.set(0, -Math.max(xw, yh) * 0.5, meanZ + Math.max(xw, yh) * 0.35);
-  controls.update();
-
-  return { zmin, zmax, cx, cy };
-}
-
-// ═══════════════════════════════════════════════════════════════════
-//  WIND OVERLAY (sim-resolution plane, vertex-coloured)
-// ═══════════════════════════════════════════════════════════════════
-
-let overlayMin = 0, overlayMax = 1;
-
-function buildOverlay(cmapName, field, title, unit) {
-  if (overlayMesh) { scene.remove(overlayMesh); overlayMesh.geometry.dispose(); overlayMesh.material.dispose(); }
-
-  const T   = simData.terrain;
-  const nx  = T.nx, ny = T.ny;
-  const xw  = T.x_extent[1] - T.x_extent[0];
-  const yh  = T.y_extent[1] - T.y_extent[0];
-  const cx  = (T.x_extent[0] + T.x_extent[1]) / 2;
-  const cy  = -(T.y_extent[0] + T.y_extent[1]) / 2;
-
-  const geom = new THREE.PlaneGeometry(xw, yh, nx - 1, ny - 1);
-  const pos  = geom.attributes.position;
-
-  // Lift overlay onto terrain surface + small offset
-  for (let j = 0; j < ny; j++)
-    for (let i = 0; i < nx; i++)
-      pos.setZ(j * nx + i, T.elevation[j][i] + 4);
-  pos.needsUpdate = true;
-
-  // Normalise field
-  let mn = Infinity, mx = -Infinity;
-  for (let i = 0; i < field.length; i++) {
-    if (field[i] < mn) mn = field[i]; if (field[i] > mx) mx = field[i];
-  }
-  overlayMin = mn; overlayMax = mx;
-  const rng = Math.max(mx - mn, 1e-9);
-
-  // Vertex colours
-  const colors = new Float32Array(pos.count * 3);
-  geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-  for (let k = 0; k < pos.count; k++) {
-    const t = (field[k] - mn) / rng;
-    const [r, g, b] = sampleCmap(cmapName, t);
-    colors[k*3] = r; colors[k*3+1] = g; colors[k*3+2] = b;
-  }
-
-  const mat = new THREE.MeshBasicMaterial({
-    vertexColors: true, transparent: true,
-    opacity: parseFloat(document.getElementById('ov-opacity').value),
-    depthWrite: false, side: THREE.DoubleSide,
-    polygonOffset: true, polygonOffsetFactor: -50, polygonOffsetUnits: -50,
-  });
-  overlayMesh = new THREE.Mesh(geom, mat);
-  overlayMesh.position.set(cx, cy, 0);
-  scene.add(overlayMesh);
-
-  const fmtFn = v => mx > 100 ? v.toFixed(0) : v.toFixed(2);
-  drawColorbar(cmapName, mn, mx, `${title} (${unit})`, fmtFn);
-}
-
-function updateTerrainOpacity() {
-  if (terrainMesh) terrainMesh.material.opacity = parseFloat(document.getElementById('terr-opacity').value);
-}
-function updateOverlayOpacity() {
-  if (overlayMesh) overlayMesh.material.opacity = parseFloat(document.getElementById('ov-opacity').value);
-}
-window.updateTerrainOpacity = updateTerrainOpacity;
-window.updateOverlayOpacity = updateOverlayOpacity;
-
-// ═══════════════════════════════════════════════════════════════════
-//  3-D WIND ARROWS (LineSegments2 — fat lines)
-// ═══════════════════════════════════════════════════════════════════
-
-function buildArrows() {
-  if (arrowLines) { scene.remove(arrowLines); arrowLines.geometry.dispose(); arrowLines.material.dispose(); arrowLines = null; }
-  if (!arrowsVisible) return;
-
-  const T     = simData.terrain;
-  const W     = simData.wind;
-  const nx    = T.nx, ny = T.ny;
-  const step  = parseInt(document.getElementById('arrow-step').value);
-  const agl   = parseFloat(document.getElementById('arrow-height').value);
-  const scale = parseFloat(document.getElementById('arrow-scale').value);
-  const width = parseFloat(document.getElementById('arrow-width').value);
-  const cx    = (T.x_extent[0] + T.x_extent[1]) / 2;
-  const cy    = -(T.y_extent[0] + T.y_extent[1]) / 2;
-  const xw    = T.x_extent[1] - T.x_extent[0];
-  const yh    = T.y_extent[1] - T.y_extent[0];
-
-  let maxSpd = 0;
-  for (let k = 0; k < W.speed.length; k++) if (W.speed[k] > maxSpd) maxSpd = W.speed[k];
-  if (maxSpd === 0) maxSpd = 1;
-
-  // LineSegmentsGeometry expects flat [x1,y1,z1, x2,y2,z2, ...] pairs
-  const positions = [];
-
-  const HEAD_FRAC = 0.3;
-  const HEAD_HALF = 0.25;
-
-  for (let j = Math.floor(step/2); j < ny; j += step) {
-    for (let i = Math.floor(step/2); i < nx; i += step) {
-      const idx = j * nx + i;
-      const ui  = W.u[idx], vi = W.v[idx];
-      const spd = W.speed[idx];
-      if (spd < 0.05) continue;
-
-      const wx = (i / (nx-1) - 0.5) * xw + cx;
-      const wy = (0.5 - j / (ny-1)) * yh + cy;
-      const wz = T.elevation[j][i] + agl;
-
-      const len = step * scale * (T.dx || 50) * 0.8 * (spd / maxSpd);
-      const ux  = ui / spd, uy = vi / spd;
-
-      const ex = wx + ux * len, ey = wy + uy * len;
-
-      // Stem
-      positions.push(wx, wy, wz,  ex, ey, wz);
-
-      // Arrowhead
-      const hl  = len * HEAD_FRAC;
-      const ang = Math.atan2(uy, ux);
-      const a1  = ang + Math.PI - HEAD_HALF;
-      const a2  = ang + Math.PI + HEAD_HALF;
-      positions.push(ex, ey, wz,  ex + Math.cos(a1)*hl, ey + Math.sin(a1)*hl, wz);
-      positions.push(ex, ey, wz,  ex + Math.cos(a2)*hl, ey + Math.sin(a2)*hl, wz);
+      const labDiv = document.getElementById('colorbar-labels');
+      labDiv.innerHTML = '';
+      for (let k = 0; k <= 5; k++) {
+        const v = maxVal - (k / 5) * (maxVal - minVal);
+        const span = document.createElement('span');
+        span.textContent = fmtFn(v);
+        span.style.fontSize = '9px'; span.style.color = '#5588aa';
+        labDiv.appendChild(span);
+      }
+      document.getElementById('colorbar-title').textContent = title;
     }
-  }
 
-  if (positions.length === 0) return;
+    // ═══════════════════════════════════════════════════════════════════
+    //  TERRAIN MESH (high-res)
+    // ═══════════════════════════════════════════════════════════════════
 
-  const geom = new LineSegmentsGeometry();
-  geom.setPositions(positions);
+    function buildTerrain() {
+      if (terrainMesh) { scene.remove(terrainMesh); terrainMesh.geometry.dispose(); terrainMesh.material.dispose(); }
 
-  const mat = new LineMaterial({
-    color: arrowColor,
-    linewidth: width,
-    transparent: true,
-    opacity: 0.75,
-    resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
-  });
+      const T = simData.terrain;
+      const useHires = T.mesh_elevation && T.mesh_nx && T.mesh_ny;
+      const elev = useHires ? T.mesh_elevation : T.elevation;
+      const mnx = useHires ? T.mesh_nx : T.nx;
+      const mny = useHires ? T.mesh_ny : T.ny;
 
-  arrowLines = new LineSegments2(geom, mat);
-  scene.add(arrowLines);
-}
+      const xw = T.x_extent[1] - T.x_extent[0];
+      const yh = T.y_extent[1] - T.y_extent[0];
 
-function updateArrowWidth() {
-  if (arrowLines) {
-    arrowLines.material.linewidth = parseFloat(document.getElementById('arrow-width').value);
-  }
-}
+      const geom = new THREE.PlaneGeometry(xw, yh, mnx - 1, mny - 1);
+      const pos = geom.attributes.position;
 
-function toggleArrows() {
-  arrowsVisible = !arrowsVisible;
-  const btn = document.getElementById('arrows-toggle');
-  btn.textContent = arrowsVisible ? 'ON' : 'OFF';
-  btn.classList.toggle('on', arrowsVisible);
-  buildArrows();
-}
+      // Elevation
+      let zmin = Infinity, zmax = -Infinity;
+      for (let j = 0; j < mny; j++)
+        for (let i = 0; i < mnx; i++) {
+          const z = elev[j][i];
+          pos.setZ(j * mnx + i, z);
+          if (z < zmin) zmin = z; if (z > zmax) zmax = z;
+        }
+      pos.needsUpdate = true;
+      geom.computeVertexNormals();
 
-function toggleArrowColor() {
-  arrowColor = arrowColor === 0xffffff ? 0x000000 : 0xffffff;
-  const btn = document.getElementById('arrows-color');
-  btn.textContent = arrowColor === 0xffffff ? 'White' : 'Black';
-  btn.classList.toggle('on', arrowColor === 0xffffff);
-  if (arrowLines) arrowLines.material.color.setHex(arrowColor);
-}
+      // Plain elevation colours — MeshLambertMaterial + scene lights provide the shading.
+      const colors = new Float32Array(pos.count * 3);
+      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      for (let k = 0; k < pos.count; k++) {
+        const t = (pos.getZ(k) - zmin) / (zmax - zmin);
+        const [r, g, b] = sampleCmap('terrain', t);
+        colors[k * 3] = r; colors[k * 3 + 1] = g; colors[k * 3 + 2] = b;
+      }
 
-window.toggleArrows     = toggleArrows;
-window.toggleArrowColor = toggleArrowColor;
-window.rebuildArrows    = buildArrows;
-window.updateArrowWidth = updateArrowWidth;
+      const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
+      const cy = -(T.y_extent[0] + T.y_extent[1]) / 2;
 
-// ═══════════════════════════════════════════════════════════════════
-//  OVERLAY SELECTION
-// ═══════════════════════════════════════════════════════════════════
+      const mat = new THREE.MeshLambertMaterial({
+        vertexColors: true, transparent: true,
+        opacity: parseFloat(document.getElementById('terr-opacity').value),
+        side: THREE.DoubleSide,
+      });
+      terrainMesh = new THREE.Mesh(geom, mat);
+      terrainMesh.position.set(cx, cy, 0);
+      terrainMesh.receiveShadow = true;
+      scene.add(terrainMesh);
 
-const OVERLAYS = {
-  speed:   { field: 'speed',    cmap: 'speed',   title: 'Wind Speed',  unit: 'm/s' },
-  froude:  { field: 'froude',   cmap: 'froude',  title: 'Froude №',    unit: '' },
-  depth:   { field: 'depth',    cmap: 'depth',   title: 'Flow Depth',  unit: 'm' },
-  vort:    { field: 'vorticity',cmap: 'vort',    title: 'Vorticity',   unit: '1/s' },
-  vvert:   { field: 'vertical', cmap: 'vvert',   title: 'Vertical Wind', unit: 'm/s' },
-  terrain: { field: null,       cmap: 'terrain', title: 'Elevation',   unit: 'm' },
-};
+      // Camera
+      const meanZ = (zmin + zmax) / 2;
+      controls.target.set(0, 0, meanZ);
+      camera.position.set(0, -Math.max(xw, yh) * 0.5, meanZ + Math.max(xw, yh) * 0.35);
+      controls.update();
 
-function setOverlay(name) {
-  currentOverlay = name;
-  ['speed','froude','depth','vort','vvert','terrain'].forEach(n => {
-    document.getElementById('tab-' + n).classList.toggle('active', n === name);
-  });
-  const ov = OVERLAYS[name];
-  document.getElementById('info-overlay').textContent = ov.title;
+      return { zmin, zmax, cx, cy };
+    }
 
-  if (!simData) return;
+    // ═══════════════════════════════════════════════════════════════════
+    //  WIND OVERLAY (sim-resolution plane, vertex-coloured)
+    // ═══════════════════════════════════════════════════════════════════
 
-  if (name === 'terrain') {
-    // Hide overlay, show terrain only
-    if (overlayMesh) { scene.remove(overlayMesh); overlayMesh.geometry.dispose(); overlayMesh.material.dispose(); overlayMesh = null; }
-    const T = simData.terrain;
-    const nx = T.nx, ny = T.ny;
-    const flat = T.elevation.flat();
-    let mn = Infinity, mx = -Infinity;
-    for (const z of flat) { if (z < mn) mn = z; if (z > mx) mx = z; }
-    drawColorbar('terrain', mn, mx, 'Elevation (m)', v => v.toFixed(0));
-  } else {
-    const field = simData.wind[ov.field];
-    buildOverlay(ov.cmap, field, ov.title, ov.unit);
-  }
-}
+    let overlayMin = 0, overlayMax = 1;
 
-window.setOverlay = setOverlay;
+    function buildOverlay(cmapName, field, title, unit) {
+      if (overlayMesh) { scene.remove(overlayMesh); overlayMesh.geometry.dispose(); overlayMesh.material.dispose(); }
 
-// ═══════════════════════════════════════════════════════════════════
-//  WAYPOINT MARKERS
-// ═══════════════════════════════════════════════════════════════════
+      const T = simData.terrain;
+      const nx = T.nx, ny = T.ny;
+      const xw = T.x_extent[1] - T.x_extent[0];
+      const yh = T.y_extent[1] - T.y_extent[0];
+      const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
+      const cy = -(T.y_extent[0] + T.y_extent[1]) / 2;
 
-const MARKER_STYLE = {
-  takeoff: { hexColor: '#ff8800', poleColor: 0xcc6600, coneColor: 0xff8800 },
-  landing: { hexColor: '#00ff88', poleColor: 0x00cc66, coneColor: 0x00ff88 },
-};
+      const geom = new THREE.PlaneGeometry(xw, yh, nx - 1, ny - 1);
+      const pos = geom.attributes.position;
 
-function buildMarkers() {
-  markerObjects.forEach(o => { scene.remove(o); if (o._labelDiv) o._labelDiv.remove(); });
-  markerObjects.length = 0;
+      // Lift overlay onto terrain surface + small offset
+      for (let j = 0; j < ny; j++)
+        for (let i = 0; i < nx; i++)
+          pos.setZ(j * nx + i, T.elevation[j][i] + 4);
+      pos.needsUpdate = true;
 
-  const markers = simData.markers;
-  if (!markers || markers.length === 0) return;
+      // Normalise field
+      let mn = Infinity, mx = -Infinity;
+      for (let i = 0; i < field.length; i++) {
+        if (field[i] < mn) mn = field[i]; if (field[i] > mx) mx = field[i];
+      }
+      overlayMin = mn; overlayMax = mx;
+      const rng = Math.max(mx - mn, 1e-9);
 
-  const poleH = 120;
+      // Vertex colours
+      const colors = new Float32Array(pos.count * 3);
+      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      for (let k = 0; k < pos.count; k++) {
+        const t = (field[k] - mn) / rng;
+        const [r, g, b] = sampleCmap(cmapName, t);
+        colors[k * 3] = r; colors[k * 3 + 1] = g; colors[k * 3 + 2] = b;
+      }
 
-  markers.forEach(m => {
-    const style = MARKER_STYLE[m.type];
-    if (!style) return;
+      const mat = new THREE.MeshBasicMaterial({
+        vertexColors: true, transparent: true,
+        opacity: parseFloat(document.getElementById('ov-opacity').value),
+        depthWrite: false, side: THREE.DoubleSide,
+        polygonOffset: true, polygonOffsetFactor: -50, polygonOffsetUnits: -50,
+      });
+      overlayMesh = new THREE.Mesh(geom, mat);
+      overlayMesh.position.set(cx, cy, 0);
+      scene.add(overlayMesh);
 
-    // Pole
-    const pole = new THREE.Mesh(
-      new THREE.CylinderGeometry(4, 4, poleH, 8),
-      new THREE.MeshBasicMaterial({ color: style.poleColor, depthTest: false, transparent: true })
-    );
-    pole.rotation.x = Math.PI / 2;
-    pole.position.set(m.x, m.y, m.z + poleH / 2);
-    pole.renderOrder = 10;
-    scene.add(pole);
-    markerObjects.push(pole);
+      const fmtFn = v => mx > 100 ? v.toFixed(0) : v.toFixed(2);
+      drawColorbar(cmapName, mn, mx, `${title} (${unit})`, fmtFn);
+    }
 
-    // Cone
-    const cone = new THREE.Mesh(
-      new THREE.ConeGeometry(40, 80, 12),
-      new THREE.MeshBasicMaterial({ color: style.coneColor, depthTest: false, transparent: true })
-    );
-    cone.rotation.x = Math.PI / 2;
-    cone.position.set(m.x, m.y, m.z + poleH + 40);
-    cone.renderOrder = 10;
-    scene.add(cone);
-    markerObjects.push(cone);
+    function updateTerrainOpacity() {
+      if (terrainMesh) terrainMesh.material.opacity = parseFloat(document.getElementById('terr-opacity').value);
+    }
+    function updateOverlayOpacity() {
+      if (overlayMesh) overlayMesh.material.opacity = parseFloat(document.getElementById('ov-opacity').value);
+    }
+    window.updateTerrainOpacity = updateTerrainOpacity;
+    window.updateOverlayOpacity = updateOverlayOpacity;
 
-    // HTML label
-    const div = document.createElement('div');
-    div.style.cssText = `
+    // ═══════════════════════════════════════════════════════════════════
+    //  3-D WIND ARROWS (LineSegments2 — fat lines)
+    // ═══════════════════════════════════════════════════════════════════
+
+    function buildArrows() {
+      if (arrowLines) { scene.remove(arrowLines); arrowLines.geometry.dispose(); arrowLines.material.dispose(); arrowLines = null; }
+      if (!arrowsVisible) return;
+
+      const T = simData.terrain;
+      const W = simData.wind;
+      const nx = T.nx, ny = T.ny;
+      const step = parseInt(document.getElementById('arrow-step').value);
+      const agl = parseFloat(document.getElementById('arrow-height').value);
+      const scale = parseFloat(document.getElementById('arrow-scale').value);
+      const width = parseFloat(document.getElementById('arrow-width').value);
+      const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
+      const cy = -(T.y_extent[0] + T.y_extent[1]) / 2;
+      const xw = T.x_extent[1] - T.x_extent[0];
+      const yh = T.y_extent[1] - T.y_extent[0];
+
+      let maxSpd = 0;
+      for (let k = 0; k < W.speed.length; k++) if (W.speed[k] > maxSpd) maxSpd = W.speed[k];
+      if (maxSpd === 0) maxSpd = 1;
+
+      // LineSegmentsGeometry expects flat [x1,y1,z1, x2,y2,z2, ...] pairs
+      const positions = [];
+
+      const HEAD_FRAC = 0.3;
+      const HEAD_HALF = 0.25;
+
+      for (let j = Math.floor(step / 2); j < ny; j += step) {
+        for (let i = Math.floor(step / 2); i < nx; i += step) {
+          const idx = j * nx + i;
+          const ui = W.u[idx], vi = W.v[idx];
+          const spd = W.speed[idx];
+          if (spd < 0.05) continue;
+
+          const wx = (i / (nx - 1) - 0.5) * xw + cx;
+          const wy = (0.5 - j / (ny - 1)) * yh + cy;
+          const wz = T.elevation[j][i] + agl;
+
+          const len = step * scale * (T.dx || 50) * 0.8 * (spd / maxSpd);
+          const ux = ui / spd, uy = vi / spd;
+
+          const ex = wx + ux * len, ey = wy + uy * len;
+
+          // Stem
+          positions.push(wx, wy, wz, ex, ey, wz);
+
+          // Arrowhead
+          const hl = len * HEAD_FRAC;
+          const ang = Math.atan2(uy, ux);
+          const a1 = ang + Math.PI - HEAD_HALF;
+          const a2 = ang + Math.PI + HEAD_HALF;
+          positions.push(ex, ey, wz, ex + Math.cos(a1) * hl, ey + Math.sin(a1) * hl, wz);
+          positions.push(ex, ey, wz, ex + Math.cos(a2) * hl, ey + Math.sin(a2) * hl, wz);
+        }
+      }
+
+      if (positions.length === 0) return;
+
+      const geom = new LineSegmentsGeometry();
+      geom.setPositions(positions);
+
+      const mat = new LineMaterial({
+        color: arrowColor,
+        linewidth: width,
+        transparent: true,
+        opacity: 0.75,
+        resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
+      });
+
+      arrowLines = new LineSegments2(geom, mat);
+      scene.add(arrowLines);
+    }
+
+    function updateArrowWidth() {
+      if (arrowLines) {
+        arrowLines.material.linewidth = parseFloat(document.getElementById('arrow-width').value);
+      }
+    }
+
+    function toggleArrows() {
+      arrowsVisible = !arrowsVisible;
+      const btn = document.getElementById('arrows-toggle');
+      btn.textContent = arrowsVisible ? 'ON' : 'OFF';
+      btn.classList.toggle('on', arrowsVisible);
+      buildArrows();
+    }
+
+    function toggleArrowColor() {
+      arrowColor = arrowColor === 0xffffff ? 0x000000 : 0xffffff;
+      const btn = document.getElementById('arrows-color');
+      btn.textContent = arrowColor === 0xffffff ? 'White' : 'Black';
+      btn.classList.toggle('on', arrowColor === 0xffffff);
+      if (arrowLines) arrowLines.material.color.setHex(arrowColor);
+    }
+
+    window.toggleArrows = toggleArrows;
+    window.toggleArrowColor = toggleArrowColor;
+    window.rebuildArrows = buildArrows;
+    window.updateArrowWidth = updateArrowWidth;
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  OVERLAY SELECTION
+    // ═══════════════════════════════════════════════════════════════════
+
+    const OVERLAYS = {
+      speed: { field: 'speed', cmap: 'speed', title: 'Wind Speed', unit: 'm/s' },
+      froude: { field: 'froude', cmap: 'froude', title: 'Froude №', unit: '' },
+      depth: { field: 'depth', cmap: 'depth', title: 'Flow Depth', unit: 'm' },
+      vort: { field: 'vorticity', cmap: 'vort', title: 'Vorticity', unit: '1/s' },
+      vvert: { field: 'vertical', cmap: 'vvert', title: 'Vertical Wind', unit: 'm/s' },
+      terrain: { field: null, cmap: 'terrain', title: 'Elevation', unit: 'm' },
+    };
+
+    function setOverlay(name) {
+      currentOverlay = name;
+      ['speed', 'froude', 'depth', 'vort', 'vvert', 'terrain'].forEach(n => {
+        document.getElementById('tab-' + n).classList.toggle('active', n === name);
+      });
+      const ov = OVERLAYS[name];
+      document.getElementById('info-overlay').textContent = ov.title;
+
+      if (!simData) return;
+
+      if (name === 'terrain') {
+        // Hide overlay, show terrain only
+        if (overlayMesh) { scene.remove(overlayMesh); overlayMesh.geometry.dispose(); overlayMesh.material.dispose(); overlayMesh = null; }
+        const T = simData.terrain;
+        const nx = T.nx, ny = T.ny;
+        const flat = T.elevation.flat();
+        let mn = Infinity, mx = -Infinity;
+        for (const z of flat) { if (z < mn) mn = z; if (z > mx) mx = z; }
+        drawColorbar('terrain', mn, mx, 'Elevation (m)', v => v.toFixed(0));
+      } else {
+        const field = simData.wind[ov.field];
+        buildOverlay(ov.cmap, field, ov.title, ov.unit);
+      }
+    }
+
+    window.setOverlay = setOverlay;
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  WAYPOINT MARKERS
+    // ═══════════════════════════════════════════════════════════════════
+
+    const MARKER_STYLE = {
+      takeoff: { hexColor: '#ff8800', poleColor: 0xcc6600, coneColor: 0xff8800 },
+      landing: { hexColor: '#00ff88', poleColor: 0x00cc66, coneColor: 0x00ff88 },
+    };
+
+    function buildMarkers() {
+      markerObjects.forEach(o => { scene.remove(o); if (o._labelDiv) o._labelDiv.remove(); });
+      markerObjects.length = 0;
+
+      const markers = simData.markers;
+      if (!markers || markers.length === 0) return;
+
+      const poleH = 120;
+
+      markers.forEach(m => {
+        const style = MARKER_STYLE[m.type];
+        if (!style) return;
+
+        // Pole
+        const pole = new THREE.Mesh(
+          new THREE.CylinderGeometry(4, 4, poleH, 8),
+          new THREE.MeshBasicMaterial({ color: style.poleColor, depthTest: false, transparent: true })
+        );
+        pole.rotation.x = Math.PI / 2;
+        pole.position.set(m.x, m.y, m.z + poleH / 2);
+        pole.renderOrder = 10;
+        scene.add(pole);
+        markerObjects.push(pole);
+
+        // Cone
+        const cone = new THREE.Mesh(
+          new THREE.ConeGeometry(40, 80, 12),
+          new THREE.MeshBasicMaterial({ color: style.coneColor, depthTest: false, transparent: true })
+        );
+        cone.rotation.x = Math.PI / 2;
+        cone.position.set(m.x, m.y, m.z + poleH + 40);
+        cone.renderOrder = 10;
+        scene.add(cone);
+        markerObjects.push(cone);
+
+        // HTML label
+        const div = document.createElement('div');
+        div.style.cssText = `
       position: absolute; pointer-events: none;
       background: rgba(10,15,30,0.82); border: 1px solid ${style.hexColor};
       color: ${style.hexColor};
@@ -787,169 +1060,169 @@ function buildMarkers() {
       padding: 3px 8px; border-radius: 4px; white-space: nowrap;
       transform: translate(-50%, -100%); margin-top: -8px;
     `;
-    div.textContent = `${m.label}  ${m.z.toFixed(0)}m`;
-    document.getElementById('canvas-container').appendChild(div);
-    cone._labelDiv = div;
-    cone._worldPos = new THREE.Vector3(m.x, m.y, m.z + poleH);
-  });
-}
-
-function buildNorthArrow() {
-  northMarkerObjects.forEach(o => {
-    scene.remove(o);
-    if (o.material?.map) o.material.map.dispose();
-  });
-  northMarkerObjects.length = 0;
-
-  const T  = simData.terrain;
-  const xw = T.x_extent[1] - T.x_extent[0];
-  const yh = T.y_extent[1] - T.y_extent[0];
-  const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
-  const cy = -(T.y_extent[0] + T.y_extent[1]) / 2;
-
-  let minZ = Infinity;
-  for (const row of T.elevation) for (const z of row) if (z < minZ) minZ = z;
-
-  // Arrow dimensions (pointing in +Y)
-  const halfH      = yh;          // half of total length 2*yh
-  const shaftHalfW = xw * 0.055;
-  const headHalfW  = xw * 0.14;
-  const headH      = halfH * 0.4;
-  const bboxW      = headHalfW * 2;
-  const bboxH      = halfH * 2;
-
-  // Draw arrow + text on a canvas, returns CanvasTexture.
-  // With THREE default flipY=true: canvas (0,0) top-left → UV (0,1) → plane north-west.
-  // tc() maps world-local (x,y) → canvas pixel so tip (+halfH) lands at canvas top (y=0).
-  function makeTexture(color, label) {
-    const CW = 512, CH = Math.round(CW * bboxH / bboxW);
-    const cv  = document.createElement('canvas');
-    cv.width  = CW; cv.height = CH;
-    const ctx = cv.getContext('2d');
-
-    function tc(x, y) {
-      return [(x / bboxW + 0.5) * CW, (0.5 - y / bboxH) * CH];
+        div.textContent = `${m.label}  ${m.z.toFixed(0)}m`;
+        document.getElementById('canvas-container').appendChild(div);
+        cone._labelDiv = div;
+        cone._worldPos = new THREE.Vector3(m.x, m.y, m.z + poleH);
+      });
     }
 
-    // Arrow shape
-    const pts = [
-      [-shaftHalfW, -halfH], [ shaftHalfW, -halfH],
-      [ shaftHalfW,  halfH - headH], [ headHalfW,  halfH - headH],
-      [ 0,           halfH],
-      [-headHalfW,   halfH - headH], [-shaftHalfW,  halfH - headH],
-    ];
-    ctx.beginPath();
-    ctx.moveTo(...tc(pts[0][0], pts[0][1]));
-    for (let i = 1; i < pts.length; i++) ctx.lineTo(...tc(pts[i][0], pts[i][1]));
-    ctx.closePath();
-    const r = (color >> 16) & 0xff, g = (color >> 8) & 0xff, b = color & 0xff;
-    ctx.fillStyle = `rgba(${r},${g},${b},0.55)`;
-    ctx.fill();
+    function buildNorthArrow() {
+      northMarkerObjects.forEach(o => {
+        scene.remove(o);
+        if (o.material?.map) o.material.map.dispose();
+      });
+      northMarkerObjects.length = 0;
 
-    // Text in shaft centre — drawn normally; flipY makes it appear upright in 3D
-    const shaftCY = (-halfH + halfH - headH) / 2;   // world-y midpoint of shaft
-    const [tx, ty] = tc(0, shaftCY);
-    const fontSize = Math.round(CW * (2 * shaftHalfW / bboxW) * 0.42);
-    ctx.font         = `bold ${fontSize}px 'Segoe UI', sans-serif`;
-    ctx.textAlign    = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.shadowColor  = 'rgba(0,0,0,0.95)';
-    ctx.shadowBlur   = fontSize * 0.3;
-    ctx.fillStyle    = `rgb(${r},${g},${b})`;
-    ctx.fillText(label.toUpperCase(), tx, ty);
+      const T = simData.terrain;
+      const xw = T.x_extent[1] - T.x_extent[0];
+      const yh = T.y_extent[1] - T.y_extent[0];
+      const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
+      const cy = -(T.y_extent[0] + T.y_extent[1]) / 2;
 
-    return new THREE.CanvasTexture(cv);
-  }
+      let minZ = Infinity;
+      for (const row of T.elevation) for (const z of row) if (z < minZ) minZ = z;
 
-  function addArrow(color, rotZ, zOffset, label) {
-    const texture = makeTexture(color, label);
-    const mesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(bboxW, bboxH),
-      new THREE.MeshBasicMaterial({
-        map: texture, transparent: true,
-        side: THREE.DoubleSide, depthWrite: false,
-      })
-    );
-    mesh.position.set(cx, cy, minZ - zOffset);
-    mesh.rotation.z = rotZ;
-    scene.add(mesh);
-    northMarkerObjects.push(mesh);
-  }
+      // Arrow dimensions (pointing in +Y)
+      const halfH = yh;          // half of total length 2*yh
+      const shaftHalfW = xw * 0.055;
+      const headHalfW = xw * 0.14;
+      const headH = halfH * 0.4;
+      const bboxW = headHalfW * 2;
+      const bboxH = halfH * 2;
 
-  // North arrow — points +Y (no rotation), red
-  addArrow(0xee2222, 0, minZ + 500, 'North');
+      // Draw arrow + text on a canvas, returns CanvasTexture.
+      // With THREE default flipY=true: canvas (0,0) top-left → UV (0,1) → plane north-west.
+      // tc() maps world-local (x,y) → canvas pixel so tip (+halfH) lands at canvas top (y=0).
+      function makeTexture(color, label) {
+        const CW = 512, CH = Math.round(CW * bboxH / bboxW);
+        const cv = document.createElement('canvas');
+        cv.width = CW; cv.height = CH;
+        const ctx = cv.getContext('2d');
 
-  // Wind arrow — points where wind blows TO, light blue
-  // wind_dir is FROM direction; TO = FROM + 180, clockwise from north
-  // In XY plane (Y=north, X=east): rotation.z = –angle for clockwise from north
-  const windFrom  = simData.params?.wind_dir ?? 0;
-  const windToRad = ((windFrom + 180) % 360) * Math.PI / 180;
-  addArrow(0x88ccff, -windToRad, minZ, 'Wind');
-}
+        function tc(x, y) {
+          return [(x / bboxW + 0.5) * CW, (0.5 - y / bboxH) * CH];
+        }
 
-function updateMarkerLabels() {
-  [...markerObjects, ...northMarkerObjects].forEach(obj => {
-    if (!obj._labelDiv) return;
-    const pos = obj._worldPos.clone().project(camera);
-    const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
-    const y = (-pos.y * 0.5 + 0.5) * window.innerHeight;
-    obj._labelDiv.style.left = x + 'px';
-    obj._labelDiv.style.top  = y + 'px';
-    obj._labelDiv.style.display = pos.z > 1 ? 'none' : 'block';
-  });
-}
+        // Arrow shape
+        const pts = [
+          [-shaftHalfW, -halfH], [shaftHalfW, -halfH],
+          [shaftHalfW, halfH - headH], [headHalfW, halfH - headH],
+          [0, halfH],
+          [-headHalfW, halfH - headH], [-shaftHalfW, halfH - headH],
+        ];
+        ctx.beginPath();
+        ctx.moveTo(...tc(pts[0][0], pts[0][1]));
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(...tc(pts[i][0], pts[i][1]));
+        ctx.closePath();
+        const r = (color >> 16) & 0xff, g = (color >> 8) & 0xff, b = color & 0xff;
+        ctx.fillStyle = `rgba(${r},${g},${b},0.55)`;
+        ctx.fill();
 
-// ═══════════════════════════════════════════════════════════════════
-//  SELECTED POINT INSPECTION
-// ═══════════════════════════════════════════════════════════════════
+        // Text in shaft centre — drawn normally; flipY makes it appear upright in 3D
+        const shaftCY = (-halfH + halfH - headH) / 2;   // world-y midpoint of shaft
+        const [tx, ty] = tc(0, shaftCY);
+        const fontSize = Math.round(CW * (2 * shaftHalfW / bboxW) * 0.42);
+        ctx.font = `bold ${fontSize}px 'Segoe UI', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0,0,0,0.95)';
+        ctx.shadowBlur = fontSize * 0.3;
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillText(label.toUpperCase(), tx, ty);
 
-function buildPickMesh() {
-  if (pickMesh) { scene.remove(pickMesh); pickMesh.geometry.dispose(); pickMesh.material.dispose(); }
-  const T = simData.terrain;
-  const { nx, ny, elevation, x_extent, y_extent } = T;
-  const geom = new THREE.PlaneGeometry(
-    x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
-  );
-  const pos = geom.attributes.position;
-  for (let j = 0; j < ny; j++)
-    for (let i = 0; i < nx; i++)
-      pos.setZ(j * nx + i, elevation[j][i]);
-  pos.needsUpdate = true;
-  geom.computeVertexNormals();
-  pickMesh = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ visible: false }));
-  pickMesh.position.set(
-    (x_extent[0] + x_extent[1]) / 2,
-    -(y_extent[0] + y_extent[1]) / 2,
-    0
-  );
-  scene.add(pickMesh);
-}
+        return new THREE.CanvasTexture(cv);
+      }
 
-function buildClickMarker(x, y, z, elevM) {
-  if (clickMarker) {
-    clickMarker.forEach(m => { scene.remove(m); if (m._labelDiv) m._labelDiv.remove(); });
-  }
-  const color = 0x4488ff;
-  const poleH = 120;
+      function addArrow(color, rotZ, zOffset, label) {
+        const texture = makeTexture(color, label);
+        const mesh = new THREE.Mesh(
+          new THREE.PlaneGeometry(bboxW, bboxH),
+          new THREE.MeshBasicMaterial({
+            map: texture, transparent: true,
+            side: THREE.DoubleSide, depthWrite: false,
+          })
+        );
+        mesh.position.set(cx, cy, minZ - zOffset);
+        mesh.rotation.z = rotZ;
+        scene.add(mesh);
+        northMarkerObjects.push(mesh);
+      }
 
-  const pole = new THREE.Mesh(
-    new THREE.CylinderGeometry(4, 4, poleH, 8),
-    new THREE.MeshBasicMaterial({ color, depthTest: false, transparent: true })
-  );
-  pole.rotation.x = Math.PI / 2;
-  pole.position.set(x, y, z + poleH / 2);
-  pole.renderOrder = 10;
+      // North arrow — points +Y (no rotation), red
+      addArrow(0xee2222, 0, minZ + 500, 'North');
 
-  const cone = new THREE.Mesh(
-    new THREE.ConeGeometry(40, 80, 12),
-    new THREE.MeshBasicMaterial({ color, depthTest: false, transparent: true })
-  );
-  cone.rotation.x = Math.PI / 2;
-  cone.position.set(x, y, z + poleH + 40);
-  cone.renderOrder = 10;
+      // Wind arrow — points where wind blows TO, light blue
+      // wind_dir is FROM direction; TO = FROM + 180, clockwise from north
+      // In XY plane (Y=north, X=east): rotation.z = –angle for clockwise from north
+      const windFrom = simData.params?.wind_dir ?? 0;
+      const windToRad = ((windFrom + 180) % 360) * Math.PI / 180;
+      addArrow(0x88ccff, -windToRad, minZ, 'Wind');
+    }
 
-  const div = document.createElement('div');
-  div.style.cssText = `
+    function updateMarkerLabels() {
+      [...markerObjects, ...northMarkerObjects].forEach(obj => {
+        if (!obj._labelDiv) return;
+        const pos = obj._worldPos.clone().project(camera);
+        const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (-pos.y * 0.5 + 0.5) * window.innerHeight;
+        obj._labelDiv.style.left = x + 'px';
+        obj._labelDiv.style.top = y + 'px';
+        obj._labelDiv.style.display = pos.z > 1 ? 'none' : 'block';
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  SELECTED POINT INSPECTION
+    // ═══════════════════════════════════════════════════════════════════
+
+    function buildPickMesh() {
+      if (pickMesh) { scene.remove(pickMesh); pickMesh.geometry.dispose(); pickMesh.material.dispose(); }
+      const T = simData.terrain;
+      const { nx, ny, elevation, x_extent, y_extent } = T;
+      const geom = new THREE.PlaneGeometry(
+        x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+      );
+      const pos = geom.attributes.position;
+      for (let j = 0; j < ny; j++)
+        for (let i = 0; i < nx; i++)
+          pos.setZ(j * nx + i, elevation[j][i]);
+      pos.needsUpdate = true;
+      geom.computeVertexNormals();
+      pickMesh = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ visible: false }));
+      pickMesh.position.set(
+        (x_extent[0] + x_extent[1]) / 2,
+        -(y_extent[0] + y_extent[1]) / 2,
+        0
+      );
+      scene.add(pickMesh);
+    }
+
+    function buildClickMarker(x, y, z, elevM) {
+      if (clickMarker) {
+        clickMarker.forEach(m => { scene.remove(m); if (m._labelDiv) m._labelDiv.remove(); });
+      }
+      const color = 0x4488ff;
+      const poleH = 120;
+
+      const pole = new THREE.Mesh(
+        new THREE.CylinderGeometry(4, 4, poleH, 8),
+        new THREE.MeshBasicMaterial({ color, depthTest: false, transparent: true })
+      );
+      pole.rotation.x = Math.PI / 2;
+      pole.position.set(x, y, z + poleH / 2);
+      pole.renderOrder = 10;
+
+      const cone = new THREE.Mesh(
+        new THREE.ConeGeometry(40, 80, 12),
+        new THREE.MeshBasicMaterial({ color, depthTest: false, transparent: true })
+      );
+      cone.rotation.x = Math.PI / 2;
+      cone.position.set(x, y, z + poleH + 40);
+      cone.renderOrder = 10;
+
+      const div = document.createElement('div');
+      div.style.cssText = `
     position: absolute; pointer-events: none;
     background: rgba(10,15,30,0.82); border: 1px solid #4488ff;
     color: #4488ff; font-size: 12px; font-weight: bold;
@@ -957,50 +1230,50 @@ function buildClickMarker(x, y, z, elevM) {
     padding: 3px 8px; border-radius: 4px; white-space: nowrap;
     transform: translate(-50%, -100%); margin-top: -8px;
   `;
-  div.textContent = `▶ Selected ${elevM !== undefined ? elevM.toFixed(0) + ' m' : ''}`;
-  document.getElementById('canvas-container').appendChild(div);
-  cone._labelDiv = div;
-  cone._worldPos = new THREE.Vector3(x, y, z + poleH);
+      div.textContent = `▶ Selected ${elevM !== undefined ? elevM.toFixed(0) + ' m' : ''}`;
+      document.getElementById('canvas-container').appendChild(div);
+      cone._labelDiv = div;
+      cone._worldPos = new THREE.Vector3(x, y, z + poleH);
 
-  scene.add(pole, cone);
-  clickMarker = [pole, cone];
-}
+      scene.add(pole, cone);
+      clickMarker = [pole, cone];
+    }
 
-function updateClickMarkerLabel() {
-  if (!clickMarker) return;
-  clickMarker.forEach(obj => {
-    if (!obj._labelDiv) return;
-    const pos = obj._worldPos.clone().project(camera);
-    const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
-    const y = (-pos.y * 0.5 + 0.5) * window.innerHeight;
-    obj._labelDiv.style.left = x + 'px';
-    obj._labelDiv.style.top  = y + 'px';
-    obj._labelDiv.style.display = pos.z > 1 ? 'none' : 'block';
-  });
-}
+    function updateClickMarkerLabel() {
+      if (!clickMarker) return;
+      clickMarker.forEach(obj => {
+        if (!obj._labelDiv) return;
+        const pos = obj._worldPos.clone().project(camera);
+        const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+        const y = (-pos.y * 0.5 + 0.5) * window.innerHeight;
+        obj._labelDiv.style.left = x + 'px';
+        obj._labelDiv.style.top = y + 'px';
+        obj._labelDiv.style.display = pos.z > 1 ? 'none' : 'block';
+      });
+    }
 
-function updateInfoPanel(pt, gi, gj) {
-  const T   = simData.terrain;
-  const W   = simData.wind;
-  const nx  = T.nx;
-  const idx = gj * nx + gi;
-  const elev = T.elevation[gj][gi];
-  const R = 6371000;
-  const lat = T.lat0 + pt.y / R * (180 / Math.PI);
-  const lon = T.lon0 + pt.x / (R * Math.cos(T.lat0 * Math.PI / 180)) * (180 / Math.PI);
+    function updateInfoPanel(pt, gi, gj) {
+      const T = simData.terrain;
+      const W = simData.wind;
+      const nx = T.nx;
+      const idx = gj * nx + gi;
+      const elev = T.elevation[gj][gi];
+      const R = 6371000;
+      const lat = T.lat0 + pt.y / R * (180 / Math.PI);
+      const lon = T.lon0 + pt.x / (R * Math.cos(T.lat0 * Math.PI / 180)) * (180 / Math.PI);
 
-  const spd = W.speed    ? W.speed[idx].toFixed(1)    : '—';
-  const u_v = W.u && W.v ? `${W.u[idx].toFixed(1)} m/s | ${W.v[idx].toFixed(1)} m/s` : '—';
-  const wv  = W.vertical ? W.vertical[idx].toFixed(2) : '—';
+      const spd = W.speed ? W.speed[idx].toFixed(1) : '—';
+      const u_v = W.u && W.v ? `${W.u[idx].toFixed(1)} m/s | ${W.v[idx].toFixed(1)} m/s` : '—';
+      const wv = W.vertical ? W.vertical[idx].toFixed(2) : '—';
 
-  const ov = OVERLAYS[currentOverlay];
-  let ovVal = '—';
-  if (ov && ov.field && W[ov.field]) {
-    const v = W[ov.field][idx];
-    ovVal = v.toFixed(3) + (ov.unit ? ' ' + ov.unit : '');
-  }
+      const ov = OVERLAYS[currentOverlay];
+      let ovVal = '—';
+      if (ov && ov.field && W[ov.field]) {
+        const v = W[ov.field][idx];
+        ovVal = v.toFixed(3) + (ov.unit ? ' ' + ov.unit : '');
+      }
 
-  document.getElementById('info-rows').innerHTML = `
+      document.getElementById('info-rows').innerHTML = `
     <div class="info-coords">${lat.toFixed(5)}° N &nbsp; ${lon.toFixed(5)}° E</div>
     <div class="info-row"><span class="info-label">Elevation</span>    <span class="info-val">${elev.toFixed(0)} m</span></div>
     <div class="info-row"><span class="info-label">Wind speed</span>   <span class="info-val">${spd} m/s</span></div>
@@ -1008,212 +1281,213 @@ function updateInfoPanel(pt, gi, gj) {
     <div class="info-row"><span class="info-label">Vertical wind</span><span class="info-val">${wv} m/s</span></div>
     <div class="info-row"><span class="info-label">${ov ? ov.title : 'Overlay'}</span><span class="info-val">${ovVal}</span></div>
   `;
-  document.getElementById('info-panel').style.display = 'block';
-}
-
-const _raycaster = new THREE.Raycaster();
-const _mouse     = new THREE.Vector2();
-let _mouseDownX  = 0, _mouseDownY = 0;
-
-renderer.domElement.addEventListener('mousedown', e => {
-  _mouseDownX = e.clientX; _mouseDownY = e.clientY;
-});
-
-renderer.domElement.addEventListener('click', e => {
-  if (Math.hypot(e.clientX - _mouseDownX, e.clientY - _mouseDownY) > 5) return;
-  if (!pickMesh || !simData) return;
-
-  const rect = renderer.domElement.getBoundingClientRect();
-  _mouse.x = ((e.clientX - rect.left) / rect.width)  *  2 - 1;
-  _mouse.y = -((e.clientY - rect.top)  / rect.height) *  2 + 1;
-
-  _raycaster.setFromCamera(_mouse, camera);
-  const hits = _raycaster.intersectObject(pickMesh);
-  if (!hits.length) {
-    document.getElementById('info-panel').style.display = 'none';
-    if (clickMarker) {
-      clickMarker.forEach(m => { scene.remove(m); if (m._labelDiv) m._labelDiv.remove(); });
-      clickMarker = null;
+      document.getElementById('info-panel').style.display = 'block';
     }
-    return;
-  }
 
-  const pt  = hits[0].point;
-  const T   = simData.terrain;
-  const gi  = Math.round((pt.x - T.x_extent[0]) / T.dx);
-  const gj  = Math.round((-T.y_extent[0] - pt.y) / T.dy);
-  if (gi < 0 || gi >= T.nx || gj < 0 || gj >= T.ny) return;
+    const _raycaster = new THREE.Raycaster();
+    const _mouse = new THREE.Vector2();
+    let _mouseDownX = 0, _mouseDownY = 0;
 
-  const elev = T.elevation[gj][gi];
-  buildClickMarker(pt.x, pt.y, elev, elev);
-  updateInfoPanel(pt, gi, gj);
-});
+    renderer.domElement.addEventListener('mousedown', e => {
+      _mouseDownX = e.clientX; _mouseDownY = e.clientY;
+    });
 
-// ═══════════════════════════════════════════════════════════════════
-//  INDEXEDDB
-// ═══════════════════════════════════════════════════════════════════
+    renderer.domElement.addEventListener('click', e => {
+      if (Math.hypot(e.clientX - _mouseDownX, e.clientY - _mouseDownY) > 5) return;
+      if (!pickMesh || !simData) return;
 
-function idbGet(key) {
-  return new Promise(resolve => {
-    const req = indexedDB.open('paragliding', 1);
-    req.onupgradeneeded = e => { if (!e.target.result.objectStoreNames.contains('sim')) e.target.result.createObjectStore('sim'); };
-    req.onerror = () => resolve(null);
-    req.onsuccess = e => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains('sim')) { resolve(null); return; }
-      const r = db.transaction('sim','readonly').objectStore('sim').get(key);
-      r.onsuccess = () => { try { resolve(r.result ? JSON.parse(r.result) : null); } catch { resolve(null); } };
-      r.onerror = () => resolve(null);
-    };
-  });
-}
+      const rect = renderer.domElement.getBoundingClientRect();
+      _mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      _mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
-// ═══════════════════════════════════════════════════════════════════
-//  PRESETS
-// ═══════════════════════════════════════════════════════════════════
+      _raycaster.setFromCamera(_mouse, camera);
+      const hits = _raycaster.intersectObject(pickMesh);
+      if (!hits.length) {
+        document.getElementById('info-panel').style.display = 'none';
+        if (clickMarker) {
+          clickMarker.forEach(m => { scene.remove(m); if (m._labelDiv) m._labelDiv.remove(); });
+          clickMarker = null;
+        }
+        return;
+      }
 
-let _presets = [];
+      const pt = hits[0].point;
+      const T = simData.terrain;
+      const gi = Math.round((pt.x - T.x_extent[0]) / T.dx);
+      const gj = Math.round((-T.y_extent[0] - pt.y) / T.dy);
+      if (gi < 0 || gi >= T.nx || gj < 0 || gj >= T.ny) return;
 
-async function loadPresets() {
-  try {
-    _presets = await fetch('presets-dynamic.json').then(r => r.json());
-  } catch { _presets = []; }
+      const elev = T.elevation[gj][gi];
+      buildClickMarker(pt.x, pt.y, elev, elev);
+      updateInfoPanel(pt, gi, gj);
+    });
 
-  const container = document.getElementById('preset-btns');
-  container.innerHTML = '';
-  _presets.forEach((p, idx) => {
-    const btn = document.createElement('button');
-    btn.className = 'tab-btn' + (idx === 0 ? ' active' : '');
-    btn.id = 'preset-' + p.id;
-    btn.textContent = p.label;
-    btn.onclick = () => applyPreset(p);
-    container.appendChild(btn);
-  });
-  if (_presets.length > 0) applyPreset(_presets[0]);
-}
+    // ═══════════════════════════════════════════════════════════════════
+    //  INDEXEDDB
+    // ═══════════════════════════════════════════════════════════════════
 
-const ALL_CTRL_IDS = [
-  'ctrl-section-terrain', 'ctrl-terrain-opacity',
-  'ctrl-section-overlay', 'ctrl-overlay-opacity',
-  'ctrl-section-arrows',  'ctrl-arrows-toggle',
-  'ctrl-arrow-step',      'ctrl-arrow-height', 'ctrl-arrow-scale', 'ctrl-arrow-width',
-];
+    function idbGet(key) {
+      return new Promise(resolve => {
+        const req = indexedDB.open('paragliding', 1);
+        req.onupgradeneeded = e => { if (!e.target.result.objectStoreNames.contains('sim')) e.target.result.createObjectStore('sim'); };
+        req.onerror = () => resolve(null);
+        req.onsuccess = e => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('sim')) { resolve(null); return; }
+          const r = db.transaction('sim', 'readonly').objectStore('sim').get(key);
+          r.onsuccess = () => { try { resolve(r.result ? JSON.parse(r.result) : null); } catch { resolve(null); } };
+          r.onerror = () => resolve(null);
+        };
+      });
+    }
 
-function applyPreset(p) {
-  // Highlight active preset button
-  _presets.forEach(q => {
-    const btn = document.getElementById('preset-' + q.id);
-    if (btn) btn.classList.toggle('active', q.id === p.id);
-  });
+    // ═══════════════════════════════════════════════════════════════════
+    //  PRESETS
+    // ═══════════════════════════════════════════════════════════════════
 
-  // Show/hide controls
-  const visible = new Set(p.visibleControls || ALL_CTRL_IDS);
-  ALL_CTRL_IDS.forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = visible.has(id) ? '' : 'none';
-  });
+    let _presets = [];
 
-  // Terrain opacity
-  const terrEl = document.getElementById('terr-opacity');
-  terrEl.value = p.terrainOpacity;
-  document.getElementById('terr-opacity-val').textContent = p.terrainOpacity;
-  updateTerrainOpacity();
+    async function loadPresets() {
+      try {
+        _presets = await fetch('presets-dynamic.json').then(r => r.json());
+      } catch { _presets = []; }
 
-  // Overlay type
-  setOverlay(p.overlay);
+      const container = document.getElementById('preset-btns');
+      container.innerHTML = '';
+      _presets.forEach((p, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'tab-btn' + (idx === 0 ? ' active' : '');
+        btn.id = 'preset-' + p.id;
+        btn.textContent = p.label;
+        btn.onclick = () => applyPreset(p);
+        container.appendChild(btn);
+      });
+      if (_presets.length > 0) applyPreset(_presets[0]);
+    }
 
-  // Overlay opacity
-  const ovEl = document.getElementById('ov-opacity');
-  ovEl.value = p.overlayOpacity;
-  document.getElementById('ov-opacity-val').textContent = p.overlayOpacity;
-  updateOverlayOpacity();
+    const ALL_CTRL_IDS = [
+      'ctrl-section-terrain', 'ctrl-terrain-opacity',
+      'ctrl-section-overlay', 'ctrl-overlay-opacity',
+      'ctrl-section-arrows', 'ctrl-arrows-toggle',
+      'ctrl-arrow-step', 'ctrl-arrow-height', 'ctrl-arrow-scale', 'ctrl-arrow-width',
+    ];
 
-  // Arrows
-  if (arrowsVisible !== p.arrows) toggleArrows();
+    function applyPreset(p) {
+      // Highlight active preset button
+      _presets.forEach(q => {
+        const btn = document.getElementById('preset-' + q.id);
+        if (btn) btn.classList.toggle('active', q.id === p.id);
+      });
 
-  const stepEl = document.getElementById('arrow-step');
-  stepEl.value = p.arrowStep;
-  document.getElementById('arrow-step-val').textContent = p.arrowStep;
+      // Show/hide controls
+      const visible = new Set(p.visibleControls || ALL_CTRL_IDS);
+      ALL_CTRL_IDS.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = visible.has(id) ? '' : 'none';
+      });
 
-  const heightEl = document.getElementById('arrow-height');
-  heightEl.value = p.arrowHeight;
-  document.getElementById('arrow-height-val').textContent = p.arrowHeight;
+      // Terrain opacity
+      const terrEl = document.getElementById('terr-opacity');
+      terrEl.value = p.terrainOpacity;
+      document.getElementById('terr-opacity-val').textContent = p.terrainOpacity;
+      updateTerrainOpacity();
 
-  const scaleEl = document.getElementById('arrow-scale');
-  scaleEl.value = p.arrowScale;
-  document.getElementById('arrow-scale-val').textContent = p.arrowScale;
+      // Overlay type
+      setOverlay(p.overlay);
 
-  if (p.arrowWidth != null) {
-    const widthEl = document.getElementById('arrow-width');
-    widthEl.value = p.arrowWidth;
-    document.getElementById('arrow-width-val').textContent = p.arrowWidth;
-  }
+      // Overlay opacity
+      const ovEl = document.getElementById('ov-opacity');
+      ovEl.value = p.overlayOpacity;
+      document.getElementById('ov-opacity-val').textContent = p.overlayOpacity;
+      updateOverlayOpacity();
 
-  const wantWhite = p.arrowColor === 'white';
-  if ((arrowColor === 0xffffff) !== wantWhite) toggleArrowColor();
+      // Arrows
+      if (arrowsVisible !== p.arrows) toggleArrows();
 
-  rebuildArrows();
-}
+      const stepEl = document.getElementById('arrow-step');
+      stepEl.value = p.arrowStep;
+      document.getElementById('arrow-step-val').textContent = p.arrowStep;
 
-window.loadPresets = loadPresets;
+      const heightEl = document.getElementById('arrow-height');
+      heightEl.value = p.arrowHeight;
+      document.getElementById('arrow-height-val').textContent = p.arrowHeight;
 
-// ═══════════════════════════════════════════════════════════════════
-//  LOAD & INIT
-// ═══════════════════════════════════════════════════════════════════
+      const scaleEl = document.getElementById('arrow-scale');
+      scaleEl.value = p.arrowScale;
+      document.getElementById('arrow-scale-val').textContent = p.arrowScale;
 
-async function load() {
-  const loadingEl = document.getElementById('loading');
-  const loadingMsg = document.getElementById('loading-msg');
+      if (p.arrowWidth != null) {
+        const widthEl = document.getElementById('arrow-width');
+        widthEl.value = p.arrowWidth;
+        document.getElementById('arrow-width-val').textContent = p.arrowWidth;
+      }
 
-  try {
-    loadingMsg.textContent = 'Reading IndexedDB…';
-    simData = await idbGet('swe_latest');
+      const wantWhite = p.arrowColor === 'white';
+      if ((arrowColor === 0xffffff) !== wantWhite) toggleArrowColor();
 
-    if (!simData) {
-      loadingEl.innerHTML =
-        `<div style="color:#f66;text-align:center">No wind simulation found.<br><br>
+      rebuildArrows();
+    }
+
+    window.loadPresets = loadPresets;
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  LOAD & INIT
+    // ═══════════════════════════════════════════════════════════════════
+
+    async function load() {
+      const loadingEl = document.getElementById('loading');
+      const loadingMsg = document.getElementById('loading-msg');
+
+      try {
+        loadingMsg.textContent = 'Reading IndexedDB…';
+        simData = await idbGet('swe_latest');
+
+        if (!simData) {
+          loadingEl.innerHTML =
+            `<div style="color:#f66;text-align:center">No wind simulation found.<br><br>
          <a href="simulate-dynamic" style="color:#7eb8ff">Run the SWE simulation first</a></div>`;
-      return;
+          return;
+        }
+
+        loadingMsg.textContent = 'Building terrain…';
+        await new Promise(r => setTimeout(r, 0));
+        buildTerrain();
+        buildPickMesh();
+
+        loadingMsg.textContent = 'Building overlay…';
+        await new Promise(r => setTimeout(r, 0));
+        setOverlay('speed');
+
+        loadingMsg.textContent = 'Building arrows…';
+        await new Promise(r => setTimeout(r, 0));
+        buildArrows();
+
+        loadingMsg.textContent = 'Building markers…';
+        await new Promise(r => setTimeout(r, 0));
+        buildMarkers();
+        buildNorthArrow();
+
+        // Info panel
+        const p = simData.params;
+
+        await loadPresets();
+      } catch (e) {
+        console.error('view-dynamic load error:', e);
+        loadingMsg.textContent = `Error: ${e.message}`;
+        loadingMsg.style.color = '#f66';
+        // Don't return — fall through to finally so the overlay is hidden
+        // and whatever was built remains visible.
+      } finally {
+        // Always hide the overlay so the Three.js canvas is reachable.
+        document.getElementById('ui-panel').classList.add('open');
+        loadingEl.style.display = 'none';
+      }
     }
 
-    loadingMsg.textContent = 'Building terrain…';
-    await new Promise(r => setTimeout(r, 0));
-    buildTerrain();
-    buildPickMesh();
-
-    loadingMsg.textContent = 'Building overlay…';
-    await new Promise(r => setTimeout(r, 0));
-    setOverlay('speed');
-
-    loadingMsg.textContent = 'Building arrows…';
-    await new Promise(r => setTimeout(r, 0));
-    buildArrows();
-
-    loadingMsg.textContent = 'Building markers…';
-    await new Promise(r => setTimeout(r, 0));
-    buildMarkers();
-    buildNorthArrow();
-
-    // Info panel
-    const p = simData.params;
-
-    await loadPresets();
-  } catch (e) {
-    console.error('view-dynamic load error:', e);
-    loadingMsg.textContent = `Error: ${e.message}`;
-    loadingMsg.style.color = '#f66';
-    // Don't return — fall through to finally so the overlay is hidden
-    // and whatever was built remains visible.
-  } finally {
-    // Always hide the overlay so the Three.js canvas is reachable.
-    document.getElementById('ui-panel').classList.add('open');
-    loadingEl.style.display = 'none';
-  }
-}
-
-animate();
-load();
-</script>
+    animate();
+    load();
+  </script>
 
 </body>
+
 </html>
