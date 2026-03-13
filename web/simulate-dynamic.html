@@ -738,13 +738,25 @@
             <label class="field-label">CFL factor</label>
             <input type="number" id="cfl" step="0.05" min="0.1" max="0.85" value="0.45">
           </div>
+          <div>
+            <label class="field-label">Min depth h<sub>min</sub> (m)</label>
+            <input type="number" id="h_min" step="0.05" min="0.01" max="5" value="0.5">
+          </div>
         </div>
-        <div class="field-hint">3600 s ≈ 5 domain transit times at 8 m/s → near-steady state.</div>
+        <div class="field-hint">3600 s ≈ 5 domain transit times at 8 m/s → near-steady state. h<sub>min</sub> is the wet/dry threshold — lower values resolve thin flow over ridges but may destabilise.</div>
 
         <div class="section-title">Output</div>
-        <label class="field-label">Arrow step (px)</label>
-        <input type="number" id="arrow_step" step="1" min="4" max="30" value="10">
-        <div class="field-hint">Plot arrow density — every N-th sim cell.</div>
+        <div class="grid-2">
+          <div>
+            <label class="field-label">Arrow step (px)</label>
+            <input type="number" id="arrow_step" step="1" min="4" max="30" value="10">
+          </div>
+          <div>
+            <label class="field-label">Arrow min speed (m/s)</label>
+            <input type="number" id="arrow_min_spd" step="0.01" min="0" max="5" value="0.05">
+          </div>
+        </div>
+        <div class="field-hint">Arrow step: density (every N-th cell). Min speed: hide arrows below this threshold.</div>
 
       </div>
 
@@ -957,7 +969,7 @@
       ctx.putImageData(img, 0, 0);
 
       if (arrowData) {
-        const { u, v, step } = arrowData;
+        const { u, v, step, minSpd = 0.05 } = arrowData;
         const maxSpd = Math.max(...u.map((ui, i) => Math.hypot(ui, v[i]))) || 1;
         ctx.strokeStyle = 'rgba(255,255,255,0.6)';
         ctx.fillStyle = 'rgba(255,255,255,0.6)';
@@ -967,7 +979,7 @@
             const idx = j * nx + i;
             const ui = u[idx], vi = v[idx];
             const spd = Math.hypot(ui, vi);
-            if (spd < 0.05) continue;
+            if (spd < minSpd) continue;
             const len = step * 0.55 * (spd / maxSpd);
             const ex = i + (ui / spd) * len, ey = j - (vi / spd) * len;
             ctx.beginPath(); ctx.moveTo(i, j); ctx.lineTo(ex, ey); ctx.stroke();
@@ -993,8 +1005,7 @@
     //  SWE SOLVER
     // ═══════════════════════════════════════════════════════════════════
 
-    function sweStep(h, u, v, Z, nx, ny, dx, dy, dt, g, Cd, nu, H0, U_in, V_in) {
-      const h_min = 0.5;
+    function sweStep(h, u, v, Z, nx, ny, dx, dy, dt, g, Cd, nu, H0, U_in, V_in, h_min) {
       const hn = new Float32Array(h), un = new Float32Array(u), vn = new Float32Array(v);
 
       for (let j = 1; j < ny - 1; j++) {
@@ -1120,10 +1131,10 @@
       const nu = parseFloat(document.getElementById('visc').value);
       const cfl = parseFloat(document.getElementById('cfl').value);
       const T_sim = parseFloat(document.getElementById('sim_time').value);
+      const h_min = parseFloat(document.getElementById('h_min').value);
       const astep = parseInt(document.getElementById('arrow_step').value);
+      const arrowMinSpd = parseFloat(document.getElementById('arrow_min_spd').value);
       const { U, V } = windComponents();
-
-      const h_min = 0.5;
       const h = new Float32Array(ny * nx);
       const u = new Float32Array(ny * nx);
       const v = new Float32Array(ny * nx);
@@ -1145,7 +1156,7 @@
 
       try {
         for (let step = 0; step < nSteps; step++) {
-          sweStep(h, u, v, Z, nx, ny, dx, dy, dt, g, Cd, nu, H0, U, V);
+          sweStep(h, u, v, Z, nx, ny, dx, dy, dt, g, Cd, nu, H0, U, V, h_min);
 
           if (step % YIELD_EVERY === 0) {
             setProgress(step / nSteps);
@@ -1193,7 +1204,7 @@
 
       // ── Render 2D previews ──
       document.getElementById('sim-plots-area').style.display = 'flex';
-      const arrowData = { u, v, step: astep };
+      const arrowData = { u, v, step: astep, minSpd: arrowMinSpd };
       renderPlot(document.getElementById('plot-speed'), speed, nx, ny, cmapSpeed, arrowData);
       renderPlot(document.getElementById('plot-froude'), froude, nx, ny, cmapFroude, arrowData);
       renderPlot(document.getElementById('plot-depth'), h, nx, ny, cmapDepth, null);
@@ -1253,9 +1264,9 @@
           vertical: Array.from(w_vert),
         },
         params: {
-          H0, g_prime: g, drag_cd: Cd, visc: nu,
+          H0, g_prime: g, drag_cd: Cd, visc: nu, h_min,
           wind_dir: windDirDeg, wind_speed_ms: parseFloat(document.getElementById('wind_speed').value),
-          U_in: U, V_in: V, sim_time: T_sim, nx, ny, dx, dy,
+          U_in: U, V_in: V, sim_time: T_sim, cfl, nx, ny, dx, dy,
         },
         markers: [
           { type: 'takeoff', label: '▲ Take-off', x: toX, y: toY, z: toZ },
