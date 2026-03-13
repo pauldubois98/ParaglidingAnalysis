@@ -488,6 +488,7 @@
 <body>
   <div id="canvas-container">
     <div id="info-panel">
+      <h3>Selected point</h3>
       <div id="info-rows"></div>
       <div id="plume-section" style="display:none">
         <h4>Thermal plume profile</h4>
@@ -2177,7 +2178,6 @@
       const lon = T.projection_origin.lon + pt.x * 180 / (Math.PI * R * Math.cos(T.projection_origin.lat * Math.PI / 180));
 
       document.getElementById('info-rows').innerHTML = `
-    <h3>Selected point</h3>
     <div class="info-coords">${lat.toFixed(5)}° N &nbsp; ${lon.toFixed(5)}° E</div>
     <div class="info-row"><span class="info-label">Elevation</span>      <span class="info-val">${elev.toFixed(0)} m</span></div>
     <div class="info-row"><span class="info-label">Slope</span>          <span class="info-val">${slope}°</span></div>
