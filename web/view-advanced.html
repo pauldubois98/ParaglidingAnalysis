@@ -345,9 +345,11 @@
     }
 
     #info-panel h3 {
-      font-size: 12px;
+      font-size: 13px;
       color: #7eb8ff;
-      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
     }
 
     .irow {
@@ -425,7 +427,6 @@
     @media (max-width: 480px) {
       #ui-panel { max-height: 60vh; }
       #info-panel { width: 180px; font-size: 11px; }
-      #info-panel h3 { font-size: 12px; }
       .irow { font-size: 10px; }
       #colorbars { bottom: 10px; left: 8px; gap: 6px; }
       .cb-label { font-size: 9px; }
@@ -453,7 +454,7 @@
       <div>Loading NS simulation data…</div>
     </div>
     <div id="info-panel">
-      <h3 id="ip-title">—</h3>
+      <h3>Selected point</h3>
       <div id="ip-rows"></div>
       <div id="plume-wrap" style="display:none; margin-top:8px;">
         <div id="plume-title"
@@ -1521,8 +1522,8 @@
       const u = sc.u_surface?.[j]?.[i] ?? 0;
       const v = sc.v_surface?.[j]?.[i] ?? 0;
       const elev = T.elevation[j]?.[i] ?? 0;
-      document.getElementById('ip-title').textContent = sc.local_time;
       document.getElementById('ip-rows').innerHTML = `
+    <div class="irow"><span class="ilabel">Time</span><span class="ival">${sc.local_time} m</span></div>
     <div class="irow"><span class="ilabel">Elevation</span><span class="ival">${elev.toFixed(0)} m</span></div>
     <div class="irow"><span class="ilabel">θ' anomaly</span><span class="ival">${theta.toFixed(2)} K</span></div>
     <div class="irow"><span class="ilabel">Vertical w</span><span class="ival">${wv.toFixed(2)} m/s</span></div>
