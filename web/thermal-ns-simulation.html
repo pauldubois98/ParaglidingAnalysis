@@ -2860,16 +2860,13 @@
       } = solver;
       // Physical display dimensions — preserve real-world aspect ratio.
       // Keep the larger cell-count axis at its native pixel count; scale the other.
-      const IMAGE_DISPLAY_FACTOR = 10;
-      const planDispW = NX * IMAGE_DISPLAY_FACTOR;
       const planDispH =
-        Math.max(1, Math.round((NY * dy) / dx)) * IMAGE_DISPLAY_FACTOR;
-      const ewDispW = NX * IMAGE_DISPLAY_FACTOR;
+        Math.max(1, Math.round((NY * dy) / dx));
       const ewDispH =
-        Math.max(1, Math.round((NZ * dz) / dx)) * IMAGE_DISPLAY_FACTOR;
-      const nsDispW = NY * IMAGE_DISPLAY_FACTOR;
+        Math.max(1, Math.round((NZ * dz) / dx));
+      const nsDispW = NY;
       const nsDispH =
-        Math.max(1, Math.round((NZ * dz) / dy)) * IMAGE_DISPLAY_FACTOR;
+        Math.max(1, Math.round((NZ * dz) / dy));
 
       // Plan view: θ' + wind at iz_view
       const theta_plan = solver.getSliceTheta(iz_view);
@@ -2891,7 +2888,7 @@
         NX,
         NY,
         solid2d_plan,
-        planDispW,
+        NX,
         planDispH,
       );
 
@@ -2903,7 +2900,7 @@
         NX,
         NY,
         solid2d_plan,
-        planDispW,
+        NX,
         planDispH,
       );
 
@@ -2921,7 +2918,7 @@
         NY,
         wMax,
         solid2d_plan,
-        planDispW,
+        NX,
         planDispH,
       );
 
@@ -2935,7 +2932,7 @@
         ewSlice.solid,
         NX,
         NZ,
-        ewDispW,
+        NX,
         ewDispH,
       );
 

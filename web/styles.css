@@ -19,7 +19,9 @@ body {
   font-family: 'Segoe UI', sans-serif;
 }
 
-canvas { display: block; }
+canvas {
+  display: block;
+}
 
 /* ================================================================
    Navigation bar  (identical across all pages)
@@ -431,9 +433,17 @@ ul li {
     padding: 52px 16px 60px;
   }
 
-  h1 { font-size: 20px; }
-  h2 { font-size: 15px; }
-  h3 { font-size: 13px; }
+  h1 {
+    font-size: 20px;
+  }
+
+  h2 {
+    font-size: 15px;
+  }
+
+  h3 {
+    font-size: 13px;
+  }
 
   .param-table,
   .lc-table {
@@ -445,13 +455,38 @@ ul li {
 }
 
 @media (max-width: 480px) {
-  .page { padding: 48px 10px 40px; }
-  h1 { font-size: 17px; }
-  h2 { font-size: 13px; letter-spacing: 0.5px; margin: 32px 0 14px; }
-  h3 { font-size: 12px; }
-  p, li { font-size: 13px; line-height: 1.6; }
-  .eq { font-size: 11px; padding: 10px 12px; }
-  .step { gap: 8px; }
+  .page {
+    padding: 48px 10px 40px;
+  }
+
+  h1 {
+    font-size: 17px;
+  }
+
+  h2 {
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    margin: 32px 0 14px;
+  }
+
+  h3 {
+    font-size: 12px;
+  }
+
+  p,
+  li {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .eq {
+    font-size: 11px;
+    padding: 10px 12px;
+  }
+
+  .step {
+    gap: 8px;
+  }
 }
 
 /* ================================================================
@@ -796,10 +831,21 @@ input[type="range"] {
   border-radius: 8px;
 }
 
-#log-output .log-info    { color: #5588aa; }
-#log-output .log-success { color: #30c870; }
-#log-output .log-warn    { color: #c8a040; }
-#log-output .log-error   { color: #cc4444; }
+#log-output .log-info {
+  color: #5588aa;
+}
+
+#log-output .log-success {
+  color: #30c870;
+}
+
+#log-output .log-warn {
+  color: #c8a040;
+}
+
+#log-output .log-error {
+  color: #cc4444;
+}
 
 .log-ts {
   color: #334455;
@@ -844,6 +890,11 @@ input[type="range"] {
   padding: 6px 6px 4px;
   overflow: hidden;
   min-width: 0;
+}
+
+.plot-box canvas {
+  flex: 1;
+  image-rendering: pixelated;
 }
 
 .plot-title {
@@ -1127,7 +1178,9 @@ input[type="checkbox"] {
   padding-bottom: 0;
 }
 
-#info-panel .info-label { color: #6888a0; }
+#info-panel .info-label {
+  color: #6888a0;
+}
 
 #info-panel .info-val {
   color: #e0f0ff;
@@ -1271,7 +1324,9 @@ input[type="checkbox"] {
    ================================================================ */
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 #loading-spinner {
@@ -1285,4 +1340,6 @@ input[type="checkbox"] {
 
 
 .hide,
-.hidden { display: none; }
+.hidden {
+  display: none;
+}
