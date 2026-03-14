@@ -533,19 +533,9 @@
       }
     }
 
-    fetch('config-advanced.json').then(r => r.json()).then(cfg => {
-      setVal('sim_date', new Date().toISOString().slice(0, 10));
-      setVal('tz_offset', cfg.simulation.tz_offset);
-      setVal('interval_min', cfg.simulation.interval_min);
-      // min_elevation no longer used directly; start/end times are set after config + date load
-      // Defer sun time init until date is also set (handled in validateDate)
-      window._cfgMinElevDeg = cfg.simulation.min_elevation_deg ?? 0;
-      setVal('era5_window', cfg.heating.era5_window_days);
-      setVal('diffuse_frac', cfg.heating.diffuse_fraction);
-      setVal('elr', cfg.heating.elr_per_km);
-      setVal('tau_hours', cfg.heating.tau_hours);
-      updateWeatherMode(); validateDate();
-    }).catch(e => console.warn('config-advanced.json not loaded:', e));
+    setVal('sim_date', new Date().toISOString().slice(0, 10));
+    window._cfgMinElevDeg = 0.0;
+    updateWeatherMode(); validateDate();
 
     // ═══════════════════════════════════════════════════════════════════
     //  COORDINATE HELPERS
@@ -2729,6 +2719,8 @@ async function runSim({solverParams, solidMaskBuf, heatMapsData, simParams}) {
   }, [convergence_sum.buffer, dT_weight_sum.buffer]);
 }
 
+  </script>
+  <script>
     // Nav dropdown touch support
     document.querySelectorAll('.nav-dropdown-btn').forEach(function(btn) {
       btn.addEventListener('click', function(e) {
