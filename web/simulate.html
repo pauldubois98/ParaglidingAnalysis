@@ -498,43 +498,34 @@
     // Override fetchERA5dT to support different modes
     async function fetchWeatherData(lat, lon, dateStr, mode, windowDays, logFn, tzOffset) {
       if (mode === 'typical') {
-        // Fetch 5 years of ERA5 data (original behavior)
+        // Fetch 5-year ERA5 average; if no data, try offset dates up to ±3 days
         logFn(`Fetching typical weather: 5-year ERA5 average around ${dateStr}…`);
-        return await fetchERA5dT(lat, lon, dateStr, windowDays);
+        const result = await fetchERA5dT(lat, lon, dateStr, windowDays);
+        if (result.records.length > 0) return result;
+        const offsets = [1, -1, 2, -2, 3, -3];
+        for (const offset of offsets) {
+          const d = new Date(dateStr + 'T12:00:00Z');
+          d.setDate(d.getDate() + offset);
+          const d_str = d.toISOString().slice(0, 10);
+          logFn(`No data for ${dateStr} — trying ${offset > 0 ? '+' : ''}${offset} day (${d_str})…`, 'warn');
+          const r = await fetchERA5dT(lat, lon, d_str, windowDays);
+          if (r.records.length > 0) {
+            logFn(`Fallback: ${r.records.length} observations from ${d_str}.`, 'warn');
+            return r;
+          }
+        }
+        logFn(`No ERA5 data for ${dateStr} or ±3 days — will use manual max_heat.`, 'warn');
+        return { records: [], diurnal: Array(24).fill(null) };
       } else if (mode === 'exact') {
-        // Fetch only the exact date's ERA5 data, with adjacent-day fallback
+        // Fetch only the exact date's ERA5 data — no fallback
         logFn(`Fetching exact weather: ERA5 data for ${dateStr} (past date)…`);
         const result = await fetchERA5dTExact(lat, lon, dateStr, windowDays, tzOffset);
         if (result.records.length > 0) {
-          logFn(`Exact: ${result.records.length} observations collected.`, 'success');
-          return result;
+          logFn(`Exact: ${result.records.length} observations collected for ${dateStr}.`, 'success');
+        } else {
+          logFn(`No clear-sky ERA5 data for ${dateStr} — will use manual max_heat.`, 'warn');
         }
-        // Try next day
-        const nextDate = new Date(dateStr + 'T12:00:00Z');
-        nextDate.setDate(nextDate.getDate() + 1);
-        const nextDateStr = nextDate.toISOString().slice(0, 10);
-        logFn(`No clear-sky data for ${dateStr} — trying next day (${nextDateStr})…`, 'warn');
-        try {
-          const nextResult = await fetchERA5dTExact(lat, lon, nextDateStr, windowDays, tzOffset);
-          if (nextResult.records.length > 0) {
-            logFn(`Fallback: ${nextResult.records.length} observations from ${nextDateStr}.`, 'warn');
-            return nextResult;
-          }
-        } catch (e) { logFn(`Next-day fetch failed: ${e.message}`, 'warn'); }
-        // Try previous day
-        const prevDate = new Date(dateStr + 'T12:00:00Z');
-        prevDate.setDate(prevDate.getDate() - 1);
-        const prevDateStr = prevDate.toISOString().slice(0, 10);
-        logFn(`No data for ${nextDateStr} — trying previous day (${prevDateStr})…`, 'warn');
-        try {
-          const prevResult = await fetchERA5dTExact(lat, lon, prevDateStr, windowDays, tzOffset);
-          if (prevResult.records.length > 0) {
-            logFn(`Fallback: ${prevResult.records.length} observations from ${prevDateStr}.`, 'warn');
-            return prevResult;
-          }
-        } catch (e) { logFn(`Prev-day fetch failed: ${e.message}`, 'warn'); }
-        logFn(`No ERA5 data for ${dateStr} or adjacent days — will use manual max_heat.`, 'warn');
-        return { records: [], diurnal: Array(24).fill(null) };
+        return result;
       }
       return { records: [], diurnal: Array(24).fill(null) };
     }
@@ -1393,6 +1384,8 @@
 
       const results = await Promise.all(requests);
       const records = results.flatMap(r => r.rows);
+      const yearSummary = results.map(r => `${r.year}(${r.rows.length})`).join(', ');
+      log(`ERA5 typical: ${yearSummary}`);
 
       // Merge hourlyT2m across years and compute mean per local hour
       const merged = Array.from({ length: 24 }, () => []);
@@ -1737,7 +1730,7 @@
         log(`Fetching ${weatherMode} weather data for ${dateStr}…`);
         const tzOffsetFetch = parseInt(document.getElementById('tz_offset').value);
         const { records: era5Records, diurnal: era5Diurnal } = await fetchWeatherData(
-          centerLat, centerLon, dateStr, weatherMode, windowDays, msg => log(msg), tzOffsetFetch);
+          centerLat, centerLon, dateStr, weatherMode, windowDays, (msg, level) => log(msg, level), tzOffsetFetch);
         if (era5Records.length) {
           log(`Weather data: ${era5Records.length} clear-sky midday observations collected.`, 'success');
         } else {
