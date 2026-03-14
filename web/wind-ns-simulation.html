@@ -119,7 +119,7 @@
           </button>
         </div>
         <div class="field-hint" style="margin-top: -4px">
-          Coarse: fast preview (40×40×20, 30 p-iter).<br />
+          Coarse: fast preview (41×41×20, 30 p-iter).<br />
           Refined: high precision (DEM res, 40 NZ, 80 p-iter).
         </div>
 
@@ -1572,9 +1572,12 @@
         laY,
         laZ
       } = _simCtx;
+      // Use _Z_REL (resampled to sim grid) + _Z_BASE instead of terrainData.Z,
+      // which has stride terrainData.nx and would be sliced incorrectly when
+      // sim_nx ≠ terrainData.nx (e.g. coarse preset).
       const elevArr2d = [];
       for (let j = 0; j < ny; j++)
-        elevArr2d.push(Array.from(terrainData.Z.slice(j * nx, (j + 1) * nx)));
+        elevArr2d.push(Array.from(_Z_REL.subarray(j * nx, (j + 1) * nx), v => v + _Z_BASE));
       const meshElev2d = [];
       for (let j = 0; j < meshData.ny; j++)
         meshElev2d.push(
@@ -1680,8 +1683,8 @@
           dx,
           dy
         } = terrainData;
-        const nx2 = Math.round(nx / 2);
-        const ny2 = Math.round(ny / 2);
+        const nx2 = Math.round(nx / 2)+1;
+        const ny2 = Math.round(ny / 2)+1;
         const dx2 = dx * 2;
         const dy2 = dx * 2;
         log(
@@ -1931,8 +1934,8 @@
     function applyPreset(name) {
       const s = (v) => v; // shorthand
       if (name === "coarse") {
-        const nx = terrainData ? Math.round(terrainData.nx / 2) : 40;
-        const ny = terrainData ? Math.round(terrainData.ny / 2) : 40;
+        const nx = terrainData ? Math.round(terrainData.nx / 2)+1 : 40;
+        const ny = terrainData ? Math.round(terrainData.ny / 2)+1 : 40;
         document.getElementById("sim_nx").value = nx;
         document.getElementById("sim_ny").value = ny;
         document.getElementById("nz").value = 20;
