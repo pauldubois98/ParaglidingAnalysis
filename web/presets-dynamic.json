@@ -40,6 +40,28 @@
     ]
   },
   {
+    "id": "wind-arrows",
+    "label": "Wind Arrows",
+    "overlay": "speed",
+    "terrainOpacity": 0.85,
+    "satelliteOpacity": 0,
+    "overlayOpacity": 0,
+    "arrows": true,
+    "arrowStep": 4,
+    "arrowHeight": 10,
+    "arrowScale": 10,
+    "arrowWidth": 2,
+    "arrowColor": "white",
+    "visibleControls": [
+      "ctrl-section-terrain",
+      "ctrl-terrain-opacity",
+      "ctrl-section-arrows",
+      "ctrl-arrows-toggle",
+      "ctrl-arrow-scale",
+      "ctrl-arrow-width"
+    ]
+  },
+  {
     "id": "vertical-wind",
     "label": "Vertical Wind",
     "overlay": "vvert",
