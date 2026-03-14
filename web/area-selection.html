@@ -479,6 +479,9 @@
       <button class="btn set-btn" id="btn-set-area">
         Set area and markers
       </button>
+      <button class="btn reset" id="btn-share">
+        Copy share link
+      </button>
     </div>
   </div>
 
@@ -510,6 +513,37 @@
   <div id="toast"></div>
 
   <script>
+    // ── URL param handling ────────────────────────────────────────────────────────
+    function parseUrlParams() {
+      const p = new URLSearchParams(window.location.search);
+      const bboxStr = p.get("bbox");
+      if (!bboxStr) return null;
+      const [minLat, maxLat, minLon, maxLon] = bboxStr.split(",").map(Number);
+      if ([minLat, maxLat, minLon, maxLon].some(isNaN)) return null;
+      const result = { bbox: { min_lat: minLat, max_lat: maxLat, min_lon: minLon, max_lon: maxLon } };
+      const toStr = p.get("to");
+      if (toStr) {
+        const [lat, lon] = toStr.split(",").map(Number);
+        if (!isNaN(lat) && !isNaN(lon)) result.takeoff = { lat, lon };
+      }
+      const laStr = p.get("la");
+      if (laStr) {
+        const [lat, lon] = laStr.split(",").map(Number);
+        if (!isNaN(lat) && !isNaN(lon)) result.landing = { lat, lon };
+      }
+      return result;
+    }
+
+    function buildShareUrl() {
+      const b = bboxFromFields();
+      const toLat = getField("in-to-lat"), toLon = getField("in-to-lon");
+      const laLat = getField("in-la-lat"), laLon = getField("in-la-lon");
+      const bbox = `${b.min_lat.toFixed(6)},${b.max_lat.toFixed(6)},${b.min_lon.toFixed(6)},${b.max_lon.toFixed(6)}`;
+      const to = `${toLat.toFixed(6)},${toLon.toFixed(6)}`;
+      const la = `${laLat.toFixed(6)},${laLon.toFixed(6)}`;
+      return `${window.location.origin}${window.location.pathname}?bbox=${bbox}&to=${to}&la=${la}`;
+    }
+
     // ── Persistent state ──────────────────────────────────────────────────────────
     const STORAGE_KEY = "paragliding_area";
 
@@ -713,8 +747,9 @@
       landingMarker.setLatLng([lat, lon]);
     }
 
-    // ── Init fields (restore saved state, fall back to defaults) ──────────────────
-    const _saved = loadAreaState();
+    // ── Init fields (URL params > saved state > defaults) ────────────────────────
+    const _urlState = parseUrlParams();
+    const _saved = _urlState || loadAreaState();
     applyBbox(_saved?.bbox || DEFAULTS.bbox);
     applyTakeoff(
       (_saved?.takeoff || DEFAULTS.takeoff).lat,
@@ -1033,6 +1068,16 @@
       saveAreaState();
       setAreaReady(true);
       showToast("Area and markers saved.");
+    });
+
+    // ── Copy share link ───────────────────────────────────────────────────────────
+    document.getElementById("btn-share").addEventListener("click", () => {
+      const url = buildShareUrl();
+      navigator.clipboard.writeText(url).then(() => {
+        showToast("Share link copied!");
+      }).catch(() => {
+        prompt("Copy this link:", url);
+      });
     });
   </script>
   <script>
