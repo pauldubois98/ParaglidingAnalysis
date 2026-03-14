@@ -940,7 +940,7 @@
         const GeoTIFF = window.GeoTIFF;
         if (!GeoTIFF) throw new Error("GeoTIFF.js not loaded");
         const tiff = await GeoTIFF.fromUrl(
-          "/proxy?url=" + encodeURIComponent(s3url), {
+          "/proxy/" + s3url.replace('://', '/'), {
             allowFullFile: false
           },
         );

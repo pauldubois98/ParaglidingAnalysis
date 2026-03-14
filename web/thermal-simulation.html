@@ -645,7 +645,7 @@
         `&start_date=${fmt(start)}&end_date=${fmt(end)}` +
         `&hourly=temperature_2m,surface_temperature,direct_radiation` +
         `&timezone=Europe/Paris`;
-      const url = `/proxy?url=` + encodeURIComponent(apiUrl);
+      const url = `/proxy/` + apiUrl.replace('://', '/');
 
       const resp = await fetch(url);
       if (!resp.ok)
@@ -703,7 +703,7 @@
         `&start_date=${fmt(startDate)}&end_date=${fmt(endDate)}` +
         `&hourly=temperature_2m,soil_temperature_0cm,shortwave_radiation` +
         `&timezone=UTC`;
-      const url = `/proxy?url=` + encodeURIComponent(apiUrl);
+      const url = `/proxy/` + apiUrl.replace('://', '/');
 
       const resp = await fetch(url);
       if (!resp.ok) throw new Error(`Forecast fetch failed: ${resp.status}`);
@@ -1366,7 +1366,7 @@
         const s3url =
           `https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/` +
           `ESA_WorldCover_10m_2021_v200_${latStr}${lonStr}_Map.tif`;
-        const proxyUrl = `/proxy?url=` + encodeURIComponent(s3url);
+        const proxyUrl = `/proxy/` + s3url.replace('://', '/');
 
         log(
           `Fetching ESA WorldCover COG (${latStr}${lonStr}) via local proxy…`,
@@ -1780,7 +1780,7 @@
           `&start_date=${fmt(start)}&end_date=${fmt(end)}` +
           `&hourly=temperature_2m,surface_temperature,direct_radiation` +
           `&timezone=Europe/Paris`;
-        const url = `/proxy?url=` + encodeURIComponent(apiUrl);
+        const url = `/proxy/` + apiUrl.replace('://', '/');
 
         return fetch(url)
           .then((r) => {

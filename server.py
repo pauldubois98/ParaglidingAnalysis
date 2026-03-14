@@ -46,7 +46,7 @@ class Handler(SimpleHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        if self.path.startswith('/proxy?') or self.path == '/proxy':
+        if self.path.startswith('/proxy/') or self.path.startswith('/proxy?') or self.path == '/proxy':
             self._handle_proxy()
         elif self.path == '/web/' or self.path == '/web':
             self.send_response(301)
@@ -65,12 +65,25 @@ class Handler(SimpleHTTPRequestHandler):
     # ── Proxy handler ─────────────────────────────────────────────────
     def _handle_proxy(self):
         parsed = urllib.parse.urlparse(self.path)
-        params = urllib.parse.parse_qs(parsed.query)
-        url = params.get('url', [None])[0]
 
-        if not url:
-            self._error(400, 'Missing ?url= parameter')
-            return
+        # New path-based format: /proxy/<scheme>/<host>/<path>?<query>
+        if parsed.path.startswith('/proxy/'):
+            after = parsed.path[len('/proxy/'):]  # e.g. "https/api.open-meteo.com/v1/forecast"
+            parts = after.split('/', 1)
+            if len(parts) < 2 or parts[0] not in ('http', 'https'):
+                self._error(400, 'Bad proxy path: expected /proxy/<scheme>/<host>/...')
+                return
+            scheme, rest = parts
+            url = f'{scheme}://{rest}'
+            if parsed.query:
+                url += '?' + parsed.query
+        else:
+            # Legacy query-based format: /proxy?url=<encoded>
+            params = urllib.parse.parse_qs(parsed.query)
+            url = params.get('url', [None])[0]
+            if not url:
+                self._error(400, 'Missing ?url= parameter')
+                return
 
         host = urllib.parse.urlparse(url).hostname
         if host not in ALLOWED_HOSTS:

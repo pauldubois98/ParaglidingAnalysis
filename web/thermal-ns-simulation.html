@@ -1191,7 +1191,7 @@
           (tileLonSW >= 0 ? "E" : "W") +
           String(Math.abs(tileLonSW)).padStart(3, "0");
         const s3url = `https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_${latStr}${lonStr}_Map.tif`;
-        const proxyUrl = `/proxy?url=` + encodeURIComponent(s3url);
+        const proxyUrl = `/proxy/` + s3url.replace('://', '/');
         log(
           `Fetching ESA WorldCover COG (${latStr}${lonStr}) via local proxy…`,
         );
@@ -1481,7 +1481,7 @@
             }, () => []),
           });
         const apiUrl = `https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&start_date=${fmt(start)}&end_date=${fmt(end)}&hourly=temperature_2m,surface_temperature,direct_radiation&timezone=Europe/Paris`;
-        const url = `/proxy?url=` + encodeURIComponent(apiUrl);
+        const url = `/proxy/` + apiUrl.replace('://', '/');
         return fetch(url)
           .then((r) => {
             if (!r.ok) throw new Error(`HTTP ${r.status}`);
@@ -1554,7 +1554,7 @@
       const end = new Date(target);
       end.setDate(end.getDate() + 1);
       const apiUrl = `https://historical-forecast-api.open-meteo.com/v1/forecast?latitude=${lat.toFixed(4)}&longitude=${lon.toFixed(4)}&start_date=${fmt(start)}&end_date=${fmt(end)}&hourly=temperature_2m,surface_temperature,direct_radiation&timezone=Europe/Paris`;
-      const url = `/proxy?url=` + encodeURIComponent(apiUrl);
+      const url = `/proxy/` + apiUrl.replace('://', '/');
       const resp = await fetch(url);
       if (!resp.ok) throw new Error(`ERA5 exact: ${resp.status}`);
       const json = await resp.json();
