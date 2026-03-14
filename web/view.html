@@ -471,10 +471,10 @@
         }
 
         const [modesResp, settingsResp] = await Promise.all([
-          fetch('modes.json'),
+          fetch('presets.json'),
           fetch('settings.json'),
         ]);
-        if (!modesResp.ok) throw new Error(`modes.json: HTTP ${modesResp.status}`);
+        if (!modesResp.ok) throw new Error(`presets.json: HTTP ${modesResp.status}`);
         if (!settingsResp.ok) throw new Error(`settings.json: HTTP ${settingsResp.status}`);
         simData = simJson;  // either from IndexedDB (simulate.html) or data/simulation.json
         DALR_JS = simData.dalr ?? 0.0098;
