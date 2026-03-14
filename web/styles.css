@@ -452,5 +452,122 @@ ul li {
   .step { gap: 8px; }
 }
 
+/* ================================================================
+   #ui-panel — view pages: absolute slide-in overlay
+   Simulate pages restore position/transform locally.
+   ================================================================ */
+
+#ui-panel {
+  background: rgba(10, 15, 30, 0.88);
+  border: 1px solid rgba(100, 160, 255, 0.3);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  position: absolute;
+  top: 52px;
+  right: 8px;
+  width: 250px;
+  padding: 14px 16px;
+  max-height: calc(100vh - 68px);
+  overflow-y: auto;
+  transform: translateX(calc(100% + 20px));
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1;
+}
+
+#ui-panel.open {
+  transform: translateX(0);
+}
+
+#ui-panel::-webkit-scrollbar {
+  width: 4px;
+}
+
+#ui-panel::-webkit-scrollbar-thumb {
+  background: rgba(100, 160, 255, 0.2);
+  border-radius: 2px;
+}
+
+#ui-panel h2 {
+  font-size: 13px;
+  color: #7eb8ff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  margin-top: 0;
+}
+
+@media (max-width: 768px) {
+  #ui-panel {
+    top: auto;
+    right: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    max-height: 72vh;
+    max-height: 72dvh;
+    border-radius: 14px 14px 0 0;
+    transform: translateY(100%);
+  }
+
+  #ui-panel.open {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  #ui-panel {
+    max-height: 60vh;
+  }
+}
+
+/* ================================================================
+   Simulation / area panel layout
+   ================================================================ */
+
+#panel-header {
+  padding: 14px 16px 10px;
+  border-bottom: 1px solid rgba(100, 160, 255, 0.15);
+  flex-shrink: 0;
+}
+
+#panel-header h2 {
+  font-size: 14px;
+  color: #7eb8ff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  margin-top: 6px;
+}
+
+#panel-header .subtitle {
+  font-size: 10px;
+  color: #3a6080;
+  margin-bottom: 6px;
+}
+
+#panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+}
+
+#panel-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+#panel-body::-webkit-scrollbar-thumb {
+  background: rgba(100, 160, 255, 0.2);
+  border-radius: 2px;
+}
+
+#panel-footer {
+  padding: 12px 16px 14px;
+  border-top: 1px solid rgba(100, 160, 255, 0.15);
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
 
 
