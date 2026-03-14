@@ -21,9 +21,6 @@ body {
 
 canvas { display: block; }
 
-.hide,
-.hidden { display: none; }
-
 /* ================================================================
    Navigation bar  (identical across all pages)
    ================================================================ */
@@ -1285,3 +1282,7 @@ input[type="checkbox"] {
   border-top-color: #7eb8ff;
   animation: spin 0.9s linear infinite;
 }
+
+
+.hide,
+.hidden { display: none; }
