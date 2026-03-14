@@ -595,7 +595,7 @@
         simData = data;
         // Load presets (non-fatal if missing)
         try {
-          const pr = await fetch("presets-advanced.json");
+          const pr = await fetch("thermal-ns-view.json");
           if (pr.ok) presetsData = await pr.json();
         } catch {}
         document.getElementById("loading").style.display = "none";

@@ -1387,7 +1387,7 @@
 
     async function loadPresets() {
       try {
-        _presets = await fetch("presets-dynamic.json").then((r) => r.json());
+        _presets = await fetch("wind-view.json").then((r) => r.json());
       } catch {
         _presets = [];
       }

@@ -496,9 +496,9 @@
           simJson = await simResp.json();
         }
 
-        const [modesResp] = await Promise.all([fetch("presets.json")]);
+        const [modesResp] = await Promise.all([fetch("thermal-view.json")]);
         if (!modesResp.ok)
-          throw new Error(`presets.json: HTTP ${modesResp.status}`);
+          throw new Error(`thermal-view.json: HTTP ${modesResp.status}`);
         simData = simJson; // either from IndexedDB (thermal-simulation.html) or data/simulation.json
         DALR_JS = simData.dalr ?? 0.0098;
         // Derive HTOP_MAX from the actual data: max thermal top at standard ELR (6.5 K/km)

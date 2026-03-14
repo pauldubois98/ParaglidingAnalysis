@@ -2146,7 +2146,7 @@
       try {
         const [raw, presets] = await Promise.all([
           idbGet("ns3d_latest"),
-          fetch("presets-dynamic-advanced.json").then((r) => r.json()),
+          fetch("wind-ns-view.json").then((r) => r.json()),
         ]);
         if (!raw)
           throw new Error(
