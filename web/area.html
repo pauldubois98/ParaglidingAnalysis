@@ -1,20 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
   <title>Flow — Area Selection</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 
   <style>
     body {
       background: #08111e;
       color: #c8d8e8;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: "Segoe UI", sans-serif;
       font-size: 14px;
       height: 100vh;
       overflow: hidden;
@@ -25,7 +25,7 @@
       width: 100vw;
       height: 100vh;
       background: #0d1a2e;
-      margin-top: 44px
+      margin-top: 44px;
     }
 
     .leaflet-tile {
@@ -49,9 +49,19 @@
       overflow: hidden;
     }
 
-    #panel-header { padding: 13px 16px 10px; }
-    #panel-header h2 { font-size: 13px; margin: 0; }
-    #panel-footer { padding: 10px 16px 13px; gap: 6px; }
+    #panel-header {
+      padding: 13px 16px 10px;
+    }
+
+    #panel-header h2 {
+      font-size: 13px;
+      margin: 0;
+    }
+
+    #panel-footer {
+      padding: 10px 16px 13px;
+      gap: 6px;
+    }
 
     /* ── Editable coord fields ── */
     .coord-grid {
@@ -79,7 +89,7 @@
     }
 
     .coord-input {
-      font-family: 'Courier New', monospace;
+      font-family: "Courier New", monospace;
       font-size: 12px;
       color: #90c8e8;
       background: rgba(20, 35, 60, 0.8);
@@ -115,7 +125,10 @@
       font-family: inherit;
       cursor: pointer;
       text-align: center;
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
+      transition:
+        background 0.15s,
+        color 0.15s,
+        border-color 0.15s;
       margin-bottom: 6px;
     }
 
@@ -279,7 +292,9 @@
       padding: 6px 18px;
       border-radius: 20px;
       opacity: 0;
-      transition: opacity 0.2s, transform 0.2s;
+      transition:
+        opacity 0.2s,
+        transform 0.2s;
       pointer-events: none;
       z-index: 9999;
     }
@@ -290,7 +305,9 @@
     }
 
     /* ── Mobile panel toggle button ── */
-    #panel-toggle { display: none; }
+    #panel-toggle {
+      display: none;
+    }
 
     @media (max-width: 768px) {
       #panel-toggle {
@@ -339,9 +356,8 @@
 </head>
 
 <body>
-
   <nav id="header-nav">
-    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt="" /><span>Home</span></a>
     <div class="nav-sep"></div>
     <a href="area" class="nav-link nav-active">Area</a>
     <div class="nav-sep"></div>
@@ -381,8 +397,9 @@
 
   <div id="map"></div>
 
-  <button id="panel-toggle" onclick="document.getElementById('panel').classList.toggle('panel-open')"
-    title="Toggle panel">☰</button>
+  <button id="panel-toggle" onclick="document.getElementById('panel').classList.toggle('panel-open')" title="Toggle panel">
+    ☰
+  </button>
 
   <!-- ── Floating panel ── -->
   <div id="panel">
@@ -396,60 +413,72 @@
       <div class="coord-grid">
         <div class="coord-cell">
           <div class="coord-label">North (max lat)</div>
-          <input class="coord-input" id="in-max-lat" type="number" step="0.0001">
+          <input class="coord-input" id="in-max-lat" type="number" step="0.0001" />
         </div>
         <div class="coord-cell">
           <div class="coord-label">South (min lat)</div>
-          <input class="coord-input" id="in-min-lat" type="number" step="0.0001">
+          <input class="coord-input" id="in-min-lat" type="number" step="0.0001" />
         </div>
         <div class="coord-cell">
           <div class="coord-label">West (min lon)</div>
-          <input class="coord-input" id="in-min-lon" type="number" step="0.0001">
+          <input class="coord-input" id="in-min-lon" type="number" step="0.0001" />
         </div>
         <div class="coord-cell">
           <div class="coord-label">East (max lon)</div>
-          <input class="coord-input" id="in-max-lon" type="number" step="0.0001">
+          <input class="coord-input" id="in-max-lon" type="number" step="0.0001" />
         </div>
         <div class="coord-cell full">
           <div class="coord-label">Center (auto)</div>
-          <input class="coord-input readonly" id="in-center" type="text" readonly>
+          <input class="coord-input readonly" id="in-center" type="text" readonly />
         </div>
       </div>
       <div class="info-row">Size: <span id="info-size">—</span></div>
-      <div id="size-warning" style="display:none;margin-top:4px;font-size:11px;padding:4px 8px;border-radius:6px;">
-      </div>
+      <div id="size-warning" style="
+            display: none;
+            margin-top: 4px;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 6px;
+          "></div>
 
-      <div class="section-title" style="margin-top:12px">Actions</div>
+      <div class="section-title" style="margin-top: 12px">Actions</div>
       <button class="btn" id="btn-draw">Draw bbox on map</button>
-      <button class="btn reset" id="btn-reset">Reset to default (Arbas)</button>
+      <button class="btn reset" id="btn-reset">
+        Reset to default (Arbas)
+      </button>
 
       <div class="section-title">Markers</div>
       <div class="coord-grid">
         <div class="coord-cell">
           <div class="coord-label">Take-off lat</div>
-          <input class="coord-input" id="in-to-lat" type="number" step="0.00001">
+          <input class="coord-input" id="in-to-lat" type="number" step="0.00001" />
         </div>
         <div class="coord-cell">
           <div class="coord-label">Take-off lon</div>
-          <input class="coord-input" id="in-to-lon" type="number" step="0.00001">
+          <input class="coord-input" id="in-to-lon" type="number" step="0.00001" />
         </div>
       </div>
-      <button class="btn" id="btn-place-to" style="margin-top:6px">Place take-off on map</button>
+      <button class="btn" id="btn-place-to" style="margin-top: 6px">
+        Place take-off on map
+      </button>
       <div class="coord-grid">
         <div class="coord-cell">
           <div class="coord-label">Landing lat</div>
-          <input class="coord-input" id="in-la-lat" type="number" step="0.00001">
+          <input class="coord-input" id="in-la-lat" type="number" step="0.00001" />
         </div>
         <div class="coord-cell">
           <div class="coord-label">Landing lon</div>
-          <input class="coord-input" id="in-la-lon" type="number" step="0.00001">
+          <input class="coord-input" id="in-la-lon" type="number" step="0.00001" />
         </div>
       </div>
       <button class="btn" id="btn-place-la">Place landing on map</button>
-    </div><!-- /panel-body -->
+    </div>
+    <!-- /panel-body -->
 
     <div id="panel-footer">
-      <button class="btn set-btn" id="btn-set-area">Set area and markers</button>
+      <button class="btn set-btn" id="btn-set-area">
+        Set area and markers
+      </button>
     </div>
   </div>
 
@@ -457,45 +486,59 @@
   <div id="legend">
     <div class="legend-title">Legend</div>
     <div class="legend-row">
-      <div class="legend-line dashed" style="border-color:#4a9eff;width:22px;"></div>
+      <div class="legend-line dashed" style="border-color: #4a9eff; width: 22px"></div>
       Default bbox (Arbas)
     </div>
     <div class="legend-row">
-      <div class="legend-line" style="background:#ffaa00;"></div>
+      <div class="legend-line" style="background: #ffaa00"></div>
       Current selection
     </div>
     <div class="legend-row">
-      <div class="legend-dot" style="background:#ff6030;box-shadow:0 0 5px #ff6030;"></div>
+      <div class="legend-dot" style="background: #ff6030; box-shadow: 0 0 5px #ff6030"></div>
       Take-off
     </div>
     <div class="legend-row">
-      <div class="legend-dot" style="background:#30ff80;box-shadow:0 0 5px #30ff80;"></div>
+      <div class="legend-dot" style="background: #30ff80; box-shadow: 0 0 5px #30ff80"></div>
       Landing
     </div>
   </div>
 
-  <div id="status">Drag the map to explore. Use "Draw bbox" or edit the fields to define the area.</div>
+  <div id="status">
+    Drag the map to explore. Use "Draw bbox" or edit the fields to define the
+    area.
+  </div>
   <div id="toast"></div>
 
   <script>
     // ── Persistent state ──────────────────────────────────────────────────────────
-    const STORAGE_KEY = 'paragliding_area';
+    const STORAGE_KEY = "paragliding_area";
 
     function saveAreaState() {
       const state = {
         bbox: bboxFromFields(),
-        takeoff: { lat: getField('in-to-lat'), lon: getField('in-to-lon') },
-        landing: { lat: getField('in-la-lat'), lon: getField('in-la-lon') },
+        takeoff: {
+          lat: getField("in-to-lat"),
+          lon: getField("in-to-lon")
+        },
+        landing: {
+          lat: getField("in-la-lat"),
+          lon: getField("in-la-lon")
+        },
       };
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) { }
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
     }
 
     function loadAreaState() {
-      try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); }
-      catch (e) { return null; }
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      } catch (e) {
+        return null;
+      }
     }
 
-    function setAreaReady(_ready) { }
+    function setAreaReady(_ready) {}
 
     // ── Defaults ──────────────────────────────────────────────────────────────────
     const DEFAULTS = {
@@ -505,17 +548,23 @@
         min_lat: 42.96106090862103,
         max_lat: 43.014963556361636,
       },
-      takeoff: { lat: 42.96939867981149, lon: 0.8859389033562173 },
-      landing: { lat: 42.99216012970225, lon: 0.9039819278411977 },
+      takeoff: {
+        lat: 42.96939867981149,
+        lon: 0.8859389033562173
+      },
+      landing: {
+        lat: 42.99216012970225,
+        lon: 0.9039819278411977
+      },
     };
 
     // ── Map ───────────────────────────────────────────────────────────────────────
-    const map = L.map('map', {
-      center: [42.990, 0.885],
+    const map = L.map("map", {
+      center: [42.99, 0.885],
       zoom: 12,
       zoomControl: true,
     });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 18,
     }).addTo(map);
@@ -523,245 +572,372 @@
     // ── Marker icons ──────────────────────────────────────────────────────────────
     function makeIcon(color) {
       return L.divIcon({
-        className: '',
+        className: "",
         html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.5);box-shadow:0 0 7px ${color};"></div>`,
-        iconSize: [14, 14], iconAnchor: [7, 7],
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
       });
     }
 
-    let takeoffMarker = L.marker([DEFAULTS.takeoff.lat, DEFAULTS.takeoff.lon], { icon: makeIcon('#ff6030'), draggable: true })
-      .bindTooltip('Take-off').addTo(map);
-    let landingMarker = L.marker([DEFAULTS.landing.lat, DEFAULTS.landing.lon], { icon: makeIcon('#30ff80'), draggable: true })
-      .bindTooltip('Landing').addTo(map);
+    let takeoffMarker = L.marker(
+        [DEFAULTS.takeoff.lat, DEFAULTS.takeoff.lon], {
+          icon: makeIcon("#ff6030"),
+          draggable: true
+        },
+      )
+      .bindTooltip("Take-off")
+      .addTo(map);
+    let landingMarker = L.marker(
+        [DEFAULTS.landing.lat, DEFAULTS.landing.lon], {
+          icon: makeIcon("#30ff80"),
+          draggable: true
+        },
+      )
+      .bindTooltip("Landing")
+      .addTo(map);
 
-    takeoffMarker.on('dragend', () => {
+    takeoffMarker.on("dragend", () => {
       const ll = takeoffMarker.getLatLng();
-      setField('in-to-lat', ll.lat, 8);
-      setField('in-to-lon', ll.lng, 8);
+      setField("in-to-lat", ll.lat, 8);
+      setField("in-to-lon", ll.lng, 8);
       setAreaReady(false);
     });
-    landingMarker.on('dragend', () => {
+    landingMarker.on("dragend", () => {
       const ll = landingMarker.getLatLng();
-      setField('in-la-lat', ll.lat, 8);
-      setField('in-la-lon', ll.lng, 8);
+      setField("in-la-lat", ll.lat, 8);
+      setField("in-la-lon", ll.lng, 8);
       setAreaReady(false);
     });
 
     // ── Rectangles ────────────────────────────────────────────────────────────────
     const defaultRect = L.rectangle(
-      [[DEFAULTS.bbox.min_lat, DEFAULTS.bbox.min_lon], [DEFAULTS.bbox.max_lat, DEFAULTS.bbox.max_lon]],
-      { color: '#4a9eff', weight: 1.5, opacity: 0.7, fillOpacity: 0.04, dashArray: '6 4' }
+      [
+        [DEFAULTS.bbox.min_lat, DEFAULTS.bbox.min_lon],
+        [DEFAULTS.bbox.max_lat, DEFAULTS.bbox.max_lon],
+      ], {
+        color: "#4a9eff",
+        weight: 1.5,
+        opacity: 0.7,
+        fillOpacity: 0.04,
+        dashArray: "6 4",
+      },
     ).addTo(map);
 
     let selRect = null;
 
     function setSelRect(b) {
-      const bounds = [[b.min_lat, b.min_lon], [b.max_lat, b.max_lon]];
+      const bounds = [
+        [b.min_lat, b.min_lon],
+        [b.max_lat, b.max_lon],
+      ];
       if (selRect) selRect.setBounds(bounds);
-      else selRect = L.rectangle(bounds, { color: '#ffaa00', weight: 2.5, opacity: 1, fillOpacity: 0.07 }).addTo(map);
+      else
+        selRect = L.rectangle(bounds, {
+          color: "#ffaa00",
+          weight: 2.5,
+          opacity: 1,
+          fillOpacity: 0.07,
+        }).addTo(map);
     }
 
     // ── Field helpers ─────────────────────────────────────────────────────────────
     function setField(id, val, decimals = 6) {
-      document.getElementById(id).value = typeof val === 'number' ? val.toFixed(decimals) : val;
+      document.getElementById(id).value =
+        typeof val === "number" ? val.toFixed(decimals) : val;
     }
 
-    function getField(id) { return parseFloat(document.getElementById(id).value); }
+    function getField(id) {
+      return parseFloat(document.getElementById(id).value);
+    }
 
     function updateCenterAndSize() {
-      const minLat = getField('in-min-lat'), maxLat = getField('in-max-lat');
-      const minLon = getField('in-min-lon'), maxLon = getField('in-max-lon');
+      const minLat = getField("in-min-lat"),
+        maxLat = getField("in-max-lat");
+      const minLon = getField("in-min-lon"),
+        maxLon = getField("in-max-lon");
       if ([minLat, maxLat, minLon, maxLon].some(isNaN)) return;
-      const cLat = (minLat + maxLat) / 2, cLon = (minLon + maxLon) / 2;
-      document.getElementById('in-center').value = `${cLat.toFixed(6)}, ${cLon.toFixed(6)}`;
+      const cLat = (minLat + maxLat) / 2,
+        cLon = (minLon + maxLon) / 2;
+      document.getElementById("in-center").value =
+        `${cLat.toFixed(6)}, ${cLon.toFixed(6)}`;
       const wKm = haversineKm(cLat, minLon, cLat, maxLon);
       const hKm = haversineKm(minLat, cLon, maxLat, cLon);
       const area = wKm * hKm;
-      document.getElementById('info-size').textContent = `${wKm.toFixed(1)} × ${hKm.toFixed(1)} km  (${area.toFixed(1)} km²)`;
-      const warn = document.getElementById('size-warning');
+      document.getElementById("info-size").textContent =
+        `${wKm.toFixed(1)} × ${hKm.toFixed(1)} km  (${area.toFixed(1)} km²)`;
+      const warn = document.getElementById("size-warning");
       if (area < 10) {
-        warn.style.display = 'block';
-        warn.style.background = 'rgba(255,160,0,0.15)';
-        warn.style.color = '#ffaa00';
-        warn.style.border = '1px solid rgba(255,160,0,0.3)';
-        warn.textContent = '⚠ Area too small — simulation will lack detail.';
+        warn.style.display = "block";
+        warn.style.background = "rgba(255,160,0,0.15)";
+        warn.style.color = "#ffaa00";
+        warn.style.border = "1px solid rgba(255,160,0,0.3)";
+        warn.textContent = "⚠ Area too small — simulation will lack detail.";
       } else if (area > 200) {
-        warn.style.display = 'block';
-        warn.style.background = 'rgba(255,80,80,0.12)';
-        warn.style.color = '#ff6060';
-        warn.style.border = '1px solid rgba(255,80,80,0.3)';
-        warn.textContent = '⚠ Area very large — simulation will be slow.';
+        warn.style.display = "block";
+        warn.style.background = "rgba(255,80,80,0.12)";
+        warn.style.color = "#ff6060";
+        warn.style.border = "1px solid rgba(255,80,80,0.3)";
+        warn.textContent = "⚠ Area very large — simulation will be slow.";
       } else {
-        warn.style.display = 'none';
+        warn.style.display = "none";
       }
     }
 
     function bboxFromFields() {
       return {
-        min_lat: getField('in-min-lat'), max_lat: getField('in-max-lat'),
-        min_lon: getField('in-min-lon'), max_lon: getField('in-max-lon'),
+        min_lat: getField("in-min-lat"),
+        max_lat: getField("in-max-lat"),
+        min_lon: getField("in-min-lon"),
+        max_lon: getField("in-max-lon"),
       };
     }
 
     function applyBbox(b) {
-      setField('in-min-lat', b.min_lat); setField('in-max-lat', b.max_lat);
-      setField('in-min-lon', b.min_lon); setField('in-max-lon', b.max_lon);
+      setField("in-min-lat", b.min_lat);
+      setField("in-max-lat", b.max_lat);
+      setField("in-min-lon", b.min_lon);
+      setField("in-max-lon", b.max_lon);
       updateCenterAndSize();
       setSelRect(b);
     }
 
     function applyTakeoff(lat, lon) {
-      setField('in-to-lat', lat, 8); setField('in-to-lon', lon, 8);
+      setField("in-to-lat", lat, 8);
+      setField("in-to-lon", lon, 8);
       takeoffMarker.setLatLng([lat, lon]);
     }
+
     function applyLanding(lat, lon) {
-      setField('in-la-lat', lat, 8); setField('in-la-lon', lon, 8);
+      setField("in-la-lat", lat, 8);
+      setField("in-la-lon", lon, 8);
       landingMarker.setLatLng([lat, lon]);
     }
 
     // ── Init fields (restore saved state, fall back to defaults) ──────────────────
     const _saved = loadAreaState();
     applyBbox(_saved?.bbox || DEFAULTS.bbox);
-    applyTakeoff((_saved?.takeoff || DEFAULTS.takeoff).lat, (_saved?.takeoff || DEFAULTS.takeoff).lon);
-    applyLanding((_saved?.landing || DEFAULTS.landing).lat, (_saved?.landing || DEFAULTS.landing).lon);
+    applyTakeoff(
+      (_saved?.takeoff || DEFAULTS.takeoff).lat,
+      (_saved?.takeoff || DEFAULTS.takeoff).lon,
+    );
+    applyLanding(
+      (_saved?.landing || DEFAULTS.landing).lat,
+      (_saved?.landing || DEFAULTS.landing).lon,
+    );
     if (_saved) setAreaReady(true);
 
     // ── Live field editing → update rect ─────────────────────────────────────────
-    ['in-min-lat', 'in-max-lat', 'in-min-lon', 'in-max-lon'].forEach(id => {
-      document.getElementById(id).addEventListener('input', () => {
+    ["in-min-lat", "in-max-lat", "in-min-lon", "in-max-lon"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
         updateCenterAndSize();
         const b = bboxFromFields();
-        if (b.min_lat < b.max_lat && b.min_lon < b.max_lon && [b.min_lat, b.max_lat, b.min_lon, b.max_lon].every(v => !isNaN(v))) {
+        if (
+          b.min_lat < b.max_lat &&
+          b.min_lon < b.max_lon && [b.min_lat, b.max_lat, b.min_lon, b.max_lon].every((v) => !isNaN(v))
+        ) {
           setSelRect(b);
         }
         setAreaReady(false);
       });
     });
 
-    ['in-to-lat', 'in-to-lon'].forEach(id => {
-      document.getElementById(id).addEventListener('input', () => {
-        const lat = getField('in-to-lat'), lon = getField('in-to-lon');
-        if (!isNaN(lat) && !isNaN(lon)) { takeoffMarker.setLatLng([lat, lon]); }
+    ["in-to-lat", "in-to-lon"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        const lat = getField("in-to-lat"),
+          lon = getField("in-to-lon");
+        if (!isNaN(lat) && !isNaN(lon)) {
+          takeoffMarker.setLatLng([lat, lon]);
+        }
         setAreaReady(false);
       });
     });
-    ['in-la-lat', 'in-la-lon'].forEach(id => {
-      document.getElementById(id).addEventListener('input', () => {
-        const lat = getField('in-la-lat'), lon = getField('in-la-lon');
-        if (!isNaN(lat) && !isNaN(lon)) { landingMarker.setLatLng([lat, lon]); }
+    ["in-la-lat", "in-la-lon"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        const lat = getField("in-la-lat"),
+          lon = getField("in-la-lon");
+        if (!isNaN(lat) && !isNaN(lon)) {
+          landingMarker.setLatLng([lat, lon]);
+        }
         setAreaReady(false);
       });
     });
 
     // ── Draw bbox mode ────────────────────────────────────────────────────────────
-    let drawMode = false, drawStart = null, drawPreview = null;
-    let tapCorner1 = null, tapCorner1Marker = null;
+    let drawMode = false,
+      drawStart = null,
+      drawPreview = null;
+    let tapCorner1 = null,
+      tapCorner1Marker = null;
 
     const isTouch = () => navigator.maxTouchPoints > 0;
 
     function enterDraw() {
       exitPlace();
-      drawMode = true; tapCorner1 = null;
-      map.dragging.disable(); map.doubleClickZoom.disable();
-      map.getContainer().classList.add('draw-mode');
-      document.getElementById('btn-draw').textContent = 'Cancel draw';
-      document.getElementById('btn-draw').classList.add('active');
-      setStatus(isTouch()
-        ? 'Tap the first corner of the area.'
-        : 'Click and drag on the map to draw the bounding box.');
-    }
-    function exitDraw() {
-      drawMode = false; drawStart = null; tapCorner1 = null;
-      if (drawPreview) { drawPreview.remove(); drawPreview = null; }
-      if (tapCorner1Marker) { tapCorner1Marker.remove(); tapCorner1Marker = null; }
-      map.dragging.enable(); map.doubleClickZoom.enable();
-      map.getContainer().classList.remove('draw-mode');
-      document.getElementById('btn-draw').textContent = 'Draw bbox on map';
-      document.getElementById('btn-draw').classList.remove('active');
+      drawMode = true;
+      tapCorner1 = null;
+      map.dragging.disable();
+      map.doubleClickZoom.disable();
+      map.getContainer().classList.add("draw-mode");
+      document.getElementById("btn-draw").textContent = "Cancel draw";
+      document.getElementById("btn-draw").classList.add("active");
+      setStatus(
+        isTouch() ?
+        "Tap the first corner of the area." :
+        "Click and drag on the map to draw the bounding box.",
+      );
     }
 
-    document.getElementById('btn-draw').addEventListener('click', () => {
-      if (drawMode) exitDraw(); else enterDraw();
+    function exitDraw() {
+      drawMode = false;
+      drawStart = null;
+      tapCorner1 = null;
+      if (drawPreview) {
+        drawPreview.remove();
+        drawPreview = null;
+      }
+      if (tapCorner1Marker) {
+        tapCorner1Marker.remove();
+        tapCorner1Marker = null;
+      }
+      map.dragging.enable();
+      map.doubleClickZoom.enable();
+      map.getContainer().classList.remove("draw-mode");
+      document.getElementById("btn-draw").textContent = "Draw bbox on map";
+      document.getElementById("btn-draw").classList.remove("active");
+    }
+
+    document.getElementById("btn-draw").addEventListener("click", () => {
+      if (drawMode) exitDraw();
+      else enterDraw();
     });
 
-    document.getElementById('btn-reset').addEventListener('click', () => {
-      exitDraw(); exitPlace();
-      try { localStorage.removeItem(STORAGE_KEY); } catch (e) { }
+    document.getElementById("btn-reset").addEventListener("click", () => {
+      exitDraw();
+      exitPlace();
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {}
       applyBbox(DEFAULTS.bbox);
       applyTakeoff(DEFAULTS.takeoff.lat, DEFAULTS.takeoff.lon);
       applyLanding(DEFAULTS.landing.lat, DEFAULTS.landing.lon);
-      map.fitBounds([[DEFAULTS.bbox.min_lat, DEFAULTS.bbox.min_lon], [DEFAULTS.bbox.max_lat, DEFAULTS.bbox.max_lon]], { padding: [40, 40] });
+      map.fitBounds(
+        [
+          [DEFAULTS.bbox.min_lat, DEFAULTS.bbox.min_lon],
+          [DEFAULTS.bbox.max_lat, DEFAULTS.bbox.max_lon],
+        ], {
+          padding: [40, 40]
+        },
+      );
       setAreaReady(false);
-      setStatus('Reset to default Arbas values.');
+      setStatus("Reset to default Arbas values.");
     });
 
     // ── Place marker mode ─────────────────────────────────────────────────────────
-    let placeMode = null;  // 'takeoff' | 'landing' | null
+    let placeMode = null; // 'takeoff' | 'landing' | null
 
     function enterPlace(type) {
       exitDraw();
-      if (placeMode === type) { exitPlace(); return; }
+      if (placeMode === type) {
+        exitPlace();
+        return;
+      }
       exitPlace();
       placeMode = type;
-      map.dragging.disable(); map.doubleClickZoom.disable();
-      map.getContainer().classList.add('place-mode');
-      const btn = document.getElementById(type === 'takeoff' ? 'btn-place-to' : 'btn-place-la');
-      btn.textContent = type === 'takeoff' ? 'Click map to place take-off…' : 'Click map to place landing…';
-      btn.classList.add('marker-active');
-      if (type === 'landing') btn.classList.add('landing');
+      map.dragging.disable();
+      map.doubleClickZoom.disable();
+      map.getContainer().classList.add("place-mode");
+      const btn = document.getElementById(
+        type === "takeoff" ? "btn-place-to" : "btn-place-la",
+      );
+      btn.textContent =
+        type === "takeoff" ?
+        "Click map to place take-off…" :
+        "Click map to place landing…";
+      btn.classList.add("marker-active");
+      if (type === "landing") btn.classList.add("landing");
       setStatus(`Click anywhere on the map to place the ${type} marker.`);
     }
+
     function exitPlace() {
       if (!placeMode) return;
-      map.dragging.enable(); map.doubleClickZoom.enable();
-      map.getContainer().classList.remove('place-mode');
-      const btn = document.getElementById(placeMode === 'takeoff' ? 'btn-place-to' : 'btn-place-la');
-      btn.textContent = placeMode === 'takeoff' ? 'Place take-off on map' : 'Place landing on map';
-      btn.classList.remove('marker-active', 'landing');
+      map.dragging.enable();
+      map.doubleClickZoom.enable();
+      map.getContainer().classList.remove("place-mode");
+      const btn = document.getElementById(
+        placeMode === "takeoff" ? "btn-place-to" : "btn-place-la",
+      );
+      btn.textContent =
+        placeMode === "takeoff" ?
+        "Place take-off on map" :
+        "Place landing on map";
+      btn.classList.remove("marker-active", "landing");
       placeMode = null;
-      setStatus('Drag the map to explore. Use "Draw bbox" or edit the fields to define the area.');
+      setStatus(
+        'Drag the map to explore. Use "Draw bbox" or edit the fields to define the area.',
+      );
     }
 
-    document.getElementById('btn-place-to').addEventListener('click', () => enterPlace('takeoff'));
-    document.getElementById('btn-place-la').addEventListener('click', () => enterPlace('landing'));
+    document
+      .getElementById("btn-place-to")
+      .addEventListener("click", () => enterPlace("takeoff"));
+    document
+      .getElementById("btn-place-la")
+      .addEventListener("click", () => enterPlace("landing"));
 
     // ── Map events ────────────────────────────────────────────────────────────────
 
     // Desktop: drag to draw bbox
-    map.on('mousedown', e => {
+    map.on("mousedown", (e) => {
       if (drawMode && !isTouch()) drawStart = e.latlng;
     });
-    map.on('mousemove', e => {
+    map.on("mousemove", (e) => {
       if (!drawMode || !drawStart || isTouch()) return;
       const b = toBbox(drawStart, e.latlng);
-      if (drawPreview) drawPreview.setBounds([[b.min_lat, b.min_lon], [b.max_lat, b.max_lon]]);
-      else drawPreview = L.rectangle([[b.min_lat, b.min_lon], [b.max_lat, b.max_lon]], {
-        color: '#ffaa00', weight: 2, opacity: 0.8, fillOpacity: 0.08, dashArray: '5 3'
-      }).addTo(map);
+      if (drawPreview)
+        drawPreview.setBounds([
+          [b.min_lat, b.min_lon],
+          [b.max_lat, b.max_lon],
+        ]);
+      else
+        drawPreview = L.rectangle(
+          [
+            [b.min_lat, b.min_lon],
+            [b.max_lat, b.max_lon],
+          ], {
+            color: "#ffaa00",
+            weight: 2,
+            opacity: 0.8,
+            fillOpacity: 0.08,
+            dashArray: "5 3",
+          },
+        ).addTo(map);
     });
-    map.on('mouseup', e => {
+    map.on("mouseup", (e) => {
       if (drawMode && drawStart && !isTouch()) {
         const b = toBbox(drawStart, e.latlng);
-        if (drawPreview) { drawPreview.remove(); drawPreview = null; }
+        if (drawPreview) {
+          drawPreview.remove();
+          drawPreview = null;
+        }
         const wKm = haversineKm(b.min_lat, b.min_lon, b.min_lat, b.max_lon);
         const hKm = haversineKm(b.min_lat, b.min_lon, b.max_lat, b.min_lon);
         if (wKm < 0.3 || hKm < 0.3) {
           drawStart = null;
-          setStatus('Selection too small — drag further to define an area.');
+          setStatus("Selection too small — drag further to define an area.");
           return;
         }
         applyBbox(b);
         exitDraw();
         setAreaReady(false);
-        setStatus('Bbox set. Edit the fields to fine-tune the coordinates.');
+        setStatus("Bbox set. Edit the fields to fine-tune the coordinates.");
       }
     });
 
     // Click/tap: two-tap draw (touch) + place marker (both)
-    map.on('click', e => {
+    map.on("click", (e) => {
       // Place marker mode
       if (placeMode) {
-        if (placeMode === 'takeoff') applyTakeoff(e.latlng.lat, e.latlng.lng);
+        if (placeMode === "takeoff") applyTakeoff(e.latlng.lat, e.latlng.lng);
         else applyLanding(e.latlng.lat, e.latlng.lng);
         exitPlace();
         setAreaReady(false);
@@ -773,23 +949,38 @@
           tapCorner1 = e.latlng;
           if (tapCorner1Marker) tapCorner1Marker.remove();
           tapCorner1Marker = L.circleMarker(e.latlng, {
-            radius: 8, color: '#ffaa00', fillColor: '#ffaa00', fillOpacity: 0.9, weight: 2
-          }).bindTooltip('Corner 1', { permanent: true, direction: 'top', offset: [0, -10] }).addTo(map);
-          setStatus('Good — now tap the opposite corner.');
+              radius: 8,
+              color: "#ffaa00",
+              fillColor: "#ffaa00",
+              fillOpacity: 0.9,
+              weight: 2,
+            })
+            .bindTooltip("Corner 1", {
+              permanent: true,
+              direction: "top",
+              offset: [0, -10],
+            })
+            .addTo(map);
+          setStatus("Good — now tap the opposite corner.");
         } else {
           const b = toBbox(tapCorner1, e.latlng);
-          if (tapCorner1Marker) { tapCorner1Marker.remove(); tapCorner1Marker = null; }
+          if (tapCorner1Marker) {
+            tapCorner1Marker.remove();
+            tapCorner1Marker = null;
+          }
           const wKm = haversineKm(b.min_lat, b.min_lon, b.min_lat, b.max_lon);
           const hKm = haversineKm(b.min_lat, b.min_lon, b.max_lat, b.min_lon);
           if (wKm < 0.3 || hKm < 0.3) {
             tapCorner1 = null;
-            setStatus('Taps too close — tap again for the first corner.');
+            setStatus("Taps too close — tap again for the first corner.");
             return;
           }
           applyBbox(b);
           exitDraw();
           setAreaReady(false);
-          setStatus('Bbox set. Edit the fields to fine-tune the coordinates.');
+          setStatus(
+            "Bbox set. Edit the fields to fine-tune the coordinates.",
+          );
         }
       }
     });
@@ -797,53 +988,70 @@
     // ── Helpers ───────────────────────────────────────────────────────────────────
     function toBbox(a, b) {
       return {
-        min_lat: Math.min(a.lat, b.lat), max_lat: Math.max(a.lat, b.lat),
-        min_lon: Math.min(a.lng, b.lng), max_lon: Math.max(a.lng, b.lng),
+        min_lat: Math.min(a.lat, b.lat),
+        max_lat: Math.max(a.lat, b.lat),
+        min_lon: Math.min(a.lng, b.lng),
+        max_lon: Math.max(a.lng, b.lng),
       };
     }
 
     function haversineKm(lat1, lon1, lat2, lon2) {
-      const R = 6371, toR = Math.PI / 180;
-      const dLat = (lat2 - lat1) * toR, dLon = (lon2 - lon1) * toR;
-      const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1 * toR) * Math.cos(lat2 * toR) * Math.sin(dLon / 2) ** 2;
+      const R = 6371,
+        toR = Math.PI / 180;
+      const dLat = (lat2 - lat1) * toR,
+        dLon = (lon2 - lon1) * toR;
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * toR) * Math.cos(lat2 * toR) * Math.sin(dLon / 2) ** 2;
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     }
 
-    function setStatus(msg) { document.getElementById('status').textContent = msg; }
+    function setStatus(msg) {
+      document.getElementById("status").textContent = msg;
+    }
 
     function showToast(msg) {
-      const t = document.getElementById('toast');
-      t.textContent = msg; t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 1800);
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 1800);
     }
 
     // ── Initial map fit ───────────────────────────────────────────────────────────
     const _initBbox = _saved?.bbox || DEFAULTS.bbox;
     map.fitBounds(
-      [[_initBbox.min_lat, _initBbox.min_lon], [_initBbox.max_lat, _initBbox.max_lon]],
-      { padding: [40, 40] }
+      [
+        [_initBbox.min_lat, _initBbox.min_lon],
+        [_initBbox.max_lat, _initBbox.max_lon],
+      ], {
+        padding: [40, 40]
+      },
     );
 
     // ── Set area and markers ──────────────────────────────────────────────────────
-    document.getElementById('btn-set-area').addEventListener('click', () => {
+    document.getElementById("btn-set-area").addEventListener("click", () => {
       saveAreaState();
       setAreaReady(true);
-      showToast('Area and markers saved.');
+      showToast("Area and markers saved.");
     });
   </script>
   <script>
     // Nav dropdown touch support
-    document.querySelectorAll('.nav-dropdown-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        var dd = btn.closest('.nav-dropdown');
-        var isOpen = dd.classList.contains('open');
-        document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
-        if (!isOpen) dd.classList.add('open');
+    document.querySelectorAll(".nav-dropdown-btn").forEach(function(btn) {
+      btn.addEventListener("click", function(e) {
+        var dd = btn.closest(".nav-dropdown");
+        var isOpen = dd.classList.contains("open");
+        document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+          d.classList.remove("open");
+        });
+        if (!isOpen) dd.classList.add("open");
         e.stopPropagation();
       });
     });
-    document.addEventListener('click', function () {
-      document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
+    document.addEventListener("click", function() {
+      document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+        d.classList.remove("open");
+      });
     });
   </script>
 </body>

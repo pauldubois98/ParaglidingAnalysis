@@ -1,23 +1,22 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
   <title>Wind — Simulation</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
   <style>
-
-    #panel-header h2 { margin-bottom: 4px; }
-
+    #panel-header h2 {
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 
 <body class="sim-page">
-
   <nav id="header-nav">
-    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt="" /><span>Home</span></a>
     <div class="nav-sep"></div>
     <a href="area" class="nav-link">Area</a>
     <div class="nav-sep"></div>
@@ -58,8 +57,10 @@
   <!-- ═══════════════ CONSOLE ═══════════════ -->
   <div id="console-area">
     <div id="log-output">
-      <div class="log-info"><span class="log-ts">00:00:00</span>Ready — configure parameters and click <strong>Fetch
-          Terrain</strong>.</div>
+      <div class="log-info">
+        <span class="log-ts">00:00:00</span>Ready — configure parameters and
+        click <strong>Fetch Terrain</strong>.
+      </div>
     </div>
     <div id="progress-wrap">
       <div id="progress-bar"></div>
@@ -103,140 +104,179 @@
     <div id="sim-ui-panel">
       <div id="panel-header">
         <h2>Wind</h2>
-        <div class="subtitle">2-D Shallow-Water Equations · wind on terrain</div>
+        <div class="subtitle">
+          2-D Shallow-Water Equations · wind on terrain
+        </div>
       </div>
 
       <div id="panel-body">
         <div class="section-title">Ambient Wind</div>
         <div id="compass-wrap">
-          <svg id="compass-svg" width="60" height="60" viewBox="-30 -30 60 60" onmousedown="compassDrag(event)"
-            ontouchstart="compassDrag(event)">
+          <svg id="compass-svg" width="60" height="60" viewBox="-30 -30 60 60" onmousedown="compassDrag(event)" ontouchstart="compassDrag(event)">
             <circle r="28" fill="rgba(100,160,255,.06)" stroke="rgba(100,160,255,.25)" stroke-width="1" />
             <line x1="0" y1="-22" x2="0" y2="22" stroke="rgba(100,160,255,.12)" stroke-width="1" />
             <line x1="-22" y1="0" x2="22" y2="0" stroke="rgba(100,160,255,.12)" stroke-width="1" />
-            <text y="-17" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">N</text>
-            <text y="22" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">S</text>
-            <text x="21" y="2" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">E</text>
-            <text x="-21" y="2" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">W</text>
+            <text y="-17" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">
+              N
+            </text>
+            <text y="22" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">
+              S
+            </text>
+            <text x="21" y="2" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">
+              E
+            </text>
+            <text x="-21" y="2" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">
+              W
+            </text>
             <g id="compass-arrow">
               <polygon points="0,-21 3.5,-9 0,-13 -3.5,-9" fill="#7eb8ff" opacity=".9" />
               <polygon points="0,21  3.5,9  0,13  -3.5,9" fill="#3a6080" opacity=".6" />
             </g>
           </svg>
           <div id="compass-readout">
-            <strong id="wind-dir-val">0°</strong> from SW<br>
-            U = <span id="wind-u-val">+6.1</span> m/s &nbsp; V = <span id="wind-v-val">+5.3</span> m/s<br>
-            <span style="color:#3a6080;font-size:10px">Drag the compass to change</span>
+            <strong id="wind-dir-val">0°</strong> from SW<br />
+            U = <span id="wind-u-val">+6.1</span> m/s &nbsp; V =
+            <span id="wind-v-val">+5.3</span> m/s<br />
+            <span style="color: #3a6080; font-size: 10px">Drag the compass to change</span>
           </div>
         </div>
         <label class="field-label">Wind speed (m/s)</label>
-        <input type="number" id="wind_speed" step="0.5" min="0" max="40" value="8" oninput="updateCompassDisplay()">
-        <div class="field-hint">Ambient far-field speed. Inflow applied on all upwind boundaries.</div>
+        <input type="number" id="wind_speed" step="0.5" min="0" max="40" value="8" oninput="updateCompassDisplay()" />
+        <div class="field-hint">
+          Ambient far-field speed. Inflow applied on all upwind boundaries.
+        </div>
 
         <div class="section-title hidden">Area</div>
         <div class="grid-2 hidden">
-          <div><label class="field-label">Max lat (N)</label><input type="number" id="max_lat" step="0.0001"
-              value="43.014963"></div>
-          <div><label class="field-label">Min lat (S)</label><input type="number" id="min_lat" step="0.0001"
-              value="42.961061"></div>
-          <div><label class="field-label">Min lon (W)</label><input type="number" id="min_lon" step="0.0001"
-              value="0.838481"></div>
-          <div><label class="field-label">Max lon (E)</label><input type="number" id="max_lon" step="0.0001"
-              value="0.933902"></div>
+          <div>
+            <label class="field-label">Max lat (N)</label><input type="number" id="max_lat" step="0.0001" value="43.014963" />
+          </div>
+          <div>
+            <label class="field-label">Min lat (S)</label><input type="number" id="min_lat" step="0.0001" value="42.961061" />
+          </div>
+          <div>
+            <label class="field-label">Min lon (W)</label><input type="number" id="min_lon" step="0.0001" value="0.838481" />
+          </div>
+          <div>
+            <label class="field-label">Max lon (E)</label><input type="number" id="max_lon" step="0.0001" value="0.933902" />
+          </div>
         </div>
         <div class="grid-2 hidden">
           <div>
             <label class="field-label">Sim zoom</label>
-            <input type="number" id="sim_zoom" min="10" max="12" step="1" value="11">
+            <input type="number" id="sim_zoom" min="10" max="12" step="1" value="11" />
           </div>
           <div>
             <label class="field-label">Mesh zoom</label>
-            <input type="number" id="mesh_zoom" min="11" max="14" step="1" value="13">
+            <input type="number" id="mesh_zoom" min="11" max="14" step="1" value="13" />
           </div>
         </div>
-        <div class="field-hint">Sim zoom 11 ≈ 56 m/px. Mesh zoom for 3-D viewer only.</div>
+        <div class="field-hint">
+          Sim zoom 11 ≈ 56 m/px. Mesh zoom for 3-D viewer only.
+        </div>
 
         <div class="section-title hidden">Markers</div>
         <div class="grid-2 hidden">
-          <div><label class="field-label">Takeoff lat</label><input type="number" id="takeoff_lat" step="0.00001"
-              value="42.96940"></div>
-          <div><label class="field-label">Takeoff lon</label><input type="number" id="takeoff_lon" step="0.00001"
-              value="0.88594"></div>
-          <div><label class="field-label">Landing lat</label><input type="number" id="landing_lat" step="0.00001"
-              value="42.99216"></div>
-          <div><label class="field-label">Landing lon</label><input type="number" id="landing_lon" step="0.00001"
-              value="0.90398"></div>
+          <div>
+            <label class="field-label">Takeoff lat</label><input type="number" id="takeoff_lat" step="0.00001" value="42.96940" />
+          </div>
+          <div>
+            <label class="field-label">Takeoff lon</label><input type="number" id="takeoff_lon" step="0.00001" value="0.88594" />
+          </div>
+          <div>
+            <label class="field-label">Landing lat</label><input type="number" id="landing_lat" step="0.00001" value="42.99216" />
+          </div>
+          <div>
+            <label class="field-label">Landing lon</label><input type="number" id="landing_lon" step="0.00001" value="0.90398" />
+          </div>
         </div>
 
         <div class="section-title">Atmospheric Layer</div>
         <div class="grid-2">
           <div>
             <label class="field-label">Layer depth H₀ (m)</label>
-            <input type="number" id="init_h" step="50" min="50" max="5000" value="500">
+            <input type="number" id="init_h" step="50" min="50" max="5000" value="500" />
           </div>
           <div>
             <label class="field-label">Red. gravity g′ (m/s²)</label>
-            <input type="number" id="g_prime" step="0.005" min="0.005" max="1" value="0.05">
+            <input type="number" id="g_prime" step="0.005" min="0.005" max="1" value="0.05" />
           </div>
         </div>
-        <div class="field-hint">Mountains taller than H₀ block flow. g′ controls wave speed and hydraulic-jump Froude.
+        <div class="field-hint">
+          Mountains taller than H₀ block flow. g′ controls wave speed and
+          hydraulic-jump Froude.
         </div>
 
         <div class="section-title">Friction &amp; Diffusion</div>
         <div class="grid-2">
           <div>
             <label class="field-label">Drag C<sub>d</sub></label>
-            <input type="number" id="drag_cd" step="0.0005" min="0" max="0.05" value="0.003">
+            <input type="number" id="drag_cd" step="0.0005" min="0" max="0.05" value="0.003" />
           </div>
           <div>
             <label class="field-label">Viscosity ν (m²/s)</label>
-            <input type="number" id="visc" step="10" min="0" max="2000" value="100">
+            <input type="number" id="visc" step="10" min="0" max="2000" value="100" />
           </div>
         </div>
-        <div class="field-hint">C<sub>d</sub> = bottom roughness. ν = turbulent diffusion (prevents sharp shocks).</div>
+        <div class="field-hint">
+          C<sub>d</sub> = bottom roughness. ν = turbulent diffusion (prevents
+          sharp shocks).
+        </div>
 
         <div class="section-title">Solver</div>
         <div class="grid-2">
           <div>
             <label class="field-label">Sim time (s)</label>
-            <input type="number" id="sim_time" step="300" min="300" max="14400" value="3600">
+            <input type="number" id="sim_time" step="300" min="300" max="14400" value="3600" />
           </div>
           <div>
             <label class="field-label">CFL factor</label>
-            <input type="number" id="cfl" step="0.05" min="0.1" max="0.85" value="0.45">
+            <input type="number" id="cfl" step="0.05" min="0.1" max="0.85" value="0.45" />
           </div>
           <div>
             <label class="field-label">Min depth h<sub>min</sub> (m)</label>
-            <input type="number" id="h_min" step="0.05" min="0.01" max="5" value="0.5">
+            <input type="number" id="h_min" step="0.05" min="0.01" max="5" value="0.5" />
           </div>
         </div>
-        <div class="field-hint">3600 s ≈ 5 domain transit times at 8 m/s → near-steady state. h<sub>min</sub> is the
-          wet/dry threshold — lower values resolve thin flow over ridges but may destabilise.</div>
+        <div class="field-hint">
+          3600 s ≈ 5 domain transit times at 8 m/s → near-steady state. h<sub>min</sub>
+          is the wet/dry threshold — lower values resolve thin flow over
+          ridges but may destabilise.
+        </div>
 
         <div class="section-title">Output</div>
         <div class="grid-2">
           <div>
             <label class="field-label">Arrow step (px)</label>
-            <input type="number" id="arrow_step" step="1" min="4" max="30" value="10">
+            <input type="number" id="arrow_step" step="1" min="4" max="30" value="10" />
           </div>
           <div>
             <label class="field-label">Arrow min speed (m/s)</label>
-            <input type="number" id="arrow_min_spd" step="0.01" min="0" max="5" value="0.05">
+            <input type="number" id="arrow_min_spd" step="0.01" min="0" max="5" value="0.05" />
           </div>
         </div>
-        <div class="field-hint">Arrow step: density (every N-th cell). Min speed: hide arrows below this threshold.
+        <div class="field-hint">
+          Arrow step: density (every N-th cell). Min speed: hide arrows below
+          this threshold.
         </div>
-
       </div>
 
       <div id="panel-footer">
         <div class="footer-row">
-          <button class="btn btn-fetch" id="btn-fetch" onclick="runFetch()">Fetch Terrain</button>
-          <button class="btn btn-sim" id="btn-sim" onclick="runSim()" disabled>Run Simulation</button>
+          <button class="btn btn-fetch" id="btn-fetch" onclick="runFetch()">
+            Fetch Terrain
+          </button>
+          <button class="btn btn-sim" id="btn-sim" onclick="runSim()" disabled>
+            Run Simulation
+          </button>
         </div>
         <div class="footer-row">
-          <button class="btn btn-stop" id="btn-stop" onclick="stopSim()" disabled>Stop</button>
-          <button class="btn btn-map" id="btn-map" onclick="openViewer()" disabled>Open Viewer</button>
+          <button class="btn btn-stop" id="btn-stop" onclick="stopSim()" disabled>
+            Stop
+          </button>
+          <button class="btn btn-map" id="btn-map" onclick="openViewer()" disabled>
+            Open Viewer
+          </button>
         </div>
       </div>
     </div>
@@ -249,27 +289,36 @@
 
     let _stopRequested = false;
     const yieldUI = async () => {
-      await new Promise(r => setTimeout(r, 0));
-      if (_stopRequested) throw new Error('__STOPPED__');
+      await new Promise((r) => setTimeout(r, 0));
+      if (_stopRequested) throw new Error("__STOPPED__");
     };
 
-    const logEl = document.getElementById('log-output');
-    const statusEl = document.getElementById('status-bar');
-    const progressEl = document.getElementById('progress-bar');
+    const logEl = document.getElementById("log-output");
+    const statusEl = document.getElementById("status-bar");
+    const progressEl = document.getElementById("progress-bar");
 
     function ts() {
       const d = new Date();
-      return [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2, '0')).join(':');
+      return [d.getHours(), d.getMinutes(), d.getSeconds()]
+        .map((n) => String(n).padStart(2, "0"))
+        .join(":");
     }
-    function log(msg, level = 'info') {
-      const div = document.createElement('div');
+
+    function log(msg, level = "info") {
+      const div = document.createElement("div");
       div.className = `log-${level}`;
       div.innerHTML = `<span class="log-ts">${ts()}</span>${msg}`;
       logEl.appendChild(div);
       logEl.scrollTop = logEl.scrollHeight;
     }
-    function setStatus(msg) { statusEl.textContent = msg; }
-    function setProgress(f) { progressEl.style.width = (Math.min(1, Math.max(0, f)) * 100) + '%'; }
+
+    function setStatus(msg) {
+      statusEl.textContent = msg;
+    }
+
+    function setProgress(f) {
+      progressEl.style.width = Math.min(1, Math.max(0, f)) * 100 + "%";
+    }
 
     // ═══════════════════════════════════════════════════════════════════
     //  COMPASS WIDGET
@@ -278,56 +327,115 @@
     let windDirDeg = 0;
 
     function windComponents() {
-      const speed = parseFloat(document.getElementById('wind_speed').value) || 0;
-      const rad = windDirDeg * Math.PI / 180;
-      return { U: -speed * Math.sin(rad), V: -speed * Math.cos(rad) };
+      const speed =
+        parseFloat(document.getElementById("wind_speed").value) || 0;
+      const rad = (windDirDeg * Math.PI) / 180;
+      return {
+        U: -speed * Math.sin(rad),
+        V: -speed * Math.cos(rad)
+      };
     }
 
     function updateCompassDisplay() {
-      document.getElementById('compass-arrow').setAttribute('transform', `rotate(${windDirDeg})`);
-      document.getElementById('wind-dir-val').textContent = windDirDeg.toFixed(0) + '°';
-      const { U, V } = windComponents();
-      const dir = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+      document
+        .getElementById("compass-arrow")
+        .setAttribute("transform", `rotate(${windDirDeg})`);
+      document.getElementById("wind-dir-val").textContent =
+        windDirDeg.toFixed(0) + "°";
+      const {
+        U,
+        V
+      } = windComponents();
+      const dir = [
+        "N",
+        "NNE",
+        "NE",
+        "ENE",
+        "E",
+        "ESE",
+        "SE",
+        "SSE",
+        "S",
+        "SSW",
+        "SW",
+        "WSW",
+        "W",
+        "WNW",
+        "NW",
+        "NNW",
+      ];
       const idx = Math.round(windDirDeg / 22.5) % 16;
-      document.getElementById('compass-readout').innerHTML =
+      document.getElementById("compass-readout").innerHTML =
         `<strong id="wind-dir-val">${windDirDeg.toFixed(0)}°</strong> from ${dir[idx]}<br>` +
-        `U = <span style="color:#7eb8ff">${U >= 0 ? '+' : ''}${U.toFixed(1)}</span> &nbsp; ` +
-        `V = <span style="color:#7eb8ff">${V >= 0 ? '+' : ''}${V.toFixed(1)}</span> m/s<br>` +
+        `U = <span style="color:#7eb8ff">${U >= 0 ? "+" : ""}${U.toFixed(1)}</span> &nbsp; ` +
+        `V = <span style="color:#7eb8ff">${V >= 0 ? "+" : ""}${V.toFixed(1)}</span> m/s<br>` +
         `<span style="color:#3a6080;font-size:10px">Drag the compass to change</span>`;
     }
     updateCompassDisplay();
 
-    function setVal(id, v) { const el = document.getElementById(id); if (el && v != null) el.value = v; }
+    function setVal(id, v) {
+      const el = document.getElementById(id);
+      if (el && v != null) el.value = v;
+    }
 
     // Load area from localStorage (redirect to area page if missing)
     {
-      const saved = (() => { try { return JSON.parse(localStorage.getItem('paragliding_area') || 'null'); } catch(e) { return null; } })();
-      if (!saved) { location.href = 'area'; }
-      else {
-        if (saved.bbox) { setVal('min_lat', saved.bbox.min_lat); setVal('max_lat', saved.bbox.max_lat); setVal('min_lon', saved.bbox.min_lon); setVal('max_lon', saved.bbox.max_lon); }
-        if (saved.takeoff) { setVal('takeoff_lat', saved.takeoff.lat); setVal('takeoff_lon', saved.takeoff.lon); }
-        if (saved.landing) { setVal('landing_lat', saved.landing.lat); setVal('landing_lon', saved.landing.lon); }
+      const saved = (() => {
+        try {
+          return JSON.parse(
+            localStorage.getItem("paragliding_area") || "null",
+          );
+        } catch (e) {
+          return null;
+        }
+      })();
+      if (!saved) {
+        location.href = "area";
+      } else {
+        if (saved.bbox) {
+          setVal("min_lat", saved.bbox.min_lat);
+          setVal("max_lat", saved.bbox.max_lat);
+          setVal("min_lon", saved.bbox.min_lon);
+          setVal("max_lon", saved.bbox.max_lon);
+        }
+        if (saved.takeoff) {
+          setVal("takeoff_lat", saved.takeoff.lat);
+          setVal("takeoff_lon", saved.takeoff.lon);
+        }
+        if (saved.landing) {
+          setVal("landing_lat", saved.landing.lat);
+          setVal("landing_lon", saved.landing.lon);
+        }
       }
     }
 
     function compassDrag(e0) {
       e0.preventDefault();
-      const svg = document.getElementById('compass-svg');
+      const svg = document.getElementById("compass-svg");
       const rect = svg.getBoundingClientRect();
-      const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+      const cx = rect.left + rect.width / 2,
+        cy = rect.top + rect.height / 2;
+
       function onMove(e) {
         const ex = e.touches ? e.touches[0].clientX : e.clientX;
         const ey = e.touches ? e.touches[0].clientY : e.clientY;
-        let deg = Math.round(Math.atan2(ex - cx, -(ey - cy)) * 180 / Math.PI);
+        let deg = Math.round(
+          (Math.atan2(ex - cx, -(ey - cy)) * 180) / Math.PI,
+        );
         windDirDeg = (deg + 360) % 360;
         updateCompassDisplay();
       }
+
       function onUp() {
-        window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp);
-        window.removeEventListener('touchmove', onMove); window.removeEventListener('touchend', onUp);
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+        window.removeEventListener("touchmove", onMove);
+        window.removeEventListener("touchend", onUp);
       }
-      window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
-      window.addEventListener('touchmove', onMove); window.addEventListener('touchend', onUp);
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+      window.addEventListener("touchmove", onMove);
+      window.addEventListener("touchend", onUp);
       onMove(e0);
     }
 
@@ -339,33 +447,49 @@
 
     function lonlatToTile(lon, lat, z) {
       const n = Math.pow(2, z);
-      const lat_r = lat * Math.PI / 180;
+      const lat_r = (lat * Math.PI) / 180;
       return [
-        (lon + 180) / 360 * n,
-        (1 - Math.log(Math.tan(lat_r) + 1 / Math.cos(lat_r)) / Math.PI) / 2 * n
+        ((lon + 180) / 360) * n,
+        ((1 - Math.log(Math.tan(lat_r) + 1 / Math.cos(lat_r)) / Math.PI) /
+          2) *
+        n,
       ];
     }
 
     function lonlatToLocal(lon, lat, lon0, lat0) {
       const R = 6371000;
-      const x = (lon - lon0) * Math.PI / 180 * R * Math.cos(lat0 * Math.PI / 180);
-      const y = (lat - lat0) * Math.PI / 180 * R;
+      const x =
+        (((lon - lon0) * Math.PI) / 180) *
+        R *
+        Math.cos((lat0 * Math.PI) / 180);
+      const y = (((lat - lat0) * Math.PI) / 180) * R;
       return [x, y];
     }
 
     async function fetchDEM(bbox, zoom, label) {
-      const { min_lat, max_lat, min_lon, max_lon } = bbox;
+      const {
+        min_lat,
+        max_lat,
+        min_lon,
+        max_lon
+      } = bbox;
       const [tx0f, ty0f] = lonlatToTile(min_lon, max_lat, zoom);
       const [tx1f, ty1f] = lonlatToTile(max_lon, min_lat, zoom);
-      const x0 = Math.floor(tx0f), y0 = Math.floor(ty0f);
-      const x1 = Math.floor(tx1f), y1 = Math.floor(ty1f);
+      const x0 = Math.floor(tx0f),
+        y0 = Math.floor(ty0f);
+      const x1 = Math.floor(tx1f),
+        y1 = Math.floor(ty1f);
 
-      const PX = 256, tw = x1 - x0 + 1, th = y1 - y0 + 1;
-      const canvas = document.createElement('canvas');
-      canvas.width = tw * PX; canvas.height = th * PX;
-      const ctx = canvas.getContext('2d');
+      const PX = 256,
+        tw = x1 - x0 + 1,
+        th = y1 - y0 + 1;
+      const canvas = document.createElement("canvas");
+      canvas.width = tw * PX;
+      canvas.height = th * PX;
+      const ctx = canvas.getContext("2d");
 
-      let loaded = 0, total = tw * th;
+      let loaded = 0,
+        total = tw * th;
       log(`Fetching ${label}: ${tw}×${th} Terrarium tiles (zoom ${zoom})…`);
 
       for (let ty = y0; ty <= y1; ty++) {
@@ -374,39 +498,65 @@
           let img = TILE_CACHE[key];
           if (!img) {
             img = await new Promise((res, rej) => {
-              const im = new Image(); im.crossOrigin = 'anonymous';
-              im.onload = () => res(im); im.onerror = rej;
+              const im = new Image();
+              im.crossOrigin = "anonymous";
+              im.onload = () => res(im);
+              im.onerror = rej;
               im.src = `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${key}.png`;
             });
             TILE_CACHE[key] = img;
           }
           ctx.drawImage(img, (tx - x0) * PX, (ty - y0) * PX);
-          setProgress(++loaded / total * 0.5);
+          setProgress((++loaded / total) * 0.5);
           if (loaded % 4 === 0) await yieldUI();
         }
       }
 
-      const px0 = (tx0f - x0) * PX, py0 = (ty0f - y0) * PX;
-      const px1 = (tx1f - x0) * PX, py1 = (ty1f - y0) * PX;
-      const nx = Math.round(px1 - px0), ny = Math.round(py1 - py0);
+      const px0 = (tx0f - x0) * PX,
+        py0 = (ty0f - y0) * PX;
+      const px1 = (tx1f - x0) * PX,
+        py1 = (ty1f - y0) * PX;
+      const nx = Math.round(px1 - px0),
+        ny = Math.round(py1 - py0);
 
-      const raw = ctx.getImageData(Math.round(px0), Math.round(py0), nx, ny).data;
+      const raw = ctx.getImageData(
+        Math.round(px0),
+        Math.round(py0),
+        nx,
+        ny,
+      ).data;
       const Z = new Float32Array(ny * nx);
       for (let i = 0; i < Z.length; i++)
-        Z[i] = raw[i * 4] * 256 + raw[i * 4 + 1] + raw[i * 4 + 2] / 256 - 32768;
+        Z[i] =
+        raw[i * 4] * 256 + raw[i * 4 + 1] + raw[i * 4 + 2] / 256 - 32768;
 
-      const lat0 = (min_lat + max_lat) / 2, lon0 = (min_lon + max_lon) / 2;
-      const dx = (max_lon - min_lon) * Math.PI / 180 * 6371000 * Math.cos(lat0 * Math.PI / 180) / nx;
-      const dy = (max_lat - min_lat) * Math.PI / 180 * 6371000 / ny;
+      const lat0 = (min_lat + max_lat) / 2,
+        lon0 = (min_lon + max_lon) / 2;
+      const dx =
+        ((((max_lon - min_lon) * Math.PI) / 180) *
+          6371000 *
+          Math.cos((lat0 * Math.PI) / 180)) /
+        nx;
+      const dy = ((((max_lat - min_lat) * Math.PI) / 180) * 6371000) / ny;
 
       const [xmin] = lonlatToLocal(min_lon, lat0, lon0, lat0);
       const [xmax] = lonlatToLocal(max_lon, lat0, lon0, lat0);
-      const [, ynorth] = lonlatToLocal(lon0, max_lat, lon0, lat0);  // positive (north)
-      const [, ysouth] = lonlatToLocal(lon0, min_lat, lon0, lat0);  // negative (south)
+      const [, ynorth] = lonlatToLocal(lon0, max_lat, lon0, lat0); // positive (north)
+      const [, ysouth] = lonlatToLocal(lon0, min_lat, lon0, lat0); // negative (south)
 
       // y_extent stored as [south, north] so yh = y_extent[1]-y_extent[0] > 0,
       // matching Three.js PlaneGeometry vertex order (iy=0 → top = north = j=0 in tile data).
-      return { Z, nx, ny, dx, dy, x_extent: [xmin, xmax], y_extent: [ysouth, ynorth], lat0, lon0 };
+      return {
+        Z,
+        nx,
+        ny,
+        dx,
+        dy,
+        x_extent: [xmin, xmax],
+        y_extent: [ysouth, ynorth],
+        lat0,
+        lon0,
+      };
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -414,89 +564,180 @@
     // ═══════════════════════════════════════════════════════════════════
 
     function renderPlot(canvasEl, arr, nx, ny, colorFn, arrowData) {
-      canvasEl.width = nx; canvasEl.height = ny;
-      const ctx = canvasEl.getContext('2d');
+      canvasEl.width = nx;
+      canvasEl.height = ny;
+      const ctx = canvasEl.getContext("2d");
       const img = ctx.createImageData(nx, ny);
-      let mn = Infinity, mx = -Infinity;
-      for (let i = 0; i < arr.length; i++) { if (arr[i] < mn) mn = arr[i]; if (arr[i] > mx) mx = arr[i]; }
+      let mn = Infinity,
+        mx = -Infinity;
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i] < mn) mn = arr[i];
+        if (arr[i] > mx) mx = arr[i];
+      }
       const rng = Math.max(mx - mn, 1e-9);
       for (let i = 0; i < arr.length; i++) {
         const [r, g, b] = colorFn((arr[i] - mn) / rng);
-        img.data[i * 4] = r; img.data[i * 4 + 1] = g; img.data[i * 4 + 2] = b; img.data[i * 4 + 3] = 255;
+        img.data[i * 4] = r;
+        img.data[i * 4 + 1] = g;
+        img.data[i * 4 + 2] = b;
+        img.data[i * 4 + 3] = 255;
       }
       ctx.putImageData(img, 0, 0);
 
       if (arrowData) {
-        const { u, v, step, minSpd = 0.05 } = arrowData;
-        const maxSpd = Math.max(...u.map((ui, i) => Math.hypot(ui, v[i]))) || 1;
-        ctx.strokeStyle = 'rgba(255,255,255,0.6)';
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        const {
+          u,
+          v,
+          step,
+          minSpd = 0.05
+        } = arrowData;
+        const maxSpd =
+          Math.max(...u.map((ui, i) => Math.hypot(ui, v[i]))) || 1;
+        ctx.strokeStyle = "rgba(255,255,255,0.6)";
+        ctx.fillStyle = "rgba(255,255,255,0.6)";
         ctx.lineWidth = 0.8;
         for (let j = Math.floor(step / 2); j < ny; j += step) {
           for (let i = Math.floor(step / 2); i < nx; i += step) {
             const idx = j * nx + i;
-            const ui = u[idx], vi = v[idx];
+            const ui = u[idx],
+              vi = v[idx];
             const spd = Math.hypot(ui, vi);
             if (spd < minSpd) continue;
             const len = step * 0.55 * (spd / maxSpd);
-            const ex = i + (ui / spd) * len, ey = j - (vi / spd) * len;
-            ctx.beginPath(); ctx.moveTo(i, j); ctx.lineTo(ex, ey); ctx.stroke();
-            const hl = len * 0.3, ang = Math.atan2(-(ey - j), ex - i);
+            const ex = i + (ui / spd) * len,
+              ey = j - (vi / spd) * len;
+            ctx.beginPath();
+            ctx.moveTo(i, j);
+            ctx.lineTo(ex, ey);
+            ctx.stroke();
+            const hl = len * 0.3,
+              ang = Math.atan2(-(ey - j), ex - i);
             ctx.beginPath();
             ctx.moveTo(ex, ey);
-            ctx.lineTo(ex - hl * Math.cos(ang - 0.4), ey - hl * Math.sin(ang - 0.4));
-            ctx.lineTo(ex - hl * Math.cos(ang + 0.4), ey - hl * Math.sin(ang + 0.4));
-            ctx.closePath(); ctx.fill();
+            ctx.lineTo(
+              ex - hl * Math.cos(ang - 0.4),
+              ey - hl * Math.sin(ang - 0.4),
+            );
+            ctx.lineTo(
+              ex - hl * Math.cos(ang + 0.4),
+              ey - hl * Math.sin(ang + 0.4),
+            );
+            ctx.closePath();
+            ctx.fill();
           }
         }
       }
     }
 
-    const cmapElev = t => { const v = t * 200 + 30; return [v * 0.6 | 0, v * 0.8 | 0, v * 0.5 | 0]; };
-    const cmapSpeed = t => t < 0.5 ? [0, (t * 2 * 200) | 0, (255 - t * 2 * 55) | 0] : [((t - 0.5) * 2 * 255) | 0, 255, 0];
-    const cmapFroude = t => t < 0.5 ? [0, (t * 2 * 180) | 0, (255 - t * 2 * 55) | 0] : [((t - 0.5) * 2 * 255) | 0, ((1 - (t - 0.5) * 2) * 180) | 0, 0];
-    const cmapDepth = t => [0, (t * 180) | 0, (80 + t * 175) | 0];
-    const cmapVort = t => t < 0.5 ? [0, 0, ((0.5 - t) * 2 * 255) | 0] : [((t - 0.5) * 2 * 255) | 0, 0, 0];
-    const cmapVert = t => t < 0.5 ? [(t * 2 * 255) | 0, (t * 2 * 255) | 0, 255] : [255, ((1 - t) * 2 * 255) | 0, ((1 - t) * 2 * 255) | 0];
+    const cmapElev = (t) => {
+      const v = t * 200 + 30;
+      return [(v * 0.6) | 0, (v * 0.8) | 0, (v * 0.5) | 0];
+    };
+    const cmapSpeed = (t) =>
+      t < 0.5 ? [0, (t * 2 * 200) | 0, (255 - t * 2 * 55) | 0] : [((t - 0.5) * 2 * 255) | 0, 255, 0];
+    const cmapFroude = (t) =>
+      t < 0.5 ? [0, (t * 2 * 180) | 0, (255 - t * 2 * 55) | 0] : [((t - 0.5) * 2 * 255) | 0, ((1 - (t - 0.5) * 2) * 180) | 0, 0];
+    const cmapDepth = (t) => [0, (t * 180) | 0, (80 + t * 175) | 0];
+    const cmapVort = (t) =>
+      t < 0.5 ? [0, 0, ((0.5 - t) * 2 * 255) | 0] : [((t - 0.5) * 2 * 255) | 0, 0, 0];
+    const cmapVert = (t) =>
+      t < 0.5 ? [(t * 2 * 255) | 0, (t * 2 * 255) | 0, 255] : [255, ((1 - t) * 2 * 255) | 0, ((1 - t) * 2 * 255) | 0];
 
     // ═══════════════════════════════════════════════════════════════════
     //  SWE SOLVER
     // ═══════════════════════════════════════════════════════════════════
 
-    function sweStep(h, u, v, Z, nx, ny, dx, dy, dt, g, Cd, nu, H0, U_in, V_in, h_min) {
-      const hn = new Float32Array(h), un = new Float32Array(u), vn = new Float32Array(v);
+    function sweStep(
+      h,
+      u,
+      v,
+      Z,
+      nx,
+      ny,
+      dx,
+      dy,
+      dt,
+      g,
+      Cd,
+      nu,
+      H0,
+      U_in,
+      V_in,
+      h_min,
+    ) {
+      const hn = new Float32Array(h),
+        un = new Float32Array(u),
+        vn = new Float32Array(v);
 
       for (let j = 1; j < ny - 1; j++) {
         for (let i = 1; i < nx - 1; i++) {
           const idx = j * nx + i;
-          const hi = h[idx], ui = u[idx], vi = v[idx];
-          if (hi < h_min) { hn[idx] = h_min; un[idx] = 0; vn[idx] = 0; continue; }
+          const hi = h[idx],
+            ui = u[idx],
+            vi = v[idx];
+          if (hi < h_min) {
+            hn[idx] = h_min;
+            un[idx] = 0;
+            vn[idx] = 0;
+            continue;
+          }
 
           const speed = Math.sqrt(ui * ui + vi * vi);
 
           // Continuity (conservative flux)
-          const div = (h[idx + 1] * u[idx + 1] - h[idx - 1] * u[idx - 1]) / (2 * dx)
-            + (h[idx + nx] * v[idx + nx] - h[idx - nx] * v[idx - nx]) / (2 * dy);
+          const div =
+            (h[idx + 1] * u[idx + 1] - h[idx - 1] * u[idx - 1]) / (2 * dx) +
+            (h[idx + nx] * v[idx + nx] - h[idx - nx] * v[idx - nx]) /
+            (2 * dy);
           hn[idx] = hi - dt * div;
 
           // Momentum (upwind advection)
-          const dui_dx = ui > 0 ? (ui - u[idx - 1]) / dx : (u[idx + 1] - ui) / dx;
-          const dui_dy = vi > 0 ? (ui - u[idx - nx]) / dy : (u[idx + nx] - ui) / dy;
-          const dvi_dx = ui > 0 ? (vi - v[idx - 1]) / dx : (v[idx + 1] - vi) / dx;
-          const dvi_dy = vi > 0 ? (vi - v[idx - nx]) / dy : (v[idx + nx] - vi) / dy;
+          const dui_dx =
+            ui > 0 ? (ui - u[idx - 1]) / dx : (u[idx + 1] - ui) / dx;
+          const dui_dy =
+            vi > 0 ? (ui - u[idx - nx]) / dy : (u[idx + nx] - ui) / dy;
+          const dvi_dx =
+            ui > 0 ? (vi - v[idx - 1]) / dx : (v[idx + 1] - vi) / dx;
+          const dvi_dy =
+            vi > 0 ? (vi - v[idx - nx]) / dy : (v[idx + nx] - vi) / dy;
 
           // Free-surface gradient (η = h + Z)
-          const deta_dx = (h[idx + 1] + Z[idx + 1] - h[idx - 1] - Z[idx - 1]) / (2 * dx);
-          const deta_dy = (h[idx + nx] + Z[idx + nx] - h[idx - nx] - Z[idx - nx]) / (2 * dy);
+          const deta_dx =
+            (h[idx + 1] + Z[idx + 1] - h[idx - 1] - Z[idx - 1]) / (2 * dx);
+          const deta_dy =
+            (h[idx + nx] + Z[idx + nx] - h[idx - nx] - Z[idx - nx]) /
+            (2 * dy);
 
           // Laplacian
-          const lap_u = (u[idx + 1] - 2 * ui + u[idx - 1]) / (dx * dx) + (u[idx + nx] - 2 * ui + u[idx - nx]) / (dy * dy);
-          const lap_v = (v[idx + 1] - 2 * vi + v[idx - 1]) / (dx * dx) + (v[idx + nx] - 2 * vi + v[idx - nx]) / (dy * dy);
+          const lap_u =
+            (u[idx + 1] - 2 * ui + u[idx - 1]) / (dx * dx) +
+            (u[idx + nx] - 2 * ui + u[idx - nx]) / (dy * dy);
+          const lap_v =
+            (v[idx + 1] - 2 * vi + v[idx - 1]) / (dx * dx) +
+            (v[idx + nx] - 2 * vi + v[idx - nx]) / (dy * dy);
 
-          un[idx] = ui - dt * (ui * dui_dx + vi * dui_dy + g * deta_dx + Cd * speed * ui / hi - nu * lap_u);
-          vn[idx] = vi - dt * (ui * dvi_dx + vi * dvi_dy + g * deta_dy + Cd * speed * vi / hi - nu * lap_v);
+          un[idx] =
+            ui -
+            dt *
+            (ui * dui_dx +
+              vi * dui_dy +
+              g * deta_dx +
+              (Cd * speed * ui) / hi -
+              nu * lap_u);
+          vn[idx] =
+            vi -
+            dt *
+            (ui * dvi_dx +
+              vi * dvi_dy +
+              g * deta_dy +
+              (Cd * speed * vi) / hi -
+              nu * lap_v);
 
-          if (hn[idx] < h_min) { hn[idx] = h_min; un[idx] = 0; vn[idx] = 0; }
+          if (hn[idx] < h_min) {
+            hn[idx] = h_min;
+            un[idx] = 0;
+            vn[idx] = 0;
+          }
         }
       }
 
@@ -504,95 +745,150 @@
       // Left edge: inflow if U_in >= 0, else Neumann outflow
       for (let j = 0; j < ny; j++) {
         const idx = j * nx;
-        if (U_in >= 0) { hn[idx] = Math.max(H0 - Z[idx], h_min); un[idx] = U_in; vn[idx] = V_in; }
-        else { hn[idx] = hn[idx + 1]; un[idx] = un[idx + 1]; vn[idx] = vn[idx + 1]; }
+        if (U_in >= 0) {
+          hn[idx] = Math.max(H0 - Z[idx], h_min);
+          un[idx] = U_in;
+          vn[idx] = V_in;
+        } else {
+          hn[idx] = hn[idx + 1];
+          un[idx] = un[idx + 1];
+          vn[idx] = vn[idx + 1];
+        }
       }
       // Right edge
       for (let j = 0; j < ny; j++) {
         const idx = j * nx + (nx - 1);
-        if (U_in <= 0) { hn[idx] = Math.max(H0 - Z[idx], h_min); un[idx] = U_in; vn[idx] = V_in; }
-        else { hn[idx] = hn[idx - 1]; un[idx] = un[idx - 1]; vn[idx] = vn[idx - 1]; }
+        if (U_in <= 0) {
+          hn[idx] = Math.max(H0 - Z[idx], h_min);
+          un[idx] = U_in;
+          vn[idx] = V_in;
+        } else {
+          hn[idx] = hn[idx - 1];
+          un[idx] = un[idx - 1];
+          vn[idx] = vn[idx - 1];
+        }
       }
       // Top edge (j=0 = geographic north)
       for (let i = 0; i < nx; i++) {
         const idx = i;
-        if (V_in <= 0) { hn[idx] = Math.max(H0 - Z[idx], h_min); un[idx] = U_in; vn[idx] = V_in; }
-        else { hn[idx] = hn[idx + nx]; un[idx] = un[idx + nx]; vn[idx] = vn[idx + nx]; }
+        if (V_in <= 0) {
+          hn[idx] = Math.max(H0 - Z[idx], h_min);
+          un[idx] = U_in;
+          vn[idx] = V_in;
+        } else {
+          hn[idx] = hn[idx + nx];
+          un[idx] = un[idx + nx];
+          vn[idx] = vn[idx + nx];
+        }
       }
       // Bottom edge (j=ny-1 = geographic south)
       for (let i = 0; i < nx; i++) {
         const idx = (ny - 1) * nx + i;
-        if (V_in >= 0) { hn[idx] = Math.max(H0 - Z[idx], h_min); un[idx] = U_in; vn[idx] = V_in; }
-        else { hn[idx] = hn[idx - nx]; un[idx] = un[idx - nx]; vn[idx] = vn[idx - nx]; }
+        if (V_in >= 0) {
+          hn[idx] = Math.max(H0 - Z[idx], h_min);
+          un[idx] = U_in;
+          vn[idx] = V_in;
+        } else {
+          hn[idx] = hn[idx - nx];
+          un[idx] = un[idx - nx];
+          vn[idx] = vn[idx - nx];
+        }
       }
 
-      h.set(hn); u.set(un); v.set(vn);
+      h.set(hn);
+      u.set(un);
+      v.set(vn);
     }
 
     // ═══════════════════════════════════════════════════════════════════
     //  MAIN FETCH & SIMULATION FLOWS
     // ═══════════════════════════════════════════════════════════════════
 
-    let terrainData = null;   // { Z, nx, ny, dx, dy, x_extent, y_extent, lat0, lon0 }
-    let meshData = null;   // high-res mesh for 3-D viewer
+    let terrainData = null; // { Z, nx, ny, dx, dy, x_extent, y_extent, lat0, lon0 }
+    let meshData = null; // high-res mesh for 3-D viewer
     let simResult = null;
 
     async function runFetch() {
       _stopRequested = false;
-      document.getElementById('btn-fetch').disabled = true;
-      document.getElementById('btn-sim').disabled = true;
+      document.getElementById("btn-fetch").disabled = true;
+      document.getElementById("btn-sim").disabled = true;
       setProgress(0);
 
       const bbox = {
-        min_lat: parseFloat(document.getElementById('min_lat').value),
-        max_lat: parseFloat(document.getElementById('max_lat').value),
-        min_lon: parseFloat(document.getElementById('min_lon').value),
-        max_lon: parseFloat(document.getElementById('max_lon').value),
+        min_lat: parseFloat(document.getElementById("min_lat").value),
+        max_lat: parseFloat(document.getElementById("max_lat").value),
+        min_lon: parseFloat(document.getElementById("min_lon").value),
+        max_lon: parseFloat(document.getElementById("max_lon").value),
       };
-      const simZoom = parseInt(document.getElementById('sim_zoom').value);
-      const meshZoom = parseInt(document.getElementById('mesh_zoom').value);
+      const simZoom = parseInt(document.getElementById("sim_zoom").value);
+      const meshZoom = parseInt(document.getElementById("mesh_zoom").value);
 
       try {
-        terrainData = await fetchDEM(bbox, simZoom, 'sim DEM');
-        const { Z, nx, ny, dx, dy } = terrainData;
-        log(`Sim grid: ${nx}×${ny}, dx=${dx.toFixed(1)} m, dy=${dy.toFixed(1)} m`, 'success');
+        terrainData = await fetchDEM(bbox, simZoom, "sim DEM");
+        const {
+          Z,
+          nx,
+          ny,
+          dx,
+          dy
+        } = terrainData;
+        log(
+          `Sim grid: ${nx}×${ny}, dx=${dx.toFixed(1)} m, dy=${dy.toFixed(1)} m`,
+          "success",
+        );
 
-        meshData = await fetchDEM(bbox, meshZoom, 'mesh DEM');
-        log(`Mesh grid: ${meshData.nx}×${meshData.ny}, dx=${meshData.dx.toFixed(1)} m`, 'success');
+        meshData = await fetchDEM(bbox, meshZoom, "mesh DEM");
+        log(
+          `Mesh grid: ${meshData.nx}×${meshData.ny}, dx=${meshData.dx.toFixed(1)} m`,
+          "success",
+        );
 
-        document.getElementById('plots-area').style.display = 'flex';
-        renderPlot(document.getElementById('plot-elev'), Z, nx, ny, cmapElev);
+        document.getElementById("plots-area").style.display = "flex";
+        renderPlot(document.getElementById("plot-elev"), Z, nx, ny, cmapElev);
 
-        document.getElementById('btn-sim').disabled = false;
-        setStatus(`Terrain loaded: sim ${nx}×${ny}, mesh ${meshData.nx}×${meshData.ny}`);
+        document.getElementById("btn-sim").disabled = false;
+        setStatus(
+          `Terrain loaded: sim ${nx}×${ny}, mesh ${meshData.nx}×${meshData.ny}`,
+        );
         setProgress(1);
       } catch (e) {
-        if (e.message !== '__STOPPED__') log(`Fetch error: ${e}`, 'error');
+        if (e.message !== "__STOPPED__") log(`Fetch error: ${e}`, "error");
       }
-      document.getElementById('btn-fetch').disabled = false;
+      document.getElementById("btn-fetch").disabled = false;
     }
 
     async function runSim() {
       if (!terrainData) return;
       _stopRequested = false;
 
-      document.getElementById('btn-sim').disabled = true;
-      document.getElementById('btn-stop').disabled = false;
-      document.getElementById('btn-map').disabled = true;
+      document.getElementById("btn-sim").disabled = true;
+      document.getElementById("btn-stop").disabled = false;
+      document.getElementById("btn-map").disabled = true;
       simResult = null;
       setProgress(0);
 
-      const { Z, nx, ny, dx, dy } = terrainData;
-      const H0 = parseFloat(document.getElementById('init_h').value);
-      const g = parseFloat(document.getElementById('g_prime').value);
-      const Cd = parseFloat(document.getElementById('drag_cd').value);
-      const nu = parseFloat(document.getElementById('visc').value);
-      const cfl = parseFloat(document.getElementById('cfl').value);
-      const T_sim = parseFloat(document.getElementById('sim_time').value);
-      const h_min = parseFloat(document.getElementById('h_min').value);
-      const astep = parseInt(document.getElementById('arrow_step').value);
-      const arrowMinSpd = parseFloat(document.getElementById('arrow_min_spd').value);
-      const { U, V } = windComponents();
+      const {
+        Z,
+        nx,
+        ny,
+        dx,
+        dy
+      } = terrainData;
+      const H0 = parseFloat(document.getElementById("init_h").value);
+      const g = parseFloat(document.getElementById("g_prime").value);
+      const Cd = parseFloat(document.getElementById("drag_cd").value);
+      const nu = parseFloat(document.getElementById("visc").value);
+      const cfl = parseFloat(document.getElementById("cfl").value);
+      const T_sim = parseFloat(document.getElementById("sim_time").value);
+      const h_min = parseFloat(document.getElementById("h_min").value);
+      const astep = parseInt(document.getElementById("arrow_step").value);
+      const arrowMinSpd = parseFloat(
+        document.getElementById("arrow_min_spd").value,
+      );
+      const {
+        U,
+        V
+      } = windComponents();
       const h = new Float32Array(ny * nx);
       const u = new Float32Array(ny * nx);
       const v = new Float32Array(ny * nx);
@@ -603,14 +899,16 @@
 
       // Estimate dt from CFL
       const wave_est = Math.sqrt(U * U + V * V) + Math.sqrt(g * H0);
-      const dt = cfl * Math.min(dx, dy) / Math.max(wave_est, 0.1);
+      const dt = (cfl * Math.min(dx, dy)) / Math.max(wave_est, 0.1);
       const nSteps = Math.ceil(T_sim / dt);
       const YIELD_EVERY = 50;
 
       log(`SWE: dt=${dt.toFixed(2)} s, steps=${nSteps}, T=${T_sim} s`);
-      log(`Wind: dir=${windDirDeg.toFixed(0)}°, U=${U.toFixed(1)} V=${V.toFixed(1)} m/s`);
+      log(
+        `Wind: dir=${windDirDeg.toFixed(0)}°, U=${U.toFixed(1)} V=${V.toFixed(1)} m/s`,
+      );
       log(`Grid: ${nx}×${ny}, H₀=${H0} m, g′=${g} m/s²`);
-      setStatus('Simulating…');
+      setStatus("Simulating…");
 
       try {
         for (let step = 0; step < nSteps; step++) {
@@ -618,19 +916,24 @@
 
           if (step % YIELD_EVERY === 0) {
             setProgress(step / nSteps);
-            setStatus(`SWE: step ${step}/${nSteps}, t=${(step * dt).toFixed(0)} s`);
+            setStatus(
+              `SWE: step ${step}/${nSteps}, t=${(step * dt).toFixed(0)} s`,
+            );
             await yieldUI();
           }
         }
       } catch (e) {
-        if (e.message === '__STOPPED__') { log('Stopped by user.', 'warn'); }
-        else { log(`Solver error: ${e}`, 'error'); }
-        document.getElementById('btn-sim').disabled = false;
-        document.getElementById('btn-stop').disabled = true;
+        if (e.message === "__STOPPED__") {
+          log("Stopped by user.", "warn");
+        } else {
+          log(`Solver error: ${e}`, "error");
+        }
+        document.getElementById("btn-sim").disabled = false;
+        document.getElementById("btn-stop").disabled = true;
         return;
       }
 
-      log(`Simulation complete (T=${T_sim} s).`, 'success');
+      log(`Simulation complete (T=${T_sim} s).`, "success");
       setProgress(1);
 
       // ── Derived fields ──
@@ -644,7 +947,9 @@
       for (let j = 1; j < ny - 1; j++)
         for (let i = 1; i < nx - 1; i++) {
           const idx = j * nx + i;
-          vorticity[idx] = (v[idx + 1] - v[idx - 1]) / (2 * dx) - (u[idx + nx] - u[idx - nx]) / (2 * dy);
+          vorticity[idx] =
+            (v[idx + 1] - v[idx - 1]) / (2 * dx) -
+            (u[idx + nx] - u[idx - nx]) / (2 * dy);
         }
 
       // Vertical wind: orographic lifting (u·∂Z/∂x + v·∂Z/∂y) + convergence (-h·div·u)
@@ -657,52 +962,118 @@
           const dZdy = (Z[(j - 1) * nx + i] - Z[(j + 1) * nx + i]) / (2 * dy); // flipped: j-1=more north
           const dudx = (u[idx + 1] - u[idx - 1]) / (2 * dx);
           const dvdy = (v[(j - 1) * nx + i] - v[(j + 1) * nx + i]) / (2 * dy); // flipped
-          w_vert[idx] = u[idx] * dZdx + v[idx] * dZdy - h[idx] * (dudx + dvdy);
+          w_vert[idx] =
+            u[idx] * dZdx + v[idx] * dZdy - h[idx] * (dudx + dvdy);
         }
 
       // ── Render 2D previews ──
-      document.getElementById('sim-plots-area').style.display = 'flex';
-      const arrowData = { u, v, step: astep, minSpd: arrowMinSpd };
-      renderPlot(document.getElementById('plot-speed'), speed, nx, ny, cmapSpeed, arrowData);
-      renderPlot(document.getElementById('plot-froude'), froude, nx, ny, cmapFroude, arrowData);
-      renderPlot(document.getElementById('plot-depth'), h, nx, ny, cmapDepth, null);
-      renderPlot(document.getElementById('plot-vort'), vorticity, nx, ny, cmapVort, null);
-      renderPlot(document.getElementById('plot-vert'), w_vert, nx, ny, cmapVert, null);
+      document.getElementById("sim-plots-area").style.display = "flex";
+      const arrowData = {
+        u,
+        v,
+        step: astep,
+        minSpd: arrowMinSpd
+      };
+      renderPlot(
+        document.getElementById("plot-speed"),
+        speed,
+        nx,
+        ny,
+        cmapSpeed,
+        arrowData,
+      );
+      renderPlot(
+        document.getElementById("plot-froude"),
+        froude,
+        nx,
+        ny,
+        cmapFroude,
+        arrowData,
+      );
+      renderPlot(
+        document.getElementById("plot-depth"),
+        h,
+        nx,
+        ny,
+        cmapDepth,
+        null,
+      );
+      renderPlot(
+        document.getElementById("plot-vort"),
+        vorticity,
+        nx,
+        ny,
+        cmapVort,
+        null,
+      );
+      renderPlot(
+        document.getElementById("plot-vert"),
+        w_vert,
+        nx,
+        ny,
+        cmapVert,
+        null,
+      );
 
       // ── Marker positions ──
-      const mLon0 = terrainData.lon0, mLat0 = terrainData.lat0;
+      const mLon0 = terrainData.lon0,
+        mLat0 = terrainData.lat0;
+
       function elevAtPoint(mlat, mlon) {
         const [mx, my] = lonlatToLocal(mlon, mlat, mLon0, mLat0);
-        const i = Math.round((mx - terrainData.x_extent[0]) / (terrainData.x_extent[1] - terrainData.x_extent[0]) * (nx - 1));
+        const i = Math.round(
+          ((mx - terrainData.x_extent[0]) /
+            (terrainData.x_extent[1] - terrainData.x_extent[0])) *
+          (nx - 1),
+        );
         // Tile data: j=0=north, j=ny-1=south; y_extent=[south,north] so invert:
-        const j = Math.round((terrainData.y_extent[1] - my) / (terrainData.y_extent[1] - terrainData.y_extent[0]) * (ny - 1));
-        return terrainData.Z[Math.max(0, Math.min(ny - 1, j)) * nx + Math.max(0, Math.min(nx - 1, i))];
+        const j = Math.round(
+          ((terrainData.y_extent[1] - my) /
+            (terrainData.y_extent[1] - terrainData.y_extent[0])) *
+          (ny - 1),
+        );
+        return terrainData.Z[
+          Math.max(0, Math.min(ny - 1, j)) * nx +
+          Math.max(0, Math.min(nx - 1, i))
+        ];
       }
-      const toLat = parseFloat(document.getElementById('takeoff_lat').value);
-      const toLon = parseFloat(document.getElementById('takeoff_lon').value);
-      const laLat = parseFloat(document.getElementById('landing_lat').value);
-      const laLon = parseFloat(document.getElementById('landing_lon').value);
+      const toLat = parseFloat(document.getElementById("takeoff_lat").value);
+      const toLon = parseFloat(document.getElementById("takeoff_lon").value);
+      const laLat = parseFloat(document.getElementById("landing_lat").value);
+      const laLon = parseFloat(document.getElementById("landing_lon").value);
       const [toX, toY] = lonlatToLocal(toLon, toLat, mLon0, mLat0);
       const [laX, laY] = lonlatToLocal(laLon, laLat, mLon0, mLat0);
       const toZ = elevAtPoint(toLat, toLon);
       const laZ = elevAtPoint(laLat, laLon);
-      log(`Take-off: x=${toX.toFixed(0)} m  y=${toY.toFixed(0)} m  z=${toZ.toFixed(0)} m`);
-      log(`Landing:  x=${laX.toFixed(0)} m  y=${laY.toFixed(0)} m  z=${laZ.toFixed(0)} m`);
+      log(
+        `Take-off: x=${toX.toFixed(0)} m  y=${toY.toFixed(0)} m  z=${toZ.toFixed(0)} m`,
+      );
+      log(
+        `Landing:  x=${laX.toFixed(0)} m  y=${laY.toFixed(0)} m  z=${laZ.toFixed(0)} m`,
+      );
 
       // ── Pack result for viewer ──
       // Convert Float32Arrays to plain arrays for JSON serialization
       const elev2d = [];
-      for (let j = 0; j < ny; j++) elev2d.push(Array.from(terrainData.Z.slice(j * nx, (j + 1) * nx)));
+      for (let j = 0; j < ny; j++)
+        elev2d.push(Array.from(terrainData.Z.slice(j * nx, (j + 1) * nx)));
 
       const meshElev2d = [];
       for (let j = 0; j < meshData.ny; j++)
-        meshElev2d.push(Array.from(meshData.Z.slice(j * meshData.nx, (j + 1) * meshData.nx)));
+        meshElev2d.push(
+          Array.from(
+            meshData.Z.slice(j * meshData.nx, (j + 1) * meshData.nx),
+          ),
+        );
 
       simResult = {
-        type: 'swe',
+        type: "swe",
         terrain: {
           elevation: elev2d,
-          nx, ny, dx, dy,
+          nx,
+          ny,
+          dx,
+          dy,
           x_extent: terrainData.x_extent,
           y_extent: terrainData.y_extent,
           lat0: terrainData.lat0,
@@ -722,25 +1093,50 @@
           vertical: Array.from(w_vert),
         },
         params: {
-          H0, g_prime: g, drag_cd: Cd, visc: nu, h_min,
-          wind_dir: windDirDeg, wind_speed_ms: parseFloat(document.getElementById('wind_speed').value),
-          U_in: U, V_in: V, sim_time: T_sim, cfl, nx, ny, dx, dy,
+          H0,
+          g_prime: g,
+          drag_cd: Cd,
+          visc: nu,
+          h_min,
+          wind_dir: windDirDeg,
+          wind_speed_ms: parseFloat(
+            document.getElementById("wind_speed").value,
+          ),
+          U_in: U,
+          V_in: V,
+          sim_time: T_sim,
+          cfl,
+          nx,
+          ny,
+          dx,
+          dy,
         },
-        markers: [
-          { type: 'takeoff', label: '▲ Take-off', x: toX, y: toY, z: toZ },
-          { type: 'landing', label: '▼ Landing', x: laX, y: laY, z: laZ },
+        markers: [{
+            type: "takeoff",
+            label: "▲ Take-off",
+            x: toX,
+            y: toY,
+            z: toZ
+          },
+          {
+            type: "landing",
+            label: "▼ Landing",
+            x: laX,
+            y: laY,
+            z: laZ
+          },
         ],
       };
 
-      document.getElementById('btn-sim').disabled = false;
-      document.getElementById('btn-stop').disabled = true;
-      document.getElementById('btn-map').disabled = false;
+      document.getElementById("btn-sim").disabled = false;
+      document.getElementById("btn-stop").disabled = true;
+      document.getElementById("btn-map").disabled = false;
       setStatus(`Done — T=${T_sim} s simulated`);
     }
 
     function stopSim() {
       _stopRequested = true;
-      document.getElementById('btn-stop').disabled = true;
+      document.getElementById("btn-stop").disabled = true;
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -749,16 +1145,17 @@
 
     function idbPut(key, json) {
       return new Promise((resolve, reject) => {
-        const req = indexedDB.open('paragliding', 1);
-        req.onupgradeneeded = e => {
+        const req = indexedDB.open("paragliding", 1);
+        req.onupgradeneeded = (e) => {
           const db = e.target.result;
-          if (!db.objectStoreNames.contains('sim')) db.createObjectStore('sim');
+          if (!db.objectStoreNames.contains("sim"))
+            db.createObjectStore("sim");
         };
         req.onerror = () => reject(req.error);
-        req.onsuccess = e => {
+        req.onsuccess = (e) => {
           const db = e.target.result;
-          const tx = db.transaction('sim', 'readwrite');
-          tx.objectStore('sim').put(json, key);
+          const tx = db.transaction("sim", "readwrite");
+          tx.objectStore("sim").put(json, key);
           tx.oncomplete = resolve;
           tx.onerror = () => reject(tx.error);
         };
@@ -766,31 +1163,37 @@
     }
 
     async function openViewer() {
-      if (!simResult) { log('No simulation result yet.', 'error'); return; }
+      if (!simResult) {
+        log("No simulation result yet.", "error");
+        return;
+      }
       try {
-        log('Saving to IndexedDB…');
-        await idbPut('swe_latest', JSON.stringify(simResult));
-        window.location.href = 'view-dynamic';
+        log("Saving to IndexedDB…");
+        await idbPut("swe_latest", JSON.stringify(simResult));
+        window.location.href = "view-dynamic";
       } catch (e) {
-        log(`IndexedDB error: ${e.message}`, 'error');
+        log(`IndexedDB error: ${e.message}`, "error");
       }
     }
 
     // Nav dropdown touch support
-    document.querySelectorAll('.nav-dropdown-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        var dd = btn.closest('.nav-dropdown');
-        var isOpen = dd.classList.contains('open');
-        document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
-        if (!isOpen) dd.classList.add('open');
+    document.querySelectorAll(".nav-dropdown-btn").forEach(function(btn) {
+      btn.addEventListener("click", function(e) {
+        var dd = btn.closest(".nav-dropdown");
+        var isOpen = dd.classList.contains("open");
+        document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+          d.classList.remove("open");
+        });
+        if (!isOpen) dd.classList.add("open");
         e.stopPropagation();
       });
     });
-    document.addEventListener('click', function () {
-      document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
+    document.addEventListener("click", function() {
+      document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+        d.classList.remove("open");
+      });
     });
   </script>
-
 </body>
 
 </html>

@@ -1,24 +1,23 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
   <title>Wind NS — Simulation</title>
   <script src="https://cdn.jsdelivr.net/npm/geotiff@2.1.3/dist-browser/geotiff.js"></script>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
   <style>
-
-    #panel-header h2 { margin-bottom: 4px; }
-
+    #panel-header h2 {
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 
 <body class="sim-page">
-
   <nav id="header-nav">
-    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt="" /><span>Home</span></a>
     <div class="nav-sep"></div>
     <a href="area" class="nav-link">Area</a>
     <div class="nav-sep"></div>
@@ -58,35 +57,44 @@
 
   <div id="console-area">
     <div id="log-output">
-      <div class="log-info"><span class="log-ts">00:00:00</span>Ready — configure parameters and click <strong>Fetch
-          Data</strong>.</div>
+      <div class="log-info">
+        <span class="log-ts">00:00:00</span>Ready — configure parameters and
+        click <strong>Fetch Data</strong>.
+      </div>
     </div>
     <div id="progress-wrap">
       <div id="progress-bar"></div>
     </div>
     <div id="plots-area">
       <div class="plot-box">
-        <div class="plot-title">Elevation (DEM)</div><canvas id="plot-elev"></canvas>
+        <div class="plot-title">Elevation (DEM)</div>
+        <canvas id="plot-elev"></canvas>
       </div>
       <div class="plot-box">
-        <div class="plot-title">Land Cover</div><canvas id="plot-lc"></canvas>
+        <div class="plot-title">Land Cover</div>
+        <canvas id="plot-lc"></canvas>
       </div>
       <div class="plot-box">
-        <div class="plot-title">Roughness z₀ (m)</div><canvas id="plot-z0"></canvas>
+        <div class="plot-title">Roughness z₀ (m)</div>
+        <canvas id="plot-z0"></canvas>
       </div>
     </div>
     <div id="plots-area-sim">
       <div class="plot-box">
-        <div class="plot-title">Surface Wind (m/s)</div><canvas id="plot-speed"></canvas>
+        <div class="plot-title">Surface Wind (m/s)</div>
+        <canvas id="plot-speed"></canvas>
       </div>
       <div class="plot-box">
-        <div class="plot-title">Vertical Wind (m/s)</div><canvas id="plot-vert"></canvas>
+        <div class="plot-title">Vertical Wind (m/s)</div>
+        <canvas id="plot-vert"></canvas>
       </div>
       <div class="plot-box">
-        <div class="plot-title">Pressure (Pa)</div><canvas id="plot-press"></canvas>
+        <div class="plot-title">Pressure (Pa)</div>
+        <canvas id="plot-press"></canvas>
       </div>
       <div class="plot-box">
-        <div class="plot-title">Vorticity Z (1/s)</div><canvas id="plot-vort"></canvas>
+        <div class="plot-title">Vorticity Z (1/s)</div>
+        <canvas id="plot-vort"></canvas>
       </div>
     </div>
   </div>
@@ -97,1256 +105,1927 @@
     <div id="sim-ui-panel">
       <div id="panel-header">
         <h2>Wind NS</h2>
-        <div class="subtitle">Full 3-D Incompressible Navier–Stokes · wind on terrain</div>
+        <div class="subtitle">
+          Full 3-D Incompressible Navier–Stokes · wind on terrain
+        </div>
       </div>
       <div id="panel-body">
-        <div class="footer-row" style="margin-bottom:8px;">
-          <button class="btn btn-fetch" onclick="applyPreset('coarse')" style="font-size:10px;">⚡ Coarse</button>
-          <button class="btn btn-sim" onclick="applyPreset('refined')" style="font-size:10px;">🎯 Refined</button>
+        <div class="footer-row" style="margin-bottom: 8px">
+          <button class="btn btn-fetch" onclick="applyPreset('coarse')" style="font-size: 10px">
+            ⚡ Coarse
+          </button>
+          <button class="btn btn-sim" onclick="applyPreset('refined')" style="font-size: 10px">
+            🎯 Refined
+          </button>
         </div>
-        <div class="field-hint" style="margin-top:-4px;">
-          Coarse: fast preview (40×40×20, 30 p-iter).<br>
+        <div class="field-hint" style="margin-top: -4px">
+          Coarse: fast preview (40×40×20, 30 p-iter).<br />
           Refined: high precision (DEM res, 40 NZ, 80 p-iter).
         </div>
 
         <div class="section-title">Ambient Wind</div>
         <div id="compass-wrap">
-          <svg id="compass-svg" width="60" height="60" viewBox="-30 -30 60 60" onmousedown="compassDrag(event)"
-            ontouchstart="compassDrag(event)">
+          <svg id="compass-svg" width="60" height="60" viewBox="-30 -30 60 60" onmousedown="compassDrag(event)" ontouchstart="compassDrag(event)">
             <circle r="28" fill="rgba(100,160,255,.06)" stroke="rgba(100,160,255,.25)" stroke-width="1" />
             <line x1="0" y1="-22" x2="0" y2="22" stroke="rgba(100,160,255,.12)" stroke-width="1" />
             <line x1="-22" y1="0" x2="22" y2="0" stroke="rgba(100,160,255,.12)" stroke-width="1" />
-            <text y="-17" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">N</text>
-            <text y="22" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">S</text>
-            <text x="21" y="2" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">E</text>
-            <text x="-21" y="2" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">W</text>
+            <text y="-17" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">
+              N
+            </text>
+            <text y="22" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">
+              S
+            </text>
+            <text x="21" y="2" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">
+              E
+            </text>
+            <text x="-21" y="2" text-anchor="middle" fill="#3a6080" font-size="6" font-family="Segoe UI">
+              W
+            </text>
             <g id="compass-arrow">
               <polygon points="0,-21 3.5,-9 0,-13 -3.5,-9" fill="#7eb8ff" opacity=".9" />
               <polygon points="0,21  3.5,9  0,13  -3.5,9" fill="#3a6080" opacity=".6" />
             </g>
           </svg>
           <div id="compass-readout">
-            <strong id="wind-dir-val">0°</strong> from SW<br>
-            U = <span id="wind-u-val">+6.1</span> m/s &nbsp; V = <span id="wind-v-val">+5.3</span> m/s<br>
-            <span style="color:#3a6080;font-size:10px">Drag the compass to change</span>
+            <strong id="wind-dir-val">0°</strong> from SW<br />
+            U = <span id="wind-u-val">+6.1</span> m/s &nbsp; V =
+            <span id="wind-v-val">+5.3</span> m/s<br />
+            <span style="color: #3a6080; font-size: 10px">Drag the compass to change</span>
           </div>
         </div>
         <div class="grid-2">
           <div>
             <label class="field-label">Wind speed (m/s)</label>
-            <input type="number" id="wind_speed" step="0.5" min="0" max="40" value="8"
-              oninput="document.getElementById('wind_speed_kmh').value=(parseFloat(this.value)||0)*3.6;updateCompassDisplay()">
+            <input type="number" id="wind_speed" step="0.5" min="0" max="40" value="8" oninput="
+                  document.getElementById('wind_speed_kmh').value =
+                    (parseFloat(this.value) || 0) * 3.6;
+                  updateCompassDisplay();
+                " />
           </div>
           <div>
             <label class="field-label">Wind speed (km/h)</label>
-            <input type="number" id="wind_speed_kmh" step="1" min="0" max="144" value="28.8"
-              oninput="document.getElementById('wind_speed').value=((parseFloat(this.value)||0)/3.6).toFixed(1);updateCompassDisplay()">
+            <input type="number" id="wind_speed_kmh" step="1" min="0" max="144" value="28.8" oninput="
+                  document.getElementById('wind_speed').value = (
+                    (parseFloat(this.value) || 0) / 3.6
+                  ).toFixed(1);
+                  updateCompassDisplay();
+                " />
           </div>
         </div>
-        <div class="field-hint">Far-field wind at 100 m AGL. Logarithmic profile applied to inflow boundaries.</div>
+        <div class="field-hint">
+          Far-field wind at 100 m AGL. Logarithmic profile applied to inflow
+          boundaries.
+        </div>
 
         <div class="section-title hidden">Area</div>
         <div class="grid-2 hidden">
-          <div><label class="field-label">Max lat (N)</label><input type="number" id="max_lat" step="0.0001"
-              value="43.014963"></div>
-          <div><label class="field-label">Min lat (S)</label><input type="number" id="min_lat" step="0.0001"
-              value="42.961061"></div>
-          <div><label class="field-label">Min lon (W)</label><input type="number" id="min_lon" step="0.0001"
-              value="0.838481"></div>
-          <div><label class="field-label">Max lon (E)</label><input type="number" id="max_lon" step="0.0001"
-              value="0.933902"></div>
+          <div>
+            <label class="field-label">Max lat (N)</label><input type="number" id="max_lat" step="0.0001" value="43.014963" />
+          </div>
+          <div>
+            <label class="field-label">Min lat (S)</label><input type="number" id="min_lat" step="0.0001" value="42.961061" />
+          </div>
+          <div>
+            <label class="field-label">Min lon (W)</label><input type="number" id="min_lon" step="0.0001" value="0.838481" />
+          </div>
+          <div>
+            <label class="field-label">Max lon (E)</label><input type="number" id="max_lon" step="0.0001" value="0.933902" />
+          </div>
         </div>
         <div class="grid-2 hidden">
-          <div><label class="field-label">Sim zoom</label><input type="number" id="sim_zoom" min="10" max="12" step="1"
-              value="11"></div>
-          <div><label class="field-label">Mesh zoom</label><input type="number" id="mesh_zoom" min="11" max="14"
-              step="1" value="13"></div>
+          <div>
+            <label class="field-label">Sim zoom</label><input type="number" id="sim_zoom" min="10" max="12" step="1" value="11" />
+          </div>
+          <div>
+            <label class="field-label">Mesh zoom</label><input type="number" id="mesh_zoom" min="11" max="14" step="1" value="13" />
+          </div>
         </div>
-        <div class="field-hint hidden">Sim zoom 11 ≈ 56 m/px. Mesh zoom for 3-D viewer only.</div>
+        <div class="field-hint hidden">
+          Sim zoom 11 ≈ 56 m/px. Mesh zoom for 3-D viewer only.
+        </div>
 
         <div class="section-title hidden">Markers</div>
         <div class="grid-2 hidden">
-          <div><label class="field-label">Takeoff lat</label><input type="number" id="takeoff_lat" step="0.00001"
-              value="42.96940"></div>
-          <div><label class="field-label">Takeoff lon</label><input type="number" id="takeoff_lon" step="0.00001"
-              value="0.88594"></div>
-          <div><label class="field-label">Landing lat</label><input type="number" id="landing_lat" step="0.00001"
-              value="42.99216"></div>
-          <div><label class="field-label">Landing lon</label><input type="number" id="landing_lon" step="0.00001"
-              value="0.90398"></div>
+          <div>
+            <label class="field-label">Takeoff lat</label><input type="number" id="takeoff_lat" step="0.00001" value="42.96940" />
+          </div>
+          <div>
+            <label class="field-label">Takeoff lon</label><input type="number" id="takeoff_lon" step="0.00001" value="0.88594" />
+          </div>
+          <div>
+            <label class="field-label">Landing lat</label><input type="number" id="landing_lat" step="0.00001" value="42.99216" />
+          </div>
+          <div>
+            <label class="field-label">Landing lon</label><input type="number" id="landing_lon" step="0.00001" value="0.90398" />
+          </div>
         </div>
 
         <div class="section-title">3-D Grid</div>
         <div class="grid-2">
-          <div><label class="field-label">Sim NX (W–E cells)</label><input type="number" id="sim_nx" min="16" max="256"
-              step="8" value="40"></div>
-          <div><label class="field-label">Sim NY (S–N cells)</label><input type="number" id="sim_ny" min="16" max="256"
-              step="8" value="40"></div>
+          <div>
+            <label class="field-label">Sim NX (W–E cells)</label><input type="number" id="sim_nx" min="16" max="256" step="8" value="40" />
+          </div>
+          <div>
+            <label class="field-label">Sim NY (S–N cells)</label><input type="number" id="sim_ny" min="16" max="256" step="8" value="40" />
+          </div>
         </div>
         <div class="grid-2">
-          <div><label class="field-label">Vertical levels NZ</label><input type="number" id="nz" min="16" max="64"
-              step="4" value="20"></div>
-          <div><label class="field-label">Domain top (m AGL)</label><input type="number" id="h_domain" min="500"
-              max="5000" step="100" value="1500"></div>
+          <div>
+            <label class="field-label">Vertical levels NZ</label><input type="number" id="nz" min="16" max="64" step="4" value="20" />
+          </div>
+          <div>
+            <label class="field-label">Domain top (m AGL)</label><input type="number" id="h_domain" min="500" max="5000" step="100" value="1500" />
+          </div>
         </div>
-        <div class="field-hint" id="grid-hint">NX×NY: simulation horizontal resolution (DEM is bilinearly resampled).
-          Populated from DEM after fetch. Domain top above highest terrain point.</div>
+        <div class="field-hint" id="grid-hint">
+          NX×NY: simulation horizontal resolution (DEM is bilinearly
+          resampled). Populated from DEM after fetch. Domain top above highest
+          terrain point.
+        </div>
 
         <div class="section-title">Wind Profile (Log Law)</div>
         <div class="grid-2">
-          <div><label class="field-label">Roughness z₀ (m)</label><input type="number" id="log_z0" step="0.01"
-              min="0.001" max="2.0" value="0.1"></div>
-          <div><label class="field-label">Ref. height z_ref (m)</label><input type="number" id="log_zref" step="10"
-              min="10" max="500" value="100"></div>
+          <div>
+            <label class="field-label">Roughness z₀ (m)</label><input type="number" id="log_z0" step="0.01" min="0.001" max="2.0" value="0.1" />
+          </div>
+          <div>
+            <label class="field-label">Ref. height z_ref (m)</label><input type="number" id="log_zref" step="10" min="10" max="500" value="100" />
+          </div>
         </div>
-        <div class="field-hint">Fallback z₀ used when no land cover is loaded. When land cover is fetched, each cell
-          gets its own z₀ from ESA WorldCover. z_ref = height AGL where wind = U_ref.</div>
+        <div class="field-hint">
+          Fallback z₀ used when no land cover is loaded. When land cover is
+          fetched, each cell gets its own z₀ from ESA WorldCover. z_ref =
+          height AGL where wind = U_ref.
+        </div>
 
         <div class="section-title">NS Parameters</div>
         <div class="grid-2">
-          <div><label class="field-label">Viscosity ν (m²/s)</label><input type="number" id="visc" step="5" min="1"
-              max="500" value="150"></div>
-          <div><label class="field-label">Pressure iter.</label><input type="number" id="p_iter" min="10" max="500"
-              step="10" value="30"></div>
+          <div>
+            <label class="field-label">Viscosity ν (m²/s)</label><input type="number" id="visc" step="5" min="1" max="500" value="150" />
+          </div>
+          <div>
+            <label class="field-label">Pressure iter.</label><input type="number" id="p_iter" min="10" max="500" step="10" value="30" />
+          </div>
         </div>
-        <div class="field-hint">ν = turbulent kinematic viscosity. Jacobi iterations per step; increase for accuracy.
+        <div class="field-hint">
+          ν = turbulent kinematic viscosity. Jacobi iterations per step;
+          increase for accuracy.
         </div>
 
         <div class="section-title">Solver</div>
         <div class="grid-2">
-          <div><label class="field-label">Sim time (s)</label><input type="number" id="sim_time" step="300" min="300"
-              max="14400" value="1800"></div>
-          <div><label class="field-label">CFL (semi-Lagr.)</label><input type="number" id="cfl" step="0.1" min="0.5"
-              max="3.0" value="2.0"></div>
+          <div>
+            <label class="field-label">Sim time (s)</label><input type="number" id="sim_time" step="300" min="300" max="14400" value="1800" />
+          </div>
+          <div>
+            <label class="field-label">CFL (semi-Lagr.)</label><input type="number" id="cfl" step="0.1" min="0.5" max="3.0" value="2.0" />
+          </div>
         </div>
         <div class="grid-2">
-          <div><label class="field-label">Max dt (s)</label><input type="number" id="dt_max" step="1" min="1" max="120"
-              value="60"></div>
-          <div><label class="field-label">Diff. safety α</label><input type="number" id="diff_safety" step="0.05"
-              min="0.05" max="0.45" value="0.25"></div>
+          <div>
+            <label class="field-label">Max dt (s)</label><input type="number" id="dt_max" step="1" min="1" max="120" value="60" />
+          </div>
+          <div>
+            <label class="field-label">Diff. safety α</label><input type="number" id="diff_safety" step="0.05" min="0.05" max="0.45" value="0.25" />
+          </div>
         </div>
         <div class="grid-2">
-          <div><label class="field-label">Pressure yield (iter)</label><input type="number" id="p_yield" step="5"
-              min="1" max="100" value="5"></div>
+          <div>
+            <label class="field-label">Pressure yield (iter)</label><input type="number" id="p_yield" step="5" min="1" max="100" value="5" />
+          </div>
         </div>
-        <div class="field-hint">CFL up to ~2.5 with semi-Lagrangian. dt = min(CFL·Δx/U, α·Δx²/ν, max_dt). Pressure
-          yield: Jacobi iters between UI refreshes.</div>
-
+        <div class="field-hint">
+          CFL up to ~2.5 with semi-Lagrangian. dt = min(CFL·Δx/U, α·Δx²/ν,
+          max_dt). Pressure yield: Jacobi iters between UI refreshes.
+        </div>
       </div>
       <div id="panel-footer">
         <div class="footer-row">
-          <button class="btn btn-fetch" id="btn-fetch" onclick="runFetchAll()">Fetch Data</button>
-          <button class="btn btn-sim" id="btn-sim" onclick="runSim()" disabled>Run NS3D</button>
+          <button class="btn btn-fetch" id="btn-fetch" onclick="runFetchAll()">
+            Fetch Data
+          </button>
+          <button class="btn btn-sim" id="btn-sim" onclick="runSim()" disabled>
+            Run NS3D
+          </button>
         </div>
         <div class="footer-row">
-          <button class="btn btn-stop" id="btn-stop" onclick="stopSim()" disabled>Stop</button>
-          <button class="btn btn-map" id="btn-map" onclick="openViewer()" disabled>Open Viewer</button>
+          <button class="btn btn-stop" id="btn-stop" onclick="stopSim()" disabled>
+            Stop
+          </button>
+          <button class="btn btn-map" id="btn-map" onclick="openViewer()" disabled>
+            Open Viewer
+          </button>
         </div>
       </div>
     </div>
+  </div>
 
-    <script>
-      // ═══════════════════════════════════════════════════════════════════
-      //  UI UTILITIES
-      // ═══════════════════════════════════════════════════════════════════
+  <script>
+    // ═══════════════════════════════════════════════════════════════════
+    //  UI UTILITIES
+    // ═══════════════════════════════════════════════════════════════════
 
-      let _stopRequested = false;
-      const yieldUI = async () => {
-        await new Promise(r => setTimeout(r, 0));
-        if (_stopRequested) throw new Error('__STOPPED__');
+    let _stopRequested = false;
+    const yieldUI = async () => {
+      await new Promise((r) => setTimeout(r, 0));
+      if (_stopRequested) throw new Error("__STOPPED__");
+    };
+
+    const logEl = document.getElementById("log-output");
+    const statusEl = document.getElementById("status-bar");
+    const progressEl = document.getElementById("progress-bar");
+
+    function ts() {
+      const d = new Date();
+      return [d.getHours(), d.getMinutes(), d.getSeconds()]
+        .map((n) => String(n).padStart(2, "0"))
+        .join(":");
+    }
+
+    function log(msg, level = "info") {
+      const div = document.createElement("div");
+      div.className = `log-${level}`;
+      div.innerHTML = `<span class="log-ts">${ts()}</span>${msg}`;
+      logEl.appendChild(div);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function setStatus(msg) {
+      statusEl.textContent = msg;
+    }
+
+    function setProgress(f) {
+      progressEl.style.width = Math.min(1, Math.max(0, f)) * 100 + "%";
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  COMPASS
+    // ═══════════════════════════════════════════════════════════════════
+
+    let windDirDeg = 0;
+
+    function windComponents() {
+      const speed =
+        parseFloat(document.getElementById("wind_speed").value) || 0;
+      const rad = (windDirDeg * Math.PI) / 180;
+      return {
+        U: -speed * Math.sin(rad),
+        V: -speed * Math.cos(rad)
       };
+    }
 
-      const logEl = document.getElementById('log-output');
-      const statusEl = document.getElementById('status-bar');
-      const progressEl = document.getElementById('progress-bar');
+    function updateCompassDisplay() {
+      document
+        .getElementById("compass-arrow")
+        .setAttribute("transform", `rotate(${windDirDeg})`);
+      const {
+        U,
+        V
+      } = windComponents();
+      const dir = [
+        "N",
+        "NNE",
+        "NE",
+        "ENE",
+        "E",
+        "ESE",
+        "SE",
+        "SSE",
+        "S",
+        "SSW",
+        "SW",
+        "WSW",
+        "W",
+        "WNW",
+        "NW",
+        "NNW",
+      ];
+      const idx = Math.round(windDirDeg / 22.5) % 16;
+      document.getElementById("compass-readout").innerHTML =
+        `<strong id="wind-dir-val">${windDirDeg.toFixed(0)}°</strong> from ${dir[idx]}<br>` +
+        `U = <span style="color:#7eb8ff">${U >= 0 ? "+" : ""}${U.toFixed(1)}</span> &nbsp; ` +
+        `V = <span style="color:#7eb8ff">${V >= 0 ? "+" : ""}${V.toFixed(1)}</span> m/s<br>` +
+        `<span style="color:#3a6080;font-size:10px">Drag the compass to change</span>`;
+    }
+    updateCompassDisplay();
 
-      function ts() {
-        const d = new Date();
-        return [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2, '0')).join(':');
-      }
-      function log(msg, level = 'info') {
-        const div = document.createElement('div');
-        div.className = `log-${level}`;
-        div.innerHTML = `<span class="log-ts">${ts()}</span>${msg}`;
-        logEl.appendChild(div);
-        logEl.scrollTop = logEl.scrollHeight;
-      }
-      function setStatus(msg) { statusEl.textContent = msg; }
-      function setProgress(f) { progressEl.style.width = (Math.min(1, Math.max(0, f)) * 100) + '%'; }
-
-      // ═══════════════════════════════════════════════════════════════════
-      //  COMPASS
-      // ═══════════════════════════════════════════════════════════════════
-
-      let windDirDeg = 0;
-
-      function windComponents() {
-        const speed = parseFloat(document.getElementById('wind_speed').value) || 0;
-        const rad = windDirDeg * Math.PI / 180;
-        return { U: -speed * Math.sin(rad), V: -speed * Math.cos(rad) };
-      }
-
-      function updateCompassDisplay() {
-        document.getElementById('compass-arrow').setAttribute('transform', `rotate(${windDirDeg})`);
-        const { U, V } = windComponents();
-        const dir = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
-        const idx = Math.round(windDirDeg / 22.5) % 16;
-        document.getElementById('compass-readout').innerHTML =
-          `<strong id="wind-dir-val">${windDirDeg.toFixed(0)}°</strong> from ${dir[idx]}<br>` +
-          `U = <span style="color:#7eb8ff">${U >= 0 ? '+' : ''}${U.toFixed(1)}</span> &nbsp; ` +
-          `V = <span style="color:#7eb8ff">${V >= 0 ? '+' : ''}${V.toFixed(1)}</span> m/s<br>` +
-          `<span style="color:#3a6080;font-size:10px">Drag the compass to change</span>`;
-      }
-      updateCompassDisplay();
-
-      function setVal(id, v) { const el = document.getElementById(id); if (el && v != null) el.value = v; }
-      // Load area from localStorage (redirect to area page if missing)
-      {
-        const saved = (() => { try { return JSON.parse(localStorage.getItem('paragliding_area') || 'null'); } catch(e) { return null; } })();
-        if (!saved) { location.href = 'area'; }
-        else {
-          if (saved.bbox) { setVal('min_lat', saved.bbox.min_lat); setVal('max_lat', saved.bbox.max_lat); setVal('min_lon', saved.bbox.min_lon); setVal('max_lon', saved.bbox.max_lon); }
-          if (saved.takeoff) { setVal('takeoff_lat', saved.takeoff.lat); setVal('takeoff_lon', saved.takeoff.lon); }
-          if (saved.landing) { setVal('landing_lat', saved.landing.lat); setVal('landing_lon', saved.landing.lon); }
+    function setVal(id, v) {
+      const el = document.getElementById(id);
+      if (el && v != null) el.value = v;
+    }
+    // Load area from localStorage (redirect to area page if missing)
+    {
+      const saved = (() => {
+        try {
+          return JSON.parse(
+            localStorage.getItem("paragliding_area") || "null",
+          );
+        } catch (e) {
+          return null;
+        }
+      })();
+      if (!saved) {
+        location.href = "area";
+      } else {
+        if (saved.bbox) {
+          setVal("min_lat", saved.bbox.min_lat);
+          setVal("max_lat", saved.bbox.max_lat);
+          setVal("min_lon", saved.bbox.min_lon);
+          setVal("max_lon", saved.bbox.max_lon);
+        }
+        if (saved.takeoff) {
+          setVal("takeoff_lat", saved.takeoff.lat);
+          setVal("takeoff_lon", saved.takeoff.lon);
+        }
+        if (saved.landing) {
+          setVal("landing_lat", saved.landing.lat);
+          setVal("landing_lon", saved.landing.lon);
         }
       }
+    }
 
-      function compassDrag(e0) {
-        e0.preventDefault();
-        const svg = document.getElementById('compass-svg');
-        const rect = svg.getBoundingClientRect();
-        const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
-        function onMove(e) {
-          const ex = e.touches ? e.touches[0].clientX : e.clientX;
-          const ey = e.touches ? e.touches[0].clientY : e.clientY;
-          let deg = Math.round(Math.atan2(ex - cx, -(ey - cy)) * 180 / Math.PI);
-          windDirDeg = (deg + 360) % 360;
-          updateCompassDisplay();
-        }
-        function onUp() {
-          window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp);
-          window.removeEventListener('touchmove', onMove); window.removeEventListener('touchend', onUp);
-        }
-        window.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
-        window.addEventListener('touchmove', onMove); window.addEventListener('touchend', onUp);
-        onMove(e0);
+    function compassDrag(e0) {
+      e0.preventDefault();
+      const svg = document.getElementById("compass-svg");
+      const rect = svg.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2,
+        cy = rect.top + rect.height / 2;
+
+      function onMove(e) {
+        const ex = e.touches ? e.touches[0].clientX : e.clientX;
+        const ey = e.touches ? e.touches[0].clientY : e.clientY;
+        let deg = Math.round(
+          (Math.atan2(ex - cx, -(ey - cy)) * 180) / Math.PI,
+        );
+        windDirDeg = (deg + 360) % 360;
+        updateCompassDisplay();
       }
 
-      // ═══════════════════════════════════════════════════════════════════
-      //  DEM FETCHING
-      // ═══════════════════════════════════════════════════════════════════
-
-      const TILE_CACHE = {};
-
-      function lonlatToTile(lon, lat, z) {
-        const n = Math.pow(2, z), lat_r = lat * Math.PI / 180;
-        return [(lon + 180) / 360 * n, (1 - Math.log(Math.tan(lat_r) + 1 / Math.cos(lat_r)) / Math.PI) / 2 * n];
+      function onUp() {
+        window.removeEventListener("mousemove", onMove);
+        window.removeEventListener("mouseup", onUp);
+        window.removeEventListener("touchmove", onMove);
+        window.removeEventListener("touchend", onUp);
       }
-      function lonlatToLocal(lon, lat, lon0, lat0) {
-        const R = 6371000;
-        return [(lon - lon0) * Math.PI / 180 * R * Math.cos(lat0 * Math.PI / 180), (lat - lat0) * Math.PI / 180 * R];
-      }
+      window.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onUp);
+      window.addEventListener("touchmove", onMove);
+      window.addEventListener("touchend", onUp);
+      onMove(e0);
+    }
 
-      async function fetchDEM(bbox, zoom, label) {
-        const { min_lat, max_lat, min_lon, max_lon } = bbox;
-        const [tx0f, ty0f] = lonlatToTile(min_lon, max_lat, zoom);
-        const [tx1f, ty1f] = lonlatToTile(max_lon, min_lat, zoom);
-        const x0 = Math.floor(tx0f), y0 = Math.floor(ty0f);
-        const x1 = Math.floor(tx1f), y1 = Math.floor(ty1f);
-        const PX = 256, tw = x1 - x0 + 1, th = y1 - y0 + 1;
-        const canvas = document.createElement('canvas');
-        canvas.width = tw * PX; canvas.height = th * PX;
-        const ctx = canvas.getContext('2d');
-        let loaded = 0, total = tw * th;
-        log(`Fetching ${label}: ${tw}×${th} Terrarium tiles (zoom ${zoom})…`);
-        for (let ty = y0; ty <= y1; ty++) {
-          for (let tx = x0; tx <= x1; tx++) {
-            const key = `${zoom}/${tx}/${ty}`;
-            let img = TILE_CACHE[key];
-            if (!img) {
-              img = await new Promise((res, rej) => {
-                const im = new Image(); im.crossOrigin = 'anonymous';
-                im.onload = () => res(im); im.onerror = rej;
-                im.src = `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${key}.png`;
-              });
-              TILE_CACHE[key] = img;
-            }
-            ctx.drawImage(img, (tx - x0) * PX, (ty - y0) * PX);
-            setProgress(++loaded / total * 0.4);
-            if (loaded % 4 === 0) await yieldUI();
+    // ═══════════════════════════════════════════════════════════════════
+    //  DEM FETCHING
+    // ═══════════════════════════════════════════════════════════════════
+
+    const TILE_CACHE = {};
+
+    function lonlatToTile(lon, lat, z) {
+      const n = Math.pow(2, z),
+        lat_r = (lat * Math.PI) / 180;
+      return [
+        ((lon + 180) / 360) * n,
+        ((1 - Math.log(Math.tan(lat_r) + 1 / Math.cos(lat_r)) / Math.PI) /
+          2) *
+        n,
+      ];
+    }
+
+    function lonlatToLocal(lon, lat, lon0, lat0) {
+      const R = 6371000;
+      return [
+        (((lon - lon0) * Math.PI) / 180) *
+        R *
+        Math.cos((lat0 * Math.PI) / 180),
+        (((lat - lat0) * Math.PI) / 180) * R,
+      ];
+    }
+
+    async function fetchDEM(bbox, zoom, label) {
+      const {
+        min_lat,
+        max_lat,
+        min_lon,
+        max_lon
+      } = bbox;
+      const [tx0f, ty0f] = lonlatToTile(min_lon, max_lat, zoom);
+      const [tx1f, ty1f] = lonlatToTile(max_lon, min_lat, zoom);
+      const x0 = Math.floor(tx0f),
+        y0 = Math.floor(ty0f);
+      const x1 = Math.floor(tx1f),
+        y1 = Math.floor(ty1f);
+      const PX = 256,
+        tw = x1 - x0 + 1,
+        th = y1 - y0 + 1;
+      const canvas = document.createElement("canvas");
+      canvas.width = tw * PX;
+      canvas.height = th * PX;
+      const ctx = canvas.getContext("2d");
+      let loaded = 0,
+        total = tw * th;
+      log(`Fetching ${label}: ${tw}×${th} Terrarium tiles (zoom ${zoom})…`);
+      for (let ty = y0; ty <= y1; ty++) {
+        for (let tx = x0; tx <= x1; tx++) {
+          const key = `${zoom}/${tx}/${ty}`;
+          let img = TILE_CACHE[key];
+          if (!img) {
+            img = await new Promise((res, rej) => {
+              const im = new Image();
+              im.crossOrigin = "anonymous";
+              im.onload = () => res(im);
+              im.onerror = rej;
+              im.src = `https://s3.amazonaws.com/elevation-tiles-prod/terrarium/${key}.png`;
+            });
+            TILE_CACHE[key] = img;
           }
-        }
-        const px0 = (tx0f - x0) * PX, py0 = (ty0f - y0) * PX;
-        const px1 = (tx1f - x0) * PX, py1 = (ty1f - y0) * PX;
-        const nx = Math.round(px1 - px0), ny = Math.round(py1 - py0);
-        const raw = ctx.getImageData(Math.round(px0), Math.round(py0), nx, ny).data;
-        const Z = new Float32Array(ny * nx);
-        for (let i = 0; i < Z.length; i++) Z[i] = raw[i * 4] * 256 + raw[i * 4 + 1] + raw[i * 4 + 2] / 256 - 32768;
-        const lat0 = (min_lat + max_lat) / 2, lon0 = (min_lon + max_lon) / 2;
-        const dx = (max_lon - min_lon) * Math.PI / 180 * 6371000 * Math.cos(lat0 * Math.PI / 180) / nx;
-        const dy = (max_lat - min_lat) * Math.PI / 180 * 6371000 / ny;
-        const [xmin] = lonlatToLocal(min_lon, lat0, lon0, lat0);
-        const [xmax] = lonlatToLocal(max_lon, lat0, lon0, lat0);
-        const [, ynorth] = lonlatToLocal(lon0, max_lat, lon0, lat0);
-        const [, ysouth] = lonlatToLocal(lon0, min_lat, lon0, lat0);
-        return { Z, nx, ny, dx, dy, x_extent: [xmin, xmax], y_extent: [ysouth, ynorth], lat0, lon0 };
-      }
-
-      // ═══════════════════════════════════════════════════════════════════
-      //  2D PLOT HELPERS
-      // ═══════════════════════════════════════════════════════════════════
-
-      function renderPlot(canvasEl, arr, nx, ny, colorFn, arrowData) {
-        canvasEl.width = nx; canvasEl.height = ny;
-        const ctx = canvasEl.getContext('2d');
-        const img = ctx.createImageData(nx, ny);
-        let mn = Infinity, mx = -Infinity;
-        for (let i = 0; i < arr.length; i++) { if (arr[i] < mn) mn = arr[i]; if (arr[i] > mx) mx = arr[i]; }
-        const rng = Math.max(mx - mn, 1e-9);
-        for (let i = 0; i < arr.length; i++) {
-          const [r, g, b] = colorFn((arr[i] - mn) / rng);
-          img.data[i * 4] = r; img.data[i * 4 + 1] = g; img.data[i * 4 + 2] = b; img.data[i * 4 + 3] = 255;
-        }
-        ctx.putImageData(img, 0, 0);
-        if (arrowData) {
-          const { u, v, step } = arrowData;
-          const maxSpd = Math.max(...u.map((ui, i) => Math.hypot(ui, v[i]))) || 1;
-          ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 0.8;
-          for (let j = Math.floor(step / 2); j < ny; j += step) {
-            for (let i = Math.floor(step / 2); i < nx; i += step) {
-              const idx = j * nx + i; const ui = u[idx], vi = v[idx]; const spd = Math.hypot(ui, vi);
-              if (spd < 0.05) continue;
-              const len = step * 0.55 * (spd / maxSpd);
-              const ex = i + (ui / spd) * len, ey = j - (vi / spd) * len;
-              ctx.beginPath(); ctx.moveTo(i, j); ctx.lineTo(ex, ey); ctx.stroke();
-              const hl = len * 0.3, ang = Math.atan2(-(ey - j), ex - i);
-              ctx.beginPath(); ctx.moveTo(ex, ey);
-              ctx.lineTo(ex - hl * Math.cos(ang - 0.4), ey - hl * Math.sin(ang - 0.4));
-              ctx.lineTo(ex - hl * Math.cos(ang + 0.4), ey - hl * Math.sin(ang + 0.4));
-              ctx.closePath(); ctx.fill();
-            }
-          }
+          ctx.drawImage(img, (tx - x0) * PX, (ty - y0) * PX);
+          setProgress((++loaded / total) * 0.4);
+          if (loaded % 4 === 0) await yieldUI();
         }
       }
-      const cmapElev = t => { const v = t * 200 + 30; return [v * 0.6 | 0, v * 0.8 | 0, v * 0.5 | 0]; };
-      const cmapSpeed = t => t < 0.5 ? [0, (t * 2 * 200) | 0, (255 - t * 2 * 55) | 0] : [((t - 0.5) * 2 * 255) | 0, 255, 0];
-      const cmapVert = t => t < 0.5 ? [(t * 2 * 255) | 0, (t * 2 * 255) | 0, 255] : [255, ((1 - t) * 2 * 255) | 0, ((1 - t) * 2 * 255) | 0];
-      const cmapPress = t => t < 0.5 ? [0, (t * 2 * 180) | 0, (200 - t * 2 * 80) | 0] : [((t - 0.5) * 2 * 220) | 0, 0, 0];
-      const cmapVort = t => t < 0.5 ? [0, 0, ((0.5 - t) * 2 * 255) | 0] : [((t - 0.5) * 2 * 255) | 0, 0, 0];
-
-      // ═══════════════════════════════════════════════════════════════════
-      //  BILINEAR DEM RESAMPLE
-      // ═══════════════════════════════════════════════════════════════════
-
-      // Resample src[src_ny * src_nx] to dst[dst_ny * dst_nx] using bilinear interpolation.
-      // The source and destination grids cover the same geographic extent.
-      function resampleDEM(src, src_nx, src_ny, dst_nx, dst_ny) {
-        const dst = new Float32Array(dst_ny * dst_nx);
-        for (let dj = 0; dj < dst_ny; dj++) {
-          const fj = dj / (dst_ny - 1) * (src_ny - 1);
-          const j0 = Math.min(src_ny - 2, Math.floor(fj));
-          const j1 = j0 + 1;
-          const ty = fj - j0;
-          for (let di = 0; di < dst_nx; di++) {
-            const fi = di / (dst_nx - 1) * (src_nx - 1);
-            const i0 = Math.min(src_nx - 2, Math.floor(fi));
-            const i1 = i0 + 1;
-            const tx = fi - i0;
-            dst[dj * dst_nx + di] =
-              (1 - ty) * ((1 - tx) * src[j0 * src_nx + i0] + tx * src[j0 * src_nx + i1]) +
-              ty * ((1 - tx) * src[j1 * src_nx + i0] + tx * src[j1 * src_nx + i1]);
-          }
-        }
-        return dst;
-      }
-
-      // ═══════════════════════════════════════════════════════════════════
-      //  3D INCOMPRESSIBLE NAVIER-STOKES SOLVER
-      // ═══════════════════════════════════════════════════════════════════
-
-      // Grid (module-level globals, set in initNS)
-      let _NX, _NY, _NZ, _DX, _DY, _DZ;
-      let _Z_BASE;      // min terrain elevation (sea level)
-      let _Z_REL;       // terrain elevation above _Z_BASE, [NY*NX]
-      let _SOLID;       // 1 = solid terrain cell, [NZ*NY*NX]
-      let _U, _V, _W;   // velocity fields, [NZ*NY*NX]
-      let _P;           // pressure field, [NZ*NY*NX]
-      let _U1, _V1, _W1, _P1; // double-buffer
-      let _DIV;         // divergence, [NZ*NY*NX]
-
-      function _idx(i, j, k) { return k * _NY * _NX + j * _NX + i; }
-
-      // Log wind profile parameters — set from UI before each simulation run
-      let _LOG_Z0 = 0.1;   // scalar fallback roughness length (m)
-      let _LOG_ZREF = 100;   // reference height where U = U_ref (m)
-      let _Z0_MAP = null;  // per-cell roughness [NY*NX] or null → use _LOG_Z0
-
-      // Returns local z0 for grid cell (i, j), using map if available
-      function _cellZ0(i, j) {
-        if (_Z0_MAP) return _Z0_MAP[j * _NX + i];
-        return _LOG_Z0;
-      }
-
-      // Logarithmic wind profile factor: 0 at ground, 1 at z_ref, capped at 1 above
-      function _logFactor(z_above_ground, z0) {
-        if (z_above_ground <= z0) return 0;
-        return Math.min(1.0, Math.log(z_above_ground / z0) / Math.log(_LOG_ZREF / z0));
-      }
-
-      // ═══════════════════════════════════════════════════════════════════
-      //  LAND COVER — ESA WorldCover → per-cell z₀
-      // ═══════════════════════════════════════════════════════════════════
-
-      // Aerodynamic roughness lengths (m) per ESA WorldCover class (Wieringa 1992 / literature)
-      const LC_Z0 = {
-        10: 1.00,   // Tree cover  (closed forest)
-        20: 0.30,   // Shrubland
-        30: 0.03,   // Grassland
-        40: 0.10,   // Cropland
-        50: 1.50,   // Built-up
-        60: 0.01,   // Bare / sparse vegetation
-        70: 0.001,  // Snow / ice
-        80: 0.0002, // Permanent water (Charnock)
-        90: 0.05,   // Herbaceous wetland
-        95: 0.50,   // Mangrove
-        100: 0.05,   // Moss / lichen
+      const px0 = (tx0f - x0) * PX,
+        py0 = (ty0f - y0) * PX;
+      const px1 = (tx1f - x0) * PX,
+        py1 = (ty1f - y0) * PX;
+      const nx = Math.round(px1 - px0),
+        ny = Math.round(py1 - py0);
+      const raw = ctx.getImageData(
+        Math.round(px0),
+        Math.round(py0),
+        nx,
+        ny,
+      ).data;
+      const Z = new Float32Array(ny * nx);
+      for (let i = 0; i < Z.length; i++)
+        Z[i] =
+        raw[i * 4] * 256 + raw[i * 4 + 1] + raw[i * 4 + 2] / 256 - 32768;
+      const lat0 = (min_lat + max_lat) / 2,
+        lon0 = (min_lon + max_lon) / 2;
+      const dx =
+        ((((max_lon - min_lon) * Math.PI) / 180) *
+          6371000 *
+          Math.cos((lat0 * Math.PI) / 180)) /
+        nx;
+      const dy = ((((max_lat - min_lat) * Math.PI) / 180) * 6371000) / ny;
+      const [xmin] = lonlatToLocal(min_lon, lat0, lon0, lat0);
+      const [xmax] = lonlatToLocal(max_lon, lat0, lon0, lat0);
+      const [, ynorth] = lonlatToLocal(lon0, max_lat, lon0, lat0);
+      const [, ysouth] = lonlatToLocal(lon0, min_lat, lon0, lat0);
+      return {
+        Z,
+        nx,
+        ny,
+        dx,
+        dy,
+        x_extent: [xmin, xmax],
+        y_extent: [ysouth, ynorth],
+        lat0,
+        lon0,
       };
-      const LC_LABELS = {
-        10: 'Tree cover', 20: 'Shrubland', 30: 'Grassland', 40: 'Cropland',
-        50: 'Built-up', 60: 'Bare/sparse', 70: 'Snow/ice', 80: 'Water',
-        90: 'Wetland', 95: 'Mangrove', 100: 'Moss/lichen',
-      };
-      // Colors for the LC preview plot (RGB 0-255)
-      const LC_COLORS = {
-        10: [0, 100, 0], 20: [255, 187, 34], 30: [255, 255, 76], 40: [240, 150, 255],
-        50: [250, 0, 0], 60: [180, 180, 180], 70: [240, 240, 240], 80: [0, 100, 200],
-        90: [0, 150, 160], 95: [0, 207, 117], 100: [250, 230, 160],
-      };
+    }
 
-      // Build per-cell z0 Float32Array [sim_ny * sim_nx] from lc class codes
-      // lc is Int16Array [lc_ny * lc_nx]; nearest-neighbour mapping to sim grid
-      function buildZ0Map(lc, lc_nx, lc_ny, sim_nx, sim_ny, fallback_z0) {
-        const z0map = new Float32Array(sim_ny * sim_nx);
-        for (let j = 0; j < sim_ny; j++) {
-          const srcJ = Math.min(lc_ny - 1, Math.round(j / (sim_ny - 1) * (lc_ny - 1)));
-          for (let i = 0; i < sim_nx; i++) {
-            const srcI = Math.min(lc_nx - 1, Math.round(i / (sim_nx - 1) * (lc_nx - 1)));
-            const code = lc[srcJ * lc_nx + srcI];
-            z0map[j * sim_nx + i] = LC_Z0[code] ?? fallback_z0;
+    // ═══════════════════════════════════════════════════════════════════
+    //  2D PLOT HELPERS
+    // ═══════════════════════════════════════════════════════════════════
+
+    function renderPlot(canvasEl, arr, nx, ny, colorFn, arrowData) {
+      canvasEl.width = nx;
+      canvasEl.height = ny;
+      const ctx = canvasEl.getContext("2d");
+      const img = ctx.createImageData(nx, ny);
+      let mn = Infinity,
+        mx = -Infinity;
+      for (let i = 0; i < arr.length; i++) {
+        if (arr[i] < mn) mn = arr[i];
+        if (arr[i] > mx) mx = arr[i];
+      }
+      const rng = Math.max(mx - mn, 1e-9);
+      for (let i = 0; i < arr.length; i++) {
+        const [r, g, b] = colorFn((arr[i] - mn) / rng);
+        img.data[i * 4] = r;
+        img.data[i * 4 + 1] = g;
+        img.data[i * 4 + 2] = b;
+        img.data[i * 4 + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+      if (arrowData) {
+        const {
+          u,
+          v,
+          step
+        } = arrowData;
+        const maxSpd =
+          Math.max(...u.map((ui, i) => Math.hypot(ui, v[i]))) || 1;
+        ctx.strokeStyle = "rgba(255,255,255,0.6)";
+        ctx.fillStyle = "rgba(255,255,255,0.6)";
+        ctx.lineWidth = 0.8;
+        for (let j = Math.floor(step / 2); j < ny; j += step) {
+          for (let i = Math.floor(step / 2); i < nx; i += step) {
+            const idx = j * nx + i;
+            const ui = u[idx],
+              vi = v[idx];
+            const spd = Math.hypot(ui, vi);
+            if (spd < 0.05) continue;
+            const len = step * 0.55 * (spd / maxSpd);
+            const ex = i + (ui / spd) * len,
+              ey = j - (vi / spd) * len;
+            ctx.beginPath();
+            ctx.moveTo(i, j);
+            ctx.lineTo(ex, ey);
+            ctx.stroke();
+            const hl = len * 0.3,
+              ang = Math.atan2(-(ey - j), ex - i);
+            ctx.beginPath();
+            ctx.moveTo(ex, ey);
+            ctx.lineTo(
+              ex - hl * Math.cos(ang - 0.4),
+              ey - hl * Math.sin(ang - 0.4),
+            );
+            ctx.lineTo(
+              ex - hl * Math.cos(ang + 0.4),
+              ey - hl * Math.sin(ang + 0.4),
+            );
+            ctx.closePath();
+            ctx.fill();
           }
         }
-        return z0map;
       }
+    }
+    const cmapElev = (t) => {
+      const v = t * 200 + 30;
+      return [(v * 0.6) | 0, (v * 0.8) | 0, (v * 0.5) | 0];
+    };
+    const cmapSpeed = (t) =>
+      t < 0.5 ? [0, (t * 2 * 200) | 0, (255 - t * 2 * 55) | 0] : [((t - 0.5) * 2 * 255) | 0, 255, 0];
+    const cmapVert = (t) =>
+      t < 0.5 ? [(t * 2 * 255) | 0, (t * 2 * 255) | 0, 255] : [255, ((1 - t) * 2 * 255) | 0, ((1 - t) * 2 * 255) | 0];
+    const cmapPress = (t) =>
+      t < 0.5 ? [0, (t * 2 * 180) | 0, (200 - t * 2 * 80) | 0] : [((t - 0.5) * 2 * 220) | 0, 0, 0];
+    const cmapVort = (t) =>
+      t < 0.5 ? [0, 0, ((0.5 - t) * 2 * 255) | 0] : [((t - 0.5) * 2 * 255) | 0, 0, 0];
 
-      // Render a false-colour LC map onto a canvas element
-      function renderLCPlot(canvasEl, lc, nx, ny) {
-        canvasEl.width = nx; canvasEl.height = ny;
-        const ctx = canvasEl.getContext('2d');
-        const img = ctx.createImageData(nx, ny);
-        for (let p = 0; p < ny * nx; p++) {
-          const code = lc[p];
-          const [r, g, b] = LC_COLORS[code] ?? [128, 128, 128];
-          img.data[p * 4] = r; img.data[p * 4 + 1] = g; img.data[p * 4 + 2] = b; img.data[p * 4 + 3] = 255;
+    // ═══════════════════════════════════════════════════════════════════
+    //  BILINEAR DEM RESAMPLE
+    // ═══════════════════════════════════════════════════════════════════
+
+    // Resample src[src_ny * src_nx] to dst[dst_ny * dst_nx] using bilinear interpolation.
+    // The source and destination grids cover the same geographic extent.
+    function resampleDEM(src, src_nx, src_ny, dst_nx, dst_ny) {
+      const dst = new Float32Array(dst_ny * dst_nx);
+      for (let dj = 0; dj < dst_ny; dj++) {
+        const fj = (dj / (dst_ny - 1)) * (src_ny - 1);
+        const j0 = Math.min(src_ny - 2, Math.floor(fj));
+        const j1 = j0 + 1;
+        const ty = fj - j0;
+        for (let di = 0; di < dst_nx; di++) {
+          const fi = (di / (dst_nx - 1)) * (src_nx - 1);
+          const i0 = Math.min(src_nx - 2, Math.floor(fi));
+          const i1 = i0 + 1;
+          const tx = fi - i0;
+          dst[dj * dst_nx + di] =
+            (1 - ty) *
+            ((1 - tx) * src[j0 * src_nx + i0] +
+              tx * src[j0 * src_nx + i1]) +
+            ty *
+            ((1 - tx) * src[j1 * src_nx + i0] + tx * src[j1 * src_nx + i1]);
         }
-        ctx.putImageData(img, 0, 0);
       }
+      return dst;
+    }
 
-      // Render z0 map as a grayscale-log plot
-      function renderZ0Plot(canvasEl, z0map, nx, ny) {
-        canvasEl.width = nx; canvasEl.height = ny;
-        const ctx = canvasEl.getContext('2d');
-        const img = ctx.createImageData(nx, ny);
-        const logMin = Math.log(0.0001), logMax = Math.log(2.0);
-        for (let p = 0; p < ny * nx; p++) {
-          const t = Math.max(0, Math.min(1, (Math.log(Math.max(z0map[p], 1e-5)) - logMin) / (logMax - logMin)));
-          const v = (t * 220 + 20) | 0;
-          img.data[p * 4] = v * 0.4 | 0; img.data[p * 4 + 1] = (v * 0.8) | 0; img.data[p * 4 + 2] = v; img.data[p * 4 + 3] = 255;
+    // ═══════════════════════════════════════════════════════════════════
+    //  3D INCOMPRESSIBLE NAVIER-STOKES SOLVER
+    // ═══════════════════════════════════════════════════════════════════
+
+    // Grid (module-level globals, set in initNS)
+    let _NX, _NY, _NZ, _DX, _DY, _DZ;
+    let _Z_BASE; // min terrain elevation (sea level)
+    let _Z_REL; // terrain elevation above _Z_BASE, [NY*NX]
+    let _SOLID; // 1 = solid terrain cell, [NZ*NY*NX]
+    let _U, _V, _W; // velocity fields, [NZ*NY*NX]
+    let _P; // pressure field, [NZ*NY*NX]
+    let _U1, _V1, _W1, _P1; // double-buffer
+    let _DIV; // divergence, [NZ*NY*NX]
+
+    function _idx(i, j, k) {
+      return k * _NY * _NX + j * _NX + i;
+    }
+
+    // Log wind profile parameters — set from UI before each simulation run
+    let _LOG_Z0 = 0.1; // scalar fallback roughness length (m)
+    let _LOG_ZREF = 100; // reference height where U = U_ref (m)
+    let _Z0_MAP = null; // per-cell roughness [NY*NX] or null → use _LOG_Z0
+
+    // Returns local z0 for grid cell (i, j), using map if available
+    function _cellZ0(i, j) {
+      if (_Z0_MAP) return _Z0_MAP[j * _NX + i];
+      return _LOG_Z0;
+    }
+
+    // Logarithmic wind profile factor: 0 at ground, 1 at z_ref, capped at 1 above
+    function _logFactor(z_above_ground, z0) {
+      if (z_above_ground <= z0) return 0;
+      return Math.min(
+        1.0,
+        Math.log(z_above_ground / z0) / Math.log(_LOG_ZREF / z0),
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  LAND COVER — ESA WorldCover → per-cell z₀
+    // ═══════════════════════════════════════════════════════════════════
+
+    // Aerodynamic roughness lengths (m) per ESA WorldCover class (Wieringa 1992 / literature)
+    const LC_Z0 = {
+      10: 1.0, // Tree cover  (closed forest)
+      20: 0.3, // Shrubland
+      30: 0.03, // Grassland
+      40: 0.1, // Cropland
+      50: 1.5, // Built-up
+      60: 0.01, // Bare / sparse vegetation
+      70: 0.001, // Snow / ice
+      80: 0.0002, // Permanent water (Charnock)
+      90: 0.05, // Herbaceous wetland
+      95: 0.5, // Mangrove
+      100: 0.05, // Moss / lichen
+    };
+    const LC_LABELS = {
+      10: "Tree cover",
+      20: "Shrubland",
+      30: "Grassland",
+      40: "Cropland",
+      50: "Built-up",
+      60: "Bare/sparse",
+      70: "Snow/ice",
+      80: "Water",
+      90: "Wetland",
+      95: "Mangrove",
+      100: "Moss/lichen",
+    };
+    // Colors for the LC preview plot (RGB 0-255)
+    const LC_COLORS = {
+      10: [0, 100, 0],
+      20: [255, 187, 34],
+      30: [255, 255, 76],
+      40: [240, 150, 255],
+      50: [250, 0, 0],
+      60: [180, 180, 180],
+      70: [240, 240, 240],
+      80: [0, 100, 200],
+      90: [0, 150, 160],
+      95: [0, 207, 117],
+      100: [250, 230, 160],
+    };
+
+    // Build per-cell z0 Float32Array [sim_ny * sim_nx] from lc class codes
+    // lc is Int16Array [lc_ny * lc_nx]; nearest-neighbour mapping to sim grid
+    function buildZ0Map(lc, lc_nx, lc_ny, sim_nx, sim_ny, fallback_z0) {
+      const z0map = new Float32Array(sim_ny * sim_nx);
+      for (let j = 0; j < sim_ny; j++) {
+        const srcJ = Math.min(
+          lc_ny - 1,
+          Math.round((j / (sim_ny - 1)) * (lc_ny - 1)),
+        );
+        for (let i = 0; i < sim_nx; i++) {
+          const srcI = Math.min(
+            lc_nx - 1,
+            Math.round((i / (sim_nx - 1)) * (lc_nx - 1)),
+          );
+          const code = lc[srcJ * lc_nx + srcI];
+          z0map[j * sim_nx + i] = LC_Z0[code] ?? fallback_z0;
         }
-        ctx.putImageData(img, 0, 0);
       }
+      return z0map;
+    }
 
-      // Slope-based fallback when ESA WorldCover is unavailable
-      function slopeHeuristicLC(Z, ny, nx, dx, dy) {
-        const lc = new Int16Array(ny * nx);
-        for (let j = 1; j < ny - 1; j++) {
-          for (let i = 1; i < nx - 1; i++) {
-            const p = j * nx + i;
-            const sx = (Z[p + 1] - Z[p - 1]) / (2 * dx);
-            const sy = (Z[p + nx] - Z[p - nx]) / (2 * dy);
-            const slope = Math.sqrt(sx * sx + sy * sy);
-            const z = Z[p];
-            if (z > 2400) lc[p] = 70;  // Snow/ice
-            else if (slope > 0.5) lc[p] = 60; // Bare/sparse
-            else if (slope > 0.25) lc[p] = 20; // Shrubland
-            else if (z < 500 && slope < 0.05) lc[p] = 40; // Cropland
-            else lc[p] = 30; // Grassland
-          }
+    // Render a false-colour LC map onto a canvas element
+    function renderLCPlot(canvasEl, lc, nx, ny) {
+      canvasEl.width = nx;
+      canvasEl.height = ny;
+      const ctx = canvasEl.getContext("2d");
+      const img = ctx.createImageData(nx, ny);
+      for (let p = 0; p < ny * nx; p++) {
+        const code = lc[p];
+        const [r, g, b] = LC_COLORS[code] ?? [128, 128, 128];
+        img.data[p * 4] = r;
+        img.data[p * 4 + 1] = g;
+        img.data[p * 4 + 2] = b;
+        img.data[p * 4 + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+    }
+
+    // Render z0 map as a grayscale-log plot
+    function renderZ0Plot(canvasEl, z0map, nx, ny) {
+      canvasEl.width = nx;
+      canvasEl.height = ny;
+      const ctx = canvasEl.getContext("2d");
+      const img = ctx.createImageData(nx, ny);
+      const logMin = Math.log(0.0001),
+        logMax = Math.log(2.0);
+      for (let p = 0; p < ny * nx; p++) {
+        const t = Math.max(
+          0,
+          Math.min(
+            1,
+            (Math.log(Math.max(z0map[p], 1e-5)) - logMin) / (logMax - logMin),
+          ),
+        );
+        const v = (t * 220 + 20) | 0;
+        img.data[p * 4] = (v * 0.4) | 0;
+        img.data[p * 4 + 1] = (v * 0.8) | 0;
+        img.data[p * 4 + 2] = v;
+        img.data[p * 4 + 3] = 255;
+      }
+      ctx.putImageData(img, 0, 0);
+    }
+
+    // Slope-based fallback when ESA WorldCover is unavailable
+    function slopeHeuristicLC(Z, ny, nx, dx, dy) {
+      const lc = new Int16Array(ny * nx);
+      for (let j = 1; j < ny - 1; j++) {
+        for (let i = 1; i < nx - 1; i++) {
+          const p = j * nx + i;
+          const sx = (Z[p + 1] - Z[p - 1]) / (2 * dx);
+          const sy = (Z[p + nx] - Z[p - nx]) / (2 * dy);
+          const slope = Math.sqrt(sx * sx + sy * sy);
+          const z = Z[p];
+          if (z > 2400)
+            lc[p] = 70; // Snow/ice
+          else if (slope > 0.5)
+            lc[p] = 60; // Bare/sparse
+          else if (slope > 0.25)
+            lc[p] = 20; // Shrubland
+          else if (z < 500 && slope < 0.05)
+            lc[p] = 40; // Cropland
+          else lc[p] = 30; // Grassland
         }
-        return lc;
       }
+      return lc;
+    }
 
-      // Parse a COG window and resample to (nx, ny)
-      async function parseCOGWindow(tiff, min_lon, max_lon, min_lat, max_lat, nx, ny) {
-        const image = await tiff.getImage();
-        const [ox, oy] = image.getOrigin();
-        const [rx, ry] = image.getResolution();
-        const imgW = image.getWidth(), imgH = image.getHeight();
-        const left = Math.max(0, Math.floor((min_lon - ox) / rx));
-        const top = Math.max(0, Math.floor((max_lat - oy) / ry));
-        const right = Math.min(imgW, Math.ceil((max_lon - ox) / rx));
-        const bottom = Math.min(imgH, Math.ceil((min_lat - oy) / ry));
-        if (left >= right || top >= bottom) throw new Error('Bbox outside GeoTIFF extent.');
-        log(`Reading ${right - left}×${bottom - top} px window…`); await yieldUI();
-        const rasters = await image.readRasters({ window: [left, top, right, bottom] });
-        const raw = rasters[0]; const rawW = right - left, rawH = bottom - top;
-        const lc = new Int16Array(ny * nx);
+    // Parse a COG window and resample to (nx, ny)
+    async function parseCOGWindow(
+      tiff,
+      min_lon,
+      max_lon,
+      min_lat,
+      max_lat,
+      nx,
+      ny,
+    ) {
+      const image = await tiff.getImage();
+      const [ox, oy] = image.getOrigin();
+      const [rx, ry] = image.getResolution();
+      const imgW = image.getWidth(),
+        imgH = image.getHeight();
+      const left = Math.max(0, Math.floor((min_lon - ox) / rx));
+      const top = Math.max(0, Math.floor((max_lat - oy) / ry));
+      const right = Math.min(imgW, Math.ceil((max_lon - ox) / rx));
+      const bottom = Math.min(imgH, Math.ceil((min_lat - oy) / ry));
+      if (left >= right || top >= bottom)
+        throw new Error("Bbox outside GeoTIFF extent.");
+      log(`Reading ${right - left}×${bottom - top} px window…`);
+      await yieldUI();
+      const rasters = await image.readRasters({
+        window: [left, top, right, bottom],
+      });
+      const raw = rasters[0];
+      const rawW = right - left,
+        rawH = bottom - top;
+      const lc = new Int16Array(ny * nx);
+      for (let j = 0; j < ny; j++) {
+        for (let i = 0; i < nx; i++) {
+          const srcI = Math.min(
+            rawW - 1,
+            Math.round((i / (nx - 1)) * (rawW - 1)),
+          );
+          const srcJ = Math.min(
+            rawH - 1,
+            Math.round((j / (ny - 1)) * (rawH - 1)),
+          );
+          lc[j * nx + i] = raw[srcJ * rawW + srcI];
+        }
+      }
+      return {
+        lc,
+        rawW,
+        rawH
+      };
+    }
+
+    let lcData = null; // { lc: Int16Array, lc_nx, lc_ny } — raw LC grid
+
+    async function _fetchLC(bbox) {
+      const {
+        Z,
+        nx,
+        ny,
+        dx,
+        dy
+      } = terrainData;
+      try {
+        const tileLatSW = Math.floor(bbox.min_lat / 3) * 3;
+        const tileLonSW = Math.floor(bbox.min_lon / 3) * 3;
+        const latStr =
+          (tileLatSW >= 0 ? "N" : "S") +
+          String(Math.abs(tileLatSW)).padStart(2, "0");
+        const lonStr =
+          (tileLonSW >= 0 ? "E" : "W") +
+          String(Math.abs(tileLonSW)).padStart(3, "0");
+        const s3url = `https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_${latStr}${lonStr}_Map.tif`;
+        log(`Fetching ESA WorldCover (${latStr}${lonStr}) via proxy…`);
+        setProgress(0.8);
+
+        const GeoTIFF = window.GeoTIFF;
+        if (!GeoTIFF) throw new Error("GeoTIFF.js not loaded");
+        const tiff = await GeoTIFF.fromUrl(
+          "/proxy?url=" + encodeURIComponent(s3url), {
+            allowFullFile: false
+          },
+        );
+        const {
+          lc,
+          rawW,
+          rawH
+        } = await parseCOGWindow(
+          tiff,
+          bbox.min_lon,
+          bbox.max_lon,
+          bbox.min_lat,
+          bbox.max_lat,
+          nx,
+          ny,
+        );
+        log(
+          `ESA WorldCover: ${rawW}×${rawH} px → ${nx}×${ny} sim cells.`,
+          "success",
+        );
+
+        lcData = {
+          lc,
+          lc_nx: nx,
+          lc_ny: ny
+        };
+        renderLCPlot(document.getElementById("plot-lc"), lc, nx, ny);
+        _logLCStats(lc, nx, ny);
+      } catch (e) {
+        log(
+          `ESA WorldCover unavailable (${e.message}) — using slope heuristic.`,
+          "warn",
+        );
+        const lc = slopeHeuristicLC(Z, ny, nx, dx, dy);
+        lcData = {
+          lc,
+          lc_nx: nx,
+          lc_ny: ny
+        };
+        renderLCPlot(document.getElementById("plot-lc"), lc, nx, ny);
+        _logLCStats(lc, nx, ny);
+      }
+    }
+
+    function _logLCStats(lc, nx, ny) {
+      const counts = {};
+      for (let p = 0; p < ny * nx; p++) {
+        const c = lc[p];
+        counts[c] = (counts[c] || 0) + 1;
+      }
+      const total = ny * nx;
+      const parts = Object.entries(counts)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 4)
+        .map(
+          ([c, n]) =>
+          `${LC_LABELS[c] || c} ${((n / total) * 100).toFixed(0)}%`,
+        );
+      log(`LC classes: ${parts.join(", ")} — z₀ range ${_lcZ0Range(lc)}`);
+    }
+
+    function _lcZ0Range(lc) {
+      let mn = Infinity,
+        mx = -Infinity;
+      for (let p = 0; p < lc.length; p++) {
+        const z = LC_Z0[lc[p]];
+        if (z == null) continue;
+        if (z < mn) mn = z;
+        if (z > mx) mx = z;
+      }
+      return `${mn} – ${mx} m`;
+    }
+
+    function initNS(Z_flat, nx, ny, dx, dy, nz, h_domain, U0, V0) {
+      _NX = nx;
+      _NY = ny;
+      _NZ = nz;
+      _DX = dx;
+      _DY = dy;
+
+      // Terrain height range
+      let z_min = Z_flat[0],
+        z_max = Z_flat[0];
+      for (let i = 0; i < Z_flat.length; i++) {
+        if (Z_flat[i] < z_min) z_min = Z_flat[i];
+        if (Z_flat[i] > z_max) z_max = Z_flat[i];
+      }
+      _Z_BASE = z_min;
+      _DZ = (z_max - z_min + h_domain) / nz;
+
+      _Z_REL = new Float32Array(ny * nx);
+      for (let i = 0; i < ny * nx; i++) _Z_REL[i] = Z_flat[i] - z_min;
+
+      const N = nz * ny * nx;
+      _SOLID = new Uint8Array(N);
+      _U = new Float32Array(N);
+      _V = new Float32Array(N);
+      _W = new Float32Array(N);
+      _P = new Float32Array(N);
+      _U1 = new Float32Array(N);
+      _V1 = new Float32Array(N);
+      _W1 = new Float32Array(N);
+      _P1 = new Float32Array(N);
+      _DIV = new Float32Array(N);
+
+      // Build solid mask: cell center at z_c = (k+0.5)*DZ above Z_BASE
+      for (let k = 0; k < nz; k++) {
+        const z_c = (k + 0.5) * _DZ;
         for (let j = 0; j < ny; j++) {
           for (let i = 0; i < nx; i++) {
-            const srcI = Math.min(rawW - 1, Math.round(i / (nx - 1) * (rawW - 1)));
-            const srcJ = Math.min(rawH - 1, Math.round(j / (ny - 1) * (rawH - 1)));
-            lc[j * nx + i] = raw[srcJ * rawW + srcI];
+            _SOLID[k * ny * nx + j * nx + i] =
+              z_c <= _Z_REL[j * nx + i] ? 1 : 0;
           }
         }
-        return { lc, rawW, rawH };
       }
 
-      let lcData = null; // { lc: Int16Array, lc_nx, lc_ny } — raw LC grid
-
-      async function _fetchLC(bbox) {
-        const { Z, nx, ny, dx, dy } = terrainData;
-        try {
-          const tileLatSW = Math.floor(bbox.min_lat / 3) * 3;
-          const tileLonSW = Math.floor(bbox.min_lon / 3) * 3;
-          const latStr = (tileLatSW >= 0 ? 'N' : 'S') + String(Math.abs(tileLatSW)).padStart(2, '0');
-          const lonStr = (tileLonSW >= 0 ? 'E' : 'W') + String(Math.abs(tileLonSW)).padStart(3, '0');
-          const s3url = `https://esa-worldcover.s3.eu-central-1.amazonaws.com/v200/2021/map/ESA_WorldCover_10m_2021_v200_${latStr}${lonStr}_Map.tif`;
-          log(`Fetching ESA WorldCover (${latStr}${lonStr}) via proxy…`);
-          setProgress(0.8);
-
-          const GeoTIFF = window.GeoTIFF;
-          if (!GeoTIFF) throw new Error('GeoTIFF.js not loaded');
-          const tiff = await GeoTIFF.fromUrl('/proxy?url=' + encodeURIComponent(s3url), { allowFullFile: false });
-          const { lc, rawW, rawH } = await parseCOGWindow(tiff, bbox.min_lon, bbox.max_lon, bbox.min_lat, bbox.max_lat, nx, ny);
-          log(`ESA WorldCover: ${rawW}×${rawH} px → ${nx}×${ny} sim cells.`, 'success');
-
-          lcData = { lc, lc_nx: nx, lc_ny: ny };
-          renderLCPlot(document.getElementById('plot-lc'), lc, nx, ny);
-          _logLCStats(lc, nx, ny);
-
-        } catch (e) {
-          log(`ESA WorldCover unavailable (${e.message}) — using slope heuristic.`, 'warn');
-          const lc = slopeHeuristicLC(Z, ny, nx, dx, dy);
-          lcData = { lc, lc_nx: nx, lc_ny: ny };
-          renderLCPlot(document.getElementById('plot-lc'), lc, nx, ny);
-          _logLCStats(lc, nx, ny);
+      // Initialize velocity: log profile everywhere
+      for (let k = 0; k < nz; k++) {
+        const z_c = (k + 0.5) * _DZ;
+        for (let j = 0; j < ny; j++) {
+          for (let i = 0; i < nx; i++) {
+            const p = k * ny * nx + j * nx + i;
+            if (_SOLID[p]) continue;
+            const z_above = z_c - _Z_REL[j * nx + i];
+            const f = _logFactor(z_above, _cellZ0(i, j));
+            _U[p] = U0 * f;
+            _V[p] = V0 * f;
+            _W[p] = 0;
+            _P[p] = 0;
+          }
         }
       }
+    }
 
-      function _logLCStats(lc, nx, ny) {
-        const counts = {};
-        for (let p = 0; p < ny * nx; p++) { const c = lc[p]; counts[c] = (counts[c] || 0) + 1; }
-        const total = ny * nx;
-        const parts = Object.entries(counts)
-          .sort((a, b) => b[1] - a[1]).slice(0, 4)
-          .map(([c, n]) => `${LC_LABELS[c] || c} ${(n / total * 100).toFixed(0)}%`);
-        log(`LC classes: ${parts.join(', ')} — z₀ range ${_lcZ0Range(lc)}`);
-      }
-      function _lcZ0Range(lc) {
-        let mn = Infinity, mx = -Infinity;
-        for (let p = 0; p < lc.length; p++) {
-          const z = LC_Z0[lc[p]];
-          if (z == null) continue;
-          if (z < mn) mn = z; if (z > mx) mx = z;
-        }
-        return `${mn} – ${mx} m`;
-      }
+    // Trilinear interpolation at fractional index (fi, fj, fk)
+    // Returns 0 if destination is a solid cell
+    function _trilinear(f, fi, fj, fk) {
+      const nx = _NX,
+        ny = _NY,
+        nz = _NZ;
+      const i0 = Math.max(0, Math.min(nx - 2, Math.floor(fi)));
+      const j0 = Math.max(0, Math.min(ny - 2, Math.floor(fj)));
+      const k0 = Math.max(0, Math.min(nz - 2, Math.floor(fk)));
+      const i1 = i0 + 1,
+        j1 = j0 + 1,
+        k1 = k0 + 1;
+      const tx = fi - i0,
+        ty = fj - j0,
+        tz = fk - k0;
+      const nxny = nx * ny;
+      const v000 = f[k0 * nxny + j0 * nx + i0],
+        v100 = f[k0 * nxny + j0 * nx + i1];
+      const v010 = f[k0 * nxny + j1 * nx + i0],
+        v110 = f[k0 * nxny + j1 * nx + i1];
+      const v001 = f[k1 * nxny + j0 * nx + i0],
+        v101 = f[k1 * nxny + j0 * nx + i1];
+      const v011 = f[k1 * nxny + j1 * nx + i0],
+        v111 = f[k1 * nxny + j1 * nx + i1];
+      return (
+        (1 - tz) *
+        ((1 - ty) * ((1 - tx) * v000 + tx * v100) +
+          ty * ((1 - tx) * v010 + tx * v110)) +
+        tz *
+        ((1 - ty) * ((1 - tx) * v001 + tx * v101) +
+          ty * ((1 - tx) * v011 + tx * v111))
+      );
+    }
 
-      function initNS(Z_flat, nx, ny, dx, dy, nz, h_domain, U0, V0) {
-        _NX = nx; _NY = ny; _NZ = nz; _DX = dx; _DY = dy;
-
-        // Terrain height range
-        let z_min = Z_flat[0], z_max = Z_flat[0];
-        for (let i = 0; i < Z_flat.length; i++) {
-          if (Z_flat[i] < z_min) z_min = Z_flat[i];
-          if (Z_flat[i] > z_max) z_max = Z_flat[i];
-        }
-        _Z_BASE = z_min;
-        _DZ = (z_max - z_min + h_domain) / nz;
-
-        _Z_REL = new Float32Array(ny * nx);
-        for (let i = 0; i < ny * nx; i++) _Z_REL[i] = Z_flat[i] - z_min;
-
-        const N = nz * ny * nx;
-        _SOLID = new Uint8Array(N);
-        _U = new Float32Array(N); _V = new Float32Array(N); _W = new Float32Array(N);
-        _P = new Float32Array(N);
-        _U1 = new Float32Array(N); _V1 = new Float32Array(N); _W1 = new Float32Array(N);
-        _P1 = new Float32Array(N); _DIV = new Float32Array(N);
-
-        // Build solid mask: cell center at z_c = (k+0.5)*DZ above Z_BASE
-        for (let k = 0; k < nz; k++) {
-          const z_c = (k + 0.5) * _DZ;
-          for (let j = 0; j < ny; j++) {
-            for (let i = 0; i < nx; i++) {
-              _SOLID[k * ny * nx + j * nx + i] = (z_c <= _Z_REL[j * nx + i]) ? 1 : 0;
+    // Semi-Lagrangian advection: trace backward in time and interpolate
+    // Convention: j=0=north, V>0=northward → fj_back = j + V*dt/dy
+    function _advect(dst, src, dt) {
+      const nx = _NX,
+        ny = _NY,
+        nz = _NZ,
+        dx = _DX,
+        dy = _DY,
+        dz = _DZ;
+      const nxny = nx * ny;
+      for (let k = 0; k < nz; k++) {
+        for (let j = 0; j < ny; j++) {
+          for (let i = 0; i < nx; i++) {
+            const p = k * nxny + j * nx + i;
+            if (_SOLID[p]) {
+              dst[p] = 0;
+              continue;
             }
+            const fi = i - (_U[p] * dt) / dx;
+            const fj = j + (_V[p] * dt) / dy; // + sign: j=0=north, V>0 → came from south (larger j)
+            const fk = k - (_W[p] * dt) / dz;
+            dst[p] = _trilinear(src, fi, fj, fk);
           }
         }
+      }
+    }
 
-        // Initialize velocity: log profile everywhere
-        for (let k = 0; k < nz; k++) {
-          const z_c = (k + 0.5) * _DZ;
-          for (let j = 0; j < ny; j++) {
-            for (let i = 0; i < nx; i++) {
-              const p = k * ny * nx + j * nx + i;
-              if (_SOLID[p]) continue;
-              const z_above = z_c - _Z_REL[j * nx + i];
-              const f = _logFactor(z_above, _cellZ0(i, j));
-              _U[p] = U0 * f; _V[p] = V0 * f; _W[p] = 0; _P[p] = 0;
+    // Explicit Laplacian diffusion
+    function _diffuse(dst, src, nu, dt) {
+      const nx = _NX,
+        ny = _NY,
+        nz = _NZ;
+      const nxny = nx * ny;
+      const idx2 = 1 / (_DX * _DX),
+        idy2 = 1 / (_DY * _DY),
+        idz2 = 1 / (_DZ * _DZ);
+      const coeff = nu * dt;
+      // Interior only; boundaries handled separately
+      for (let k = 1; k < nz - 1; k++) {
+        for (let j = 1; j < ny - 1; j++) {
+          for (let i = 1; i < nx - 1; i++) {
+            const p = k * nxny + j * nx + i;
+            if (_SOLID[p]) {
+              dst[p] = 0;
+              continue;
             }
+            const s = src[p];
+            // Use 0 for solid neighbors (no-slip BC at walls)
+            const se = _SOLID[p + 1] ? 0 : src[p + 1];
+            const sw = _SOLID[p - 1] ? 0 : src[p - 1];
+            const sn = _SOLID[p - nx] ? 0 : src[p - nx];
+            const ss = _SOLID[p + nx] ? 0 : src[p + nx];
+            const su = _SOLID[p + nxny] ? 0 : src[p + nxny];
+            const sd = _SOLID[p - nxny] ? 0 : src[p - nxny];
+            const lap =
+              (se - 2 * s + sw) * idx2 +
+              (sn - 2 * s + ss) * idy2 +
+              (su - 2 * s + sd) * idz2;
+            dst[p] = s + coeff * lap;
           }
         }
       }
+    }
 
-      // Trilinear interpolation at fractional index (fi, fj, fk)
-      // Returns 0 if destination is a solid cell
-      function _trilinear(f, fi, fj, fk) {
-        const nx = _NX, ny = _NY, nz = _NZ;
-        const i0 = Math.max(0, Math.min(nx - 2, Math.floor(fi)));
-        const j0 = Math.max(0, Math.min(ny - 2, Math.floor(fj)));
-        const k0 = Math.max(0, Math.min(nz - 2, Math.floor(fk)));
-        const i1 = i0 + 1, j1 = j0 + 1, k1 = k0 + 1;
-        const tx = fi - i0, ty = fj - j0, tz = fk - k0;
-        const nxny = nx * ny;
-        const v000 = f[k0 * nxny + j0 * nx + i0], v100 = f[k0 * nxny + j0 * nx + i1];
-        const v010 = f[k0 * nxny + j1 * nx + i0], v110 = f[k0 * nxny + j1 * nx + i1];
-        const v001 = f[k1 * nxny + j0 * nx + i0], v101 = f[k1 * nxny + j0 * nx + i1];
-        const v011 = f[k1 * nxny + j1 * nx + i0], v111 = f[k1 * nxny + j1 * nx + i1];
-        return (1 - tz) * ((1 - ty) * ((1 - tx) * v000 + tx * v100) + ty * ((1 - tx) * v010 + tx * v110))
-          + tz * ((1 - ty) * ((1 - tx) * v001 + tx * v101) + ty * ((1 - tx) * v011 + tx * v111));
-      }
-
-      // Semi-Lagrangian advection: trace backward in time and interpolate
-      // Convention: j=0=north, V>0=northward → fj_back = j + V*dt/dy
-      function _advect(dst, src, dt) {
-        const nx = _NX, ny = _NY, nz = _NZ, dx = _DX, dy = _DY, dz = _DZ;
-        const nxny = nx * ny;
-        for (let k = 0; k < nz; k++) {
-          for (let j = 0; j < ny; j++) {
-            for (let i = 0; i < nx; i++) {
-              const p = k * nxny + j * nx + i;
-              if (_SOLID[p]) { dst[p] = 0; continue; }
-              const fi = i - _U[p] * dt / dx;
-              const fj = j + _V[p] * dt / dy; // + sign: j=0=north, V>0 → came from south (larger j)
-              const fk = k - _W[p] * dt / dz;
-              dst[p] = _trilinear(src, fi, fj, fk);
+    // Compute divergence of (U, V, W) in physical space
+    // ∂U/∂x + ∂V/∂y + ∂W/∂z
+    // j increases southward → ∂V/∂y = -(∂V/∂j)/dy
+    function _computeDiv() {
+      const nx = _NX,
+        ny = _NY,
+        nz = _NZ;
+      const nxny = nx * ny;
+      const inv2dx = 1 / (2 * _DX),
+        inv2dy = 1 / (2 * _DY),
+        inv2dz = 1 / (2 * _DZ);
+      for (let k = 1; k < nz - 1; k++) {
+        for (let j = 1; j < ny - 1; j++) {
+          for (let i = 1; i < nx - 1; i++) {
+            const p = k * nxny + j * nx + i;
+            if (_SOLID[p]) {
+              _DIV[p] = 0;
+              continue;
             }
+            // Use one-sided differences at solid interfaces
+            const ue = _SOLID[p + 1] ? _U[p] : _U[p + 1];
+            const uw = _SOLID[p - 1] ? _U[p] : _U[p - 1];
+            const vn = _SOLID[p - nx] ? _V[p] : _V[p - nx]; // j-1 = north
+            const vs = _SOLID[p + nx] ? _V[p] : _V[p + nx]; // j+1 = south
+            const wu = _SOLID[p + nxny] ? _W[p] : _W[p + nxny];
+            const wd = _SOLID[p - nxny] ? _W[p] : _W[p - nxny];
+            // Note: ∂V/∂y = -(vs-vn)/(2dy) because j increases south
+            _DIV[p] =
+              (ue - uw) * inv2dx - (vs - vn) * inv2dy + (wu - wd) * inv2dz;
           }
         }
       }
+    }
 
-      // Explicit Laplacian diffusion
-      function _diffuse(dst, src, nu, dt) {
-        const nx = _NX, ny = _NY, nz = _NZ;
-        const nxny = nx * ny;
-        const idx2 = 1 / (_DX * _DX), idy2 = 1 / (_DY * _DY), idz2 = 1 / (_DZ * _DZ);
-        const coeff = nu * dt;
-        // Interior only; boundaries handled separately
-        for (let k = 1; k < nz - 1; k++) {
-          for (let j = 1; j < ny - 1; j++) {
-            for (let i = 1; i < nx - 1; i++) {
-              const p = k * nxny + j * nx + i;
-              if (_SOLID[p]) { dst[p] = 0; continue; }
-              const s = src[p];
-              // Use 0 for solid neighbors (no-slip BC at walls)
-              const se = _SOLID[p + 1] ? 0 : src[p + 1];
-              const sw = _SOLID[p - 1] ? 0 : src[p - 1];
-              const sn = _SOLID[p - nx] ? 0 : src[p - nx];
-              const ss = _SOLID[p + nx] ? 0 : src[p + nx];
-              const su = _SOLID[p + nxny] ? 0 : src[p + nxny];
-              const sd = _SOLID[p - nxny] ? 0 : src[p - nxny];
-              const lap = (se - 2 * s + sw) * idx2 + (sn - 2 * s + ss) * idy2 + (su - 2 * s + sd) * idz2;
-              dst[p] = s + coeff * lap;
-            }
-          }
-        }
-      }
-
-      // Compute divergence of (U, V, W) in physical space
-      // ∂U/∂x + ∂V/∂y + ∂W/∂z
-      // j increases southward → ∂V/∂y = -(∂V/∂j)/dy
-      function _computeDiv() {
-        const nx = _NX, ny = _NY, nz = _NZ;
-        const nxny = nx * ny;
-        const inv2dx = 1 / (2 * _DX), inv2dy = 1 / (2 * _DY), inv2dz = 1 / (2 * _DZ);
-        for (let k = 1; k < nz - 1; k++) {
-          for (let j = 1; j < ny - 1; j++) {
-            for (let i = 1; i < nx - 1; i++) {
-              const p = k * nxny + j * nx + i;
-              if (_SOLID[p]) { _DIV[p] = 0; continue; }
-              // Use one-sided differences at solid interfaces
-              const ue = _SOLID[p + 1] ? _U[p] : _U[p + 1];
-              const uw = _SOLID[p - 1] ? _U[p] : _U[p - 1];
-              const vn = _SOLID[p - nx] ? _V[p] : _V[p - nx];  // j-1 = north
-              const vs = _SOLID[p + nx] ? _V[p] : _V[p + nx];  // j+1 = south
-              const wu = _SOLID[p + nxny] ? _W[p] : _W[p + nxny];
-              const wd = _SOLID[p - nxny] ? _W[p] : _W[p - nxny];
-              // Note: ∂V/∂y = -(vs-vn)/(2dy) because j increases south
-              _DIV[p] = (ue - uw) * inv2dx - (vs - vn) * inv2dy + (wu - wd) * inv2dz;
-            }
-          }
-        }
-      }
-
-      // Jacobi iterations for pressure Poisson: ∇²p = div/dt
-      // For solid neighbors: Neumann BC (dp/dn=0) → use cell's own pressure
-      // Async: yields every _PRESSURE_YIELD_EVERY_VAL iterations so the stop button is always responsive.
-      let _PRESSURE_YIELD_EVERY_VAL = 10;
-      async function _solvePressure(dt, nIter) {
-        const nx = _NX, ny = _NY, nz = _NZ;
-        const nxny = nx * ny;
-        const idx2 = 1 / (_DX * _DX), idy2 = 1 / (_DY * _DY), idz2 = 1 / (_DZ * _DZ);
-        const denom = 2 * (idx2 + idy2 + idz2);
-        for (let iter = 0; iter < nIter; iter++) {
-          for (let k = 1; k < nz - 1; k++) {
-            for (let j = 1; j < ny - 1; j++) {
-              for (let i = 1; i < nx - 1; i++) {
-                const q = k * nxny + j * nx + i;
-                if (_SOLID[q]) { _P1[q] = 0; continue; }
-                const pe = _SOLID[q + 1] ? _P[q] : _P[q + 1];
-                const pw = _SOLID[q - 1] ? _P[q] : _P[q - 1];
-                const pn = _SOLID[q - nx] ? _P[q] : _P[q - nx];
-                const ps = _SOLID[q + nx] ? _P[q] : _P[q + nx];
-                const pu = _SOLID[q + nxny] ? _P[q] : _P[q + nxny];
-                const pd = _SOLID[q - nxny] ? _P[q] : _P[q - nxny];
-                _P1[q] = ((pe + pw) * idx2 + (pn + ps) * idy2 + (pu + pd) * idz2 - _DIV[q] / dt) / denom;
-              }
-            }
-          }
-          _applyPressureBC();
-          _P.set(_P1);
-          if ((iter + 1) % _PRESSURE_YIELD_EVERY_VAL === 0) await yieldUI();
-        }
-      }
-
-      // Correct velocity with pressure gradient
-      // U -= dt * ∂p/∂x;  V += dt * ∂p/∂j / dy (note: ∂V/∂y = -∂V/∂j → correct sign);
-      // W -= dt * ∂p/∂z
-      function _projectVelocity(dt) {
-        const nx = _NX, ny = _NY, nz = _NZ;
-        const nxny = nx * ny;
-        const inv2dx = 1 / (2 * _DX), inv2dy = 1 / (2 * _DY), inv2dz = 1 / (2 * _DZ);
+    // Jacobi iterations for pressure Poisson: ∇²p = div/dt
+    // For solid neighbors: Neumann BC (dp/dn=0) → use cell's own pressure
+    // Async: yields every _PRESSURE_YIELD_EVERY_VAL iterations so the stop button is always responsive.
+    let _PRESSURE_YIELD_EVERY_VAL = 10;
+    async function _solvePressure(dt, nIter) {
+      const nx = _NX,
+        ny = _NY,
+        nz = _NZ;
+      const nxny = nx * ny;
+      const idx2 = 1 / (_DX * _DX),
+        idy2 = 1 / (_DY * _DY),
+        idz2 = 1 / (_DZ * _DZ);
+      const denom = 2 * (idx2 + idy2 + idz2);
+      for (let iter = 0; iter < nIter; iter++) {
         for (let k = 1; k < nz - 1; k++) {
           for (let j = 1; j < ny - 1; j++) {
             for (let i = 1; i < nx - 1; i++) {
               const q = k * nxny + j * nx + i;
-              if (_SOLID[q]) continue;
+              if (_SOLID[q]) {
+                _P1[q] = 0;
+                continue;
+              }
               const pe = _SOLID[q + 1] ? _P[q] : _P[q + 1];
               const pw = _SOLID[q - 1] ? _P[q] : _P[q - 1];
               const pn = _SOLID[q - nx] ? _P[q] : _P[q - nx];
               const ps = _SOLID[q + nx] ? _P[q] : _P[q + nx];
               const pu = _SOLID[q + nxny] ? _P[q] : _P[q + nxny];
               const pd = _SOLID[q - nxny] ? _P[q] : _P[q - nxny];
-              _U[q] -= dt * (pe - pw) * inv2dx;
-              _V[q] += dt * (ps - pn) * inv2dy; // + sign: j increases south
-              _W[q] -= dt * (pu - pd) * inv2dz;
+              _P1[q] =
+                ((pe + pw) * idx2 +
+                  (pn + ps) * idy2 +
+                  (pu + pd) * idz2 -
+                  _DIV[q] / dt) /
+                denom;
             }
           }
         }
+        _applyPressureBC();
+        _P.set(_P1);
+        if ((iter + 1) % _PRESSURE_YIELD_EVERY_VAL === 0) await yieldUI();
       }
+    }
 
-      function _applyPressureBC() {
-        // Pressure = 0 at outflow boundaries
-        const nx = _NX, ny = _NY, nz = _NZ;
-        const nxny = nx * ny;
-        const { U: U0, V: V0 } = windComponents();
-        for (let k = 0; k < nz; k++) {
-          for (let j = 0; j < ny; j++) {
-            if (U0 <= 0) _P1[k * nxny + j * nx + 0] = 0; // left outflow
-            if (U0 >= 0) _P1[k * nxny + j * nx + (nx - 1)] = 0; // right outflow
-          }
-          for (let i = 0; i < nx; i++) {
-            if (V0 >= 0) _P1[k * nxny + 0 * nx + i] = 0; // top (north) outflow
-            if (V0 <= 0) _P1[k * nxny + (ny - 1) * nx + i] = 0; // bottom (south) outflow
-          }
-        }
-      }
-
-      // Apply all boundary conditions on velocity
-      function _applyVelocityBC(U0, V0) {
-        const nx = _NX, ny = _NY, nz = _NZ;
-        const nxny = nx * ny;
-
-        // Solid cells: no-slip
-        for (let p = 0; p < nz * ny * nx; p++) {
-          if (_SOLID[p]) { _U[p] = 0; _V[p] = 0; _W[p] = 0; }
-        }
-
-        // Top layer (k=NZ-1): free-slip (copy from k=NZ-2, zero normal)
-        for (let j = 0; j < ny; j++) {
-          for (let i = 0; i < nx; i++) {
-            const q = (nz - 1) * nxny + j * nx + i;
-            const q2 = (nz - 2) * nxny + j * nx + i;
-            _U[q] = _U[q2]; _V[q] = _V[q2]; _W[q] = 0;
-          }
-        }
-
-        // Bottom layer (k=0): Neumann (copy from k=1) unless solid
-        for (let j = 0; j < ny; j++) {
-          for (let i = 0; i < nx; i++) {
-            const q = j * nx + i;
-            const q2 = nxny + j * nx + i;
-            if (!_SOLID[q]) { _U[q] = _U[q2]; _V[q] = _V[q2]; _W[q] = 0; }
-          }
-        }
-
-        // Lateral inflow/outflow BCs
-        for (let k = 0; k < nz; k++) {
-          const z_c = (k + 0.5) * _DZ;
-          // Left (i=0)
-          for (let j = 0; j < ny; j++) {
-            const q = k * nxny + j * nx;
-            if (_SOLID[q]) continue;
-            if (U0 > 0) { // inflow from left
-              const f = _logFactor(z_c - _Z_REL[j * nx], _cellZ0(0, j));
-              _U[q] = U0 * f; _V[q] = V0 * f; _W[q] = 0;
-            } else { // outflow: Neumann
-              _U[q] = _U[q + 1]; _V[q] = _V[q + 1]; _W[q] = _W[q + 1];
-            }
-          }
-          // Right (i=nx-1)
-          for (let j = 0; j < ny; j++) {
-            const q = k * nxny + j * nx + (nx - 1);
-            if (_SOLID[q]) continue;
-            if (U0 < 0) { // inflow from right
-              const f = _logFactor(z_c - _Z_REL[j * nx + (nx - 1)], _cellZ0(nx - 1, j));
-              _U[q] = U0 * f; _V[q] = V0 * f; _W[q] = 0;
-            } else {
-              _U[q] = _U[q - 1]; _V[q] = _V[q - 1]; _W[q] = _W[q - 1];
-            }
-          }
-          // Top edge (j=0 = north)
-          for (let i = 0; i < nx; i++) {
-            const q = k * nxny + i;
-            if (_SOLID[q]) continue;
-            if (V0 < 0) { // inflow from north (southward wind)
-              const f = _logFactor(z_c - _Z_REL[i], _cellZ0(i, 0));
-              _U[q] = U0 * f; _V[q] = V0 * f; _W[q] = 0;
-            } else {
-              _U[q] = _U[q + nx]; _V[q] = _V[q + nx]; _W[q] = _W[q + nx];
-            }
-          }
-          // Bottom edge (j=ny-1 = south)
-          for (let i = 0; i < nx; i++) {
-            const q = k * nxny + (ny - 1) * nx + i;
-            if (_SOLID[q]) continue;
-            if (V0 > 0) { // inflow from south (northward wind)
-              const f = _logFactor(z_c - _Z_REL[(ny - 1) * nx + i], _cellZ0(i, ny - 1));
-              _U[q] = U0 * f; _V[q] = V0 * f; _W[q] = 0;
-            } else {
-              _U[q] = _U[q - nx]; _V[q] = _V[q - nx]; _W[q] = _W[q - nx];
-            }
-          }
-        }
-      }
-
-      // One full NS time step — async so each phase can yield to the event loop
-      async function nsStep(dt, nu, pIter, U0, V0) {
-        // 1. Semi-Lagrangian advection of U, V, W
-        _advect(_U1, _U, dt);
-        _advect(_V1, _V, dt);
-        _advect(_W1, _W, dt);
-        _U.set(_U1); _V.set(_V1); _W.set(_W1);
-        await yieldUI();
-
-        // 2. Diffusion
-        _diffuse(_U1, _U, nu, dt);
-        _diffuse(_V1, _V, nu, dt);
-        _diffuse(_W1, _W, nu, dt);
-        _U.set(_U1); _V.set(_V1); _W.set(_W1);
-        await yieldUI();
-
-        // 3. Apply velocity BCs (inflow, outflow, walls)
-        _applyVelocityBC(U0, V0);
-
-        // 4. Divergence
-        _computeDiv();
-        await yieldUI();
-
-        // 5. Pressure solve (internally yields every _PRESSURE_YIELD_EVERY iterations)
-        await _solvePressure(dt, pIter);
-
-        // 6. Pressure projection
-        _projectVelocity(dt);
-
-        // 7. Re-apply BCs (clean up)
-        _applyVelocityBC(U0, V0);
-      }
-
-      // Extract surface (lowest non-solid) field at each (i,j)
-      function extractSurface2D(field3D) {
-        const nx = _NX, ny = _NY, nz = _NZ;
-        const nxny = nx * ny;
-        const out = new Float32Array(ny * nx);
-        for (let j = 0; j < ny; j++) {
-          for (let i = 0; i < nx; i++) {
-            // Find first non-solid level
-            for (let k = 0; k < nz; k++) {
-              const p = k * nxny + j * nx + i;
-              if (!_SOLID[p]) { out[j * nx + i] = field3D[p]; break; }
-              if (k === nz - 1) out[j * nx + i] = 0;
-            }
-          }
-        }
-        return out;
-      }
-
-      // Compute RMS divergence (convergence diagnostic)
-      function rmsDivergence() {
-        let sum = 0, count = 0;
-        for (let p = 0; p < _DIV.length; p++) {
-          if (!_SOLID[p]) { sum += _DIV[p] * _DIV[p]; count++; }
-        }
-        return Math.sqrt(sum / Math.max(count, 1));
-      }
-
-      // ═══════════════════════════════════════════════════════════════════
-      //  MAIN FLOW
-      // ═══════════════════════════════════════════════════════════════════
-
-      let terrainData = null, meshData = null, simResult = null;
-      let _surf_u, _surf_v, _surf_w, _surf_p, _surf_speed, _surf_vort;
-      let _simCtx = null; // set at sim start so _renderPreviews can pack simResult
-
-      function _renderPreviews(nx, ny, dx, dy) {
-        _surf_u = extractSurface2D(_U);
-        _surf_v = extractSurface2D(_V);
-        _surf_w = extractSurface2D(_W);
-        _surf_p = extractSurface2D(_P);
-        _surf_speed = new Float32Array(ny * nx);
-        for (let i = 0; i < ny * nx; i++) _surf_speed[i] = Math.hypot(_surf_u[i], _surf_v[i]);
-        _surf_vort = new Float32Array(ny * nx);
+    // Correct velocity with pressure gradient
+    // U -= dt * ∂p/∂x;  V += dt * ∂p/∂j / dy (note: ∂V/∂y = -∂V/∂j → correct sign);
+    // W -= dt * ∂p/∂z
+    function _projectVelocity(dt) {
+      const nx = _NX,
+        ny = _NY,
+        nz = _NZ;
+      const nxny = nx * ny;
+      const inv2dx = 1 / (2 * _DX),
+        inv2dy = 1 / (2 * _DY),
+        inv2dz = 1 / (2 * _DZ);
+      for (let k = 1; k < nz - 1; k++) {
         for (let j = 1; j < ny - 1; j++) {
           for (let i = 1; i < nx - 1; i++) {
-            const idx = j * nx + i;
-            _surf_vort[idx] = (_surf_v[idx + 1] - _surf_v[idx - 1]) / (2 * dx)
-              + (_surf_u[idx + nx] - _surf_u[idx - nx]) / (2 * dy);
+            const q = k * nxny + j * nx + i;
+            if (_SOLID[q]) continue;
+            const pe = _SOLID[q + 1] ? _P[q] : _P[q + 1];
+            const pw = _SOLID[q - 1] ? _P[q] : _P[q - 1];
+            const pn = _SOLID[q - nx] ? _P[q] : _P[q - nx];
+            const ps = _SOLID[q + nx] ? _P[q] : _P[q + nx];
+            const pu = _SOLID[q + nxny] ? _P[q] : _P[q + nxny];
+            const pd = _SOLID[q - nxny] ? _P[q] : _P[q - nxny];
+            _U[q] -= dt * (pe - pw) * inv2dx;
+            _V[q] += dt * (ps - pn) * inv2dy; // + sign: j increases south
+            _W[q] -= dt * (pu - pd) * inv2dz;
           }
         }
-        const arrowData = { u: _surf_u, v: _surf_v, step: Math.max(4, Math.round(nx / 20)) };
-        renderPlot(document.getElementById('plot-speed'), _surf_speed, nx, ny, cmapSpeed, arrowData);
-        renderPlot(document.getElementById('plot-vert'), _surf_w, nx, ny, cmapVert, null);
-        renderPlot(document.getElementById('plot-press'), _surf_p, nx, ny, cmapPress, null);
-        renderPlot(document.getElementById('plot-vort'), _surf_vort, nx, ny, cmapVort, null);
+      }
+    }
 
-        // Pack simResult so viewer can be opened at any point during the sim
-        if (!_simCtx) return;
-        const { nz, T_sim, U0, V0, nu, toX, toY, toZ, laX, laY, laZ } = _simCtx;
-        const elevArr2d = []; for (let j = 0; j < ny; j++) elevArr2d.push(Array.from(terrainData.Z.slice(j * nx, (j + 1) * nx)));
-        const meshElev2d = []; for (let j = 0; j < meshData.ny; j++) meshElev2d.push(Array.from(meshData.Z.slice(j * meshData.nx, (j + 1) * meshData.nx)));
-        simResult = {
-          type: 'ns3d',
-          terrain: {
-            elevation: elevArr2d, nx, ny, dx, dy,
-            x_extent: terrainData.x_extent,
-            y_extent: terrainData.y_extent,
-            lat0: terrainData.lat0, lon0: terrainData.lon0,
-            mesh_elevation: meshElev2d,
-            mesh_nx: meshData.nx, mesh_ny: meshData.ny, mesh_dx: meshData.dx,
-          },
-          grid: { nx, ny, nz, dx, dy, dz: _DZ, z_base: _Z_BASE },
-          fields: {
-            u: Array.from(_U),
-            v: Array.from(_V),
-            w: Array.from(_W),
-            p: Array.from(_P),
-            surf_speed: Array.from(_surf_speed),
-            surf_w: Array.from(_surf_w),
-            surf_p: Array.from(_surf_p),
-            surf_vort: Array.from(_surf_vort),
-            surf_u: Array.from(_surf_u),
-            surf_v: Array.from(_surf_v),
-          },
-          params: {
-            wind_dir: windDirDeg,
-            wind_speed_ms: parseFloat(document.getElementById('wind_speed').value),
-            U_in: U0, V_in: V0, nu, nz, h_domain: _simCtx.h_domain, dz: _DZ, z_base: _Z_BASE, sim_time: T_sim,
-          },
-          markers: [
-            { type: 'takeoff', label: '▲ Take-off', x: toX, y: toY, z: toZ },
-            { type: 'landing', label: '▼ Landing', x: laX, y: laY, z: laZ },
-          ],
-        };
-        // Only enable viewer when sim is not actively running
-        if (document.getElementById('btn-stop').disabled) {
-          document.getElementById('btn-map').disabled = false;
+    function _applyPressureBC() {
+      // Pressure = 0 at outflow boundaries
+      const nx = _NX,
+        ny = _NY,
+        nz = _NZ;
+      const nxny = nx * ny;
+      const {
+        U: U0,
+        V: V0
+      } = windComponents();
+      for (let k = 0; k < nz; k++) {
+        for (let j = 0; j < ny; j++) {
+          if (U0 <= 0) _P1[k * nxny + j * nx + 0] = 0; // left outflow
+          if (U0 >= 0) _P1[k * nxny + j * nx + (nx - 1)] = 0; // right outflow
+        }
+        for (let i = 0; i < nx; i++) {
+          if (V0 >= 0) _P1[k * nxny + 0 * nx + i] = 0; // top (north) outflow
+          if (V0 <= 0) _P1[k * nxny + (ny - 1) * nx + i] = 0; // bottom (south) outflow
+        }
+      }
+    }
+
+    // Apply all boundary conditions on velocity
+    function _applyVelocityBC(U0, V0) {
+      const nx = _NX,
+        ny = _NY,
+        nz = _NZ;
+      const nxny = nx * ny;
+
+      // Solid cells: no-slip
+      for (let p = 0; p < nz * ny * nx; p++) {
+        if (_SOLID[p]) {
+          _U[p] = 0;
+          _V[p] = 0;
+          _W[p] = 0;
         }
       }
 
-      async function runFetchAll() {
-        _stopRequested = false;
-        document.getElementById('btn-fetch').disabled = true;
-        document.getElementById('btn-sim').disabled = true;
-        setProgress(0);
+      // Top layer (k=NZ-1): free-slip (copy from k=NZ-2, zero normal)
+      for (let j = 0; j < ny; j++) {
+        for (let i = 0; i < nx; i++) {
+          const q = (nz - 1) * nxny + j * nx + i;
+          const q2 = (nz - 2) * nxny + j * nx + i;
+          _U[q] = _U[q2];
+          _V[q] = _V[q2];
+          _W[q] = 0;
+        }
+      }
 
-        const bbox = {
-          min_lat: parseFloat(document.getElementById('min_lat').value),
-          max_lat: parseFloat(document.getElementById('max_lat').value),
-          min_lon: parseFloat(document.getElementById('min_lon').value),
-          max_lon: parseFloat(document.getElementById('max_lon').value),
-        };
-        const simZoom = parseInt(document.getElementById('sim_zoom').value);
-        const meshZoom = parseInt(document.getElementById('mesh_zoom').value);
+      // Bottom layer (k=0): Neumann (copy from k=1) unless solid
+      for (let j = 0; j < ny; j++) {
+        for (let i = 0; i < nx; i++) {
+          const q = j * nx + i;
+          const q2 = nxny + j * nx + i;
+          if (!_SOLID[q]) {
+            _U[q] = _U[q2];
+            _V[q] = _V[q2];
+            _W[q] = 0;
+          }
+        }
+      }
 
-        try {
-          terrainData = await fetchDEM(bbox, simZoom, 'sim DEM');
-          const { Z, nx, ny, dx, dy } = terrainData;
-          const nx2 = Math.round(nx / 2)
-          const ny2 = Math.round(ny / 2)
-          const dx2 = dx * 2;
-          const dy2 = dx * 2;
-          log(`Refined sim grid: ${nx}×${ny}, dx=${dx.toFixed(1)} m, dy=${dy.toFixed(1)} m`, 'success');
-          log(`Coarse sim grid: ${nx2}×${ny2}, dx=${dx2.toFixed(1)} m, dy=${dy2.toFixed(1)} m`, 'success');
-
-          document.getElementById('sim_nx').value = nx2;
-          document.getElementById('sim_ny').value = ny2;
-          document.getElementById('grid-hint').textContent =
-            `DEM: ${nx2}×${ny2} (dx=${dx2.toFixed(1)} m). Change NX/NY to resample before simulation. Larger = more precise but slower.`;
-
-          meshData = await fetchDEM(bbox, meshZoom, 'mesh DEM');
-          log(`Mesh grid: ${meshData.nx}×${meshData.ny}, dx=${meshData.dx.toFixed(1)} m`, 'success');
-
-          document.getElementById('plots-area').style.display = 'flex';
-          renderPlot(document.getElementById('plot-elev'), Z, nx, ny, cmapElev);
-
-          await _fetchLC(bbox);
-
-          // Build and preview z₀ map immediately after fetch
-          const fallback_z0 = parseFloat(document.getElementById('log_z0').value) || 0.1;
-          _Z0_MAP = lcData ? buildZ0Map(lcData.lc, lcData.lc_nx, lcData.lc_ny, nx, ny, fallback_z0) : null;
-          if (_Z0_MAP) {
-            let z0min = Infinity, z0max = -Infinity;
-            for (let p = 0; p < _Z0_MAP.length; p++) { if (_Z0_MAP[p] < z0min) z0min = _Z0_MAP[p]; if (_Z0_MAP[p] > z0max) z0max = _Z0_MAP[p]; }
-            log(`Per-cell z₀: min=${z0min.toFixed(4)} m, max=${z0max.toFixed(4)} m`, 'success');
-            renderZ0Plot(document.getElementById('plot-z0'), _Z0_MAP, nx, ny);
+      // Lateral inflow/outflow BCs
+      for (let k = 0; k < nz; k++) {
+        const z_c = (k + 0.5) * _DZ;
+        // Left (i=0)
+        for (let j = 0; j < ny; j++) {
+          const q = k * nxny + j * nx;
+          if (_SOLID[q]) continue;
+          if (U0 > 0) {
+            // inflow from left
+            const f = _logFactor(z_c - _Z_REL[j * nx], _cellZ0(0, j));
+            _U[q] = U0 * f;
+            _V[q] = V0 * f;
+            _W[q] = 0;
           } else {
-            log(`Scalar z₀=${fallback_z0} m (no land cover data).`);
+            // outflow: Neumann
+            _U[q] = _U[q + 1];
+            _V[q] = _V[q + 1];
+            _W[q] = _W[q + 1];
           }
-
-          document.getElementById('btn-sim').disabled = false;
-          setStatus(`Data ready: terrain ${nx}×${ny}, land cover + z₀ map computed.`);
-          setProgress(1);
-        } catch (e) {
-          if (e.message !== '__STOPPED__') log(`Fetch error: ${e}`, 'error');
         }
-        document.getElementById('btn-fetch').disabled = false;
+        // Right (i=nx-1)
+        for (let j = 0; j < ny; j++) {
+          const q = k * nxny + j * nx + (nx - 1);
+          if (_SOLID[q]) continue;
+          if (U0 < 0) {
+            // inflow from right
+            const f = _logFactor(
+              z_c - _Z_REL[j * nx + (nx - 1)],
+              _cellZ0(nx - 1, j),
+            );
+            _U[q] = U0 * f;
+            _V[q] = V0 * f;
+            _W[q] = 0;
+          } else {
+            _U[q] = _U[q - 1];
+            _V[q] = _V[q - 1];
+            _W[q] = _W[q - 1];
+          }
+        }
+        // Top edge (j=0 = north)
+        for (let i = 0; i < nx; i++) {
+          const q = k * nxny + i;
+          if (_SOLID[q]) continue;
+          if (V0 < 0) {
+            // inflow from north (southward wind)
+            const f = _logFactor(z_c - _Z_REL[i], _cellZ0(i, 0));
+            _U[q] = U0 * f;
+            _V[q] = V0 * f;
+            _W[q] = 0;
+          } else {
+            _U[q] = _U[q + nx];
+            _V[q] = _V[q + nx];
+            _W[q] = _W[q + nx];
+          }
+        }
+        // Bottom edge (j=ny-1 = south)
+        for (let i = 0; i < nx; i++) {
+          const q = k * nxny + (ny - 1) * nx + i;
+          if (_SOLID[q]) continue;
+          if (V0 > 0) {
+            // inflow from south (northward wind)
+            const f = _logFactor(
+              z_c - _Z_REL[(ny - 1) * nx + i],
+              _cellZ0(i, ny - 1),
+            );
+            _U[q] = U0 * f;
+            _V[q] = V0 * f;
+            _W[q] = 0;
+          } else {
+            _U[q] = _U[q - nx];
+            _V[q] = _V[q - nx];
+            _W[q] = _W[q - nx];
+          }
+        }
       }
+    }
 
-      async function runSim() {
-        if (!terrainData) return;
-        _stopRequested = false;
-        document.getElementById('btn-fetch').disabled = true;
-        document.getElementById('btn-sim').disabled = true;
-        document.getElementById('btn-stop').disabled = false;
-        document.getElementById('btn-map').disabled = true;
-        simResult = null;
-        setProgress(0);
+    // One full NS time step — async so each phase can yield to the event loop
+    async function nsStep(dt, nu, pIter, U0, V0) {
+      // 1. Semi-Lagrangian advection of U, V, W
+      _advect(_U1, _U, dt);
+      _advect(_V1, _V, dt);
+      _advect(_W1, _W, dt);
+      _U.set(_U1);
+      _V.set(_V1);
+      _W.set(_W1);
+      await yieldUI();
 
-        const sim_nx = Math.max(2, parseInt(document.getElementById('sim_nx').value) || terrainData.nx);
-        const sim_ny = Math.max(2, parseInt(document.getElementById('sim_ny').value) || terrainData.ny);
+      // 2. Diffusion
+      _diffuse(_U1, _U, nu, dt);
+      _diffuse(_V1, _V, nu, dt);
+      _diffuse(_W1, _W, nu, dt);
+      _U.set(_U1);
+      _V.set(_V1);
+      _W.set(_W1);
+      await yieldUI();
 
-        // Resample DEM to simulation resolution (bilinear); recompute cell spacing
-        const Z = (sim_nx === terrainData.nx && sim_ny === terrainData.ny)
-          ? terrainData.Z
-          : resampleDEM(terrainData.Z, terrainData.nx, terrainData.ny, sim_nx, sim_ny);
-        const nx = sim_nx, ny = sim_ny;
-        const dx = (terrainData.x_extent[1] - terrainData.x_extent[0]) / nx;
-        const dy = (terrainData.y_extent[1] - terrainData.y_extent[0]) / ny;
+      // 3. Apply velocity BCs (inflow, outflow, walls)
+      _applyVelocityBC(U0, V0);
 
-        if (sim_nx !== terrainData.nx || sim_ny !== terrainData.ny)
-          log(`DEM resampled: ${terrainData.nx}×${terrainData.ny} → ${nx}×${ny}, dx=${dx.toFixed(1)} m, dy=${dy.toFixed(1)} m`);
+      // 4. Divergence
+      _computeDiv();
+      await yieldUI();
 
-        const nz = parseInt(document.getElementById('nz').value);
-        const h_domain = parseFloat(document.getElementById('h_domain').value);
-        const nu = parseFloat(document.getElementById('visc').value);
-        const pIter = parseInt(document.getElementById('p_iter').value);
-        const T_sim = parseFloat(document.getElementById('sim_time').value);
-        const cfl = parseFloat(document.getElementById('cfl').value);
-        const dt_max = parseFloat(document.getElementById('dt_max').value);
-        const diff_safety = parseFloat(document.getElementById('diff_safety').value);
-        const p_yield = parseInt(document.getElementById('p_yield').value);
-        const { U: U0, V: V0 } = windComponents();
+      // 5. Pressure solve (internally yields every _PRESSURE_YIELD_EVERY iterations)
+      await _solvePressure(dt, pIter);
 
-        // Apply UI-driven log profile parameters
-        _LOG_Z0 = parseFloat(document.getElementById('log_z0').value);
-        _LOG_ZREF = parseFloat(document.getElementById('log_zref').value);
+      // 6. Pressure projection
+      _projectVelocity(dt);
 
-        // dt: limited by semi-Lagrangian CFL and diffusion stability
-        const wind_speed = Math.hypot(U0, V0);
-        const dt_adv = wind_speed > 0.1 ? cfl * Math.min(dx, dy) / wind_speed : 9999;
-        const dt_diff = diff_safety * Math.min(dx * dx, dy * dy, (h_domain / nz) ** 2) / Math.max(nu, 0.01);
-        const dt = Math.min(dt_adv, dt_diff, dt_max);
-        const nSteps = Math.ceil(T_sim / dt);
+      // 7. Re-apply BCs (clean up)
+      _applyVelocityBC(U0, V0);
+    }
 
-        log(`NS3D init: grid ${nx}×${ny}×${nz}`);
-        log(`dz=${(h_domain / nz).toFixed(1)} m, dt=${dt.toFixed(2)} s (adv=${dt_adv.toFixed(1)}, diff=${dt_diff.toFixed(1)}, max=${dt_max}), steps=${nSteps}`);
-        log(`Wind: ${windDirDeg.toFixed(0)}°, U=${U0.toFixed(1)} V=${V0.toFixed(1)} m/s`);
-        log(`Log profile: z₀=${_LOG_Z0} m, z_ref=${_LOG_ZREF} m`);
-        log(`ν=${nu} m²/s, pressure iter=${pIter}, yield every ${p_yield}`);
-        _PRESSURE_YIELD_EVERY_VAL = p_yield;
-        setStatus('Initializing NS3D grid…');
-
-        initNS(Z, nx, ny, dx, dy, nz, h_domain, U0, V0);
-        log(`Solid cells: ${_SOLID.reduce((a, b) => a + b, 0)} / ${nz * ny * nx}`, 'success');
-
-        // Compute marker positions once so _renderPreviews can include them in simResult
-        const mLon0 = terrainData.lon0, mLat0 = terrainData.lat0;
-        function elevAtPoint(mlat, mlon) {
-          const [mx, my] = lonlatToLocal(mlon, mlat, mLon0, mLat0);
-          const i = Math.round((mx - terrainData.x_extent[0]) / (terrainData.x_extent[1] - terrainData.x_extent[0]) * (nx - 1));
-          const j = Math.round((terrainData.y_extent[1] - my) / (terrainData.y_extent[1] - terrainData.y_extent[0]) * (ny - 1));
-          return terrainData.Z[Math.max(0, Math.min(ny - 1, j)) * nx + Math.max(0, Math.min(nx - 1, i))];
-        }
-        const toLat = parseFloat(document.getElementById('takeoff_lat').value);
-        const toLon = parseFloat(document.getElementById('takeoff_lon').value);
-        const laLat = parseFloat(document.getElementById('landing_lat').value);
-        const laLon = parseFloat(document.getElementById('landing_lon').value);
-        const [toX, toY] = lonlatToLocal(toLon, toLat, mLon0, mLat0);
-        const [laX, laY] = lonlatToLocal(laLon, laLat, mLon0, mLat0);
-        const toZ = elevAtPoint(toLat, toLon), laZ = elevAtPoint(laLat, laLon);
-        _simCtx = { nz, T_sim, U0, V0, nu, h_domain, toX, toY, toZ, laX, laY, laZ };
-
-        document.getElementById('plots-area-sim').style.display = 'flex';
-
-        setStatus('Simulating NS3D…');
-        const _simStart = performance.now();
-        try {
-          for (let step = 0; step < nSteps; step++) {
-            // nsStep is async and yields internally — stop button works at any moment
-            await nsStep(dt, nu, pIter, U0, V0);
-            const rms = rmsDivergence();
-            setProgress(step / nSteps);
-            const elapsed = (performance.now() - _simStart) / 1000;
-            const etaSec = step > 0 ? elapsed / step * (nSteps - step) : null;
-            const etaStr = etaSec === null ? '…' : `${etaSec.toFixed(0)}s`;
-            setStatus(`NS3D step ${step}/${nSteps} · t=${(step * dt).toFixed(0)}s · div=${rms.toExponential(2)} · ETA ${etaStr}`);
-            if (step % 10 === 0) {
-              log(`Step ${step}/${nSteps} — t=${(step * dt).toFixed(0)} s, div_rms=${rms.toExponential(2)}`);
-              _renderPreviews(nx, ny, dx, dy);
+    // Extract surface (lowest non-solid) field at each (i,j)
+    function extractSurface2D(field3D) {
+      const nx = _NX,
+        ny = _NY,
+        nz = _NZ;
+      const nxny = nx * ny;
+      const out = new Float32Array(ny * nx);
+      for (let j = 0; j < ny; j++) {
+        for (let i = 0; i < nx; i++) {
+          // Find first non-solid level
+          for (let k = 0; k < nz; k++) {
+            const p = k * nxny + j * nx + i;
+            if (!_SOLID[p]) {
+              out[j * nx + i] = field3D[p];
+              break;
             }
+            if (k === nz - 1) out[j * nx + i] = 0;
           }
-        } catch (e) {
-          if (e.message === '__STOPPED__') {
-            log('Stopped by user.', 'warn');
-            _renderPreviews(nx, ny, dx, dy);
-          } else {
-            log(`Solver error: ${e}`, 'error');
+        }
+      }
+      return out;
+    }
+
+    // Compute RMS divergence (convergence diagnostic)
+    function rmsDivergence() {
+      let sum = 0,
+        count = 0;
+      for (let p = 0; p < _DIV.length; p++) {
+        if (!_SOLID[p]) {
+          sum += _DIV[p] * _DIV[p];
+          count++;
+        }
+      }
+      return Math.sqrt(sum / Math.max(count, 1));
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  MAIN FLOW
+    // ═══════════════════════════════════════════════════════════════════
+
+    let terrainData = null,
+      meshData = null,
+      simResult = null;
+    let _surf_u, _surf_v, _surf_w, _surf_p, _surf_speed, _surf_vort;
+    let _simCtx = null; // set at sim start so _renderPreviews can pack simResult
+
+    function _renderPreviews(nx, ny, dx, dy) {
+      _surf_u = extractSurface2D(_U);
+      _surf_v = extractSurface2D(_V);
+      _surf_w = extractSurface2D(_W);
+      _surf_p = extractSurface2D(_P);
+      _surf_speed = new Float32Array(ny * nx);
+      for (let i = 0; i < ny * nx; i++)
+        _surf_speed[i] = Math.hypot(_surf_u[i], _surf_v[i]);
+      _surf_vort = new Float32Array(ny * nx);
+      for (let j = 1; j < ny - 1; j++) {
+        for (let i = 1; i < nx - 1; i++) {
+          const idx = j * nx + i;
+          _surf_vort[idx] =
+            (_surf_v[idx + 1] - _surf_v[idx - 1]) / (2 * dx) +
+            (_surf_u[idx + nx] - _surf_u[idx - nx]) / (2 * dy);
+        }
+      }
+      const arrowData = {
+        u: _surf_u,
+        v: _surf_v,
+        step: Math.max(4, Math.round(nx / 20)),
+      };
+      renderPlot(
+        document.getElementById("plot-speed"),
+        _surf_speed,
+        nx,
+        ny,
+        cmapSpeed,
+        arrowData,
+      );
+      renderPlot(
+        document.getElementById("plot-vert"),
+        _surf_w,
+        nx,
+        ny,
+        cmapVert,
+        null,
+      );
+      renderPlot(
+        document.getElementById("plot-press"),
+        _surf_p,
+        nx,
+        ny,
+        cmapPress,
+        null,
+      );
+      renderPlot(
+        document.getElementById("plot-vort"),
+        _surf_vort,
+        nx,
+        ny,
+        cmapVort,
+        null,
+      );
+
+      // Pack simResult so viewer can be opened at any point during the sim
+      if (!_simCtx) return;
+      const {
+        nz,
+        T_sim,
+        U0,
+        V0,
+        nu,
+        toX,
+        toY,
+        toZ,
+        laX,
+        laY,
+        laZ
+      } = _simCtx;
+      const elevArr2d = [];
+      for (let j = 0; j < ny; j++)
+        elevArr2d.push(Array.from(terrainData.Z.slice(j * nx, (j + 1) * nx)));
+      const meshElev2d = [];
+      for (let j = 0; j < meshData.ny; j++)
+        meshElev2d.push(
+          Array.from(
+            meshData.Z.slice(j * meshData.nx, (j + 1) * meshData.nx),
+          ),
+        );
+      simResult = {
+        type: "ns3d",
+        terrain: {
+          elevation: elevArr2d,
+          nx,
+          ny,
+          dx,
+          dy,
+          x_extent: terrainData.x_extent,
+          y_extent: terrainData.y_extent,
+          lat0: terrainData.lat0,
+          lon0: terrainData.lon0,
+          mesh_elevation: meshElev2d,
+          mesh_nx: meshData.nx,
+          mesh_ny: meshData.ny,
+          mesh_dx: meshData.dx,
+        },
+        grid: {
+          nx,
+          ny,
+          nz,
+          dx,
+          dy,
+          dz: _DZ,
+          z_base: _Z_BASE
+        },
+        fields: {
+          u: Array.from(_U),
+          v: Array.from(_V),
+          w: Array.from(_W),
+          p: Array.from(_P),
+          surf_speed: Array.from(_surf_speed),
+          surf_w: Array.from(_surf_w),
+          surf_p: Array.from(_surf_p),
+          surf_vort: Array.from(_surf_vort),
+          surf_u: Array.from(_surf_u),
+          surf_v: Array.from(_surf_v),
+        },
+        params: {
+          wind_dir: windDirDeg,
+          wind_speed_ms: parseFloat(
+            document.getElementById("wind_speed").value,
+          ),
+          U_in: U0,
+          V_in: V0,
+          nu,
+          nz,
+          h_domain: _simCtx.h_domain,
+          dz: _DZ,
+          z_base: _Z_BASE,
+          sim_time: T_sim,
+        },
+        markers: [{
+            type: "takeoff",
+            label: "▲ Take-off",
+            x: toX,
+            y: toY,
+            z: toZ
+          },
+          {
+            type: "landing",
+            label: "▼ Landing",
+            x: laX,
+            y: laY,
+            z: laZ
+          },
+        ],
+      };
+      // Only enable viewer when sim is not actively running
+      if (document.getElementById("btn-stop").disabled) {
+        document.getElementById("btn-map").disabled = false;
+      }
+    }
+
+    async function runFetchAll() {
+      _stopRequested = false;
+      document.getElementById("btn-fetch").disabled = true;
+      document.getElementById("btn-sim").disabled = true;
+      setProgress(0);
+
+      const bbox = {
+        min_lat: parseFloat(document.getElementById("min_lat").value),
+        max_lat: parseFloat(document.getElementById("max_lat").value),
+        min_lon: parseFloat(document.getElementById("min_lon").value),
+        max_lon: parseFloat(document.getElementById("max_lon").value),
+      };
+      const simZoom = parseInt(document.getElementById("sim_zoom").value);
+      const meshZoom = parseInt(document.getElementById("mesh_zoom").value);
+
+      try {
+        terrainData = await fetchDEM(bbox, simZoom, "sim DEM");
+        const {
+          Z,
+          nx,
+          ny,
+          dx,
+          dy
+        } = terrainData;
+        const nx2 = Math.round(nx / 2);
+        const ny2 = Math.round(ny / 2);
+        const dx2 = dx * 2;
+        const dy2 = dx * 2;
+        log(
+          `Refined sim grid: ${nx}×${ny}, dx=${dx.toFixed(1)} m, dy=${dy.toFixed(1)} m`,
+          "success",
+        );
+        log(
+          `Coarse sim grid: ${nx2}×${ny2}, dx=${dx2.toFixed(1)} m, dy=${dy2.toFixed(1)} m`,
+          "success",
+        );
+
+        document.getElementById("sim_nx").value = nx2;
+        document.getElementById("sim_ny").value = ny2;
+        document.getElementById("grid-hint").textContent =
+          `DEM: ${nx2}×${ny2} (dx=${dx2.toFixed(1)} m). Change NX/NY to resample before simulation. Larger = more precise but slower.`;
+
+        meshData = await fetchDEM(bbox, meshZoom, "mesh DEM");
+        log(
+          `Mesh grid: ${meshData.nx}×${meshData.ny}, dx=${meshData.dx.toFixed(1)} m`,
+          "success",
+        );
+
+        document.getElementById("plots-area").style.display = "flex";
+        renderPlot(document.getElementById("plot-elev"), Z, nx, ny, cmapElev);
+
+        await _fetchLC(bbox);
+
+        // Build and preview z₀ map immediately after fetch
+        const fallback_z0 =
+          parseFloat(document.getElementById("log_z0").value) || 0.1;
+        _Z0_MAP = lcData ?
+          buildZ0Map(
+            lcData.lc,
+            lcData.lc_nx,
+            lcData.lc_ny,
+            nx,
+            ny,
+            fallback_z0,
+          ) :
+          null;
+        if (_Z0_MAP) {
+          let z0min = Infinity,
+            z0max = -Infinity;
+          for (let p = 0; p < _Z0_MAP.length; p++) {
+            if (_Z0_MAP[p] < z0min) z0min = _Z0_MAP[p];
+            if (_Z0_MAP[p] > z0max) z0max = _Z0_MAP[p];
           }
-          document.getElementById('btn-fetch').disabled = false;
-          document.getElementById('btn-sim').disabled = false;
-          document.getElementById('btn-stop').disabled = true;
-          return;
+          log(
+            `Per-cell z₀: min=${z0min.toFixed(4)} m, max=${z0max.toFixed(4)} m`,
+            "success",
+          );
+          renderZ0Plot(document.getElementById("plot-z0"), _Z0_MAP, nx, ny);
+        } else {
+          log(`Scalar z₀=${fallback_z0} m (no land cover data).`);
         }
 
-        log(`Simulation complete (T=${T_sim} s).`, 'success');
+        document.getElementById("btn-sim").disabled = false;
+        setStatus(
+          `Data ready: terrain ${nx}×${ny}, land cover + z₀ map computed.`,
+        );
         setProgress(1);
-        _renderPreviews(nx, ny, dx, dy);
-
-        document.getElementById('btn-fetch').disabled = false;
-        document.getElementById('btn-map').disabled = false;
-        document.getElementById('btn-sim').disabled = false;
-        document.getElementById('btn-stop').disabled = true;
-        setStatus(`Done — T=${T_sim} s, ${nSteps} steps`);
+      } catch (e) {
+        if (e.message !== "__STOPPED__") log(`Fetch error: ${e}`, "error");
       }
+      document.getElementById("btn-fetch").disabled = false;
+    }
 
-      function applyPreset(name) {
-        const s = v => v; // shorthand
-        if (name === 'coarse') {
-          const nx = terrainData ? Math.round(terrainData.nx / 2) : 40;
-          const ny = terrainData ? Math.round(terrainData.ny / 2) : 40;
-          document.getElementById('sim_nx').value = nx;
-          document.getElementById('sim_ny').value = ny;
-          document.getElementById('nz').value = 20;
-          document.getElementById('h_domain').value = 1500;
-          document.getElementById('visc').value = 150;
-          document.getElementById('p_iter').value = 30;
-          document.getElementById('p_yield').value = 5;
-          document.getElementById('sim_time').value = 900;
-          document.getElementById('cfl').value = 2.0;
-          document.getElementById('dt_max').value = 60;
-          document.getElementById('diff_safety').value = 0.25;
-          document.getElementById('log_z0').value = 0.1;
-          document.getElementById('log_zref').value = 100;
-        } else { // refined
-          const nx = terrainData ? terrainData.nx : 64;
-          const ny = terrainData ? terrainData.ny : 64;
-          document.getElementById('sim_nx').value = nx;
-          document.getElementById('sim_ny').value = ny;
-          document.getElementById('nz').value = 40;
-          document.getElementById('h_domain').value = 2000;
-          document.getElementById('visc').value = 50;
-          document.getElementById('p_iter').value = 80;
-          document.getElementById('p_yield').value = 10;
-          document.getElementById('sim_time').value = 1500;
-          document.getElementById('cfl').value = 1.5;
-          document.getElementById('dt_max').value = 30;
-          document.getElementById('diff_safety').value = 0.30;
-          document.getElementById('log_z0').value = 0.1;
-          document.getElementById('log_zref').value = 100;
+    async function runSim() {
+      if (!terrainData) return;
+      _stopRequested = false;
+      document.getElementById("btn-fetch").disabled = true;
+      document.getElementById("btn-sim").disabled = true;
+      document.getElementById("btn-stop").disabled = false;
+      document.getElementById("btn-map").disabled = true;
+      simResult = null;
+      setProgress(0);
+
+      const sim_nx = Math.max(
+        2,
+        parseInt(document.getElementById("sim_nx").value) || terrainData.nx,
+      );
+      const sim_ny = Math.max(
+        2,
+        parseInt(document.getElementById("sim_ny").value) || terrainData.ny,
+      );
+
+      // Resample DEM to simulation resolution (bilinear); recompute cell spacing
+      const Z =
+        sim_nx === terrainData.nx && sim_ny === terrainData.ny ?
+        terrainData.Z :
+        resampleDEM(
+          terrainData.Z,
+          terrainData.nx,
+          terrainData.ny,
+          sim_nx,
+          sim_ny,
+        );
+      const nx = sim_nx,
+        ny = sim_ny;
+      const dx = (terrainData.x_extent[1] - terrainData.x_extent[0]) / nx;
+      const dy = (terrainData.y_extent[1] - terrainData.y_extent[0]) / ny;
+
+      if (sim_nx !== terrainData.nx || sim_ny !== terrainData.ny)
+        log(
+          `DEM resampled: ${terrainData.nx}×${terrainData.ny} → ${nx}×${ny}, dx=${dx.toFixed(1)} m, dy=${dy.toFixed(1)} m`,
+        );
+
+      const nz = parseInt(document.getElementById("nz").value);
+      const h_domain = parseFloat(document.getElementById("h_domain").value);
+      const nu = parseFloat(document.getElementById("visc").value);
+      const pIter = parseInt(document.getElementById("p_iter").value);
+      const T_sim = parseFloat(document.getElementById("sim_time").value);
+      const cfl = parseFloat(document.getElementById("cfl").value);
+      const dt_max = parseFloat(document.getElementById("dt_max").value);
+      const diff_safety = parseFloat(
+        document.getElementById("diff_safety").value,
+      );
+      const p_yield = parseInt(document.getElementById("p_yield").value);
+      const {
+        U: U0,
+        V: V0
+      } = windComponents();
+
+      // Apply UI-driven log profile parameters
+      _LOG_Z0 = parseFloat(document.getElementById("log_z0").value);
+      _LOG_ZREF = parseFloat(document.getElementById("log_zref").value);
+
+      // dt: limited by semi-Lagrangian CFL and diffusion stability
+      const wind_speed = Math.hypot(U0, V0);
+      const dt_adv =
+        wind_speed > 0.1 ? (cfl * Math.min(dx, dy)) / wind_speed : 9999;
+      const dt_diff =
+        (diff_safety * Math.min(dx * dx, dy * dy, (h_domain / nz) ** 2)) /
+        Math.max(nu, 0.01);
+      const dt = Math.min(dt_adv, dt_diff, dt_max);
+      const nSteps = Math.ceil(T_sim / dt);
+
+      log(`NS3D init: grid ${nx}×${ny}×${nz}`);
+      log(
+        `dz=${(h_domain / nz).toFixed(1)} m, dt=${dt.toFixed(2)} s (adv=${dt_adv.toFixed(1)}, diff=${dt_diff.toFixed(1)}, max=${dt_max}), steps=${nSteps}`,
+      );
+      log(
+        `Wind: ${windDirDeg.toFixed(0)}°, U=${U0.toFixed(1)} V=${V0.toFixed(1)} m/s`,
+      );
+      log(`Log profile: z₀=${_LOG_Z0} m, z_ref=${_LOG_ZREF} m`);
+      log(`ν=${nu} m²/s, pressure iter=${pIter}, yield every ${p_yield}`);
+      _PRESSURE_YIELD_EVERY_VAL = p_yield;
+      setStatus("Initializing NS3D grid…");
+
+      initNS(Z, nx, ny, dx, dy, nz, h_domain, U0, V0);
+      log(
+        `Solid cells: ${_SOLID.reduce((a, b) => a + b, 0)} / ${nz * ny * nx}`,
+        "success",
+      );
+
+      // Compute marker positions once so _renderPreviews can include them in simResult
+      const mLon0 = terrainData.lon0,
+        mLat0 = terrainData.lat0;
+
+      function elevAtPoint(mlat, mlon) {
+        const [mx, my] = lonlatToLocal(mlon, mlat, mLon0, mLat0);
+        const i = Math.round(
+          ((mx - terrainData.x_extent[0]) /
+            (terrainData.x_extent[1] - terrainData.x_extent[0])) *
+          (nx - 1),
+        );
+        const j = Math.round(
+          ((terrainData.y_extent[1] - my) /
+            (terrainData.y_extent[1] - terrainData.y_extent[0])) *
+          (ny - 1),
+        );
+        return terrainData.Z[
+          Math.max(0, Math.min(ny - 1, j)) * nx +
+          Math.max(0, Math.min(nx - 1, i))
+        ];
+      }
+      const toLat = parseFloat(document.getElementById("takeoff_lat").value);
+      const toLon = parseFloat(document.getElementById("takeoff_lon").value);
+      const laLat = parseFloat(document.getElementById("landing_lat").value);
+      const laLon = parseFloat(document.getElementById("landing_lon").value);
+      const [toX, toY] = lonlatToLocal(toLon, toLat, mLon0, mLat0);
+      const [laX, laY] = lonlatToLocal(laLon, laLat, mLon0, mLat0);
+      const toZ = elevAtPoint(toLat, toLon),
+        laZ = elevAtPoint(laLat, laLon);
+      _simCtx = {
+        nz,
+        T_sim,
+        U0,
+        V0,
+        nu,
+        h_domain,
+        toX,
+        toY,
+        toZ,
+        laX,
+        laY,
+        laZ,
+      };
+
+      document.getElementById("plots-area-sim").style.display = "flex";
+
+      setStatus("Simulating NS3D…");
+      const _simStart = performance.now();
+      try {
+        for (let step = 0; step < nSteps; step++) {
+          // nsStep is async and yields internally — stop button works at any moment
+          await nsStep(dt, nu, pIter, U0, V0);
+          const rms = rmsDivergence();
+          setProgress(step / nSteps);
+          const elapsed = (performance.now() - _simStart) / 1000;
+          const etaSec = step > 0 ? (elapsed / step) * (nSteps - step) : null;
+          const etaStr = etaSec === null ? "…" : `${etaSec.toFixed(0)}s`;
+          setStatus(
+            `NS3D step ${step}/${nSteps} · t=${(step * dt).toFixed(0)}s · div=${rms.toExponential(2)} · ETA ${etaStr}`,
+          );
+          if (step % 10 === 0) {
+            log(
+              `Step ${step}/${nSteps} — t=${(step * dt).toFixed(0)} s, div_rms=${rms.toExponential(2)}`,
+            );
+            _renderPreviews(nx, ny, dx, dy);
+          }
         }
-      }
-
-      function stopSim() {
-        _stopRequested = true;
-        document.getElementById('btn-stop').disabled = true;
-      }
-
-      // ═══════════════════════════════════════════════════════════════════
-      //  INDEXEDDB & NAVIGATION
-      // ═══════════════════════════════════════════════════════════════════
-
-      function idbPut(key, json) {
-        return new Promise((resolve, reject) => {
-          const req = indexedDB.open('paragliding', 1);
-          req.onupgradeneeded = e => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains('sim')) db.createObjectStore('sim');
-          };
-          req.onerror = () => reject(req.error);
-          req.onsuccess = e => {
-            const db = e.target.result;
-            const tx = db.transaction('sim', 'readwrite');
-            tx.objectStore('sim').put(json, key);
-            tx.oncomplete = resolve; tx.onerror = () => reject(tx.error);
-          };
-        });
-      }
-
-      async function openViewer() {
-        if (!simResult) { log('No simulation result yet.', 'error'); return; }
-        try {
-          log('Saving to IndexedDB…');
-          await idbPut('ns3d_latest', JSON.stringify(simResult));
-          window.location.href = 'view-dynamic-advanced';
-        } catch (e) {
-          log(`IndexedDB error: ${e.message}`, 'error');
+      } catch (e) {
+        if (e.message === "__STOPPED__") {
+          log("Stopped by user.", "warn");
+          _renderPreviews(nx, ny, dx, dy);
+        } else {
+          log(`Solver error: ${e}`, "error");
         }
+        document.getElementById("btn-fetch").disabled = false;
+        document.getElementById("btn-sim").disabled = false;
+        document.getElementById("btn-stop").disabled = true;
+        return;
       }
 
-      // Nav dropdown touch support
-      document.querySelectorAll('.nav-dropdown-btn').forEach(function (btn) {
-        btn.addEventListener('click', function (e) {
-          var dd = btn.closest('.nav-dropdown');
-          var isOpen = dd.classList.contains('open');
-          document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
-          if (!isOpen) dd.classList.add('open');
-          e.stopPropagation();
+      log(`Simulation complete (T=${T_sim} s).`, "success");
+      setProgress(1);
+      _renderPreviews(nx, ny, dx, dy);
+
+      document.getElementById("btn-fetch").disabled = false;
+      document.getElementById("btn-map").disabled = false;
+      document.getElementById("btn-sim").disabled = false;
+      document.getElementById("btn-stop").disabled = true;
+      setStatus(`Done — T=${T_sim} s, ${nSteps} steps`);
+    }
+
+    function applyPreset(name) {
+      const s = (v) => v; // shorthand
+      if (name === "coarse") {
+        const nx = terrainData ? Math.round(terrainData.nx / 2) : 40;
+        const ny = terrainData ? Math.round(terrainData.ny / 2) : 40;
+        document.getElementById("sim_nx").value = nx;
+        document.getElementById("sim_ny").value = ny;
+        document.getElementById("nz").value = 20;
+        document.getElementById("h_domain").value = 1500;
+        document.getElementById("visc").value = 150;
+        document.getElementById("p_iter").value = 30;
+        document.getElementById("p_yield").value = 5;
+        document.getElementById("sim_time").value = 900;
+        document.getElementById("cfl").value = 2.0;
+        document.getElementById("dt_max").value = 60;
+        document.getElementById("diff_safety").value = 0.25;
+        document.getElementById("log_z0").value = 0.1;
+        document.getElementById("log_zref").value = 100;
+      } else {
+        // refined
+        const nx = terrainData ? terrainData.nx : 64;
+        const ny = terrainData ? terrainData.ny : 64;
+        document.getElementById("sim_nx").value = nx;
+        document.getElementById("sim_ny").value = ny;
+        document.getElementById("nz").value = 40;
+        document.getElementById("h_domain").value = 2000;
+        document.getElementById("visc").value = 50;
+        document.getElementById("p_iter").value = 80;
+        document.getElementById("p_yield").value = 10;
+        document.getElementById("sim_time").value = 1500;
+        document.getElementById("cfl").value = 1.5;
+        document.getElementById("dt_max").value = 30;
+        document.getElementById("diff_safety").value = 0.3;
+        document.getElementById("log_z0").value = 0.1;
+        document.getElementById("log_zref").value = 100;
+      }
+    }
+
+    function stopSim() {
+      _stopRequested = true;
+      document.getElementById("btn-stop").disabled = true;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    //  INDEXEDDB & NAVIGATION
+    // ═══════════════════════════════════════════════════════════════════
+
+    function idbPut(key, json) {
+      return new Promise((resolve, reject) => {
+        const req = indexedDB.open("paragliding", 1);
+        req.onupgradeneeded = (e) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains("sim"))
+            db.createObjectStore("sim");
+        };
+        req.onerror = () => reject(req.error);
+        req.onsuccess = (e) => {
+          const db = e.target.result;
+          const tx = db.transaction("sim", "readwrite");
+          tx.objectStore("sim").put(json, key);
+          tx.oncomplete = resolve;
+          tx.onerror = () => reject(tx.error);
+        };
+      });
+    }
+
+    async function openViewer() {
+      if (!simResult) {
+        log("No simulation result yet.", "error");
+        return;
+      }
+      try {
+        log("Saving to IndexedDB…");
+        await idbPut("ns3d_latest", JSON.stringify(simResult));
+        window.location.href = "view-dynamic-advanced";
+      } catch (e) {
+        log(`IndexedDB error: ${e.message}`, "error");
+      }
+    }
+
+    // Nav dropdown touch support
+    document.querySelectorAll(".nav-dropdown-btn").forEach(function(btn) {
+      btn.addEventListener("click", function(e) {
+        var dd = btn.closest(".nav-dropdown");
+        var isOpen = dd.classList.contains("open");
+        document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+          d.classList.remove("open");
         });
+        if (!isOpen) dd.classList.add("open");
+        e.stopPropagation();
       });
-      document.addEventListener('click', function () {
-        document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
+    });
+    document.addEventListener("click", function() {
+      document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+        d.classList.remove("open");
       });
-    </script>
+    });
+  </script>
 </body>
 
 </html>

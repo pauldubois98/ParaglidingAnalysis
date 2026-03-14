@@ -1,17 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
   <title>Air Flow</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
   <style>
     body {
       background: #08111e;
       color: #c8d8e8;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: "Segoe UI", sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -76,7 +76,10 @@
       border-radius: 14px;
       text-decoration: none;
       color: #c8d8e8;
-      transition: background 0.2s, border-color 0.2s, transform 0.18s;
+      transition:
+        background 0.2s,
+        border-color 0.2s,
+        transform 0.18s;
     }
 
     .area-card:hover {
@@ -200,7 +203,7 @@
     .wf-model {
       font-size: 11px;
       color: #3a6080;
-      font-family: 'Courier New', monospace;
+      font-family: "Courier New", monospace;
     }
 
     .wf-desc {
@@ -235,7 +238,9 @@
       border: 1px solid rgba(100, 160, 255, 0.25);
       color: #7eb8ff;
       background: rgba(100, 160, 255, 0.07);
-      transition: background 0.15s, border-color 0.15s;
+      transition:
+        background 0.15s,
+        border-color 0.15s;
     }
 
     .wf-link:hover {
@@ -284,13 +289,12 @@
         padding: 8px;
       }
     }
-
   </style>
 </head>
 
 <body>
   <nav id="header-nav">
-    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt="" /><span>Home</span></a>
     <div class="nav-sep"></div>
     <a href="area" class="nav-link">Area</a>
     <div class="nav-sep"></div>
@@ -328,21 +332,26 @@
     </div>
   </nav>
   <div class="page">
-
     <header>
-      <div class="logo"><img src="icons/favicon.svg" alt=""></div>
+      <div class="logo"><img src="icons/favicon.svg" alt="" /></div>
       <h1>Paragliding Air Flow</h1>
-      <p>Browser-based atmospheric simulations for paragliding site analysis — thermal convection and orographic wind
-        flow over real terrain</p>
+      <p>
+        Browser-based atmospheric simulations for paragliding site analysis —
+        thermal convection and orographic wind flow over real terrain
+      </p>
     </header>
 
     <!-- ── Step 0: Area ── -->
     <div class="area-wrap">
       <a href="area" class="area-card">
-        <div class="area-icon"><img src="icons/favicon-area1.svg" data-icon="area" data-count="5" alt=""></div>
+        <div class="area-icon">
+          <img src="icons/favicon-area1.svg" data-icon="area" data-count="5" alt="" />
+        </div>
         <div class="area-text">
           <div class="area-title">Step 0 — Select Area</div>
-          <div class="area-desc">Draw the bounding box, mark take-off and landing on a map. Required by all workflows.
+          <div class="area-desc">
+            Draw the bounding box, mark take-off and landing on a map.
+            Required by all workflows.
           </div>
         </div>
       </a>
@@ -355,11 +364,11 @@
     </div>
 
     <div class="workflows">
-
       <!-- Thermal basic -->
       <div class="wf-card">
         <div class="wf-header">
-          <div class="wf-icon"><img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4" alt="">
+          <div class="wf-icon">
+            <img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4" alt="" />
           </div>
           <div>
             <div class="wf-title">Thermal</div>
@@ -367,12 +376,15 @@
           </div>
         </div>
         <div class="wf-desc">
-          Computes surface heat flux from solar geometry, terrain slope, land cover (ESA WorldCover), and
-          atmospheric transmittance. The ground temperature anomaly is resolved per-cell and converted to
-          a thermal strength index — fast enough to run a full day of hourly snapshots in seconds.
+          Computes surface heat flux from solar geometry, terrain slope, land
+          cover (ESA WorldCover), and atmospheric transmittance. The ground
+          temperature anomaly is resolved per-cell and converted to a thermal
+          strength index — fast enough to run a full day of hourly snapshots
+          in seconds.
         </div>
         <div class="wf-outputs">
-          <strong>Outputs:</strong> surface temperature anomaly · thermal index · shadow mask · sun elevation
+          <strong>Outputs:</strong> surface temperature anomaly · thermal
+          index · shadow mask · sun elevation
         </div>
         <div class="wf-links">
           <a href="simulate" class="wf-link primary">Simulate</a>
@@ -385,7 +397,8 @@
       <div class="wf-card">
         <div class="wf-badge">NS</div>
         <div class="wf-header">
-          <div class="wf-icon"><img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4" alt="">
+          <div class="wf-icon">
+            <img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4" alt="" />
           </div>
           <div>
             <div class="wf-title">Thermal NS</div>
@@ -393,13 +406,15 @@
           </div>
         </div>
         <div class="wf-desc">
-          Full 3D incompressible Navier-Stokes solver under the Boussinesq approximation: solar heating
-          warms the ground, which injects buoyancy into the boundary layer, driving convective thermal
-          plumes. Smagorinsky LES turbulence closure and a Red-Black SOR pressure solver. Runs in a
-          Web Worker; takes minutes for a coarse grid.
+          Full 3D incompressible Navier-Stokes solver under the Boussinesq
+          approximation: solar heating warms the ground, which injects
+          buoyancy into the boundary layer, driving convective thermal plumes.
+          Smagorinsky LES turbulence closure and a Red-Black SOR pressure
+          solver. Runs in a Web Worker; takes minutes for a coarse grid.
         </div>
         <div class="wf-outputs">
-          <strong>Outputs:</strong> 3D temperature anomaly θ' · vertical wind w · convergence · cross-section slices
+          <strong>Outputs:</strong> 3D temperature anomaly θ' · vertical wind
+          w · convergence · cross-section slices
         </div>
         <div class="wf-links">
           <a href="simulate-advanced" class="wf-link primary">Simulate</a>
@@ -407,35 +422,39 @@
           <a href="about-advanced" class="wf-link">About</a>
         </div>
       </div>
-
     </div>
 
     <!-- ── Wind workflows ── -->
-    <div class="section-row" style="margin-top:24px;">
+    <div class="section-row" style="margin-top: 24px">
       <div class="section-row-label">Orographic wind</div>
       <div class="section-row-line"></div>
     </div>
 
     <div class="workflows">
-
       <!-- Wind SWE -->
       <div class="wf-card">
         <div class="wf-header">
-          <div class="wf-icon"><img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4" alt="">
+          <div class="wf-icon">
+            <img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4" alt="" />
           </div>
           <div>
             <div class="wf-title">Wind</div>
-            <div class="wf-model">2D Shallow Water Equations · explicit FD</div>
+            <div class="wf-model">
+              2D Shallow Water Equations · explicit FD
+            </div>
           </div>
         </div>
         <div class="wf-desc">
-          Solves the 2D shallow water equations (SWE) with reduced gravity over real terrain.
-          The atmosphere is modelled as a single layer of depth h flowing over the orographic floor.
-          Terrain-blocking, orographic lifting, Froude number transitions, hydraulic jumps, and
-          vorticity wakes emerge naturally. Runs to quasi-steady state in seconds to minutes.
+          Solves the 2D shallow water equations (SWE) with reduced gravity
+          over real terrain. The atmosphere is modelled as a single layer of
+          depth h flowing over the orographic floor. Terrain-blocking,
+          orographic lifting, Froude number transitions, hydraulic jumps, and
+          vorticity wakes emerge naturally. Runs to quasi-steady state in
+          seconds to minutes.
         </div>
         <div class="wf-outputs">
-          <strong>Outputs:</strong> wind speed · vertical wind proxy · Froude number · vorticity · flow depth
+          <strong>Outputs:</strong> wind speed · vertical wind proxy · Froude
+          number · vorticity · flow depth
         </div>
         <div class="wf-links">
           <a href="simulate-dynamic" class="wf-link primary">Simulate</a>
@@ -448,21 +467,27 @@
       <div class="wf-card">
         <div class="wf-badge">NS</div>
         <div class="wf-header">
-          <div class="wf-icon"><img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4" alt="">
+          <div class="wf-icon">
+            <img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4" alt="" />
           </div>
           <div>
             <div class="wf-title">Wind NS</div>
-            <div class="wf-model">3D Navier-Stokes · log profile · land-cover roughness</div>
+            <div class="wf-model">
+              3D Navier-Stokes · log profile · land-cover roughness
+            </div>
           </div>
         </div>
         <div class="wf-desc">
-          Full 3D incompressible Navier-Stokes solver for mechanical wind flow. Terrain cells are
-          blocked (no-slip); inflow uses a logarithmic wind profile anchored to a per-cell roughness
-          length z₀ derived from ESA WorldCover. Semi-Lagrangian advection and a Jacobi pressure
-          Poisson solver. Resolves lee-side recirculation, flow separation, and surface-layer structure.
+          Full 3D incompressible Navier-Stokes solver for mechanical wind
+          flow. Terrain cells are blocked (no-slip); inflow uses a logarithmic
+          wind profile anchored to a per-cell roughness length z₀ derived from
+          ESA WorldCover. Semi-Lagrangian advection and a Jacobi pressure
+          Poisson solver. Resolves lee-side recirculation, flow separation,
+          and surface-layer structure.
         </div>
         <div class="wf-outputs">
-          <strong>Outputs:</strong> 3D velocity (U, V, W) · surface wind speed · vertical wind · pressure · vorticity
+          <strong>Outputs:</strong> 3D velocity (U, V, W) · surface wind speed
+          · vertical wind · pressure · vorticity
         </div>
         <div class="wf-links">
           <a href="simulate-dynamic-advanced" class="wf-link primary">Simulate</a>
@@ -470,30 +495,35 @@
           <a href="about-dynamic-advanced" class="wf-link">About</a>
         </div>
       </div>
-
     </div>
 
-    <footer>Select Area → Simulate → View &nbsp;|&nbsp; All simulations run in the browser</footer>
-
+    <footer>
+      Select Area → Simulate → View &nbsp;|&nbsp; All simulations run in the
+      browser
+    </footer>
   </div>
   <script>
-    document.querySelectorAll('img[data-icon]').forEach(img => {
+    document.querySelectorAll("img[data-icon]").forEach((img) => {
       const n = Math.floor(Math.random() * +img.dataset.count) + 1;
       img.src = `icons/favicon-${img.dataset.icon}${n}.svg`;
     });
 
     // Nav dropdown touch support
-    document.querySelectorAll('.nav-dropdown-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        var dd = btn.closest('.nav-dropdown');
-        var isOpen = dd.classList.contains('open');
-        document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
-        if (!isOpen) dd.classList.add('open');
+    document.querySelectorAll(".nav-dropdown-btn").forEach(function(btn) {
+      btn.addEventListener("click", function(e) {
+        var dd = btn.closest(".nav-dropdown");
+        var isOpen = dd.classList.contains("open");
+        document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+          d.classList.remove("open");
+        });
+        if (!isOpen) dd.classList.add("open");
         e.stopPropagation();
       });
     });
-    document.addEventListener('click', function () {
-      document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
+    document.addEventListener("click", function() {
+      document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+        d.classList.remove("open");
+      });
     });
   </script>
 </body>

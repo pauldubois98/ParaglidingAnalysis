@@ -1,18 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
   <title>Thermal NS — View</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
   <style>
-
     body {
       background: #0a0f1a;
       color: #e0e8f0;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: "Segoe UI", sans-serif;
       overflow: hidden;
     }
 
@@ -22,7 +21,6 @@
       position: relative;
       margin-top: 44px;
     }
-
 
     .cg {
       margin-bottom: 8px;
@@ -99,7 +97,9 @@
       background: rgba(100, 160, 255, 0.3);
     }
 
-    .colorbar { display: none; }
+    .colorbar {
+      display: none;
+    }
 
     /* ── Loading ── */
     #loading {
@@ -158,15 +158,13 @@
       .colorbar-labels {
         font-size: 8px;
       }
-
     }
   </style>
 </head>
 
 <body>
-
   <nav id="header-nav">
-    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt="" /><span>Home</span></a>
     <div class="nav-sep"></div>
     <a href="area" class="nav-link">Area</a>
     <div class="nav-sep"></div>
@@ -213,24 +211,46 @@
   <div id="info-panel">
     <h3>Selected point</h3>
     <div id="info-rows"></div>
-    <div id="plume-wrap" style="display:none; margin-top:8px;">
-      <div id="plume-title"
-        style="text-align:center; font-size:10px; font-weight:bold; color:#8ab4d4; letter-spacing:0.05em; margin-bottom:3px; margin-left:36px;">
-        Vertical Profile</div>
-      <div style="display:flex; align-items:stretch; gap:0;">
-        <div id="plume-yaxis" style="width:36px; position:relative; flex-shrink:0;"></div>
-        <canvas id="plume-canvas" width="156" height="160"
-          style="display:block; border:1px solid rgba(100,160,255,0.2); border-radius:4px;"></canvas>
+    <div id="plume-wrap" style="display: none; margin-top: 8px">
+      <div id="plume-title" style="
+            text-align: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: #8ab4d4;
+            letter-spacing: 0.05em;
+            margin-bottom: 3px;
+            margin-left: 36px;
+          ">
+        Vertical Profile
       </div>
-      <div id="plume-xaxis" style="margin-left:36px;"></div>
-      <div id="plume-legend"
-        style="margin-left:36px; margin-top:4px; display:flex; gap:10px; font-size:9px; font-family:monospace;"></div>
+      <div style="display: flex; align-items: stretch; gap: 0">
+        <div id="plume-yaxis" style="width: 36px; position: relative; flex-shrink: 0"></div>
+        <canvas id="plume-canvas" width="156" height="160" style="
+              display: block;
+              border: 1px solid rgba(100, 160, 255, 0.2);
+              border-radius: 4px;
+            "></canvas>
+      </div>
+      <div id="plume-xaxis" style="margin-left: 36px"></div>
+      <div id="plume-legend" style="
+            margin-left: 36px;
+            margin-top: 4px;
+            display: flex;
+            gap: 10px;
+            font-size: 9px;
+            font-family: monospace;
+          "></div>
     </div>
   </div>
 
-  <button id="panel-toggle"
-    onclick="const p=document.getElementById('ui-panel');p.classList.toggle('open');this.classList.toggle('open');this.textContent=p.classList.contains('open')?'✕':'☰';"
-    title="Toggle controls">✕</button>
+  <button id="panel-toggle" onclick="
+        const p = document.getElementById('ui-panel');
+        p.classList.toggle('open');
+        this.classList.toggle('open');
+        this.textContent = p.classList.contains('open') ? '✕' : '☰';
+      " title="Toggle controls">
+    ✕
+  </button>
 
   <div id="ui-panel" class="open">
     <h2>Thermal NS</h2>
@@ -240,30 +260,32 @@
     <div class="sec" id="sec-time">Time</div>
     <div class="cg" id="cg-time">
       <label>Scenario <span id="time-display">—</span></label>
-      <input type="range" id="time-slider" min="0" max="0" step="1" value="0">
-      <div id="sun-info" style="font-size:10px;color:#556677;margin-top:3px">—</div>
+      <input type="range" id="time-slider" min="0" max="0" step="1" value="0" />
+      <div id="sun-info" style="font-size: 10px; color: #556677; margin-top: 3px">
+        —
+      </div>
     </div>
 
     <div class="sec" id="sec-overlays">Overlays</div>
     <div class="cg" id="cg-terrain-op">
       <label>Terrain (elevation) <span id="terrain-op-val">0.85</span></label>
-      <input type="range" id="terrain-op" min="0" max="1" step="0.05" value="0.85">
+      <input type="range" id="terrain-op" min="0" max="1" step="0.05" value="0.85" />
     </div>
     <div class="cg" id="cg-theta-op">
       <label>θ' temp. anomaly <span id="theta-op-val">0.70</span></label>
-      <input type="range" id="theta-op" min="0" max="1" step="0.05" value="0.70">
+      <input type="range" id="theta-op" min="0" max="1" step="0.05" value="0.70" />
     </div>
     <div class="cg" id="cg-wvel-op">
       <label>Vertical velocity w <span id="wvel-op-val">0.00</span></label>
-      <input type="range" id="wvel-op" min="0" max="1" step="0.05" value="0.00">
+      <input type="range" id="wvel-op" min="0" max="1" step="0.05" value="0.00" />
     </div>
     <div class="cg" id="cg-conv-op">
       <label>Convergence <span id="conv-op-val">0.00</span></label>
-      <input type="range" id="conv-op" min="0" max="1" step="0.05" value="0.00">
+      <input type="range" id="conv-op" min="0" max="1" step="0.05" value="0.00" />
     </div>
     <div class="cg" id="cg-wind-op">
       <label>Wind arrows <span id="wind-op-val">0.50</span></label>
-      <input type="range" id="wind-op" min="0" max="1" step="0.05" value="0.50">
+      <input type="range" id="wind-op" min="0" max="1" step="0.05" value="0.50" />
     </div>
 
     <div class="sec" id="sec-slices">Slices</div>
@@ -275,11 +297,11 @@
       </div>
       <div class="cg">
         <label>Opacity <span id="ew-op-val">0.00</span></label>
-        <input type="range" id="ew-op" min="0" max="1" step="0.05" value="0.00">
+        <input type="range" id="ew-op" min="0" max="1" step="0.05" value="0.00" />
       </div>
       <div class="cg">
         <label>Y row <span id="ew-pos-val">—</span></label>
-        <input type="range" id="ew-pos" min="0" max="1" step="1" value="0">
+        <input type="range" id="ew-pos" min="0" max="1" step="1" value="0" />
       </div>
     </div>
 
@@ -290,11 +312,11 @@
       </div>
       <div class="cg">
         <label>Opacity <span id="ns-op-val">0.00</span></label>
-        <input type="range" id="ns-op" min="0" max="1" step="0.05" value="0.00">
+        <input type="range" id="ns-op" min="0" max="1" step="0.05" value="0.00" />
       </div>
       <div class="cg">
         <label>X col <span id="ns-pos-val">—</span></label>
-        <input type="range" id="ns-pos" min="0" max="1" step="1" value="0">
+        <input type="range" id="ns-pos" min="0" max="1" step="1" value="0" />
       </div>
     </div>
 
@@ -305,25 +327,27 @@
       </div>
       <div class="cg">
         <label>Opacity <span id="z-op-val">0.00</span></label>
-        <input type="range" id="z-op" min="0" max="1" step="0.05" value="0.00">
+        <input type="range" id="z-op" min="0" max="1" step="0.05" value="0.00" />
       </div>
       <div class="cg">
         <label>Altitude <span id="z-pos-val">—</span></label>
-        <input type="range" id="z-pos" min="0" max="1" step="1" value="0">
+        <input type="range" id="z-pos" min="0" max="1" step="1" value="0" />
       </div>
     </div>
 
     <div class="sec" id="sec-lighting">Lighting</div>
     <div class="cg" id="cg-amb">
       <label>Ambient <span id="amb-val">2.0</span></label>
-      <input type="range" id="amb" min="0" max="6" step="0.1" value="2.0">
+      <input type="range" id="amb" min="0" max="6" step="0.1" value="2.0" />
     </div>
     <div class="cg" id="cg-sun-int">
       <label>Sun intensity <span id="sun-val">3.0</span></label>
-      <input type="range" id="sun-int" min="0" max="8" step="0.1" value="3.0">
+      <input type="range" id="sun-int" min="0" max="8" step="0.1" value="3.0" />
     </div>
 
-    <div class="hint">Drag to rotate · Scroll to zoom · Right-drag to pan</div>
+    <div class="hint">
+      Drag to rotate · Scroll to zoom · Right-drag to pan
+    </div>
   </div>
 
   <div id="colorbars">
@@ -358,16 +382,25 @@
   </div>
 
   <script type="importmap">
-{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"}}
-</script>
+    {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+        }
+      }
+    </script>
 
   <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import * as THREE from "three";
+    import {
+      OrbitControls
+    } from "three/addons/controls/OrbitControls.js";
 
     // ── Scene ────────────────────────────────────────────────────────────────────
-    const container = document.getElementById('canvas-container');
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const container = document.getElementById("canvas-container");
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true
+    });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight - 44);
     renderer.shadowMap.enabled = true;
@@ -378,14 +411,21 @@
     scene.background = new THREE.Color(0x040810);
     scene.fog = new THREE.Fog(0x040810, 8000, 20000);
 
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / (window.innerHeight - 44), 10, 30000);
+    const camera = new THREE.PerspectiveCamera(
+      55,
+      window.innerWidth / (window.innerHeight - 44),
+      10,
+      30000,
+    );
     camera.position.set(0, -2500, 2500);
     camera.up.set(0, 0, 1);
 
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.target.set(0, 0, 800);
-    controls.enableDamping = true; controls.dampingFactor = 0.06;
-    controls.minDistance = 100; controls.maxDistance = 15000;
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.06;
+    controls.minDistance = 100;
+    controls.maxDistance = 15000;
     controls.maxPolarAngle = Math.PI * 0.48;
 
     const ambientLight = new THREE.AmbientLight(0x1a2a3a, 2);
@@ -396,56 +436,79 @@
     sun.shadow.mapSize.set(2048, 2048);
     sun.shadow.camera.left = sun.shadow.camera.bottom = -6000;
     sun.shadow.camera.right = sun.shadow.camera.top = 6000;
-    sun.shadow.camera.near = 100; sun.shadow.camera.far = 20000;
+    sun.shadow.camera.near = 100;
+    sun.shadow.camera.far = 20000;
     sun.shadow.bias = -0.002;
     scene.add(sun);
 
-    window.addEventListener('resize', () => {
-      const w = window.innerWidth, h = window.innerHeight - 44;
-      camera.aspect = w / h; camera.updateProjectionMatrix();
+    window.addEventListener("resize", () => {
+      const w = window.innerWidth,
+        h = window.innerHeight - 44;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     });
 
     // ── Colormaps ─────────────────────────────────────────────────────────────────
     function elevColor(t) {
       t = Math.max(0, Math.min(1, t));
-      if (t < 0.25) { const s = t / 0.25; return [0.4 + 0.1 * s, 0.25 + 0.25 * s, 0.1]; }
-      if (t < 0.55) { const s = (t - 0.25) / 0.30; return [0.5 - 0.2 * s, 0.5 + 0.1 * s, 0.1 + 0.2 * s]; }
-      if (t < 0.80) { const s = (t - 0.55) / 0.25; return [0.3 + 0.4 * s, 0.6 + 0.2 * s, 0.3 + 0.4 * s]; }
-      const s = (t - 0.80) / 0.20; return [0.7 + 0.3 * s, 0.8 + 0.2 * s, 0.7 + 0.3 * s];
+      if (t < 0.25) {
+        const s = t / 0.25;
+        return [0.4 + 0.1 * s, 0.25 + 0.25 * s, 0.1];
+      }
+      if (t < 0.55) {
+        const s = (t - 0.25) / 0.3;
+        return [0.5 - 0.2 * s, 0.5 + 0.1 * s, 0.1 + 0.2 * s];
+      }
+      if (t < 0.8) {
+        const s = (t - 0.55) / 0.25;
+        return [0.3 + 0.4 * s, 0.6 + 0.2 * s, 0.3 + 0.4 * s];
+      }
+      const s = (t - 0.8) / 0.2;
+      return [0.7 + 0.3 * s, 0.8 + 0.2 * s, 0.7 + 0.3 * s];
     }
 
     function divergingColor(t) {
       t = Math.max(0, Math.min(1, t));
-      if (t < 0.5) { const s = 1 - t * 2; return [1 - s, 1 - s, 1]; }
-      const s = (t - 0.5) * 2; return [1, 1 - s, 1 - s];
+      if (t < 0.5) {
+        const s = 1 - t * 2;
+        return [1 - s, 1 - s, 1];
+      }
+      const s = (t - 0.5) * 2;
+      return [1, 1 - s, 1 - s];
     }
 
     function convColor(t) {
       t = Math.max(0, Math.min(1, t));
-      if (t < 0.5) { const s = t * 2; return [s * 0.95, s * 0.45, 0]; }
-      const s = (t - 0.5) * 2; return [0.95, 0.45 + s * 0.55, s * 0.1];
+      if (t < 0.5) {
+        const s = t * 2;
+        return [s * 0.95, s * 0.45, 0];
+      }
+      const s = (t - 0.5) * 2;
+      return [0.95, 0.45 + s * 0.55, s * 0.1];
     }
 
     function drawColorbar(canvasId, labelsId, colorFn, minVal, maxVal, fmt) {
       const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       const img = ctx.createImageData(canvas.width, canvas.height);
       for (let py = 0; py < canvas.height; py++) {
         const t = 1 - py / (canvas.height - 1);
         const [r, g, b] = colorFn(t);
         for (let px = 0; px < canvas.width; px++) {
           const idx = (py * canvas.width + px) * 4;
-          img.data[idx] = Math.round(r * 255); img.data[idx + 1] = Math.round(g * 255);
-          img.data[idx + 2] = Math.round(b * 255); img.data[idx + 3] = 255;
+          img.data[idx] = Math.round(r * 255);
+          img.data[idx + 1] = Math.round(g * 255);
+          img.data[idx + 2] = Math.round(b * 255);
+          img.data[idx + 3] = 255;
         }
       }
       ctx.putImageData(img, 0, 0);
       const div = document.getElementById(labelsId);
-      div.innerHTML = '';
+      div.innerHTML = "";
       for (let k = 0; k <= 4; k++) {
         const v = maxVal - (k / 4) * (maxVal - minVal);
-        const s = document.createElement('span');
+        const s = document.createElement("span");
         s.textContent = fmt(v);
         div.appendChild(s);
       }
@@ -453,36 +516,60 @@
 
     // ── State ────────────────────────────────────────────────────────────────────
     let simData = null;
-    let terrainMesh = null, terrainMat = null;
-    let thetaMesh = null, thetaMat = null;
-    let wvelMesh = null, wvelMat = null;
-    let convMesh = null, convMat = null;
+    let terrainMesh = null,
+      terrainMat = null;
+    let thetaMesh = null,
+      thetaMat = null;
+    let wvelMesh = null,
+      wvelMat = null;
+    let convMesh = null,
+      convMat = null;
     let windGroup = null;
-    let sunSphere = null, sunGlow = null, sunLabel = null;
-    let terrainZMin = 0, terrainZMax = 1;
-    let globalMaxTheta = 1, globalMaxW = 1;
+    let sunSphere = null,
+      sunGlow = null,
+      sunLabel = null;
+    let terrainZMin = 0,
+      terrainZMax = 1;
+    let globalMaxTheta = 1,
+      globalMaxW = 1;
     let currentScenario = 0;
 
     // Slice state
-    let ewSliceMesh = null, ewSliceMat = null, ewIy = 0, ewMode = 'theta';
-    let nsSliceMesh = null, nsSliceMat = null, nsIx = 0, nsMode = 'theta';
-    let zSliceMesh = null, zSliceMat = null, zIz = 0, zMode = 'theta';
+    let ewSliceMesh = null,
+      ewSliceMat = null,
+      ewIy = 0,
+      ewMode = "theta";
+    let nsSliceMesh = null,
+      nsSliceMat = null,
+      nsIx = 0,
+      nsMode = "theta";
+    let zSliceMesh = null,
+      zSliceMat = null,
+      zIz = 0,
+      zMode = "theta";
 
     // ── IDB ──────────────────────────────────────────────────────────────────────
     function idbGet() {
-      return new Promise(resolve => {
-        const req = indexedDB.open('paragliding', 1);
-        req.onupgradeneeded = e => e.target.result.createObjectStore('sim');
+      return new Promise((resolve) => {
+        const req = indexedDB.open("paragliding", 1);
+        req.onupgradeneeded = (e) => e.target.result.createObjectStore("sim");
         req.onerror = () => resolve(null);
-        req.onsuccess = e => {
+        req.onsuccess = (e) => {
           const db = e.target.result;
-          if (!db.objectStoreNames.contains('sim')) { resolve(null); return; }
-          const tx = db.transaction('sim', 'readonly');
-          const store = tx.objectStore('sim');
-          const getReq = store.get('latest-ns');
+          if (!db.objectStoreNames.contains("sim")) {
+            resolve(null);
+            return;
+          }
+          const tx = db.transaction("sim", "readonly");
+          const store = tx.objectStore("sim");
+          const getReq = store.get("latest-ns");
           getReq.onsuccess = () => {
             const raw = getReq.result;
-            try { resolve(raw ? JSON.parse(raw) : null); } catch { resolve(null); }
+            try {
+              resolve(raw ? JSON.parse(raw) : null);
+            } catch {
+              resolve(null);
+            }
           };
           getReq.onerror = () => resolve(null);
         };
@@ -496,21 +583,21 @@
       try {
         let data = await idbGet();
         if (!data) {
-          const r = await fetch('../data/simulation-ns.json');
+          const r = await fetch("../data/simulation-ns.json");
           if (!r.ok) throw new Error(`simulation-ns.json: HTTP ${r.status}`);
           data = await r.json();
         }
         simData = data;
         // Load presets (non-fatal if missing)
         try {
-          const pr = await fetch('presets-advanced.json');
+          const pr = await fetch("presets-advanced.json");
           if (pr.ok) presetsData = await pr.json();
-        } catch { }
-        document.getElementById('loading').style.display = 'none';
+        } catch {}
+        document.getElementById("loading").style.display = "none";
         init();
         buildPresetButtons();
       } catch (e) {
-        document.getElementById('loading').innerHTML =
+        document.getElementById("loading").innerHTML =
           `<div style="color:#f66">Failed to load NS data<br><small>${e.message}</small><br><br>
        <small>Run the NS simulation first (<a href="simulate-advanced" style="color:#7eb8ff">Simulate NS</a>)</small></div>`;
       }
@@ -519,26 +606,47 @@
     // ── Presets ───────────────────────────────────────────────────────────────────
     // Map slider id → val-display id (mirrors bindOp calls in init)
     const SLIDER_VAL_ID = {
-      'terrain-op': 'terrain-op-val', 'theta-op': 'theta-op-val',
-      'wvel-op': 'wvel-op-val', 'conv-op': 'conv-op-val',
-      'wind-op': 'wind-op-val', 'ew-op': 'ew-op-val',
-      'ns-op': 'ns-op-val', 'z-op': 'z-op-val',
-      'amb': 'amb-val', 'sun-int': 'sun-val',
+      "terrain-op": "terrain-op-val",
+      "theta-op": "theta-op-val",
+      "wvel-op": "wvel-op-val",
+      "conv-op": "conv-op-val",
+      "wind-op": "wind-op-val",
+      "ew-op": "ew-op-val",
+      "ns-op": "ns-op-val",
+      "z-op": "z-op-val",
+      amb: "amb-val",
+      "sun-int": "sun-val",
     };
 
     const ALL_CTRL_IDS = [
-      'sec-time', 'cg-time',
-      'sec-overlays', 'cg-terrain-op', 'cg-theta-op', 'cg-wvel-op', 'cg-conv-op', 'cg-wind-op',
-      'sec-slices', 'sg-ew', 'sg-ns', 'sg-z',
-      'sec-lighting', 'cg-amb', 'cg-sun-int',
+      "sec-time",
+      "cg-time",
+      "sec-overlays",
+      "cg-terrain-op",
+      "cg-theta-op",
+      "cg-wvel-op",
+      "cg-conv-op",
+      "cg-wind-op",
+      "sec-slices",
+      "sg-ew",
+      "sg-ns",
+      "sg-z",
+      "sec-lighting",
+      "cg-amb",
+      "cg-sun-int",
     ];
 
     function applySliderVisibility(preset) {
-      const visible = preset.sliders_visible ? new Set(preset.sliders_visible) : null;
-      ALL_CTRL_IDS.forEach(id => {
+      const visible = preset.sliders_visible ?
+        new Set(preset.sliders_visible) :
+        null;
+      ALL_CTRL_IDS.forEach((id) => {
         const el = document.getElementById(id);
         if (!el) return;
-        el.classList.toggle('ctrl-hidden', visible !== null && !visible.has(id));
+        el.classList.toggle(
+          "ctrl-hidden",
+          visible !== null && !visible.has(id),
+        );
       });
     }
 
@@ -548,49 +656,67 @@
         const el = document.getElementById(id);
         if (!el) continue;
         el.value = val;
-        el.dispatchEvent(new Event('input'));
+        el.dispatchEvent(new Event("input"));
         // Also update display span in case the event didn't (safety)
         const valEl = document.getElementById(SLIDER_VAL_ID[id]);
         if (valEl) valEl.textContent = parseFloat(val).toFixed(2);
       }
       // Apply slice θ'/w modes
       for (const [type, mode] of Object.entries(preset.slice_modes || {})) {
-        const btnId = type + '-mode-btn';
+        const btnId = type + "-mode-btn";
         const btn = document.getElementById(btnId);
         if (!btn) continue;
-        if (type === 'ew' && ewMode !== mode) { ewMode = mode; btn.textContent = mode === 'theta' ? "θ'" : 'w'; recolorSlice('ew'); }
-        if (type === 'ns' && nsMode !== mode) { nsMode = mode; btn.textContent = mode === 'theta' ? "θ'" : 'w'; recolorSlice('ns'); }
-        if (type === 'z' && zMode !== mode) { zMode = mode; btn.textContent = mode === 'theta' ? "θ'" : 'w'; recolorSlice('z'); }
+        if (type === "ew" && ewMode !== mode) {
+          ewMode = mode;
+          btn.textContent = mode === "theta" ? "θ'" : "w";
+          recolorSlice("ew");
+        }
+        if (type === "ns" && nsMode !== mode) {
+          nsMode = mode;
+          btn.textContent = mode === "theta" ? "θ'" : "w";
+          recolorSlice("ns");
+        }
+        if (type === "z" && zMode !== mode) {
+          zMode = mode;
+          btn.textContent = mode === "theta" ? "θ'" : "w";
+          recolorSlice("z");
+        }
       }
       // Show/hide controls
       applySliderVisibility(preset);
     }
 
     function buildPresetButtons() {
-      const container = document.getElementById('preset-buttons');
+      const container = document.getElementById("preset-buttons");
       if (!container || !presetsData.length) return;
-      container.innerHTML = '';
+      container.innerHTML = "";
 
       presetsData.forEach((preset, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'tab-btn' + (i === 0 ? ' active' : '');
+        const btn = document.createElement("button");
+        btn.className = "tab-btn" + (i === 0 ? " active" : "");
         btn.textContent = preset.label;
-        btn.title = preset.tip || '';
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'modified'));
-          btn.classList.add('active');
+        btn.title = preset.tip || "";
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".tab-btn")
+            .forEach((b) => b.classList.remove("active", "modified"));
+          btn.classList.add("active");
           applyPreset(preset);
         });
         container.appendChild(btn);
       });
 
       // Mark active preset as "modified" when any slider is manually changed
-      document.getElementById('ui-panel').addEventListener('input', e => {
-        if (e.target.type === 'range') {
-          const active = document.querySelector('.tab-btn.active');
-          if (active) active.classList.add('modified');
-        }
-      }, true);
+      document.getElementById("ui-panel").addEventListener(
+        "input",
+        (e) => {
+          if (e.target.type === "range") {
+            const active = document.querySelector(".tab-btn.active");
+            if (active) active.classList.add("modified");
+          }
+        },
+        true,
+      );
 
       // Apply first preset silently
       if (presetsData.length > 0) applyPreset(presetsData[0]);
@@ -602,30 +728,48 @@
       const ns = simData.ns_solver;
 
       // Compute global ranges — shared across surface overlays and all slices
-      globalMaxTheta = 0; globalMaxW = 0;
+      globalMaxTheta = 0;
+      globalMaxW = 0;
       for (const sc of scenarios) {
-        for (const row of sc.ground_temp_anomaly) for (const v of row) if (Math.abs(v) > globalMaxTheta) globalMaxTheta = Math.abs(v);
-        if (sc.w_vel) for (const row of sc.w_vel) for (const v of row) if (Math.abs(v) > globalMaxW) globalMaxW = Math.abs(v);
-        if (sc.theta_3d) for (const p of sc.theta_3d) for (const row of p) for (const v of row) if (Math.abs(v) > globalMaxTheta) globalMaxTheta = Math.abs(v);
-        if (sc.w_3d) for (const p of sc.w_3d) for (const row of p) for (const v of row) if (Math.abs(v) > globalMaxW) globalMaxW = Math.abs(v);
+        for (const row of sc.ground_temp_anomaly)
+          for (const v of row)
+            if (Math.abs(v) > globalMaxTheta) globalMaxTheta = Math.abs(v);
+        if (sc.w_vel)
+          for (const row of sc.w_vel)
+            for (const v of row)
+              if (Math.abs(v) > globalMaxW) globalMaxW = Math.abs(v);
+        if (sc.theta_3d)
+          for (const p of sc.theta_3d)
+            for (const row of p)
+              for (const v of row)
+                if (Math.abs(v) > globalMaxTheta)
+                  globalMaxTheta = Math.abs(v);
+        if (sc.w_3d)
+          for (const p of sc.w_3d)
+            for (const row of p)
+              for (const v of row)
+                if (Math.abs(v) > globalMaxW) globalMaxW = Math.abs(v);
       }
       if (globalMaxTheta < 0.01) globalMaxTheta = 1;
       if (globalMaxW < 0.01) globalMaxW = 1;
 
       buildTerrain(T);
       buildNorthArrow();
-      buildOverlay(T, 'theta');
-      buildOverlay(T, 'wvel');
-      buildOverlay(T, 'conv');
+      buildOverlay(T, "theta");
+      buildOverlay(T, "wvel");
+      buildOverlay(T, "conv");
       buildWindArrows(T);
 
       if (ns) {
-        const ew = buildVertSlice('ew', T, ns);
-        ewSliceMesh = ew.mesh; ewSliceMat = ew.mat;
-        const ns_ = buildVertSlice('ns', T, ns);
-        nsSliceMesh = ns_.mesh; nsSliceMat = ns_.mat;
+        const ew = buildVertSlice("ew", T, ns);
+        ewSliceMesh = ew.mesh;
+        ewSliceMat = ew.mat;
+        const ns_ = buildVertSlice("ns", T, ns);
+        nsSliceMesh = ns_.mesh;
+        nsSliceMat = ns_.mat;
         const z_ = buildZSlice(T, ns);
-        zSliceMesh = z_.mesh; zSliceMat = z_.mat;
+        zSliceMesh = z_.mesh;
+        zSliceMat = z_.mat;
 
         // Init slice positions at mid
         ewIy = Math.floor(ns.NY / 2);
@@ -633,47 +777,72 @@
         zIz = 0;
 
         // Configure position sliders
-        const ewPosEl = document.getElementById('ew-pos');
-        ewPosEl.max = ns.NY - 1; ewPosEl.value = ewIy;
-        document.getElementById('ew-pos-val').textContent = ewIy;
+        const ewPosEl = document.getElementById("ew-pos");
+        ewPosEl.max = ns.NY - 1;
+        ewPosEl.value = ewIy;
+        document.getElementById("ew-pos-val").textContent = ewIy;
 
-        const nsPosEl = document.getElementById('ns-pos');
-        nsPosEl.max = ns.NX - 1; nsPosEl.value = nsIx;
-        document.getElementById('ns-pos-val').textContent = nsIx;
+        const nsPosEl = document.getElementById("ns-pos");
+        nsPosEl.max = ns.NX - 1;
+        nsPosEl.value = nsIx;
+        document.getElementById("ns-pos-val").textContent = nsIx;
 
-        const zPosEl = document.getElementById('z-pos');
-        zPosEl.max = ns.NZ - 1; zPosEl.value = zIz;
-        document.getElementById('z-pos-val').textContent = Math.round(T.z_extent[0]) + 'm';
+        const zPosEl = document.getElementById("z-pos");
+        zPosEl.max = ns.NZ - 1;
+        zPosEl.value = zIz;
+        document.getElementById("z-pos-val").textContent =
+          Math.round(T.z_extent[0]) + "m";
 
         // Position sliders
-        ewPosEl.addEventListener('input', () => { ewIy = parseInt(ewPosEl.value); setEWSlicePos(); });
-        nsPosEl.addEventListener('input', () => { nsIx = parseInt(nsPosEl.value); setNSSlicePos(); });
-        zPosEl.addEventListener('input', () => { zIz = parseInt(zPosEl.value); setZSlicePos(); });
+        ewPosEl.addEventListener("input", () => {
+          ewIy = parseInt(ewPosEl.value);
+          setEWSlicePos();
+        });
+        nsPosEl.addEventListener("input", () => {
+          nsIx = parseInt(nsPosEl.value);
+          setNSSlicePos();
+        });
+        zPosEl.addEventListener("input", () => {
+          zIz = parseInt(zPosEl.value);
+          setZSlicePos();
+        });
 
         // Mode toggle buttons
-        document.getElementById('ew-mode-btn').addEventListener('click', () => {
-          ewMode = ewMode === 'theta' ? 'w' : 'theta';
-          document.getElementById('ew-mode-btn').textContent = ewMode === 'theta' ? "θ'" : 'w';
-          recolorSlice('ew'); updateColorbars();
-        });
-        document.getElementById('ns-mode-btn').addEventListener('click', () => {
-          nsMode = nsMode === 'theta' ? 'w' : 'theta';
-          document.getElementById('ns-mode-btn').textContent = nsMode === 'theta' ? "θ'" : 'w';
-          recolorSlice('ns'); updateColorbars();
-        });
-        document.getElementById('z-mode-btn').addEventListener('click', () => {
-          zMode = zMode === 'theta' ? 'w' : 'theta';
-          document.getElementById('z-mode-btn').textContent = zMode === 'theta' ? "θ'" : 'w';
-          recolorSlice('z'); updateColorbars();
-        });
+        document
+          .getElementById("ew-mode-btn")
+          .addEventListener("click", () => {
+            ewMode = ewMode === "theta" ? "w" : "theta";
+            document.getElementById("ew-mode-btn").textContent =
+              ewMode === "theta" ? "θ'" : "w";
+            recolorSlice("ew");
+            updateColorbars();
+          });
+        document
+          .getElementById("ns-mode-btn")
+          .addEventListener("click", () => {
+            nsMode = nsMode === "theta" ? "w" : "theta";
+            document.getElementById("ns-mode-btn").textContent =
+              nsMode === "theta" ? "θ'" : "w";
+            recolorSlice("ns");
+            updateColorbars();
+          });
+        document
+          .getElementById("z-mode-btn")
+          .addEventListener("click", () => {
+            zMode = zMode === "theta" ? "w" : "theta";
+            document.getElementById("z-mode-btn").textContent =
+              zMode === "theta" ? "θ'" : "w";
+            recolorSlice("z");
+            updateColorbars();
+          });
       }
 
       buildSun();
 
       // Time slider
-      const slider = document.getElementById('time-slider');
+      const slider = document.getElementById("time-slider");
       slider.max = scenarios.length - 1;
-      slider.addEventListener('input', () => {
+      slider.addEventListener("input", () => {
         currentScenario = parseInt(slider.value);
         updateScenario(currentScenario);
       });
@@ -681,63 +850,125 @@
       // Opacity sliders
       function bindOp(id, valId, setter) {
         const el = document.getElementById(id);
-        el.addEventListener('input', () => {
-          document.getElementById(valId).textContent = parseFloat(el.value).toFixed(2);
+        el.addEventListener("input", () => {
+          document.getElementById(valId).textContent = parseFloat(
+            el.value,
+          ).toFixed(2);
           setter(parseFloat(el.value));
         });
       }
-      bindOp('terrain-op', 'terrain-op-val', v => { if (terrainMat) terrainMat.opacity = v; updateColorbars(); });
-      bindOp('theta-op', 'theta-op-val', v => { if (thetaMat) thetaMat.opacity = v; updateColorbars(); });
-      bindOp('wvel-op', 'wvel-op-val', v => { if (wvelMat) wvelMat.opacity = v; updateColorbars(); });
-      bindOp('conv-op', 'conv-op-val', v => { if (convMat) convMat.opacity = v; toggleCb('cb-conv-wrap', v > 0); });
-      bindOp('wind-op', 'wind-op-val', v => { if (windGroup) { windGroup.visible = v > 0; windGroup.children.forEach(c => c.material && (c.material.opacity = v)); } });
-      bindOp('ew-op', 'ew-op-val', v => { if (ewSliceMat) ewSliceMat.opacity = v; updateColorbars(); });
-      bindOp('ns-op', 'ns-op-val', v => { if (nsSliceMat) nsSliceMat.opacity = v; updateColorbars(); });
-      bindOp('z-op', 'z-op-val', v => { if (zSliceMat) zSliceMat.opacity = v; updateColorbars(); });
-      bindOp('amb', 'amb-val', v => { ambientLight.intensity = v; });
-      bindOp('sun-int', 'sun-val', v => { sun.intensity = v; });
+      bindOp("terrain-op", "terrain-op-val", (v) => {
+        if (terrainMat) terrainMat.opacity = v;
+        updateColorbars();
+      });
+      bindOp("theta-op", "theta-op-val", (v) => {
+        if (thetaMat) thetaMat.opacity = v;
+        updateColorbars();
+      });
+      bindOp("wvel-op", "wvel-op-val", (v) => {
+        if (wvelMat) wvelMat.opacity = v;
+        updateColorbars();
+      });
+      bindOp("conv-op", "conv-op-val", (v) => {
+        if (convMat) convMat.opacity = v;
+        toggleCb("cb-conv-wrap", v > 0);
+      });
+      bindOp("wind-op", "wind-op-val", (v) => {
+        if (windGroup) {
+          windGroup.visible = v > 0;
+          windGroup.children.forEach(
+            (c) => c.material && (c.material.opacity = v),
+          );
+        }
+      });
+      bindOp("ew-op", "ew-op-val", (v) => {
+        if (ewSliceMat) ewSliceMat.opacity = v;
+        updateColorbars();
+      });
+      bindOp("ns-op", "ns-op-val", (v) => {
+        if (nsSliceMat) nsSliceMat.opacity = v;
+        updateColorbars();
+      });
+      bindOp("z-op", "z-op-val", (v) => {
+        if (zSliceMat) zSliceMat.opacity = v;
+        updateColorbars();
+      });
+      bindOp("amb", "amb-val", (v) => {
+        ambientLight.intensity = v;
+      });
+      bindOp("sun-int", "sun-val", (v) => {
+        sun.intensity = v;
+      });
 
       // Initial scenario
       updateScenario(0);
 
       // Colorbars — drawn once, visibility driven by updateColorbars()
-      drawColorbar('cb-elev', 'cb-elev-labels', elevColor, terrainZMin, terrainZMax, v => v.toFixed(0) + 'm');
-      drawColorbar('cb-theta', 'cb-theta-labels', t => divergingColor(t), -globalMaxTheta, globalMaxTheta, v => v.toFixed(2) + 'K');
-      drawColorbar('cb-wvel', 'cb-wvel-labels', t => divergingColor(t), -globalMaxW, globalMaxW, v => v.toFixed(2) + 'm/s');
-      drawColorbar('cb-conv', 'cb-conv-labels', convColor, 0, 1, v => v.toFixed(2));
+      drawColorbar(
+        "cb-elev",
+        "cb-elev-labels",
+        elevColor,
+        terrainZMin,
+        terrainZMax,
+        (v) => v.toFixed(0) + "m",
+      );
+      drawColorbar(
+        "cb-theta",
+        "cb-theta-labels",
+        (t) => divergingColor(t),
+        -globalMaxTheta,
+        globalMaxTheta,
+        (v) => v.toFixed(2) + "K",
+      );
+      drawColorbar(
+        "cb-wvel",
+        "cb-wvel-labels",
+        (t) => divergingColor(t),
+        -globalMaxW,
+        globalMaxW,
+        (v) => v.toFixed(2) + "m/s",
+      );
+      drawColorbar("cb-conv", "cb-conv-labels", convColor, 0, 1, (v) =>
+        v.toFixed(2),
+      );
 
       // panel already starts open; ensure button state is in sync
-      document.getElementById('panel-toggle').classList.add('open');
+      document.getElementById("panel-toggle").classList.add("open");
     }
 
     function toggleCb(id, show) {
-      document.getElementById(id).classList.toggle('show', show);
+      document.getElementById(id).classList.toggle("show", show);
     }
 
     function updateColorbars() {
-      const v = id => parseFloat(document.getElementById(id).value);
-      const terrOp = v('terrain-op');
-      const thetaOp = v('theta-op');
-      const wvelOp = v('wvel-op');
-      const ewOp = v('ew-op');
-      const nsOp = v('ns-op');
-      const zOp = v('z-op');
-      const thetaVis = thetaOp > 0
-        || (ewOp > 0 && ewMode === 'theta')
-        || (nsOp > 0 && nsMode === 'theta')
-        || (zOp > 0 && zMode === 'theta');
-      const wVis = wvelOp > 0
-        || (ewOp > 0 && ewMode === 'w')
-        || (nsOp > 0 && nsMode === 'w')
-        || (zOp > 0 && zMode === 'w');
-      toggleCb('cb-elev-wrap', terrOp > 0);
-      toggleCb('cb-theta-wrap', thetaVis);
-      toggleCb('cb-wvel-wrap', wVis);
+      const v = (id) => parseFloat(document.getElementById(id).value);
+      const terrOp = v("terrain-op");
+      const thetaOp = v("theta-op");
+      const wvelOp = v("wvel-op");
+      const ewOp = v("ew-op");
+      const nsOp = v("ns-op");
+      const zOp = v("z-op");
+      const thetaVis =
+        thetaOp > 0 ||
+        (ewOp > 0 && ewMode === "theta") ||
+        (nsOp > 0 && nsMode === "theta") ||
+        (zOp > 0 && zMode === "theta");
+      const wVis =
+        wvelOp > 0 ||
+        (ewOp > 0 && ewMode === "w") ||
+        (nsOp > 0 && nsMode === "w") ||
+        (zOp > 0 && zMode === "w");
+      toggleCb("cb-elev-wrap", terrOp > 0);
+      toggleCb("cb-theta-wrap", thetaVis);
+      toggleCb("cb-wvel-wrap", wVis);
     }
 
     // ── Terrain ───────────────────────────────────────────────────────────────────
     function buildTerrain(T) {
-      if (terrainMesh) { scene.remove(terrainMesh); terrainMesh.geometry.dispose(); }
+      if (terrainMesh) {
+        scene.remove(terrainMesh);
+        terrainMesh.geometry.dispose();
+      }
 
       const hasMesh = T.mesh_elevation && T.mesh_nx && T.mesh_ny;
       const elev = hasMesh ? T.mesh_elevation : T.elevation;
@@ -745,29 +976,46 @@
       const ny = hasMesh ? T.mesh_ny : T.ny;
 
       const geom = new THREE.PlaneGeometry(
-        T.x_extent[1] - T.x_extent[0], T.y_extent[1] - T.y_extent[0], nx - 1, ny - 1);
+        T.x_extent[1] - T.x_extent[0],
+        T.y_extent[1] - T.y_extent[0],
+        nx - 1,
+        ny - 1,
+      );
       const pos = geom.attributes.position;
-      for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) pos.setZ(j * nx + i, elev[j][i]);
+      for (let j = 0; j < ny; j++)
+        for (let i = 0; i < nx; i++) pos.setZ(j * nx + i, elev[j][i]);
       pos.needsUpdate = true;
       geom.computeVertexNormals();
 
-      terrainZMin = Infinity; terrainZMax = -Infinity;
+      terrainZMin = Infinity;
+      terrainZMax = -Infinity;
       for (let k = 0; k < pos.count; k++) {
         const z = pos.getZ(k);
-        if (z < terrainZMin) terrainZMin = z; if (z > terrainZMax) terrainZMax = z;
+        if (z < terrainZMin) terrainZMin = z;
+        if (z > terrainZMax) terrainZMax = z;
       }
 
       const colors = new Float32Array(pos.count * 3);
       for (let k = 0; k < pos.count; k++) {
         const t = (pos.getZ(k) - terrainZMin) / (terrainZMax - terrainZMin);
         const [r, g, b] = elevColor(t);
-        colors[k * 3] = r; colors[k * 3 + 1] = g; colors[k * 3 + 2] = b;
+        colors[k * 3] = r;
+        colors[k * 3 + 1] = g;
+        colors[k * 3 + 2] = b;
       }
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
-      terrainMat = new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, opacity: 0.85 });
+      terrainMat = new THREE.MeshLambertMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.85,
+      });
       terrainMesh = new THREE.Mesh(geom, terrainMat);
-      terrainMesh.position.set((T.x_extent[0] + T.x_extent[1]) / 2, -(T.y_extent[0] + T.y_extent[1]) / 2, 0);
+      terrainMesh.position.set(
+        (T.x_extent[0] + T.x_extent[1]) / 2,
+        -(T.y_extent[0] + T.y_extent[1]) / 2,
+        0,
+      );
       terrainMesh.receiveShadow = true;
       scene.add(terrainMesh);
 
@@ -779,26 +1027,49 @@
 
     // ── Overlay meshes (θ', w, convergence) ──────────────────────────────────────
     function buildOverlay(T, type) {
-      const lift = type === 'conv' ? 9 : 6;
+      const lift = type === "conv" ? 9 : 6;
       const mat = new THREE.MeshBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0,
-        depthWrite: false, depthTest: false,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        depthTest: false,
       });
       const geom = new THREE.PlaneGeometry(
-        T.x_extent[1] - T.x_extent[0], T.y_extent[1] - T.y_extent[0], T.nx - 1, T.ny - 1);
+        T.x_extent[1] - T.x_extent[0],
+        T.y_extent[1] - T.y_extent[0],
+        T.nx - 1,
+        T.ny - 1,
+      );
       const pos = geom.attributes.position;
-      for (let j = 0; j < T.ny; j++) for (let i = 0; i < T.nx; i++)
-        pos.setZ(j * T.nx + i, T.elevation[j][i] + lift);
+      for (let j = 0; j < T.ny; j++)
+        for (let i = 0; i < T.nx; i++)
+          pos.setZ(j * T.nx + i, T.elevation[j][i] + lift);
       pos.needsUpdate = true;
-      geom.setAttribute('color', new THREE.BufferAttribute(new Float32Array(T.nx * T.ny * 3), 3));
+      geom.setAttribute(
+        "color",
+        new THREE.BufferAttribute(new Float32Array(T.nx * T.ny * 3), 3),
+      );
 
       const mesh = new THREE.Mesh(geom, mat);
-      mesh.position.set((T.x_extent[0] + T.x_extent[1]) / 2, -(T.y_extent[0] + T.y_extent[1]) / 2, 0);
+      mesh.position.set(
+        (T.x_extent[0] + T.x_extent[1]) / 2,
+        -(T.y_extent[0] + T.y_extent[1]) / 2,
+        0,
+      );
       scene.add(mesh);
 
-      if (type === 'theta') { thetaMesh = mesh; thetaMat = mat; mat.opacity = 0.70; }
-      else if (type === 'wvel') { wvelMesh = mesh; wvelMat = mat; }
-      else { convMesh = mesh; convMat = mat; }
+      if (type === "theta") {
+        thetaMesh = mesh;
+        thetaMat = mat;
+        mat.opacity = 0.7;
+      } else if (type === "wvel") {
+        wvelMesh = mesh;
+        wvelMat = mat;
+      } else {
+        convMesh = mesh;
+        convMat = mat;
+      }
     }
 
     function updateOverlayColors(mesh, T, data, colorFn, minVal, maxVal) {
@@ -810,7 +1081,9 @@
           const idx = (j * T.nx + i) * 3;
           const t = (data[j][i] - minVal) / range;
           const [r, g, b] = colorFn(Math.max(0, Math.min(1, t)));
-          arr[idx] = r; arr[idx + 1] = g; arr[idx + 2] = b;
+          arr[idx] = r;
+          arr[idx + 1] = g;
+          arr[idx + 2] = b;
         }
       }
       mesh.geometry.attributes.color.needsUpdate = true;
@@ -818,16 +1091,32 @@
 
     // ── Wind arrows ───────────────────────────────────────────────────────────────
     function buildWindArrows(T) {
-      if (windGroup) { scene.remove(windGroup); windGroup.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) o.material.dispose(); }); }
+      if (windGroup) {
+        scene.remove(windGroup);
+        windGroup.traverse((o) => {
+          if (o.geometry) o.geometry.dispose();
+          if (o.material) o.material.dispose();
+        });
+      }
       windGroup = new THREE.Group();
       const step = Math.max(2, Math.round(Math.min(T.nx, T.ny) / 16));
-      const lineMat = new THREE.LineBasicMaterial({ color: 0xffdd66, transparent: true, opacity: 0.5 });
+      const lineMat = new THREE.LineBasicMaterial({
+        color: 0xffdd66,
+        transparent: true,
+        opacity: 0.5,
+      });
       for (let j = Math.floor(step / 2); j < T.ny; j += step) {
         for (let i = Math.floor(step / 2); i < T.nx; i += step) {
-          const pts = [new THREE.Vector3(0, 0, 0), new THREE.Vector3(0, 0, 0)];
+          const pts = [
+            new THREE.Vector3(0, 0, 0),
+            new THREE.Vector3(0, 0, 0),
+          ];
           const geom = new THREE.BufferGeometry().setFromPoints(pts);
           const line = new THREE.Line(geom, lineMat.clone());
-          line.userData = { j, i };
+          line.userData = {
+            j,
+            i
+          };
           windGroup.add(line);
         }
       }
@@ -836,7 +1125,8 @@
 
     function updateWindArrows(sc, T) {
       if (!windGroup) return;
-      const windOp = parseFloat(document.getElementById('wind-op').value) || 0;
+      const windOp =
+        parseFloat(document.getElementById("wind-op").value) || 0;
       windGroup.visible = windOp > 0;
       if (!sc.u_surface || windOp === 0) return;
       const xRange = T.x_extent[1] - T.x_extent[0];
@@ -844,44 +1134,68 @@
       const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
       const cy = (T.y_extent[0] + T.y_extent[1]) / 2;
       let uMax = 1e-6;
-      for (const row of sc.u_surface) for (const v of row) if (Math.abs(v) > uMax) uMax = Math.abs(v);
-      for (const row of sc.v_surface) for (const v of row) if (Math.abs(v) > uMax) uMax = Math.abs(v);
+      for (const row of sc.u_surface)
+        for (const v of row)
+          if (Math.abs(v) > uMax) uMax = Math.abs(v);
+      for (const row of sc.v_surface)
+        for (const v of row)
+          if (Math.abs(v) > uMax) uMax = Math.abs(v);
       const arrowLen = Math.min(xRange, yRange) * 0.04;
-      windGroup.children.forEach(line => {
-        const { j, i } = line.userData;
-        const u = sc.u_surface[j][i], v = sc.v_surface[j][i];
+      windGroup.children.forEach((line) => {
+        const {
+          j,
+          i
+        } = line.userData;
+        const u = sc.u_surface[j][i],
+          v = sc.v_surface[j][i];
         const x0 = (i / (T.nx - 1) - 0.5) * xRange;
         const y0 = -(j / (T.ny - 1) - 0.5) * yRange;
         const z0 = T.elevation[j][i] + 15;
         const scale = arrowLen / uMax;
-        const pts = new Float32Array([x0, y0, z0, x0 + u * scale, y0 - v * scale, z0]);
-        line.geometry.setAttribute('position', new THREE.BufferAttribute(pts, 3));
+        const pts = new Float32Array([
+          x0,
+          y0,
+          z0,
+          x0 + u * scale,
+          y0 - v * scale,
+          z0,
+        ]);
+        line.geometry.setAttribute(
+          "position",
+          new THREE.BufferAttribute(pts, 3),
+        );
         line.geometry.attributes.position.needsUpdate = true;
       });
     }
 
     // ── Vertical slices (EW / NS) ─────────────────────────────────────────────────
     function buildVertSlice(type, T, ns) {
-      const { NX, NY, NZ, domH } = ns;
+      const {
+        NX,
+        NY,
+        NZ,
+        domH
+      } = ns;
       const z0 = T.z_extent[0];
       const xRange = T.x_extent[1] - T.x_extent[0];
       const yRange = T.y_extent[1] - T.y_extent[0];
       const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
       const cy = (T.y_extent[0] + T.y_extent[1]) / 2;
 
-      const nH = (type === 'ew') ? NX : NY;
+      const nH = type === "ew" ? NX : NY;
       const positions = new Float32Array(NZ * nH * 3);
       const colors = new Float32Array(NZ * nH * 3).fill(0.5);
 
       for (let iz = 0; iz < NZ; iz++) {
-        const z_w = z0 + iz / Math.max(1, NZ - 1) * domH;
+        const z_w = z0 + (iz / Math.max(1, NZ - 1)) * domH;
         for (let ih = 0; ih < nH; ih++) {
           const base = (iz * nH + ih) * 3;
-          if (type === 'ew') {
+          if (type === "ew") {
             positions[base] = cx + (ih / Math.max(1, NX - 1) - 0.5) * xRange;
             positions[base + 1] = -cy + (Math.floor(NY / 2) / Math.max(1, NY - 1) - 0.5) * yRange;
           } else {
-            positions[base] = cx + (Math.floor(NX / 2) / Math.max(1, NX - 1) - 0.5) * xRange;
+            positions[base] =
+              cx + (Math.floor(NX / 2) / Math.max(1, NX - 1) - 0.5) * xRange;
             positions[base + 1] = -cy + (ih / Math.max(1, NY - 1) - 0.5) * yRange;
           }
           positions[base + 2] = z_w;
@@ -891,45 +1205,82 @@
       const indices = [];
       for (let iz = 0; iz < NZ - 1; iz++) {
         for (let ih = 0; ih < nH - 1; ih++) {
-          const a = iz * nH + ih, b = a + 1, c = (iz + 1) * nH + ih, d = c + 1;
+          const a = iz * nH + ih,
+            b = a + 1,
+            c = (iz + 1) * nH + ih,
+            d = c + 1;
           indices.push(a, b, c, b, d, c);
         }
       }
 
       const geom = new THREE.BufferGeometry();
-      geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
       geom.setIndex(indices);
 
       const mat = new THREE.MeshBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0,
-        side: THREE.DoubleSide, depthWrite: false,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0,
+        side: THREE.DoubleSide,
+        depthWrite: false,
       });
       const mesh = new THREE.Mesh(geom, mat);
       scene.add(mesh);
-      return { mesh, mat };
+      return {
+        mesh,
+        mat
+      };
     }
 
     // ── Z horizontal slice ────────────────────────────────────────────────────────
     function buildZSlice(T, ns) {
       const geom = new THREE.PlaneGeometry(
-        T.x_extent[1] - T.x_extent[0], T.y_extent[1] - T.y_extent[0], ns.NX - 1, ns.NY - 1);
+        T.x_extent[1] - T.x_extent[0],
+        T.y_extent[1] - T.y_extent[0],
+        ns.NX - 1,
+        ns.NY - 1,
+      );
       const pos = geom.attributes.position;
       for (let k = 0; k < pos.count; k++) pos.setZ(k, T.z_extent[0]);
       pos.needsUpdate = true;
-      geom.setAttribute('color', new THREE.BufferAttribute(new Float32Array(ns.NX * ns.NY * 3).fill(0.5), 3));
+      geom.setAttribute(
+        "color",
+        new THREE.BufferAttribute(
+          new Float32Array(ns.NX * ns.NY * 3).fill(0.5),
+          3,
+        ),
+      );
       const mat = new THREE.MeshBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0,
-        side: THREE.DoubleSide, depthWrite: false,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0,
+        side: THREE.DoubleSide,
+        depthWrite: false,
       });
       const mesh = new THREE.Mesh(geom, mat);
-      mesh.position.set((T.x_extent[0] + T.x_extent[1]) / 2, -(T.y_extent[0] + T.y_extent[1]) / 2, 0);
+      mesh.position.set(
+        (T.x_extent[0] + T.x_extent[1]) / 2,
+        -(T.y_extent[0] + T.y_extent[1]) / 2,
+        0,
+      );
       scene.add(mesh);
-      return { mesh, mat };
+      return {
+        mesh,
+        mat
+      };
     }
 
     // ── Slice color updates ───────────────────────────────────────────────────────
-    function updateVertSliceColors(mesh, sliceData, nH, nV, colorFn, minVal, maxVal) {
+    function updateVertSliceColors(
+      mesh,
+      sliceData,
+      nH,
+      nV,
+      colorFn,
+      minVal,
+      maxVal,
+    ) {
       if (!mesh || !sliceData) return;
       const arr = mesh.geometry.attributes.color.array;
       const range = maxVal - minVal || 1;
@@ -938,7 +1289,9 @@
           const t = ((sliceData[iz]?.[ih] ?? 0) - minVal) / range;
           const [r, g, b] = colorFn(Math.max(0, Math.min(1, t)));
           const base = (iz * nH + ih) * 3;
-          arr[base] = r; arr[base + 1] = g; arr[base + 2] = b;
+          arr[base] = r;
+          arr[base + 1] = g;
+          arr[base + 2] = b;
         }
       }
       mesh.geometry.attributes.color.needsUpdate = true;
@@ -953,7 +1306,9 @@
           const t = ((sliceData[j]?.[i] ?? 0) - minVal) / range;
           const [r, g, b] = colorFn(Math.max(0, Math.min(1, t)));
           const base = (j * T.nx + i) * 3;
-          arr[base] = r; arr[base + 1] = g; arr[base + 2] = b;
+          arr[base] = r;
+          arr[base + 1] = g;
+          arr[base + 2] = b;
         }
       }
       mesh.geometry.attributes.color.needsUpdate = true;
@@ -962,39 +1317,43 @@
     // ── Slice position setters ────────────────────────────────────────────────────
     function setEWSlicePos() {
       if (!ewSliceMesh || !simData.ns_solver) return;
-      const ns = simData.ns_solver, T = simData.terrain;
+      const ns = simData.ns_solver,
+        T = simData.terrain;
       const cy = (T.y_extent[0] + T.y_extent[1]) / 2;
       const yRange = T.y_extent[1] - T.y_extent[0];
       const y_w = -cy + (ewIy / Math.max(1, ns.NY - 1) - 0.5) * yRange;
       const pos = ewSliceMesh.geometry.attributes.position;
       for (let k = 0; k < pos.count; k++) pos.setY(k, y_w);
       pos.needsUpdate = true;
-      document.getElementById('ew-pos-val').textContent = ewIy;
-      recolorSlice('ew');
+      document.getElementById("ew-pos-val").textContent = ewIy;
+      recolorSlice("ew");
     }
 
     function setNSSlicePos() {
       if (!nsSliceMesh || !simData.ns_solver) return;
-      const ns = simData.ns_solver, T = simData.terrain;
+      const ns = simData.ns_solver,
+        T = simData.terrain;
       const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
       const xRange = T.x_extent[1] - T.x_extent[0];
       const x_w = cx + (nsIx / Math.max(1, ns.NX - 1) - 0.5) * xRange;
       const pos = nsSliceMesh.geometry.attributes.position;
       for (let k = 0; k < pos.count; k++) pos.setX(k, x_w);
       pos.needsUpdate = true;
-      document.getElementById('ns-pos-val').textContent = nsIx;
-      recolorSlice('ns');
+      document.getElementById("ns-pos-val").textContent = nsIx;
+      recolorSlice("ns");
     }
 
     function setZSlicePos() {
       if (!zSliceMesh || !simData.ns_solver) return;
-      const ns = simData.ns_solver, T = simData.terrain;
-      const z_w = T.z_extent[0] + zIz / Math.max(1, ns.NZ - 1) * ns.domH;
+      const ns = simData.ns_solver,
+        T = simData.terrain;
+      const z_w = T.z_extent[0] + (zIz / Math.max(1, ns.NZ - 1)) * ns.domH;
       const pos = zSliceMesh.geometry.attributes.position;
       for (let k = 0; k < pos.count; k++) pos.setZ(k, z_w);
       pos.needsUpdate = true;
-      document.getElementById('z-pos-val').textContent = Math.round(z_w) + 'm';
-      recolorSlice('z');
+      document.getElementById("z-pos-val").textContent =
+        Math.round(z_w) + "m";
+      recolorSlice("z");
     }
 
     // ── Recolor a slice from current scenario ─────────────────────────────────────
@@ -1004,64 +1363,99 @@
       const ns = simData.ns_solver;
       const T = simData.terrain;
 
-      if (type === 'ew' && ewSliceMesh) {
-        const data3d = ewMode === 'theta' ? sc.theta_3d : sc.w_3d;
-        const maxVal = ewMode === 'theta' ? globalMaxTheta : globalMaxW;
+      if (type === "ew" && ewSliceMesh) {
+        const data3d = ewMode === "theta" ? sc.theta_3d : sc.w_3d;
+        const maxVal = ewMode === "theta" ? globalMaxTheta : globalMaxW;
         if (data3d) {
-          const slice = data3d.map(plane => plane[ewIy] ?? []);
-          updateVertSliceColors(ewSliceMesh, slice, ns.NX, ns.NZ, divergingColor, -maxVal, maxVal);
+          const slice = data3d.map((plane) => plane[ewIy] ?? []);
+          updateVertSliceColors(
+            ewSliceMesh,
+            slice,
+            ns.NX,
+            ns.NZ,
+            divergingColor,
+            -maxVal,
+            maxVal,
+          );
         }
       }
-      if (type === 'ns' && nsSliceMesh) {
-        const data3d = nsMode === 'theta' ? sc.theta_3d : sc.w_3d;
-        const maxVal = nsMode === 'theta' ? globalMaxTheta : globalMaxW;
+      if (type === "ns" && nsSliceMesh) {
+        const data3d = nsMode === "theta" ? sc.theta_3d : sc.w_3d;
+        const maxVal = nsMode === "theta" ? globalMaxTheta : globalMaxW;
         if (data3d) {
-          const slice = data3d.map(plane => plane.map(row => row[nsIx] ?? 0));
-          updateVertSliceColors(nsSliceMesh, slice, ns.NY, ns.NZ, divergingColor, -maxVal, maxVal);
+          const slice = data3d.map((plane) =>
+            plane.map((row) => row[nsIx] ?? 0),
+          );
+          updateVertSliceColors(
+            nsSliceMesh,
+            slice,
+            ns.NY,
+            ns.NZ,
+            divergingColor,
+            -maxVal,
+            maxVal,
+          );
         }
       }
-      if (type === 'z' && zSliceMesh) {
-        const data3d = zMode === 'theta' ? sc.theta_3d : sc.w_3d;
-        const maxVal = zMode === 'theta' ? globalMaxTheta : globalMaxW;
+      if (type === "z" && zSliceMesh) {
+        const data3d = zMode === "theta" ? sc.theta_3d : sc.w_3d;
+        const maxVal = zMode === "theta" ? globalMaxTheta : globalMaxW;
         if (data3d) {
-          updateZSliceColors(zSliceMesh, T, data3d[zIz], divergingColor, -maxVal, maxVal);
+          updateZSliceColors(
+            zSliceMesh,
+            T,
+            data3d[zIz],
+            divergingColor,
+            -maxVal,
+            maxVal,
+          );
         }
       }
     }
 
     function recolorAllSlices() {
-      recolorSlice('ew');
-      recolorSlice('ns');
-      recolorSlice('z');
+      recolorSlice("ew");
+      recolorSlice("ns");
+      recolorSlice("z");
     }
 
     // ── Sun ───────────────────────────────────────────────────────────────────────
     const SUN_R = 8000;
+
     function buildSun() {
       sunSphere = new THREE.Mesh(
         new THREE.SphereGeometry(140, 16, 16),
-        new THREE.MeshBasicMaterial({ color: 0xffee88 }));
+        new THREE.MeshBasicMaterial({
+          color: 0xffee88
+        }),
+      );
       scene.add(sunSphere);
       sunGlow = new THREE.Mesh(
         new THREE.SphereGeometry(280, 16, 16),
         new THREE.MeshBasicMaterial({
-          color: 0xffcc44, transparent: true, opacity: 0.18,
-          blending: THREE.AdditiveBlending, depthWrite: false
-        }));
+          color: 0xffcc44,
+          transparent: true,
+          opacity: 0.18,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        }),
+      );
       scene.add(sunGlow);
-      sunLabel = document.createElement('div');
-      sunLabel.style.cssText = 'position:absolute;pointer-events:none;background:rgba(10,15,30,0.75);border:1px solid #ffcc44;color:#ffee88;font-size:10px;font-family:Segoe UI,sans-serif;padding:2px 6px;border-radius:4px;white-space:nowrap;transform:translate(-50%,-140%)';
+      sunLabel = document.createElement("div");
+      sunLabel.style.cssText =
+        "position:absolute;pointer-events:none;background:rgba(10,15,30,0.75);border:1px solid #ffcc44;color:#ffee88;font-size:10px;font-family:Segoe UI,sans-serif;padding:2px 6px;border-radius:4px;white-space:nowrap;transform:translate(-50%,-140%)";
       container.appendChild(sunLabel);
     }
 
     function updateSun(sc) {
-      const az = sc.sun_azimuth * Math.PI / 180;
-      const el = sc.sun_elevation * Math.PI / 180;
+      const az = (sc.sun_azimuth * Math.PI) / 180;
+      const el = (sc.sun_elevation * Math.PI) / 180;
       const cz = (terrainZMin + terrainZMax) / 2;
       const pos = new THREE.Vector3(
         SUN_R * Math.sin(az) * Math.cos(el),
         SUN_R * Math.cos(az) * Math.cos(el),
-        cz + SUN_R * Math.sin(el));
+        cz + SUN_R * Math.sin(el),
+      );
       sunSphere.position.copy(pos);
       sunGlow.position.copy(pos);
       sun.position.copy(pos);
@@ -1071,20 +1465,28 @@
 
     // ── Markers ───────────────────────────────────────────────────────────────────
     const MARKER_CONFIG = {
-      takeoff: { color: 0xff8800, hex: '#ff8800', label: '▲ Take-off' },
-      landing: { color: 0x00ff88, hex: '#00ff88', label: '▼ Landing' },
+      takeoff: {
+        color: 0xff8800,
+        hex: "#ff8800",
+        label: "▲ Take-off"
+      },
+      landing: {
+        color: 0x00ff88,
+        hex: "#00ff88",
+        label: "▼ Landing"
+      },
     };
-    const _markerMeshes = [];  // all 3D marker objects (with optional _labelDiv)
+    const _markerMeshes = []; // all 3D marker objects (with optional _labelDiv)
 
     function _makeMarkerLabel(text, hexColor) {
-      const div = document.createElement('div');
+      const div = document.createElement("div");
       div.style.cssText = `position:absolute;pointer-events:none;
     background:rgba(10,15,30,0.82);border:1px solid ${hexColor};color:${hexColor};
     font-size:12px;font-weight:bold;font-family:'Segoe UI',sans-serif;
     padding:3px 8px;border-radius:4px;white-space:nowrap;
     transform:translate(-50%,-100%);margin-top:-50px;`;
       div.textContent = text;
-      document.getElementById('canvas-container').appendChild(div);
+      document.getElementById("canvas-container").appendChild(div);
       return div;
     }
 
@@ -1092,7 +1494,12 @@
       const poleH = 120;
       const pole = new THREE.Mesh(
         new THREE.CylinderGeometry(4, 4, poleH, 8),
-        new THREE.MeshBasicMaterial({ color: colorInt, depthTest: false, transparent: true }));
+        new THREE.MeshBasicMaterial({
+          color: colorInt,
+          depthTest: false,
+          transparent: true,
+        }),
+      );
       pole.rotation.x = Math.PI / 2;
       pole.position.set(wx, wy, wz + poleH / 2);
       pole.renderOrder = 10;
@@ -1101,7 +1508,12 @@
 
       const cone = new THREE.Mesh(
         new THREE.ConeGeometry(40, 80, 12),
-        new THREE.MeshBasicMaterial({ color: colorInt, depthTest: false, transparent: true }));
+        new THREE.MeshBasicMaterial({
+          color: colorInt,
+          depthTest: false,
+          transparent: true,
+        }),
+      );
       cone.rotation.x = Math.PI / 2;
       cone.position.set(wx, wy, wz + poleH + 40);
       cone.renderOrder = 10;
@@ -1114,19 +1526,25 @@
 
     function updateMarkerLabels() {
       const rect = renderer.domElement.getBoundingClientRect();
-      _markerMeshes.forEach(obj => {
+      _markerMeshes.forEach((obj) => {
         if (!obj._labelDiv) return;
         const pos = obj._worldPos.clone().project(camera);
-        obj._labelDiv.style.left = ((pos.x * 0.5 + 0.5) * rect.width + rect.left) + 'px';
-        obj._labelDiv.style.top = ((-pos.y * 0.5 + 0.5) * rect.height + rect.top) + 'px';
-        obj._labelDiv.style.display = pos.z > 1 ? 'none' : 'block';
+        obj._labelDiv.style.left =
+          (pos.x * 0.5 + 0.5) * rect.width + rect.left + "px";
+        obj._labelDiv.style.top =
+          (-pos.y * 0.5 + 0.5) * rect.height + rect.top + "px";
+        obj._labelDiv.style.display = pos.z > 1 ? "none" : "block";
       });
     }
 
     // ─── North Arrow ────────────────────────────────────────────────────────────
     const northArrowObjects = [];
+
     function buildNorthArrow() {
-      northArrowObjects.forEach(o => { scene.remove(o); if (o.material?.map) o.material.map.dispose(); });
+      northArrowObjects.forEach((o) => {
+        scene.remove(o);
+        if (o.material?.map) o.material.map.dispose();
+      });
       northArrowObjects.length = 0;
 
       const T = simData.terrain;
@@ -1142,38 +1560,54 @@
       const bboxW = headHalfW * 2;
       const bboxH = halfH * 2;
 
-      const CW = 512, CH = Math.round(CW * bboxH / bboxW);
-      const cv = document.createElement('canvas');
-      cv.width = CW; cv.height = CH;
-      const ctx = cv.getContext('2d');
-      function tc(x, y) { return [(x / bboxW + 0.5) * CW, (0.5 - y / bboxH) * CH]; }
+      const CW = 512,
+        CH = Math.round((CW * bboxH) / bboxW);
+      const cv = document.createElement("canvas");
+      cv.width = CW;
+      cv.height = CH;
+      const ctx = cv.getContext("2d");
+
+      function tc(x, y) {
+        return [(x / bboxW + 0.5) * CW, (0.5 - y / bboxH) * CH];
+      }
 
       const pts = [
-        [-shaftHalfW, -halfH], [shaftHalfW, -halfH],
-        [shaftHalfW, halfH - headH], [headHalfW, halfH - headH],
+        [-shaftHalfW, -halfH],
+        [shaftHalfW, -halfH],
+        [shaftHalfW, halfH - headH],
+        [headHalfW, halfH - headH],
         [0, halfH],
-        [-headHalfW, halfH - headH], [-shaftHalfW, halfH - headH],
+        [-headHalfW, halfH - headH],
+        [-shaftHalfW, halfH - headH],
       ];
       ctx.beginPath();
       ctx.moveTo(...tc(pts[0][0], pts[0][1]));
-      for (let i = 1; i < pts.length; i++) ctx.lineTo(...tc(pts[i][0], pts[i][1]));
+      for (let i = 1; i < pts.length; i++)
+        ctx.lineTo(...tc(pts[i][0], pts[i][1]));
       ctx.closePath();
-      ctx.fillStyle = 'rgba(238,34,34,0.55)';
+      ctx.fillStyle = "rgba(238,34,34,0.55)";
       ctx.fill();
 
       const shaftCY = (-halfH + halfH - headH) / 2;
       const [tx, ty] = tc(0, shaftCY);
-      const fontSize = Math.round(CW * (2 * shaftHalfW / bboxW) * 0.42);
+      const fontSize = Math.round(CW * ((2 * shaftHalfW) / bboxW) * 0.42);
       ctx.font = `bold ${fontSize}px 'Segoe UI', sans-serif`;
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.shadowColor = 'rgba(0,0,0,0.95)'; ctx.shadowBlur = fontSize * 0.3;
-      ctx.fillStyle = 'rgb(238,34,34)';
-      ctx.fillText('North', tx, ty);
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = fontSize * 0.3;
+      ctx.fillStyle = "rgb(238,34,34)";
+      ctx.fillText("North", tx, ty);
 
       const texture = new THREE.CanvasTexture(cv);
       const mesh = new THREE.Mesh(
         new THREE.PlaneGeometry(bboxW, bboxH),
-        new THREE.MeshBasicMaterial({ map: texture, transparent: true, side: THREE.DoubleSide, depthWrite: false })
+        new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        }),
       );
       mesh.position.set(cx, cy, terrainZMin - 500);
       scene.add(mesh);
@@ -1181,33 +1615,49 @@
     }
 
     let markersMade = false;
+
     function buildMarkers(T) {
       if (markersMade || !simData.markers) return;
       markersMade = true;
       const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
       const cy = (T.y_extent[0] + T.y_extent[1]) / 2;
       for (const m of simData.markers) {
-        const cfg = MARKER_CONFIG[m.type]; if (!cfg) continue;
-        const z0 = (m.z || terrainZMin);
-        _addMarker(m.x - cx, -(m.y - cy), z0, cfg.color,
-          `${cfg.label}  ${z0.toFixed(0)}m`, cfg.hex);
+        const cfg = MARKER_CONFIG[m.type];
+        if (!cfg) continue;
+        const z0 = m.z || terrainZMin;
+        _addMarker(
+          m.x - cx,
+          -(m.y - cy),
+          z0,
+          cfg.color,
+          `${cfg.label}  ${z0.toFixed(0)}m`,
+          cfg.hex,
+        );
       }
     }
 
     let _clickCone = null;
     let lastClickIJ = null;
+
     function setClickMarker(wx, wy, wz, elevM) {
       if (_clickCone) {
-        _clickCone._labelDiv.textContent = `▶ Selected  ${elevM !== undefined ? elevM.toFixed(0) + 'm' : ''}`;
+        _clickCone._labelDiv.textContent = `▶ Selected  ${elevM !== undefined ? elevM.toFixed(0) + "m" : ""}`;
         _clickCone._worldPos.set(wx, wy, wz + 120 + 90);
         _clickCone.position.set(wx, wy, wz + 120 + 40);
         _clickCone.parent || scene.add(_clickCone);
         _clickCone.previousSibling || scene.add(_clickCone._pole);
-        _clickCone.visible = true; _clickCone._pole.visible = true;
+        _clickCone.visible = true;
+        _clickCone._pole.visible = true;
         _clickCone._pole.position.set(wx, wy, wz + 60);
       } else {
-        _clickCone = _addMarker(wx, wy, wz, 0x4488ff,
-          `▶ Selected  ${elevM !== undefined ? elevM.toFixed(0) + 'm' : ''}`, '#4488ff');
+        _clickCone = _addMarker(
+          wx,
+          wy,
+          wz,
+          0x4488ff,
+          `▶ Selected  ${elevM !== undefined ? elevM.toFixed(0) + "m" : ""}`,
+          "#4488ff",
+        );
         _clickCone._pole = _markerMeshes[_markerMeshes.length - 2];
       }
     }
@@ -1218,14 +1668,31 @@
       const sc = simData.scenarios[idx];
       const T = simData.terrain;
 
-      document.getElementById('time-display').textContent = sc.local_time || sc.name;
-      document.getElementById('sun-info').textContent =
+      document.getElementById("time-display").textContent =
+        sc.local_time || sc.name;
+      document.getElementById("sun-info").textContent =
         `az ${sc.sun_azimuth.toFixed(0)}°  el ${sc.sun_elevation.toFixed(0)}°`;
-      document.getElementById('time-slider').value = idx;
+      document.getElementById("time-slider").value = idx;
 
-      updateOverlayColors(thetaMesh, T, sc.ground_temp_anomaly, divergingColor, -globalMaxTheta, globalMaxTheta);
-      if (sc.w_vel) updateOverlayColors(wvelMesh, T, sc.w_vel, divergingColor, -globalMaxW, globalMaxW);
-      if (sc.convergence) updateOverlayColors(convMesh, T, sc.convergence, convColor, 0, 1);
+      updateOverlayColors(
+        thetaMesh,
+        T,
+        sc.ground_temp_anomaly,
+        divergingColor,
+        -globalMaxTheta,
+        globalMaxTheta,
+      );
+      if (sc.w_vel)
+        updateOverlayColors(
+          wvelMesh,
+          T,
+          sc.w_vel,
+          divergingColor,
+          -globalMaxW,
+          globalMaxW,
+        );
+      if (sc.convergence)
+        updateOverlayColors(convMesh, T, sc.convergence, convColor, 0, 1);
       recolorAllSlices();
       updateWindArrows(sc, T);
       updateSun(sc);
@@ -1235,27 +1702,32 @@
 
     // ── Plume profile ─────────────────────────────────────────────────────────────
     function drawPlumeProfile(sc, i, j) {
-      const wrap = document.getElementById('plume-wrap');
-      if (!sc.theta_3d) { wrap.style.display = 'none'; return; }
-      wrap.style.display = 'block';
+      const wrap = document.getElementById("plume-wrap");
+      if (!sc.theta_3d) {
+        wrap.style.display = "none";
+        return;
+      }
+      wrap.style.display = "block";
 
-      const canvas = document.getElementById('plume-canvas');
+      const canvas = document.getElementById("plume-canvas");
       const NZ = sc.theta_3d.length;
       const dpr = window.devicePixelRatio || 1;
-      const W = Math.max(60, canvas.clientWidth);   // actual CSS width from flex layout
+      const W = Math.max(60, canvas.clientWidth); // actual CSS width from flex layout
       const H = 160;
-      canvas.style.height = H + 'px';
+      canvas.style.height = H + "px";
       canvas.width = W * dpr;
       canvas.height = H * dpr;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       ctx.scale(dpr, dpr);
 
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = 'rgba(5,10,20,0.95)';
+      ctx.fillStyle = "rgba(5,10,20,0.95)";
       ctx.fillRect(0, 0, W, H);
 
-      const thetaCol = sc.theta_3d.map(plane => plane[j]?.[i] ?? 0);
-      const wCol = sc.w_3d ? sc.w_3d.map(plane => plane[j]?.[i] ?? 0) : null;
+      const thetaCol = sc.theta_3d.map((plane) => plane[j]?.[i] ?? 0);
+      const wCol = sc.w_3d ?
+        sc.w_3d.map((plane) => plane[j]?.[i] ?? 0) :
+        null;
 
       const maxAbsT = Math.max(1e-9, ...thetaCol.map(Math.abs));
       const maxAbsW = wCol ? Math.max(1e-9, ...wCol.map(Math.abs)) : 1;
@@ -1265,66 +1737,79 @@
 
       // ── Y axis (HTML) ──
       const nYTicks = 5;
-      const yAxis = document.getElementById('plume-yaxis');
-      yAxis.style.height = H + 'px';
-      yAxis.innerHTML = '';
+      const yAxis = document.getElementById("plume-yaxis");
+      yAxis.style.height = H + "px";
+      yAxis.innerHTML = "";
       for (let k = 0; k <= nYTicks; k++) {
         const topPct = (1 - k / nYTicks) * 100;
-        const alt = Math.round(z0 + k / nYTicks * ns.domH);
-        const span = document.createElement('span');
-        span.textContent = alt + 'm';
-        span.style.top = topPct + '%';
+        const alt = Math.round(z0 + (k / nYTicks) * ns.domH);
+        const span = document.createElement("span");
+        span.textContent = alt + "m";
+        span.style.top = topPct + "%";
         yAxis.appendChild(span);
       }
 
       // ── Horizontal grid lines + zero line (canvas) ──
       for (let k = 0; k <= nYTicks; k++) {
         const y = H * (1 - k / nYTicks);
-        ctx.strokeStyle = 'rgba(100,160,255,0.1)'; ctx.lineWidth = 0.5;
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+        ctx.strokeStyle = "rgba(100,160,255,0.1)";
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(W, y);
+        ctx.stroke();
       }
-      ctx.strokeStyle = 'rgba(100,160,255,0.3)'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(W / 2, 0); ctx.lineTo(W / 2, H); ctx.stroke();
+      ctx.strokeStyle = "rgba(100,160,255,0.3)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(W / 2, 0);
+      ctx.lineTo(W / 2, H);
+      ctx.stroke();
 
       // ── Profiles ──
       function drawProfile(colData, maxAbs, color) {
-        ctx.strokeStyle = color; ctx.lineWidth = 2;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
         ctx.beginPath();
         for (let iz = 0; iz < NZ; iz++) {
           const t = 0.5 + (colData[iz] / maxAbs) * 0.5;
           const x = Math.max(0, Math.min(1, t)) * W;
           const y = H * (1 - iz / Math.max(1, NZ - 1));
-          if (iz === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          if (iz === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
         }
         ctx.stroke();
       }
 
-      drawProfile(thetaCol, maxAbsT, '#6699ff');
-      if (wCol) drawProfile(wCol, maxAbsW, '#ff7755');
+      drawProfile(thetaCol, maxAbsT, "#6699ff");
+      if (wCol) drawProfile(wCol, maxAbsW, "#ff7755");
 
       // ── X axis (HTML) ──
-      const fmt = v => Math.abs(v) < 10 ? v.toFixed(2) : v.toFixed(1);
-      const xAxis = document.getElementById('plume-xaxis');
-      xAxis.style.width = W + 'px';
+      const fmt = (v) => (Math.abs(v) < 10 ? v.toFixed(2) : v.toFixed(1));
+      const xAxis = document.getElementById("plume-xaxis");
+      xAxis.style.width = W + "px";
       const tRow = `<div class="px-row">
     <span style="color:#6699ff">${fmt(-maxAbsT)}K</span>
     <span style="color:#3a5568">0</span>
     <span style="color:#6699ff">${fmt(+maxAbsT)}K</span>
   </div>`;
-      const wRow = wCol ? `<div class="px-row">
+      const wRow = wCol ?
+        `<div class="px-row">
     <span style="color:#ff7755">${fmt(-maxAbsW)}m/s</span>
     <span></span>
     <span style="color:#ff7755">${fmt(+maxAbsW)}m/s</span>
-  </div>` : '';
+  </div>` :
+        "";
       xAxis.innerHTML = tRow + wRow;
 
       // ── Legend ──
-      const legend = document.getElementById('plume-legend');
+      const legend = document.getElementById("plume-legend");
       const swatch = (color, label) =>
         `<span style="display:flex;align-items:center;gap:3px;">` +
         `<span style="display:inline-block;width:14px;height:2px;background:${color};border-radius:1px;"></span>` +
         `<span style="color:#8ab4d4;">${label}</span></span>`;
-      legend.innerHTML = swatch('#6699ff', 'θ\'') + (wCol ? swatch('#ff7755', 'w') : '');
+      legend.innerHTML =
+        swatch("#6699ff", "θ'") + (wCol ? swatch("#ff7755", "w") : "");
     }
 
     // ── Raycasting (click info) ───────────────────────────────────────────────────
@@ -1336,7 +1821,7 @@
       const u = sc.u_surface?.[j]?.[i] ?? 0;
       const v = sc.v_surface?.[j]?.[i] ?? 0;
       const elev = T.elevation[j]?.[i] ?? 0;
-      document.getElementById('info-rows').innerHTML = `
+      document.getElementById("info-rows").innerHTML = `
     <div class="info-row"><span class="info-label">Time</span><span class="info-val">${sc.local_time} m</span></div>
     <div class="info-row"><span class="info-label">Elevation</span><span class="info-val">${elev.toFixed(0)} m</span></div>
     <div class="info-row"><span class="info-label">θ' anomaly</span><span class="info-val">${theta.toFixed(2)} K</span></div>
@@ -1344,39 +1829,55 @@
     <div class="info-row"><span class="info-label">Convergence</span><span class="info-val">${conv.toFixed(3)}</span></div>
     <div class="info-row"><span class="info-label">Wind (u,v)</span><span class="info-val">${(u / 3600).toFixed(1)}, ${(v / 3600).toFixed(1)} m/s</span></div>
   `;
-      document.getElementById('info-panel').style.display = 'block';
+      document.getElementById("info-panel").style.display = "block";
       drawPlumeProfile(sc, i, j);
     }
 
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
-    let _pointerDownTime = 0, _pointerDownX = 0, _pointerDownY = 0;
-    renderer.domElement.addEventListener('pointerdown', e => {
-      _pointerDownTime = Date.now(); _pointerDownX = e.clientX; _pointerDownY = e.clientY;
+    let _pointerDownTime = 0,
+      _pointerDownX = 0,
+      _pointerDownY = 0;
+    renderer.domElement.addEventListener("pointerdown", (e) => {
+      _pointerDownTime = Date.now();
+      _pointerDownX = e.clientX;
+      _pointerDownY = e.clientY;
     });
-    renderer.domElement.addEventListener('click', e => {
+    renderer.domElement.addEventListener("click", (e) => {
       if (!thetaMesh || !simData) return;
       const dt = Date.now() - _pointerDownTime;
-      const dx = e.clientX - _pointerDownX, dy = e.clientY - _pointerDownY;
+      const dx = e.clientX - _pointerDownX,
+        dy = e.clientY - _pointerDownY;
       if (dt > 250 || dx * dx + dy * dy > 25) return; // long press or drag → ignore
       const rect = renderer.domElement.getBoundingClientRect();
       mouse.set(
         ((e.clientX - rect.left) / rect.width) * 2 - 1,
-        -((e.clientY - rect.top) / rect.height) * 2 + 1);
+        -((e.clientY - rect.top) / rect.height) * 2 + 1,
+      );
       raycaster.setFromCamera(mouse, camera);
       const hits = raycaster.intersectObject(thetaMesh);
       if (!hits.length) {
-        document.getElementById('info-panel').style.display = 'none';
+        document.getElementById("info-panel").style.display = "none";
         lastClickIJ = null;
-        if (_clickCone) { _clickCone.visible = false; _clickCone._pole.visible = false; _clickCone._labelDiv.style.display = 'none'; }
+        if (_clickCone) {
+          _clickCone.visible = false;
+          _clickCone._pole.visible = false;
+          _clickCone._labelDiv.style.display = "none";
+        }
         return;
       }
-      const { uv, point } = hits[0];
+      const {
+        uv,
+        point
+      } = hits[0];
       const T = simData.terrain;
       const sc = simData.scenarios[currentScenario];
       const i = Math.min(T.nx - 1, Math.round(uv.x * (T.nx - 1)));
       const j = Math.min(T.ny - 1, Math.round((1 - uv.y) * (T.ny - 1)));
-      lastClickIJ = { i, j };
+      lastClickIJ = {
+        i,
+        j
+      };
       setClickMarker(point.x, point.y, point.z, T.elevation[j]?.[i]);
       showInfoPanel(sc, i, j);
     });
@@ -1389,10 +1890,11 @@
       const x = (v.x * 0.5 + 0.5) * rect.width;
       const y = (-v.y * 0.5 + 0.5) * rect.height;
       if (v.z < 1) {
-        sunLabel.style.display = 'block';
-        sunLabel.style.left = x + 'px'; sunLabel.style.top = y + 'px';
+        sunLabel.style.display = "block";
+        sunLabel.style.left = x + "px";
+        sunLabel.style.top = y + "px";
       } else {
-        sunLabel.style.display = 'none';
+        sunLabel.style.display = "none";
       }
     }
 
@@ -1407,12 +1909,15 @@
     animate();
 
     // Keyboard scenario navigation
-    window.addEventListener('keydown', e => {
+    window.addEventListener("keydown", (e) => {
       if (!simData) return;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
-        currentScenario = Math.min(simData.scenarios.length - 1, currentScenario + 1);
+      if (e.key === "ArrowRight" || e.key === "ArrowUp") {
+        currentScenario = Math.min(
+          simData.scenarios.length - 1,
+          currentScenario + 1,
+        );
         updateScenario(currentScenario);
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+      } else if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
         currentScenario = Math.max(0, currentScenario - 1);
         updateScenario(currentScenario);
       }
@@ -1421,17 +1926,21 @@
     loadData();
 
     // Nav dropdown touch support
-    document.querySelectorAll('.nav-dropdown-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        var dd = btn.closest('.nav-dropdown');
-        var isOpen = dd.classList.contains('open');
-        document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
-        if (!isOpen) dd.classList.add('open');
+    document.querySelectorAll(".nav-dropdown-btn").forEach(function(btn) {
+      btn.addEventListener("click", function(e) {
+        var dd = btn.closest(".nav-dropdown");
+        var isOpen = dd.classList.contains("open");
+        document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+          d.classList.remove("open");
+        });
+        if (!isOpen) dd.classList.add("open");
         e.stopPropagation();
       });
     });
-    document.addEventListener('click', function () {
-      document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
+    document.addEventListener("click", function() {
+      document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+        d.classList.remove("open");
+      });
     });
   </script>
 </body>

@@ -1,18 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
   <title>Thermal Flow — About</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
 </head>
 
-<body style="font-size:14px;line-height:1.7">
-
+<body style="font-size: 14px; line-height: 1.7">
   <nav id="header-nav">
-    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt="" /><span>Home</span></a>
     <div class="nav-sep"></div>
     <a href="area" class="nav-link">Area</a>
     <div class="nav-sep"></div>
@@ -51,23 +50,27 @@
   </nav>
 
   <div class="page">
-
     <h1>NS Thermal Simulation — Technical Documentation</h1>
-    <p class="subtitle">Full 3D Navier-Stokes atmospheric simulation for paragliding thermal analysis</p>
+    <p class="subtitle">
+      Full 3D Navier-Stokes atmospheric simulation for paragliding thermal
+      analysis
+    </p>
 
     <!-- ─ OVERVIEW ─ -->
     <h2>Overview</h2>
     <p>
-      The NS (Navier-Stokes) simulation solves the incompressible Boussinesq equations for atmospheric
-      convection over real terrain. It models how solar heating of the ground creates temperature
-      anomalies in the boundary layer, which generate buoyant thermals that rise through a stably
-      stratified atmosphere.
+      The NS (Navier-Stokes) simulation solves the incompressible Boussinesq
+      equations for atmospheric convection over real terrain. It models how
+      solar heating of the ground creates temperature anomalies in the
+      boundary layer, which generate buoyant thermals that rise through a
+      stably stratified atmosphere.
     </p>
     <p>
-      The simulation runs entirely in the browser using a Web Worker, operating on a 3D rectangular
-      grid that spans the terrain horizontally and from the lowest terrain point up to a configurable
-      domain height vertically. Terrain cells are flagged as solid (no-flow) and heat is injected at
-      the first fluid cell above the surface.
+      The simulation runs entirely in the browser using a Web Worker,
+      operating on a 3D rectangular grid that spans the terrain horizontally
+      and from the lowest terrain point up to a configurable domain height
+      vertically. Terrain cells are flagged as solid (no-flow) and heat is
+      injected at the first fluid cell above the surface.
     </p>
 
     <!-- ─ PIPELINE ─ -->
@@ -75,50 +78,77 @@
 
     <div class="step">
       <div class="step-num">1</div>
-      <div class="step-body"><strong>Fetch terrain</strong> — AWS Terrarium RGB-encoded tiles are downloaded at the chosen zoom level,
-        decoded to metres, and bilinearly resampled to the NX × NY simulation grid.</div>
+      <div class="step-body">
+        <strong>Fetch terrain</strong> — AWS Terrarium RGB-encoded tiles are
+        downloaded at the chosen zoom level, decoded to metres, and bilinearly
+        resampled to the NX × NY simulation grid.
+      </div>
     </div>
     <div class="step">
       <div class="step-num">2</div>
-      <div class="step-body"><strong>Fetch land cover</strong> — ESA WorldCover 2021 COG GeoTIFF is fetched for the bounding box,
-        resampled to the grid, and converted to per-cell thermal factor <code>tf</code> and time constant <code>τ</code>.
-        A slope-based heuristic is used as fallback when the file is unavailable.</div>
+      <div class="step-body">
+        <strong>Fetch land cover</strong> — ESA WorldCover 2021 COG GeoTIFF is
+        fetched for the bounding box, resampled to the grid, and converted to
+        per-cell thermal factor <code>tf</code> and time constant
+        <code>τ</code>. A slope-based heuristic is used as fallback when the
+        file is unavailable.
+      </div>
     </div>
     <div class="step">
       <div class="step-num">3</div>
-      <div class="step-body"><strong>ERA5 calibration</strong> — Open-Meteo archive API is queried for historical 2 m air
-        temperature and surface temperature at the site centre. The median clear-sky midday surface–air difference is used
-        to set <code>max_heat</code>, or the user can override it manually.</div>
+      <div class="step-body">
+        <strong>ERA5 calibration</strong> — Open-Meteo archive API is queried
+        for historical 2 m air temperature and surface temperature at the site
+        centre. The median clear-sky midday surface–air difference is used to
+        set <code>max_heat</code>, or the user can override it manually.
+      </div>
     </div>
     <div class="step">
       <div class="step-num">4</div>
-      <div class="step-body"><strong>Build 3D grid and solid mask</strong> — the NX × NY × NZ Cartesian grid is constructed.
-        Each cell is flagged solid if its centre lies below the terrain surface; fluid otherwise. The first fluid cell
-        above each terrain column is identified for surface heat-flux injection.</div>
+      <div class="step-body">
+        <strong>Build 3D grid and solid mask</strong> — the NX × NY × NZ
+        Cartesian grid is constructed. Each cell is flagged solid if its
+        centre lies below the terrain surface; fluid otherwise. The first
+        fluid cell above each terrain column is identified for surface
+        heat-flux injection.
+      </div>
     </div>
     <div class="step">
       <div class="step-num">5</div>
-      <div class="step-body"><strong>Compute solar heating maps</strong> — for each scenario time step, solar geometry,
-        terrain shadow ray-casting, land-cover factors, and atmospheric transmittance are combined to produce the
-        per-cell surface heat flux <code>Q_Ks(x,y)</code> that drives the simulation at that scenario time.</div>
+      <div class="step-body">
+        <strong>Compute solar heating maps</strong> — for each scenario time
+        step, solar geometry, terrain shadow ray-casting, land-cover factors,
+        and atmospheric transmittance are combined to produce the per-cell
+        surface heat flux <code>Q_Ks(x,y)</code> that drives the simulation at
+        that scenario time.
+      </div>
     </div>
     <div class="step">
       <div class="step-num">6</div>
-      <div class="step-body"><strong>Spin-up</strong> — the solver is advanced for the configured number of spin-up steps
-        before the first snapshot, allowing convective motions to develop from the initially quiescent (zero-velocity)
-        field.</div>
+      <div class="step-body">
+        <strong>Spin-up</strong> — the solver is advanced for the configured
+        number of spin-up steps before the first snapshot, allowing convective
+        motions to develop from the initially quiescent (zero-velocity) field.
+      </div>
     </div>
     <div class="step">
       <div class="step-num">7</div>
-      <div class="step-body"><strong>Scenario loop</strong> — for each output time step the corresponding heat flux is
-        applied, then the NS solver runs the configured number of steps: Smagorinsky viscosity → semi-Lagrangian
-        advection → explicit diffusion → buoyancy → stratification → surface flux → Red-Black SOR pressure → projection.
-        2D surface fields and 3D cross-section slices are snapshotted.</div>
+      <div class="step-body">
+        <strong>Scenario loop</strong> — for each output time step the
+        corresponding heat flux is applied, then the NS solver runs the
+        configured number of steps: Smagorinsky viscosity → semi-Lagrangian
+        advection → explicit diffusion → buoyancy → stratification → surface
+        flux → Red-Black SOR pressure → projection. 2D surface fields and 3D
+        cross-section slices are snapshotted.
+      </div>
     </div>
     <div class="step">
       <div class="step-num">8</div>
-      <div class="step-body"><strong>Export to IndexedDB</strong> — all scenario snapshots plus static fields (elevation,
-        land-cover map) are packed and stored in the browser's IndexedDB, from where the Three.js viewer reads them.</div>
+      <div class="step-body">
+        <strong>Export to IndexedDB</strong> — all scenario snapshots plus
+        static fields (elevation, land-cover map) are packed and stored in the
+        browser's IndexedDB, from where the Three.js viewer reads them.
+      </div>
     </div>
 
     <!-- ─ PHYSICS MODELLED ─ -->
@@ -126,94 +156,109 @@
 
     <h3>1. Incompressible Boussinesq Navier-Stokes equations</h3>
     <p>
-      The flow is governed by the incompressible Navier-Stokes equations under the Boussinesq
-      approximation: density variations are neglected everywhere except in the buoyancy term, where
-      temperature anomalies drive vertical acceleration.
+      The flow is governed by the incompressible Navier-Stokes equations under
+      the Boussinesq approximation: density variations are neglected
+      everywhere except in the buoyancy term, where temperature anomalies
+      drive vertical acceleration.
     </p>
     <div class="eq">
-      ∂<b>u</b>/∂t + (<b>u</b>·∇)<b>u</b> = −∇p + ∇·(νₜ ∇<b>u</b>) [momentum]<br>
-      ∇·<b>u</b> = 0 [incompressibility]<br>
-      ∂θ'/∂t + (<b>u</b>·∇)θ' = κₜ ∇²θ' − w·(DALR − ELR) + Q_surface [temperature]
+      ∂<b>u</b>/∂t + (<b>u</b>·∇)<b>u</b> = −∇p + ∇·(νₜ ∇<b>u</b>)
+      [momentum]<br />
+      ∇·<b>u</b> = 0 [incompressibility]<br />
+      ∂θ'/∂t + (<b>u</b>·∇)θ' = κₜ ∇²θ' − w·(DALR − ELR) + Q_surface
+      [temperature]
     </div>
     <p>
-      Here <code>u = (u, v, w)</code> is the 3D velocity field (East, South, Up), <code>p</code> is
-      the kinematic pressure (pressure divided by reference density), <code>θ'</code> is the potential
-      temperature anomaly relative to the background profile, <code>νₜ</code> is the turbulent
-      viscosity, and <code>κₜ = νₜ / Prₜ</code> is the turbulent thermal diffusivity.
+      Here <code>u = (u, v, w)</code> is the 3D velocity field (East, South,
+      Up), <code>p</code> is the kinematic pressure (pressure divided by
+      reference density), <code>θ'</code> is the potential temperature anomaly
+      relative to the background profile, <code>νₜ</code> is the turbulent
+      viscosity, and <code>κₜ = νₜ / Prₜ</code> is the turbulent thermal
+      diffusivity.
     </p>
 
     <h3>2. Buoyancy</h3>
     <p>
-      Warm air rises. The buoyancy term couples the temperature anomaly to the vertical momentum equation:
+      Warm air rises. The buoyancy term couples the temperature anomaly to the
+      vertical momentum equation:
     </p>
     <div class="eq">w* += (g / T₀) · θ' · dt</div>
     <p>
-      where <code>g = 9.81 m/s²</code>, <code>T₀</code> is the reference temperature in Kelvin
-      (estimated from ERA5 reanalysis or set to 293 K), and <code>dt</code> is the timestep.
-      A cell with θ' = +2 K at T₀ = 293 K produces a buoyancy acceleration of about
-      0.067 m/s² — enough to drive 1–3 m/s vertical velocities over several minutes.
+      where <code>g = 9.81 m/s²</code>, <code>T₀</code> is the reference
+      temperature in Kelvin (estimated from ERA5 reanalysis or set to 293 K),
+      and <code>dt</code> is the timestep. A cell with θ' = +2 K at T₀ = 293 K
+      produces a buoyancy acceleration of about 0.067 m/s² — enough to drive
+      1–3 m/s vertical velocities over several minutes.
     </p>
 
     <h3>3. Background atmospheric stability (stratification)</h3>
     <p>
-      The atmosphere has a background temperature profile that resists vertical motion. When a parcel
-      rises, it cools at the Dry Adiabatic Lapse Rate (DALR = 9.76 K/km). If the environment cools
-      more slowly (ELR &lt; DALR), the parcel becomes colder than its surroundings and is pushed back
-      down — this is atmospheric stability.
+      The atmosphere has a background temperature profile that resists
+      vertical motion. When a parcel rises, it cools at the Dry Adiabatic
+      Lapse Rate (DALR = 9.76 K/km). If the environment cools more slowly (ELR
+      &lt; DALR), the parcel becomes colder than its surroundings and is
+      pushed back down — this is atmospheric stability.
     </p>
     <div class="eq">θ'* -= w · (DALR − ELR) · dt</div>
     <p>
-      The stability parameter <code>strat = DALR − ELR</code> is positive when the atmosphere is
-      stable (typical daytime: strat ≈ 3 K/km). When ELR approaches DALR the atmosphere is neutral
-      and thermals penetrate much higher. If ELR > DALR the atmosphere is absolutely unstable
-      (rare in practice).
+      The stability parameter <code>strat = DALR − ELR</code> is positive when
+      the atmosphere is stable (typical daytime: strat ≈ 3 K/km). When ELR
+      approaches DALR the atmosphere is neutral and thermals penetrate much
+      higher. If ELR > DALR the atmosphere is absolutely unstable (rare in
+      practice).
     </p>
 
     <h3>4. Smagorinsky Large Eddy Simulation (LES) turbulence closure</h3>
     <p>
-      Turbulent motions smaller than a grid cell are parameterised using the Smagorinsky-Lilly model.
-      The turbulent viscosity is computed from the local strain-rate tensor:
+      Turbulent motions smaller than a grid cell are parameterised using the
+      Smagorinsky-Lilly model. The turbulent viscosity is computed from the
+      local strain-rate tensor:
     </p>
-    <div class="eq">νₜ = (Cs · Δ)² · √(2 SᵢⱼSᵢⱼ)
-
-      Sᵢⱼ = ½ (∂uᵢ/∂xⱼ + ∂uⱼ/∂xᵢ) [strain-rate tensor]
-      Δ = (dx · dy · dz)^(1/3) [filter width = geometric mean grid spacing]</div>
+    <div class="eq">
+      νₜ = (Cs · Δ)² · √(2 SᵢⱼSᵢⱼ) Sᵢⱼ = ½ (∂uᵢ/∂xⱼ + ∂uⱼ/∂xᵢ) [strain-rate
+      tensor] Δ = (dx · dy · dz)^(1/3) [filter width = geometric mean grid
+      spacing]
+    </div>
     <p>
-      The turbulent Prandtl number <code>Prₜ = 0.7</code> gives the thermal diffusivity
-      <code>κₜ = νₜ / 0.7</code>. The viscosity is clamped for numerical stability:
-      <code>νₜ ≤ 0.4 · min(dx,dy,dz)² / dt</code>.
+      The turbulent Prandtl number <code>Prₜ = 0.7</code> gives the thermal
+      diffusivity <code>κₜ = νₜ / 0.7</code>. The viscosity is clamped for
+      numerical stability: <code>νₜ ≤ 0.4 · min(dx,dy,dz)² / dt</code>.
     </p>
 
     <h3>5. Solar heating and surface heat flux</h3>
     <p>
-      At each scenario time step, the ground temperature anomaly is computed from sun geometry,
-      terrain slope and shadowing, land cover, and atmospheric transmittance.
+      At each scenario time step, the ground temperature anomaly is computed
+      from sun geometry, terrain slope and shadowing, land cover, and
+      atmospheric transmittance.
     </p>
-    <div class="eq">dT(x,y) = maxHeat · (I_direct + I_diffuse) · tf(x,y) <br>
-      <br>
-      I_direct = cos(θ_inc) · T_atm · (1 − shadow)<br>
-      I_diffuse = diffuseFrac · (1 − T_atm) · SVF<br>
-      <br>
-      T_atm = T_base^(AM^T_exp) [Kasten-Czeplak atmospheric transmittance]<br>
-      AM = 1 / [sin(el) + 0.50572 · (el_deg + 6.07995)^(−1.6364)] [airmass]<br>
+    <div class="eq">
+      dT(x,y) = maxHeat · (I_direct + I_diffuse) · tf(x,y) <br />
+      <br />
+      I_direct = cos(θ_inc) · T_atm · (1 − shadow)<br />
+      I_diffuse = diffuseFrac · (1 − T_atm) · SVF<br />
+      <br />
+      T_atm = T_base^(AM^T_exp) [Kasten-Czeplak atmospheric transmittance]<br />
+      AM = 1 / [sin(el) + 0.50572 · (el_deg + 6.07995)^(−1.6364)] [airmass]<br />
       SVF = (1 + cos(slope)) / 2 [sky view factor for diffuse radiation]
     </div>
     <p>
-      <code>θ_inc</code> is the angle between the solar ray and the terrain surface normal (computed
-      from the terrain gradient). The ground temperature anomaly is then converted to a continuous
-      heat flux injected into the simulation:
+      <code>θ_inc</code> is the angle between the solar ray and the terrain
+      surface normal (computed from the terrain gradient). The ground
+      temperature anomaly is then converted to a continuous heat flux injected
+      into the simulation:
     </p>
     <div class="eq">Q_Ks(x,y) = dT(x,y) / (τ(x,y) · 3600) [K/s]</div>
     <p>
-      where <code>τ</code> is the ground thermal time constant (in hours, land-cover dependent).
-      This flux is added each timestep to the potential temperature of the bottom fluid cell above
-      the terrain surface.
+      where <code>τ</code> is the ground thermal time constant (in hours,
+      land-cover dependent). This flux is added each timestep to the potential
+      temperature of the bottom fluid cell above the terrain surface.
     </p>
 
     <h3>6. Land cover</h3>
     <p>
-      Each grid cell has a thermal factor <code>tf</code> (heating efficiency) and time constant
-      <code>τ</code> derived from the ESA WorldCover land cover map:
+      Each grid cell has a thermal factor <code>tf</code> (heating efficiency)
+      and time constant <code>τ</code> derived from the ESA WorldCover land
+      cover map:
     </p>
     <table class="lc-table">
       <tr>
@@ -223,67 +268,92 @@
         <th>Effect</th>
       </tr>
       <tr>
-        <td><span class="lc-swatch" style="background:rgb(250,0,0)"></span>Built-up</td>
+        <td>
+          <span class="lc-swatch" style="background: rgb(250, 0, 0)"></span>Built-up
+        </td>
         <td>1.30</td>
         <td>0.50</td>
         <td>Strong, fast heating (heat island)</td>
       </tr>
       <tr>
-        <td><span class="lc-swatch" style="background:rgb(180,180,180)"></span>Bare/sparse</td>
+        <td>
+          <span class="lc-swatch" style="background: rgb(180, 180, 180)"></span>Bare/sparse
+        </td>
         <td>1.80</td>
         <td>0.35</td>
-        <td>Strongest heating, fastest response — rocky terrain is the best thermal trigger</td>
+        <td>
+          Strongest heating, fastest response — rocky terrain is the best
+          thermal trigger
+        </td>
       </tr>
       <tr>
-        <td><span class="lc-swatch" style="background:rgb(240,150,255)"></span>Cropland</td>
+        <td>
+          <span class="lc-swatch" style="background: rgb(240, 150, 255)"></span>Cropland
+        </td>
         <td>0.85</td>
         <td>0.85</td>
         <td>Moderate heating</td>
       </tr>
       <tr>
-        <td><span class="lc-swatch" style="background:rgb(255,255,76)"></span>Grassland</td>
+        <td>
+          <span class="lc-swatch" style="background: rgb(255, 255, 76)"></span>Grassland
+        </td>
         <td>1.00</td>
         <td>1.00</td>
         <td>Reference land cover</td>
       </tr>
       <tr>
-        <td><span class="lc-swatch" style="background:rgb(255,187,34)"></span>Shrubland</td>
+        <td>
+          <span class="lc-swatch" style="background: rgb(255, 187, 34)"></span>Shrubland
+        </td>
         <td>0.70</td>
         <td>1.30</td>
         <td>Moderate, slower</td>
       </tr>
       <tr>
-        <td><span class="lc-swatch" style="background:rgb(250,230,160)"></span>Moss/lichen</td>
+        <td>
+          <span class="lc-swatch" style="background: rgb(250, 230, 160)"></span>Moss/lichen
+        </td>
         <td>0.60</td>
         <td>1.00</td>
         <td>Moderate</td>
       </tr>
       <tr>
-        <td><span class="lc-swatch" style="background:rgb(0,150,160)"></span>Herb. wetland</td>
+        <td>
+          <span class="lc-swatch" style="background: rgb(0, 150, 160)"></span>Herb. wetland
+        </td>
         <td>0.35</td>
         <td>1.50</td>
         <td>Weak heating</td>
       </tr>
       <tr>
-        <td><span class="lc-swatch" style="background:rgb(0,207,117)"></span>Mangrove</td>
+        <td>
+          <span class="lc-swatch" style="background: rgb(0, 207, 117)"></span>Mangrove
+        </td>
         <td>0.50</td>
         <td>2.00</td>
         <td>Weak, slow</td>
       </tr>
       <tr>
-        <td><span class="lc-swatch" style="background:rgb(0,100,0)"></span>Tree cover</td>
+        <td>
+          <span class="lc-swatch" style="background: rgb(0, 100, 0)"></span>Tree cover
+        </td>
         <td>0.45</td>
         <td>2.50</td>
         <td>Forest: weak and slow — poor thermal source</td>
       </tr>
       <tr>
-        <td><span class="lc-swatch" style="background:rgb(240,240,240)"></span>Snow/ice</td>
+        <td>
+          <span class="lc-swatch" style="background: rgb(240, 240, 240)"></span>Snow/ice
+        </td>
         <td>0.08</td>
         <td>1.50</td>
         <td>Almost no heating (high albedo)</td>
       </tr>
       <tr>
-        <td><span class="lc-swatch" style="background:rgb(0,100,200)"></span>Perm. water</td>
+        <td>
+          <span class="lc-swatch" style="background: rgb(0, 100, 200)"></span>Perm. water
+        </td>
         <td>0.03</td>
         <td>15.0</td>
         <td>Negligible heating, very high thermal mass</td>
@@ -292,100 +362,114 @@
 
     <h3>7. Terrain shadowing</h3>
     <p>
-      Before the simulation, a ray-marching shadow pass determines which terrain cells are in shadow
-      for each scenario time step. Shadowed cells receive only diffuse radiation, suppressing their
-      surface heat flux. This creates realistic cold patches on north-facing slopes or in valleys
+      Before the simulation, a ray-marching shadow pass determines which
+      terrain cells are in shadow for each scenario time step. Shadowed cells
+      receive only diffuse radiation, suppressing their surface heat flux.
+      This creates realistic cold patches on north-facing slopes or in valleys
       in the morning and evening.
     </p>
 
     <h3>8. ERA5 calibration</h3>
     <p>
-      The maximum heating parameter <code>maxHeat</code> can be calibrated automatically from
-      ERA5 reanalysis data. The model fetches historical hourly 2m-temperature and surface
-      temperature from the Open-Meteo API for the target site, computes the typical midday
-      surface–air temperature difference, and fits <code>maxHeat</code> to match observations.
-      This grounds the simulation in real meteorological data for the chosen date and location.
+      The maximum heating parameter <code>maxHeat</code> can be calibrated
+      automatically from ERA5 reanalysis data. The model fetches historical
+      hourly 2m-temperature and surface temperature from the Open-Meteo API
+      for the target site, computes the typical midday surface–air temperature
+      difference, and fits <code>maxHeat</code> to match observations. This
+      grounds the simulation in real meteorological data for the chosen date
+      and location.
     </p>
 
     <!-- ─ NUMERICAL METHOD ─ -->
     <h2>Numerical Method (Chorin Projection)</h2>
     <p>
-      Each timestep applies the following sequence (Chorin fractional-step / projection method):
+      Each timestep applies the following sequence (Chorin fractional-step /
+      projection method):
     </p>
 
     <div class="step">
       <div class="step-num">1</div>
       <div class="step-body">
-        <b>Smagorinsky turbulent viscosity</b> — compute <code>νₜ</code> at every fluid cell from the
-        current strain-rate tensor (9 velocity gradients via central differences).
+        <b>Smagorinsky turbulent viscosity</b> — compute <code>νₜ</code> at
+        every fluid cell from the current strain-rate tensor (9 velocity
+        gradients via central differences).
       </div>
     </div>
 
     <div class="step">
       <div class="step-num">2</div>
       <div class="step-body">
-        <b>Semi-Lagrangian advection</b> — for each cell, backtrack the departure point
-        <code>x_d = x − u·dt</code> and interpolate the field value there using trilinear interpolation.
-        This scheme is unconditionally stable for any CFL number, allowing large timesteps.
+        <b>Semi-Lagrangian advection</b> — for each cell, backtrack the
+        departure point <code>x_d = x − u·dt</code> and interpolate the field
+        value there using trilinear interpolation. This scheme is
+        unconditionally stable for any CFL number, allowing large timesteps.
       </div>
     </div>
 
     <div class="step">
       <div class="step-num">3</div>
       <div class="step-body">
-        <b>Explicit diffusion</b> — apply <code>u* += νₜ ∇²u · dt</code> (and same for θ') using
-        second-order central differences. The viscosity is clamped to satisfy the diffusive CFL condition.
+        <b>Explicit diffusion</b> — apply <code>u* += νₜ ∇²u · dt</code> (and
+        same for θ') using second-order central differences. The viscosity is
+        clamped to satisfy the diffusive CFL condition.
       </div>
     </div>
 
     <div class="step">
       <div class="step-num">4</div>
       <div class="step-body">
-        <b>Buoyancy</b> — add the buoyancy acceleration to the intermediate vertical velocity:
-        <code>w* += (g/T₀) · θ' · dt</code>.
+        <b>Buoyancy</b> — add the buoyancy acceleration to the intermediate
+        vertical velocity: <code>w* += (g/T₀) · θ' · dt</code>.
       </div>
     </div>
 
     <div class="step">
       <div class="step-num">5</div>
       <div class="step-body">
-        <b>Stratification</b> — damp the temperature anomaly proportional to vertical motion and
-        stability: <code>θ'* -= w* · (DALR − ELR) · dt</code>.
+        <b>Stratification</b> — damp the temperature anomaly proportional to
+        vertical motion and stability:
+        <code>θ'* -= w* · (DALR − ELR) · dt</code>.
       </div>
     </div>
 
     <div class="step">
       <div class="step-num">6</div>
       <div class="step-body">
-        <b>Surface heat flux</b> — inject <code>Q_Ks · dt</code> of temperature into the bottom fluid
-        cell of each column above the terrain surface.
+        <b>Surface heat flux</b> — inject <code>Q_Ks · dt</code> of
+        temperature into the bottom fluid cell of each column above the
+        terrain surface.
       </div>
     </div>
 
     <div class="step">
       <div class="step-num">7</div>
       <div class="step-body">
-        <b>Boundary conditions</b> — enforce no-slip (u=v=w=0) inside solid terrain cells and at the
-        domain top. Horizontal boundaries are periodic.
+        <b>Boundary conditions</b> — enforce no-slip (u=v=w=0) inside solid
+        terrain cells and at the domain top. Horizontal boundaries are
+        periodic.
       </div>
     </div>
 
     <div class="step">
       <div class="step-num">8</div>
       <div class="step-body">
-        <b>Pressure Poisson equation</b> — solve ∇²p = (∇·u*)/dt using Red-Black Successive
-        Over-Relaxation (SOR) with ω ≈ 1.75. Boundary conditions are Neumann (∂p/∂n = 0) at terrain
-        and top, periodic horizontally. The mean pressure is removed every N iterations (tunable via
-        <i>SOR mean-removal freq</i>) to handle the null space of the Neumann problem.
+        <b>Pressure Poisson equation</b> — solve ∇²p = (∇·u*)/dt using
+        Red-Black Successive Over-Relaxation (SOR) with ω ≈ 1.75. Boundary
+        conditions are Neumann (∂p/∂n = 0) at terrain and top, periodic
+        horizontally. The mean pressure is removed every N iterations (tunable
+        via <i>SOR mean-removal freq</i>) to handle the null space of the
+        Neumann problem.
       </div>
     </div>
 
     <div class="step">
       <div class="step-num">9</div>
       <div class="step-body">
-        <b>Helmholtz projection</b> — subtract the pressure gradient to enforce incompressibility:
-        <code>u = u* − ∇p · dt</code>. This guarantees ∇·u = 0 (i.e. divergence-free velocity) in the fluid domain. Note
-        that incompressibility is enforced ndirectly via pressure projection.
+        <b>Helmholtz projection</b> — subtract the pressure gradient to
+        enforce incompressibility: <code>u = u* − ∇p · dt</code>. This
+        guarantees ∇·u = 0 (i.e. divergence-free velocity) in the fluid
+        domain. Note that incompressibility is enforced ndirectly via pressure
+        projection.
       </div>
     </div>
 
@@ -393,11 +477,14 @@
     <h2>Grid and Boundary Conditions</h2>
 
     <p>
-      The simulation domain is a rectangular box aligned with the terrain bounding box. The grid
-      spacing is uniform: <code>dx = domain_width / NX</code>, <code>dy = domain_height / NY</code>,
-      <code>dz = domH / NZ</code>. Terrain is represented as a solid mask: cells below (or at) the
-      terrain surface are flagged solid, and all velocities inside them are forced to zero (no-slip).
-      Heat is applied only to the first fluid cell above each terrain column.
+      The simulation domain is a rectangular box aligned with the terrain
+      bounding box. The grid spacing is uniform:
+      <code>dx = domain_width / NX</code>,
+      <code>dy = domain_height / NY</code>, <code>dz = domH / NZ</code>.
+      Terrain is represented as a solid mask: cells below (or at) the terrain
+      surface are flagged solid, and all velocities inside them are forced to
+      zero (no-slip). Heat is applied only to the first fluid cell above each
+      terrain column.
     </p>
 
     <table class="param-table">
@@ -408,19 +495,19 @@
         <th>Temperature</th>
       </tr>
       <tr>
-        <td style="color:#a8c0d4">Terrain surface</td>
+        <td style="color: #a8c0d4">Terrain surface</td>
         <td>No-slip (u=v=w=0)</td>
         <td>Neumann (∂p/∂n=0)</td>
         <td>Heat flux Q_Ks applied</td>
       </tr>
       <tr>
-        <td style="color:#a8c0d4">Domain top</td>
+        <td style="color: #a8c0d4">Domain top</td>
         <td>w=0 (free-slip)</td>
         <td>Neumann</td>
         <td>Neumann (∂θ'/∂n=0)</td>
       </tr>
       <tr>
-        <td style="color:#a8c0d4">X/Y sides</td>
+        <td style="color: #a8c0d4">X/Y sides</td>
         <td>Periodic</td>
         <td>Periodic</td>
         <td>Periodic</td>
@@ -431,40 +518,68 @@
     <h2>Simplifications</h2>
     <div class="box warn">
       <ul>
-        <li>Incompressibility (Boussinesq): density is constant except in the buoyancy term.
-          Valid for vertical motions &lt; ~2 km and speeds well below the speed of sound.</li>
-        <li>The ELR is assumed uniform (the same lapse rate throughout the domain), ignoring
-          inversions and local stability variations.</li>
-        <li>The ground heat flux is spatially smooth (Gaussian-filtered land cover) and
-          instantaneously applied, ignoring sub-surface heat conduction.</li>
-        <li>The SOR pressure solver converges to finite precision; residual divergence remains
-          in the velocity field after the projection step.</li>
-        <li>Periodic lateral boundaries mean that thermals that leave one side re-enter from
-          the opposite side — an artefact for small domains.</li>
+        <li>
+          Incompressibility (Boussinesq): density is constant except in the
+          buoyancy term. Valid for vertical motions &lt; ~2 km and speeds well
+          below the speed of sound.
+        </li>
+        <li>
+          The ELR is assumed uniform (the same lapse rate throughout the
+          domain), ignoring inversions and local stability variations.
+        </li>
+        <li>
+          The ground heat flux is spatially smooth (Gaussian-filtered land
+          cover) and instantaneously applied, ignoring sub-surface heat
+          conduction.
+        </li>
+        <li>
+          The SOR pressure solver converges to finite precision; residual
+          divergence remains in the velocity field after the projection step.
+        </li>
+        <li>
+          Periodic lateral boundaries mean that thermals that leave one side
+          re-enter from the opposite side — an artefact for small domains.
+        </li>
       </ul>
     </div>
 
     <h2>Limitations</h2>
     <div class="box note">
       <ul>
-        <li><b>Background wind</b> — there is no mean horizontal flow. Orographic lift, rotor zones
-          and wind shear are absent. All flow is purely thermally driven.</li>
-        <li><b>Moisture and clouds</b> — no latent heat, no condensation, no cloud base or cumulus
-          development. The simulation is dry throughout.</li>
-        <li><b>Coriolis effect</b> — negligible at the spatial scales considered (&lt; 10 km)
-          but formally absent.</li>
-        <li><b>Radiation divergence</b> — longwave cooling of the air column and radiative
-          flux divergence within the atmosphere are ignored. Only surface heating is modelled.</li>
-        <li><b>Entrainment</b> — the erosion of the thermal top by mixing with environmental air is
-          handled implicitly by turbulent diffusion but no explicit entrainment parameterisation
-          is used.</li>
-        <li><b>Synoptic forcing</b> — large-scale pressure gradients, fronts, and mesoscale
-          circulation are not represented.</li>
-        <li><b>Non-flat terrain top</b> — the domain top is a flat horizontal plane, not a
-          terrain-following coordinate. Thermals that reach the top are absorbed.</li>
+        <li>
+          <b>Background wind</b> — there is no mean horizontal flow.
+          Orographic lift, rotor zones and wind shear are absent. All flow is
+          purely thermally driven.
+        </li>
+        <li>
+          <b>Moisture and clouds</b> — no latent heat, no condensation, no
+          cloud base or cumulus development. The simulation is dry throughout.
+        </li>
+        <li>
+          <b>Coriolis effect</b> — negligible at the spatial scales considered
+          (&lt; 10 km) but formally absent.
+        </li>
+        <li>
+          <b>Radiation divergence</b> — longwave cooling of the air column and
+          radiative flux divergence within the atmosphere are ignored. Only
+          surface heating is modelled.
+        </li>
+        <li>
+          <b>Entrainment</b> — the erosion of the thermal top by mixing with
+          environmental air is handled implicitly by turbulent diffusion but
+          no explicit entrainment parameterisation is used.
+        </li>
+        <li>
+          <b>Synoptic forcing</b> — large-scale pressure gradients, fronts,
+          and mesoscale circulation are not represented.
+        </li>
+        <li>
+          <b>Non-flat terrain top</b> — the domain top is a flat horizontal
+          plane, not a terrain-following coordinate. Thermals that reach the
+          top are absorbed.
+        </li>
       </ul>
     </div>
-
 
     <!-- ─ PARAMETERS ─ -->
     <h2>Parameters and Their Effects</h2>
@@ -479,28 +594,40 @@
       <tr>
         <td>NX, NY</td>
         <td>50, 50</td>
-        <td>Horizontal grid resolution. More cells → finer spatial structure, smaller thermals
-          can be resolved, but runtime grows as NX·NY·NZ. Aspect ratio should match the terrain.</td>
+        <td>
+          Horizontal grid resolution. More cells → finer spatial structure,
+          smaller thermals can be resolved, but runtime grows as NX·NY·NZ.
+          Aspect ratio should match the terrain.
+        </td>
       </tr>
       <tr>
         <td>NZ</td>
         <td>30</td>
-        <td>Vertical layers. Increasing NZ improves thermal height resolution but reduces dz,
-          which tightens the diffusive stability limit and may require a smaller dt.</td>
+        <td>
+          Vertical layers. Increasing NZ improves thermal height resolution
+          but reduces dz, which tightens the diffusive stability limit and may
+          require a smaller dt.
+        </td>
       </tr>
       <tr>
         <td>Domain height (domH)</td>
         <td>4000 m</td>
-        <td>Vertical extent of the simulation box above the lowest terrain point. Should be at
-          least as tall as the expected thermal top. Too small truncates rising thermals; too
-          large spreads NZ layers thinly and coarsens vertical resolution.</td>
+        <td>
+          Vertical extent of the simulation box above the lowest terrain
+          point. Should be at least as tall as the expected thermal top. Too
+          small truncates rising thermals; too large spreads NZ layers thinly
+          and coarsens vertical resolution.
+        </td>
       </tr>
       <tr>
         <td>Timestep (dt)</td>
         <td>90 s</td>
-        <td>Integration step. Semi-Lagrangian advection is stable for any CFL, but buoyancy and
-          diffusion impose practical limits. Reduce if the simulation diverges (velocities
-          grow without bound). Larger dt speeds up computation but reduces accuracy.</td>
+        <td>
+          Integration step. Semi-Lagrangian advection is stable for any CFL,
+          but buoyancy and diffusion impose practical limits. Reduce if the
+          simulation diverges (velocities grow without bound). Larger dt
+          speeds up computation but reduces accuracy.
+        </td>
       </tr>
     </table>
 
@@ -514,66 +641,87 @@
       <tr>
         <td>ELR</td>
         <td>6.5 K/km</td>
-        <td>Environmental Lapse Rate. Controls atmospheric stability: <code>strat = DALR − ELR</code>.
-          Higher ELR → less stable → thermals rise higher and faster.
-          ELR = 9.76 K/km (= DALR) is neutral; ELR > DALR is absolutely unstable.
-          Typical summer value: 6–8 K/km. <b>Most impactful parameter for thermal height.</b></td>
+        <td>
+          Environmental Lapse Rate. Controls atmospheric stability:
+          <code>strat = DALR − ELR</code>. Higher ELR → less stable → thermals
+          rise higher and faster. ELR = 9.76 K/km (= DALR) is neutral; ELR >
+          DALR is absolutely unstable. Typical summer value: 6–8 K/km.
+          <b>Most impactful parameter for thermal height.</b>
+        </td>
       </tr>
       <tr>
         <td>DALR</td>
         <td>9.76 K/km</td>
-        <td>Dry Adiabatic Lapse Rate — the rate at which an unsaturated rising air parcel cools.
-          This is a physical constant and should normally be left at 9.76 K/km. Reducing it
-          artificially weakens the buoyancy restoring force, making the atmosphere behave as if
-          moister (pseudo-adiabatic conditions). Only change for sensitivity studies.</td>
+        <td>
+          Dry Adiabatic Lapse Rate — the rate at which an unsaturated rising
+          air parcel cools. This is a physical constant and should normally be
+          left at 9.76 K/km. Reducing it artificially weakens the buoyancy
+          restoring force, making the atmosphere behave as if moister
+          (pseudo-adiabatic conditions). Only change for sensitivity studies.
+        </td>
       </tr>
       <tr>
         <td>Prt (Prandtl)</td>
         <td>0.7</td>
-        <td>Turbulent Prandtl number: ratio of momentum to thermal eddy diffusivity,
-          <code>κₜ = νₜ / Prt</code>. Higher Prt → less thermal mixing → temperature anomalies
-          stay sharper and thermals are more intense. Lower Prt → more diffuse temperature field.
-          Physically, the atmosphere has Prt ≈ 0.7; values of 1.0–1.5 reduce numerical diffusion
-          of thermals in coarse grids.
+        <td>
+          Turbulent Prandtl number: ratio of momentum to thermal eddy
+          diffusivity, <code>κₜ = νₜ / Prt</code>. Higher Prt → less thermal
+          mixing → temperature anomalies stay sharper and thermals are more
+          intense. Lower Prt → more diffuse temperature field. Physically, the
+          atmosphere has Prt ≈ 0.7; values of 1.0–1.5 reduce numerical
+          diffusion of thermals in coarse grids.
         </td>
       </tr>
       <tr>
         <td>Cs (Smagorinsky)</td>
         <td>0.18</td>
-        <td>Scales subgrid turbulent viscosity and diffusivity.
-          Higher Cs → more dissipation → thermals are weaker and more diffuse.
-          Lower Cs → less dissipation → sharper, stronger plumes, but risk of numerical instability.
-          Typical range: 0.10–0.25.</td>
+        <td>
+          Scales subgrid turbulent viscosity and diffusivity. Higher Cs → more
+          dissipation → thermals are weaker and more diffuse. Lower Cs → less
+          dissipation → sharper, stronger plumes, but risk of numerical
+          instability. Typical range: 0.10–0.25.
+        </td>
       </tr>
       <tr>
         <td>CFL factor</td>
         <td>0.4</td>
-        <td>Caps the turbulent viscosity νₜ for diffusive stability:
-          <code>νₜ ≤ CFL_factor · Δ² / dt</code>. Reducing this makes the diffusion scheme
-          more conservative (less mixing per step); increasing it allows stronger diffusion but
-          risks numerical instability. Values above ~0.5 may cause blow-up on coarse grids with
-          large νₜ.
+        <td>
+          Caps the turbulent viscosity νₜ for diffusive stability:
+          <code>νₜ ≤ CFL_factor · Δ² / dt</code>. Reducing this makes the
+          diffusion scheme more conservative (less mixing per step);
+          increasing it allows stronger diffusion but risks numerical
+          instability. Values above ~0.5 may cause blow-up on coarse grids
+          with large νₜ.
         </td>
       </tr>
       <tr>
         <td>ω (SOR relaxation)</td>
         <td>1.75</td>
-        <td>Over-relaxation factor for the pressure solver. Higher ω → faster convergence per
-          iteration. Values above ~1.9 risk divergence. Reduce if pressure residuals are large.</td>
+        <td>
+          Over-relaxation factor for the pressure solver. Higher ω → faster
+          convergence per iteration. Values above ~1.9 risk divergence. Reduce
+          if pressure residuals are large.
+        </td>
       </tr>
       <tr>
         <td>Max iterations</td>
         <td>60</td>
-        <td>Maximum SOR iterations per timestep. More iterations → better satisfaction of
-          incompressibility (∇·u ≈ 0) but slower per step. Increase for large or fine grids.</td>
+        <td>
+          Maximum SOR iterations per timestep. More iterations → better
+          satisfaction of incompressibility (∇·u ≈ 0) but slower per step.
+          Increase for large or fine grids.
+        </td>
       </tr>
       <tr>
         <td>SOR mean-removal freq</td>
         <td>20</td>
-        <td>Remove the mean pressure from the pressure field every N SOR iterations. This handles
-          the null space of the all-Neumann Poisson problem (pressure is defined only up to a
-          constant). More frequent removal (smaller N) is safer but adds small overhead. Values
-          of 10–30 are all equivalent in practice.</td>
+        <td>
+          Remove the mean pressure from the pressure field every N SOR
+          iterations. This handles the null space of the all-Neumann Poisson
+          problem (pressure is defined only up to a constant). More frequent
+          removal (smaller N) is safer but adds small overhead. Values of
+          10–30 are all equivalent in practice.
+        </td>
       </tr>
     </table>
 
@@ -587,59 +735,78 @@
       <tr>
         <td>max_heat</td>
         <td>15 K</td>
-        <td>Peak ground–air temperature difference under full insolation on grassland (tf=1).
-          Directly scales all surface heat fluxes. <b>Primary knob for overall thermal strength.</b>
-          Real values: 10–25 K on a warm summer day. Can be auto-calibrated from ERA5 data.</td>
+        <td>
+          Peak ground–air temperature difference under full insolation on
+          grassland (tf=1). Directly scales all surface heat fluxes.
+          <b>Primary knob for overall thermal strength.</b> Real values: 10–25
+          K on a warm summer day. Can be auto-calibrated from ERA5 data.
+        </td>
       </tr>
       <tr>
         <td>diffuse_frac</td>
         <td>0.30</td>
-        <td>Fraction of solar energy arriving as scattered sky radiation (independent of direct
-          beam and shadow). Higher diffuse fraction reduces the contrast between sunny and
-          shadowed slopes, producing more uniform heating.</td>
+        <td>
+          Fraction of solar energy arriving as scattered sky radiation
+          (independent of direct beam and shadow). Higher diffuse fraction
+          reduces the contrast between sunny and shadowed slopes, producing
+          more uniform heating.
+        </td>
       </tr>
       <tr>
         <td>tau_hours</td>
         <td>1.5 h</td>
-        <td>Reference ground thermal time constant, scaled per land cover type. Controls how
-          quickly the ground temperature anomaly drives a heat flux into the atmosphere:
-          <code>Q_Ks = dT / (τ · 3600)</code>. Smaller τ → faster, stronger flux for the
-          same surface anomaly. Rocky terrain is already set to τ·0.35.
+        <td>
+          Reference ground thermal time constant, scaled per land cover type.
+          Controls how quickly the ground temperature anomaly drives a heat
+          flux into the atmosphere: <code>Q_Ks = dT / (τ · 3600)</code>.
+          Smaller τ → faster, stronger flux for the same surface anomaly.
+          Rocky terrain is already set to τ·0.35.
         </td>
       </tr>
       <tr>
         <td>T_atm base</td>
         <td>0.70</td>
-        <td>Base transmittance in the Kasten-Czeplak formula:
-          <code>T_atm = T_base^(AM^T_exp)</code>. Represents clear-sky atmospheric
-          transparency at the zenith (airmass = 1). Higher values (e.g. 0.80) correspond to
-          a cleaner, drier atmosphere or high-altitude sites — more solar energy reaches the
-          ground, driving stronger thermals. Lower values model haze, humidity, or pollution.
+        <td>
+          Base transmittance in the Kasten-Czeplak formula:
+          <code>T_atm = T_base^(AM^T_exp)</code>. Represents clear-sky
+          atmospheric transparency at the zenith (airmass = 1). Higher values
+          (e.g. 0.80) correspond to a cleaner, drier atmosphere or
+          high-altitude sites — more solar energy reaches the ground, driving
+          stronger thermals. Lower values model haze, humidity, or pollution.
         </td>
       </tr>
       <tr>
         <td>T_atm exponent</td>
         <td>0.678</td>
-        <td>Exponent on the airmass in the transmittance formula. Controls how quickly
-          transmittance drops as the sun approaches the horizon (high airmass). A higher
-          exponent steepens the airmass penalty; a lower exponent gives a more uniform
-          insolation throughout the day. The Kasten-Czeplak empirical value is 0.678.</td>
+        <td>
+          Exponent on the airmass in the transmittance formula. Controls how
+          quickly transmittance drops as the sun approaches the horizon (high
+          airmass). A higher exponent steepens the airmass penalty; a lower
+          exponent gives a more uniform insolation throughout the day. The
+          Kasten-Czeplak empirical value is 0.678.
+        </td>
       </tr>
       <tr>
         <td>σ slope (slope smoothing)</td>
         <td>1.5 cells</td>
-        <td>Gaussian smoothing radius applied to the cos(incidence) field before computing
-          direct solar irradiance. Reduces high-frequency artifacts from steep or noisy terrain
-          normals. Larger σ → smoother heating patterns, less cliff/ridge edge artefacts.
-          Set to 0 to disable smoothing.</td>
+        <td>
+          Gaussian smoothing radius applied to the cos(incidence) field before
+          computing direct solar irradiance. Reduces high-frequency artifacts
+          from steep or noisy terrain normals. Larger σ → smoother heating
+          patterns, less cliff/ridge edge artefacts. Set to 0 to disable
+          smoothing.
+        </td>
       </tr>
       <tr>
         <td>σ land cover (lc smoothing)</td>
         <td>4 cells</td>
-        <td>Gaussian smoothing radius applied to the land-cover thermal factor map. Blends
-          abrupt forest/grassland boundaries, which are coarser than the simulation grid.
-          Larger σ produces gentler spatial gradients in surface heating. Set to 0 for sharp
-          land-cover boundaries.</td>
+        <td>
+          Gaussian smoothing radius applied to the land-cover thermal factor
+          map. Blends abrupt forest/grassland boundaries, which are coarser
+          than the simulation grid. Larger σ produces gentler spatial
+          gradients in surface heating. Set to 0 for sharp land-cover
+          boundaries.
+        </td>
       </tr>
     </table>
 
@@ -653,21 +820,30 @@
       <tr>
         <td>Start / end time</td>
         <td>10:00–16:00</td>
-        <td>UTC times at which scenarios are computed. Solar elevation and azimuth change
-          significantly; the most intense thermals typically occur 11:00–14:00 local solar time.</td>
+        <td>
+          UTC times at which scenarios are computed. Solar elevation and
+          azimuth change significantly; the most intense thermals typically
+          occur 11:00–14:00 local solar time.
+        </td>
       </tr>
       <tr>
         <td>Steps before snapshot</td>
         <td>80</td>
-        <td>Number of NS timesteps integrated between each saved scenario. More steps allow
-          the flow to develop further before sampling. Too few steps and the flow is
-          under-developed; too many and transient features are lost.</td>
+        <td>
+          Number of NS timesteps integrated between each saved scenario. More
+          steps allow the flow to develop further before sampling. Too few
+          steps and the flow is under-developed; too many and transient
+          features are lost.
+        </td>
       </tr>
       <tr>
         <td>Spin-up steps</td>
         <td>40</td>
-        <td>Extra steps run before the first snapshot to let the flow develop from rest.
-          Without spin-up, the first scenario shows an unrealistically quiet flow field.</td>
+        <td>
+          Extra steps run before the first snapshot to let the flow develop
+          from rest. Without spin-up, the first scenario shows an
+          unrealistically quiet flow field.
+        </td>
       </tr>
     </table>
 
@@ -683,43 +859,63 @@
       <tr>
         <td>θ' surface</td>
         <td>θ'(x,y)</td>
-        <td>Potential temperature anomaly at the first fluid cell above terrain. Positive = warm air
-          rising; negative = cold sinking. Proxy for thermal trigger strength.</td>
+        <td>
+          Potential temperature anomaly at the first fluid cell above terrain.
+          Positive = warm air rising; negative = cold sinking. Proxy for
+          thermal trigger strength.
+        </td>
       </tr>
       <tr>
         <td>Vertical w</td>
         <td>w(x,y)</td>
-        <td>Vertical velocity at the surface level. Positive (red) = rising air; negative (blue) =
-          sinking. More directly related to what a paraglider feels than θ'.</td>
+        <td>
+          Vertical velocity at the surface level. Positive (red) = rising air;
+          negative (blue) = sinking. More directly related to what a
+          paraglider feels than θ'.
+        </td>
       </tr>
       <tr>
         <td>Convergence</td>
         <td>−(∂u/∂x + ∂v/∂y)</td>
-        <td>Negative horizontal divergence. Where surface winds converge, air is forced upward,
-          triggering or feeding thermals. High convergence with high w indicates a strong thermal source.</td>
+        <td>
+          Negative horizontal divergence. Where surface winds converge, air is
+          forced upward, triggering or feeding thermals. High convergence with
+          high w indicates a strong thermal source.
+        </td>
       </tr>
       <tr>
         <td>θ'(x,y,z)</td>
         <td>theta_3d</td>
-        <td>Full 3D temperature anomaly field, viewable on EW/NS/Z cross-section slices. Shows
-          thermal plume structure with altitude.</td>
+        <td>
+          Full 3D temperature anomaly field, viewable on EW/NS/Z cross-section
+          slices. Shows thermal plume structure with altitude.
+        </td>
       </tr>
       <tr>
         <td>w(x,y,z)</td>
         <td>w_3d</td>
-        <td>Full 3D vertical velocity field. The updraft core visible in cross-sections corresponds
-          to the exploitable thermal column.</td>
+        <td>
+          Full 3D vertical velocity field. The updraft core visible in
+          cross-sections corresponds to the exploitable thermal column.
+        </td>
       </tr>
     </table>
 
     <!-- ─ DATA SOURCES ─ -->
     <h2>Data Sources</h2>
     <table class="param-table">
-      <tr><th>Dataset</th><th>Used for</th><th>Source</th><th>Resolution</th></tr>
+      <tr>
+        <th>Dataset</th>
+        <th>Used for</th>
+        <th>Source</th>
+        <th>Resolution</th>
+      </tr>
       <tr>
         <td>Elevation</td>
         <td>Terrain mesh, solid mask, surface-flux injection point</td>
-        <td>AWS Terrain Tiles — Terrarium RGB encoding (IGN RGE Alti for France)</td>
+        <td>
+          AWS Terrain Tiles — Terrarium RGB encoding (IGN RGE Alti for France)
+        </td>
         <td>~7 m (zoom 14)</td>
       </tr>
       <tr>
@@ -743,47 +939,72 @@
       <tr>
         <td>Simulation output</td>
         <td>Scenario snapshots read by the viewer</td>
-        <td>Browser IndexedDB (written by the Web Worker, read by the viewer)</td>
+        <td>
+          Browser IndexedDB (written by the Web Worker, read by the viewer)
+        </td>
         <td>—</td>
       </tr>
     </table>
     <p>
-      Elevation tiles use the Terrarium RGB encoding: <code>elevation = R×256 + G + B/256 − 32768</code> metres,
-      delivered in Web Mercator (EPSG:3857) and reprojected to WGS84 before use.
-      ESA WorldCover is fetched as a Cloud-Optimised GeoTIFF (COG) — only the portion covering the bounding box
-      is downloaded via HTTP range requests, avoiding full-file downloads.
+      Elevation tiles use the Terrarium RGB encoding:
+      <code>elevation = R×256 + G + B/256 − 32768</code> metres, delivered in
+      Web Mercator (EPSG:3857) and reprojected to WGS84 before use. ESA
+      WorldCover is fetched as a Cloud-Optimised GeoTIFF (COG) — only the
+      portion covering the bounding box is downloaded via HTTP range requests,
+      avoiding full-file downloads.
     </p>
 
     <!-- ─ TIPS ─ -->
     <h2>Tips for Realistic Results</h2>
     <ul>
-      <li>Use ERA5 calibration to auto-set <code>max_heat</code> for the specific date and site.</li>
-      <li>Increase <code>ELR</code> toward 8–9 K/km on active convective days (cumulus days).</li>
-      <li>For a 10 km × 10 km domain, NX=NY=50 gives dx≈200 m — resolving thermals wider than ~400 m.
-        Large thermals (mountain scale) are well captured; narrow convergence lines may be missed.</li>
-      <li>Run at least 80 steps before the first snapshot. At dt=90 s this is 2 hours of simulated
-        time — enough for a well-developed convective boundary layer to form.</li>
-      <li>The simulation conserves neither energy nor temperature globally (periodic BCs + Neumann top
-        allow net heat accumulation). Very long runs (&gt;500 steps) may show unrealistic amplitudes.</li>
-      <li>Cross-section slices (EW/NS) are the most physically informative output: they reveal
-        whether thermals detach from the ground, how high they reach, and whether there is
-        organised convective structure (columns vs. sheets).</li>
+      <li>
+        Use ERA5 calibration to auto-set <code>max_heat</code> for the
+        specific date and site.
+      </li>
+      <li>
+        Increase <code>ELR</code> toward 8–9 K/km on active convective days
+        (cumulus days).
+      </li>
+      <li>
+        For a 10 km × 10 km domain, NX=NY=50 gives dx≈200 m — resolving
+        thermals wider than ~400 m. Large thermals (mountain scale) are well
+        captured; narrow convergence lines may be missed.
+      </li>
+      <li>
+        Run at least 80 steps before the first snapshot. At dt=90 s this is 2
+        hours of simulated time — enough for a well-developed convective
+        boundary layer to form.
+      </li>
+      <li>
+        The simulation conserves neither energy nor temperature globally
+        (periodic BCs + Neumann top allow net heat accumulation). Very long
+        runs (&gt;500 steps) may show unrealistic amplitudes.
+      </li>
+      <li>
+        Cross-section slices (EW/NS) are the most physically informative
+        output: they reveal whether thermals detach from the ground, how high
+        they reach, and whether there is organised convective structure
+        (columns vs. sheets).
+      </li>
     </ul>
-
   </div>
   <script>
     // Nav dropdown touch support
-    document.querySelectorAll('.nav-dropdown-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        var dd = btn.closest('.nav-dropdown');
-        var isOpen = dd.classList.contains('open');
-        document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
-        if (!isOpen) dd.classList.add('open');
+    document.querySelectorAll(".nav-dropdown-btn").forEach(function(btn) {
+      btn.addEventListener("click", function(e) {
+        var dd = btn.closest(".nav-dropdown");
+        var isOpen = dd.classList.contains("open");
+        document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+          d.classList.remove("open");
+        });
+        if (!isOpen) dd.classList.add("open");
         e.stopPropagation();
       });
     });
-    document.addEventListener('click', function () {
-      document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
+    document.addEventListener("click", function() {
+      document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+        d.classList.remove("open");
+      });
     });
   </script>
 </body>

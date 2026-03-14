@@ -1,22 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
   <title>Wind NS — View</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css" />
   <style>
-
     body {
       background: #040810;
       color: #e0e8f0;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: "Segoe UI", sans-serif;
       overflow: hidden;
     }
-
-
 
     #canvas-container {
       width: 100vw;
@@ -62,7 +59,7 @@
     #plume-canvas {
       flex: 1;
       border-radius: 4px;
-      border: 1px solid rgba(100, 160, 255, .1);
+      border: 1px solid rgba(100, 160, 255, 0.1);
       display: block;
     }
 
@@ -145,9 +142,8 @@
 </head>
 
 <body>
-
   <nav id="header-nav">
-    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt="" /><span>Home</span></a>
     <div class="nav-sep"></div>
     <a href="area" class="nav-link">Area</a>
     <div class="nav-sep"></div>
@@ -192,27 +188,46 @@
 
   <div id="canvas-container"></div>
 
-  <button id="panel-toggle"
-    onclick="const p=document.getElementById('ui-panel');p.classList.toggle('open');this.textContent=p.classList.contains('open')?'✕':'☰';"
-    title="Toggle controls">✕</button>
+  <button id="panel-toggle" onclick="
+        const p = document.getElementById('ui-panel');
+        p.classList.toggle('open');
+        this.textContent = p.classList.contains('open') ? '✕' : '☰';
+      " title="Toggle controls">
+    ✕
+  </button>
 
   <div id="ui-panel">
     <h2>Wind NS</h2>
 
-    <div class="tab-row" id="preset-btns" style="flex-wrap:wrap;gap:3px;"></div>
+    <div class="tab-row" id="preset-btns" style="flex-wrap: wrap; gap: 3px"></div>
     <div id="section-surface">
       <div class="section-title">Surface Field</div>
       <div class="tab-row" id="surf-tabs">
-        <button class="tab-btn active" id="tab-surf-speed" onclick="setSurfaceField('speed')">Speed</button>
-        <button class="tab-btn" id="tab-surf-w" onclick="setSurfaceField('w')">Vert.</button>
-        <button class="tab-btn" id="tab-surf-p" onclick="setSurfaceField('p')">Press.</button>
-        <button class="tab-btn" id="tab-surf-vort" onclick="setSurfaceField('vort')">Vort.</button>
-        <button class="tab-btn" id="tab-surf-elev" onclick="setSurfaceField('elev')">Terrain</button>
+        <button class="tab-btn active" id="tab-surf-speed" onclick="setSurfaceField('speed')">
+          Speed
+        </button>
+        <button class="tab-btn" id="tab-surf-w" onclick="setSurfaceField('w')">
+          Vert.
+        </button>
+        <button class="tab-btn" id="tab-surf-p" onclick="setSurfaceField('p')">
+          Press.
+        </button>
+        <button class="tab-btn" id="tab-surf-vort" onclick="setSurfaceField('vort')">
+          Vort.
+        </button>
+        <button class="tab-btn" id="tab-surf-elev" onclick="setSurfaceField('elev')">
+          Terrain
+        </button>
       </div>
       <div class="ctrl-group">
-        <div class="ctrl-label">Overlay opacity <span id="ov-opacity-val">0.8</span></div>
-        <input type="range" id="ov-opacity" min="0" max="1" step="0.05" value="0.8"
-          oninput="document.getElementById('ov-opacity-val').textContent=this.value; updateOverlayOpacity();">
+        <div class="ctrl-label">
+          Overlay opacity <span id="ov-opacity-val">0.8</span>
+        </div>
+        <input type="range" id="ov-opacity" min="0" max="1" step="0.05" value="0.8" oninput="
+              document.getElementById('ov-opacity-val').textContent =
+                this.value;
+              updateOverlayOpacity();
+            " />
       </div>
     </div>
 
@@ -220,61 +235,108 @@
       <div class="section-title">Height Slice</div>
       <div class="toggle-row">
         Show slice
-        <button class="toggle-btn on" id="slice-toggle" onclick="toggleSlice()">ON</button>
+        <button class="toggle-btn on" id="slice-toggle" onclick="toggleSlice()">
+          ON
+        </button>
       </div>
       <div class="ctrl-group">
-        <div class="ctrl-label">Height AGL (m) <span id="slice-height-val">500</span></div>
-        <input type="range" id="slice-height" min="50" max="2000" step="50" value="500"
-          oninput="document.getElementById('slice-height-val').textContent=this.value; updateSlice();">
+        <div class="ctrl-label">
+          Height AGL (m) <span id="slice-height-val">500</span>
+        </div>
+        <input type="range" id="slice-height" min="50" max="2000" step="50" value="500" oninput="
+              document.getElementById('slice-height-val').textContent =
+                this.value;
+              updateSlice();
+            " />
       </div>
       <div class="tab-row" id="slice-field-tabs">
-        <button class="tab-btn active" id="tab-slice-speed" onclick="setSliceField('speed')">Speed</button>
-        <button class="tab-btn" id="tab-slice-w" onclick="setSliceField('w')">Vert.</button>
-        <button class="tab-btn" id="tab-slice-p" onclick="setSliceField('p')">Press.</button>
-        <button class="tab-btn" id="tab-slice-vort" onclick="setSliceField('vort')">Vort.</button>
+        <button class="tab-btn active" id="tab-slice-speed" onclick="setSliceField('speed')">
+          Speed
+        </button>
+        <button class="tab-btn" id="tab-slice-w" onclick="setSliceField('w')">
+          Vert.
+        </button>
+        <button class="tab-btn" id="tab-slice-p" onclick="setSliceField('p')">
+          Press.
+        </button>
+        <button class="tab-btn" id="tab-slice-vort" onclick="setSliceField('vort')">
+          Vort.
+        </button>
       </div>
     </div>
 
     <div id="section-terrain">
       <div class="section-title">Terrain</div>
       <div class="ctrl-group">
-        <div class="ctrl-label">Opacity <span id="terr-opacity-val">0.8</span></div>
-        <input type="range" id="terr-opacity" min="0" max="1" step="0.05" value="0.8"
-          oninput="document.getElementById('terr-opacity-val').textContent=this.value; updateTerrainOpacity();">
+        <div class="ctrl-label">
+          Opacity <span id="terr-opacity-val">0.8</span>
+        </div>
+        <input type="range" id="terr-opacity" min="0" max="1" step="0.05" value="0.8" oninput="
+              document.getElementById('terr-opacity-val').textContent =
+                this.value;
+              updateTerrainOpacity();
+            " />
       </div>
-
     </div>
 
     <div id="section-arrows">
       <div class="section-title">Arrows</div>
       <div class="toggle-row">
         Show arrows
-        <button class="toggle-btn on" id="arrows-toggle" onclick="toggleArrows()">ON</button>
+        <button class="toggle-btn on" id="arrows-toggle" onclick="toggleArrows()">
+          ON
+        </button>
       </div>
       <div class="ctrl-group">
-        <div class="ctrl-label">Step (cells) <span id="arrow-step-val">4</span></div>
-        <input type="range" id="arrow-step" min="4" max="16" step="1" value="4"
-          oninput="document.getElementById('arrow-step-val').textContent=this.value; rebuildArrows();">
+        <div class="ctrl-label">
+          Step (cells) <span id="arrow-step-val">4</span>
+        </div>
+        <input type="range" id="arrow-step" min="4" max="16" step="1" value="4" oninput="
+              document.getElementById('arrow-step-val').textContent =
+                this.value;
+              rebuildArrows();
+            " />
       </div>
       <div class="ctrl-group">
-        <div class="ctrl-label">Height AGL (m) <span id="arrow-height-val">100</span></div>
-        <input type="range" id="arrow-height" min="10" max="2000" step="10" value="100"
-          oninput="document.getElementById('arrow-height-val').textContent=this.value; rebuildArrows();">
+        <div class="ctrl-label">
+          Height AGL (m) <span id="arrow-height-val">100</span>
+        </div>
+        <input type="range" id="arrow-height" min="10" max="2000" step="10" value="100" oninput="
+              document.getElementById('arrow-height-val').textContent =
+                this.value;
+              rebuildArrows();
+            " />
       </div>
       <div class="ctrl-group">
-        <div class="ctrl-label">Scale <span id="arrow-scale-val">1</span></div>
-        <input type="range" id="arrow-scale" min="1" max="30" step="1" value="1"
-          oninput="document.getElementById('arrow-scale-val').textContent=this.value; rebuildArrows();">
+        <div class="ctrl-label">
+          Scale <span id="arrow-scale-val">1</span>
+        </div>
+        <input type="range" id="arrow-scale" min="1" max="30" step="1" value="1" oninput="
+              document.getElementById('arrow-scale-val').textContent =
+                this.value;
+              rebuildArrows();
+            " />
       </div>
       <div class="ctrl-group">
-        <div class="ctrl-label">Width (px) <span id="arrow-width-val">2</span></div>
-        <input type="range" id="arrow-width" min="1" max="8" step="0.5" value="2"
-          oninput="document.getElementById('arrow-width-val').textContent=this.value; updateArrowWidth();">
+        <div class="ctrl-label">
+          Width (px) <span id="arrow-width-val">2</span>
+        </div>
+        <input type="range" id="arrow-width" min="1" max="8" step="0.5" value="2" oninput="
+              document.getElementById('arrow-width-val').textContent =
+                this.value;
+              updateArrowWidth();
+            " />
       </div>
     </div>
 
-    <div style="font-size:9px;color:#3a6080;line-height:1.7;margin-top:10px;">
-      Drag to orbit · Scroll to zoom<br>Right-drag to pan · Click terrain to inspect
+    <div style="
+          font-size: 9px;
+          color: #3a6080;
+          line-height: 1.7;
+          margin-top: 10px;
+        ">
+      Drag to orbit · Scroll to zoom<br />Right-drag to pan · Click terrain to
+      inspect
     </div>
   </div>
 
@@ -314,27 +376,37 @@
   <div id="height-indicator"></div>
 
   <script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
-  }
-}
-</script>
+    {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+        }
+      }
+    </script>
 
   <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { LineSegments2 } from 'three/addons/lines/LineSegments2.js';
-    import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
-    import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+    import * as THREE from "three";
+    import {
+      OrbitControls
+    } from "three/addons/controls/OrbitControls.js";
+    import {
+      LineSegments2
+    } from "three/addons/lines/LineSegments2.js";
+    import {
+      LineSegmentsGeometry
+    } from "three/addons/lines/LineSegmentsGeometry.js";
+    import {
+      LineMaterial
+    } from "three/addons/lines/LineMaterial.js";
 
     // ═══════════════════════════════════════════════════════════════════
     //  SCENE SETUP
     // ═══════════════════════════════════════════════════════════════════
 
-    const container = document.getElementById('canvas-container');
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const container = document.getElementById("canvas-container");
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true
+    });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     container.appendChild(renderer.domElement);
@@ -343,7 +415,12 @@
     scene.background = new THREE.Color(0x040810);
     scene.fog = new THREE.Fog(0x040810, 8000, 20000);
 
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 5, 30000);
+    const camera = new THREE.PerspectiveCamera(
+      55,
+      window.innerWidth / window.innerHeight,
+      5,
+      30000,
+    );
     camera.up.set(0, 0, 1); // Z is up
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -361,13 +438,16 @@
     sun.shadow.mapSize.width = sun.shadow.mapSize.height = 4096;
     sun.shadow.camera.left = sun.shadow.camera.bottom = -6000;
     sun.shadow.camera.right = sun.shadow.camera.top = 6000;
-    sun.shadow.camera.near = 50; sun.shadow.camera.far = 15000;
+    sun.shadow.camera.near = 50;
+    sun.shadow.camera.far = 15000;
     sun.shadow.bias = -0.002;
     scene.add(sun);
 
-    window.addEventListener('resize', () => {
-      const w = window.innerWidth, h = window.innerHeight;
-      camera.aspect = w / h; camera.updateProjectionMatrix();
+    window.addEventListener("resize", () => {
+      const w = window.innerWidth,
+        h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
       renderer.setSize(w, h);
       if (arrowLines) arrowLines.material.resolution.set(w, h);
       if (sliceArrowLines) sliceArrowLines.material.resolution.set(w, h);
@@ -390,19 +470,50 @@
     let sliceVisible = true;
     let arrowsVisible = true;
 
-    let currentSurfField = 'speed';
-    let currentSliceField = 'speed';
+    let currentSurfField = "speed";
+    let currentSliceField = "speed";
 
     // ═══════════════════════════════════════════════════════════════════
     //  COLORMAPS
     // ═══════════════════════════════════════════════════════════════════
 
     const CMAPS = {
-      speed: [[0, 0, 220], [0, 180, 200], [0, 255, 80], [255, 230, 0], [255, 40, 0]],
-      w: [[0, 0, 200], [80, 80, 255], [255, 255, 255], [255, 80, 80], [200, 0, 0]],
-      p: [[0, 80, 200], [0, 180, 160], [240, 240, 240], [200, 120, 0], [180, 0, 0]],
-      vort: [[0, 0, 200], [10, 10, 50], [8, 8, 8], [50, 8, 8], [200, 0, 0]],
-      terrain: [[30, 60, 20], [80, 110, 50], [140, 140, 100], [180, 160, 130], [230, 220, 200], [255, 255, 255]],
+      speed: [
+        [0, 0, 220],
+        [0, 180, 200],
+        [0, 255, 80],
+        [255, 230, 0],
+        [255, 40, 0],
+      ],
+      w: [
+        [0, 0, 200],
+        [80, 80, 255],
+        [255, 255, 255],
+        [255, 80, 80],
+        [200, 0, 0],
+      ],
+      p: [
+        [0, 80, 200],
+        [0, 180, 160],
+        [240, 240, 240],
+        [200, 120, 0],
+        [180, 0, 0],
+      ],
+      vort: [
+        [0, 0, 200],
+        [10, 10, 50],
+        [8, 8, 8],
+        [50, 8, 8],
+        [200, 0, 0],
+      ],
+      terrain: [
+        [30, 60, 20],
+        [80, 110, 50],
+        [140, 140, 100],
+        [180, 160, 130],
+        [230, 220, 200],
+        [255, 255, 255],
+      ],
     };
 
     function sampleCmap(name, t) {
@@ -410,32 +521,42 @@
       const n = stops.length - 1;
       const i = Math.min(Math.floor(t * n), n - 1);
       const s = t * n - i;
-      const lo = stops[i], hi = stops[i + 1] || lo;
-      return [(lo[0] + (hi[0] - lo[0]) * s) / 255, (lo[1] + (hi[1] - lo[1]) * s) / 255, (lo[2] + (hi[2] - lo[2]) * s) / 255];
+      const lo = stops[i],
+        hi = stops[i + 1] || lo;
+      return [
+        (lo[0] + (hi[0] - lo[0]) * s) / 255,
+        (lo[1] + (hi[1] - lo[1]) * s) / 255,
+        (lo[2] + (hi[2] - lo[2]) * s) / 255,
+      ];
     }
 
     function drawColorbar(name, mn, mx, title, fmt) {
-      const canvas = document.getElementById('colorbar-canvas');
-      const ctx = canvas.getContext('2d');
+      const canvas = document.getElementById("colorbar-canvas");
+      const ctx = canvas.getContext("2d");
       const img = ctx.createImageData(canvas.width, canvas.height);
       for (let py = 0; py < canvas.height; py++) {
         const t = 1 - py / (canvas.height - 1);
         const [r, g, b] = sampleCmap(name, t);
         for (let px = 0; px < canvas.width; px++) {
           const base = (py * canvas.width + px) * 4;
-          img.data[base] = r * 255; img.data[base + 1] = g * 255; img.data[base + 2] = b * 255; img.data[base + 3] = 255;
+          img.data[base] = r * 255;
+          img.data[base + 1] = g * 255;
+          img.data[base + 2] = b * 255;
+          img.data[base + 3] = 255;
         }
       }
       ctx.putImageData(img, 0, 0);
-      const labDiv = document.getElementById('colorbar-labels');
-      labDiv.innerHTML = '';
+      const labDiv = document.getElementById("colorbar-labels");
+      labDiv.innerHTML = "";
       for (let k = 0; k <= 5; k++) {
-        const v = mx - k / 5 * (mx - mn);
-        const sp = document.createElement('span');
-        sp.textContent = fmt(v); sp.style.fontSize = '9px'; sp.style.color = '#5588aa';
+        const v = mx - (k / 5) * (mx - mn);
+        const sp = document.createElement("span");
+        sp.textContent = fmt(v);
+        sp.style.fontSize = "9px";
+        sp.style.color = "#5588aa";
         labDiv.appendChild(sp);
       }
-      document.getElementById('colorbar-title').textContent = title;
+      document.getElementById("colorbar-title").textContent = title;
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -447,8 +568,13 @@
     // Or equivalently: mesh center at (cx, cy=-(y_center), 0)
     //   with plane spanning xw × yh, j=0 at top (+yh/2 in plane coords)
 
-    function terrainCX(T) { return (T.x_extent[0] + T.x_extent[1]) / 2; }
-    function terrainCY(T) { return -(T.y_extent[0] + T.y_extent[1]) / 2; }
+    function terrainCX(T) {
+      return (T.x_extent[0] + T.x_extent[1]) / 2;
+    }
+
+    function terrainCY(T) {
+      return -(T.y_extent[0] + T.y_extent[1]) / 2;
+    }
 
     // Bilinear elevation lookup from the displayed terrain grid at local (x, y) coords.
     // Uses mesh_elevation if available, else elevation.
@@ -460,26 +586,37 @@
       const xw = T.x_extent[1] - T.x_extent[0];
       const yh = T.y_extent[1] - T.y_extent[0];
       // fi, fj in [0, mnx/mny - 1]
-      const fi = (x - T.x_extent[0]) / xw * (mnx - 1);
-      const fj = (T.y_extent[1] - y) / yh * (mny - 1);
+      const fi = ((x - T.x_extent[0]) / xw) * (mnx - 1);
+      const fj = ((T.y_extent[1] - y) / yh) * (mny - 1);
       const i0 = Math.max(0, Math.min(mnx - 2, Math.floor(fi)));
       const j0 = Math.max(0, Math.min(mny - 2, Math.floor(fj)));
-      const tx = fi - i0, ty = fj - j0;
-      return (1 - ty) * ((1 - tx) * elev[j0][i0] + tx * elev[j0][i0 + 1]) +
-        ty * ((1 - tx) * elev[j0 + 1][i0] + tx * elev[j0 + 1][i0 + 1]);
+      const tx = fi - i0,
+        ty = fj - j0;
+      return (
+        (1 - ty) * ((1 - tx) * elev[j0][i0] + tx * elev[j0][i0 + 1]) +
+        ty * ((1 - tx) * elev[j0 + 1][i0] + tx * elev[j0 + 1][i0 + 1])
+      );
     }
-
 
     // Get the 3D field value at grid (i, j, k)
     function fieldAt(i, j, k) {
-      const { nx, ny, nz } = simData.grid;
-      return (k * ny * nx) + (j * nx) + i;
+      const {
+        nx,
+        ny,
+        nz
+      } = simData.grid;
+      return k * ny * nx + j * nx + i;
     }
 
     // Sample 3D field at height z_agl (above terrain minimum) at grid cell (i, j)
     // Returns interpolated value between two nearest k levels
     function sampleAtHeight(field3D, i, j, z_agl) {
-      const { nx, ny, nz, dz } = simData.grid;
+      const {
+        nx,
+        ny,
+        nz,
+        dz
+      } = simData.grid;
       const k_f = z_agl / dz - 0.5;
       const k0 = Math.max(0, Math.min(nz - 2, Math.floor(k_f)));
       const k1 = k0 + 1;
@@ -494,7 +631,11 @@
     // ═══════════════════════════════════════════════════════════════════
 
     function buildTerrain() {
-      if (terrainMesh) { scene.remove(terrainMesh); terrainMesh.geometry.dispose(); terrainMesh.material.dispose(); }
+      if (terrainMesh) {
+        scene.remove(terrainMesh);
+        terrainMesh.geometry.dispose();
+        terrainMesh.material.dispose();
+      }
 
       const T = simData.terrain;
       const useHires = T.mesh_elevation && T.mesh_nx && T.mesh_ny;
@@ -509,28 +650,33 @@
       const geom = new THREE.PlaneGeometry(xw, yh, mnx - 1, mny - 1);
       const pos = geom.attributes.position;
 
-      let zmin = Infinity, zmax = -Infinity;
+      let zmin = Infinity,
+        zmax = -Infinity;
       for (let j = 0; j < mny; j++) {
         for (let i = 0; i < mnx; i++) {
           const z = elev[j][i] * Zs;
           pos.setZ(j * mnx + i, z);
-          if (z < zmin) zmin = z; if (z > zmax) zmax = z;
+          if (z < zmin) zmin = z;
+          if (z > zmax) zmax = z;
         }
       }
       pos.needsUpdate = true;
       geom.computeVertexNormals();
 
       const colors = new Float32Array(pos.count * 3);
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
       for (let k = 0; k < pos.count; k++) {
         const t = (pos.getZ(k) - zmin) / Math.max(zmax - zmin, 1);
-        const [r, g, b] = sampleCmap('terrain', t);
-        colors[k * 3] = r; colors[k * 3 + 1] = g; colors[k * 3 + 2] = b;
+        const [r, g, b] = sampleCmap("terrain", t);
+        colors[k * 3] = r;
+        colors[k * 3 + 1] = g;
+        colors[k * 3 + 2] = b;
       }
 
       const mat = new THREE.MeshLambertMaterial({
-        vertexColors: true, transparent: true,
-        opacity: parseFloat(document.getElementById('terr-opacity').value),
+        vertexColors: true,
+        transparent: true,
+        opacity: parseFloat(document.getElementById("terr-opacity").value),
         side: THREE.DoubleSide,
       });
       terrainMesh = new THREE.Mesh(geom, mat);
@@ -545,39 +691,88 @@
       camera.position.set(0, -sz * 0.55, meanZ + sz * 0.35);
       controls.update();
 
-      return { zmin, zmax };
+      return {
+        zmin,
+        zmax
+      };
     }
 
     // ═══════════════════════════════════════════════════════════════════
     //  SURFACE OVERLAY
     // ═══════════════════════════════════════════════════════════════════
 
-    let overlayMin = 0, overlayMax = 1;
+    let overlayMin = 0,
+      overlayMax = 1;
 
     function getOverlayField() {
       const F = simData.fields;
       const T = simData.terrain;
       switch (currentSurfField) {
-        case 'w': return { arr: F.surf_w, cmap: 'w', title: 'Vert. Wind', unit: 'm/s', sym: true };
-        case 'p': return { arr: F.surf_p, cmap: 'p', title: 'Pressure', unit: 'Pa', sym: true };
-        case 'vort': return { arr: F.surf_vort, cmap: 'vort', title: 'Vorticity Z', unit: '1/s', sym: true };
-        case 'elev': {
+        case "w":
+          return {
+            arr: F.surf_w,
+              cmap: "w",
+              title: "Vert. Wind",
+              unit: "m/s",
+              sym: true,
+          };
+        case "p":
+          return {
+            arr: F.surf_p,
+              cmap: "p",
+              title: "Pressure",
+              unit: "Pa",
+              sym: true,
+          };
+        case "vort":
+          return {
+            arr: F.surf_vort,
+              cmap: "vort",
+              title: "Vorticity Z",
+              unit: "1/s",
+              sym: true,
+          };
+        case "elev": {
           const flat = T.elevation.flat();
-          return { arr: flat, cmap: 'terrain', title: 'Elevation', unit: 'm', sym: false };
+          return {
+            arr: flat,
+            cmap: "terrain",
+            title: "Elevation",
+            unit: "m",
+            sym: false,
+          };
         }
-        default: return { arr: F.surf_speed, cmap: 'speed', title: 'Wind Speed', unit: 'm/s', sym: false };
+        default:
+          return {
+            arr: F.surf_speed,
+              cmap: "speed",
+              title: "Wind Speed",
+              unit: "m/s",
+              sym: false,
+          };
       }
     }
 
     function buildOverlay() {
-      if (overlayMesh) { scene.remove(overlayMesh); overlayMesh.geometry.dispose(); overlayMesh.material.dispose(); }
+      if (overlayMesh) {
+        scene.remove(overlayMesh);
+        overlayMesh.geometry.dispose();
+        overlayMesh.material.dispose();
+      }
 
       const T = simData.terrain;
-      const nx = T.nx, ny = T.ny;
+      const nx = T.nx,
+        ny = T.ny;
       const xw = T.x_extent[1] - T.x_extent[0];
       const yh = T.y_extent[1] - T.y_extent[0];
       const Zs = 1;
-      const { arr, cmap, title, unit, sym } = getOverlayField();
+      const {
+        arr,
+        cmap,
+        title,
+        unit,
+        sym
+      } = getOverlayField();
 
       const geom = new THREE.PlaneGeometry(xw, yh, nx - 1, ny - 1);
       const pos = geom.attributes.position;
@@ -591,36 +786,46 @@
       pos.needsUpdate = true;
 
       // Normalize: for symmetric fields, use ±max
-      let mn = Infinity, mx = -Infinity;
+      let mn = Infinity,
+        mx = -Infinity;
       for (let i = 0; i < arr.length; i++) {
-        if (arr[i] < mn) mn = arr[i]; if (arr[i] > mx) mx = arr[i];
+        if (arr[i] < mn) mn = arr[i];
+        if (arr[i] > mx) mx = arr[i];
       }
       if (sym) {
         const abs = Math.max(Math.abs(mn), Math.abs(mx));
-        mn = -abs; mx = abs;
+        mn = -abs;
+        mx = abs;
       }
-      overlayMin = mn; overlayMax = mx;
+      overlayMin = mn;
+      overlayMax = mx;
       const rng = Math.max(mx - mn, 1e-9);
 
       const colors = new Float32Array(pos.count * 3);
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
       for (let k = 0; k < pos.count; k++) {
         const t = (arr[k] - mn) / rng;
         const [r, g, b] = sampleCmap(cmap, Math.max(0, Math.min(1, t)));
-        colors[k * 3] = r; colors[k * 3 + 1] = g; colors[k * 3 + 2] = b;
+        colors[k * 3] = r;
+        colors[k * 3 + 1] = g;
+        colors[k * 3 + 2] = b;
       }
 
       const mat = new THREE.MeshBasicMaterial({
-        vertexColors: true, transparent: true,
-        opacity: parseFloat(document.getElementById('ov-opacity').value),
-        depthWrite: false, side: THREE.DoubleSide,
-        polygonOffset: true, polygonOffsetFactor: -80, polygonOffsetUnits: -80,
+        vertexColors: true,
+        transparent: true,
+        opacity: parseFloat(document.getElementById("ov-opacity").value),
+        depthWrite: false,
+        side: THREE.DoubleSide,
+        polygonOffset: true,
+        polygonOffsetFactor: -80,
+        polygonOffsetUnits: -80,
       });
       overlayMesh = new THREE.Mesh(geom, mat);
       overlayMesh.position.set(terrainCX(T), terrainCY(T), 0);
       scene.add(overlayMesh);
 
-      const fmt = v => Math.abs(mx) > 100 ? v.toFixed(0) : v.toFixed(2);
+      const fmt = (v) => (Math.abs(mx) > 100 ? v.toFixed(0) : v.toFixed(2));
       drawColorbar(cmap, mn, mx, `${title} (${unit})`, fmt);
     }
 
@@ -630,64 +835,136 @@
 
     function getSliceField() {
       const F = simData.fields;
-      const { nx, ny, nz, dz } = simData.grid;
-      const h_agl = parseFloat(document.getElementById('slice-height').value);
+      const {
+        nx,
+        ny,
+        nz,
+        dz
+      } = simData.grid;
+      const h_agl = parseFloat(document.getElementById("slice-height").value);
       // Find the k level closest to h_agl
-      const k_center = Math.max(0, Math.min(nz - 1, Math.round(h_agl / dz - 0.5)));
+      const k_center = Math.max(
+        0,
+        Math.min(nz - 1, Math.round(h_agl / dz - 0.5)),
+      );
 
       const arr = new Float32Array(ny * nx);
       let field3D, cmap, title, unit, sym;
       switch (currentSliceField) {
-        case 'w':
-          field3D = simData.fields.w; cmap = 'w'; title = 'Vert. Wind'; unit = 'm/s'; sym = true; break;
-        case 'p':
-          field3D = simData.fields.p; cmap = 'p'; title = 'Pressure'; unit = 'Pa'; sym = true; break;
-        case 'vort': {
-          const { dx, dy } = simData.grid;
+        case "w":
+          field3D = simData.fields.w;
+          cmap = "w";
+          title = "Vert. Wind";
+          unit = "m/s";
+          sym = true;
+          break;
+        case "p":
+          field3D = simData.fields.p;
+          cmap = "p";
+          title = "Pressure";
+          unit = "Pa";
+          sym = true;
+          break;
+        case "vort": {
+          const {
+            dx,
+            dy
+          } = simData.grid;
           const base = k_center * ny * nx;
-          const u3 = simData.fields.u, v3 = simData.fields.v;
+          const u3 = simData.fields.u,
+            v3 = simData.fields.v;
           for (let j = 1; j < ny - 1; j++) {
             for (let i = 1; i < nx - 1; i++) {
-              const dv_dx = (v3[base + j * nx + i + 1] - v3[base + j * nx + i - 1]) / (2 * dx);
-              const du_dy = (u3[base + (j + 1) * nx + i] - u3[base + (j - 1) * nx + i]) / (2 * dy);
+              const dv_dx =
+                (v3[base + j * nx + i + 1] - v3[base + j * nx + i - 1]) /
+                (2 * dx);
+              const du_dy =
+                (u3[base + (j + 1) * nx + i] - u3[base + (j - 1) * nx + i]) /
+                (2 * dy);
               arr[j * nx + i] = dv_dx - du_dy;
             }
           }
-          cmap = 'vort'; title = 'Vorticity Z'; unit = '1/s'; sym = true;
-          return { arr, cmap, title, unit, sym, k: k_center };
+          cmap = "vort";
+          title = "Vorticity Z";
+          unit = "1/s";
+          sym = true;
+          return {
+            arr,
+            cmap,
+            title,
+            unit,
+            sym,
+            k: k_center
+          };
         }
-        default:
-          { // speed: compute from u,v,w
-            const u3 = simData.fields.u, v3 = simData.fields.v, w3 = simData.fields.w;
-            for (let j = 0; j < ny; j++) {
-              for (let i = 0; i < nx; i++) {
-                const p = k_center * ny * nx + j * nx + i;
-                arr[j * nx + i] = Math.hypot(u3[p], v3[p], w3[p]);
-              }
+        default: {
+          // speed: compute from u,v,w
+          const u3 = simData.fields.u,
+            v3 = simData.fields.v,
+            w3 = simData.fields.w;
+          for (let j = 0; j < ny; j++) {
+            for (let i = 0; i < nx; i++) {
+              const p = k_center * ny * nx + j * nx + i;
+              arr[j * nx + i] = Math.hypot(u3[p], v3[p], w3[p]);
             }
-            cmap = 'speed'; title = 'Wind Speed'; unit = 'm/s'; sym = false;
-            return { arr, cmap, title, unit, sym, k: k_center };
           }
+          cmap = "speed";
+          title = "Wind Speed";
+          unit = "m/s";
+          sym = false;
+          return {
+            arr,
+            cmap,
+            title,
+            unit,
+            sym,
+            k: k_center
+          };
+        }
       }
       for (let j = 0; j < ny; j++) {
         for (let i = 0; i < nx; i++) {
           arr[j * nx + i] = field3D[k_center * ny * nx + j * nx + i];
         }
       }
-      return { arr, cmap, title, unit, sym, k: k_center };
+      return {
+        arr,
+        cmap,
+        title,
+        unit,
+        sym,
+        k: k_center
+      };
     }
 
     function buildSlice() {
-      if (sliceMesh) { scene.remove(sliceMesh); sliceMesh.geometry.dispose(); sliceMesh.material.dispose(); }
+      if (sliceMesh) {
+        scene.remove(sliceMesh);
+        sliceMesh.geometry.dispose();
+        sliceMesh.material.dispose();
+      }
       if (!sliceVisible) return;
 
       const T = simData.terrain;
-      const { nx, ny, nz, dz, z_base } = simData.grid;
+      const {
+        nx,
+        ny,
+        nz,
+        dz,
+        z_base
+      } = simData.grid;
       const xw = T.x_extent[1] - T.x_extent[0];
       const yh = T.y_extent[1] - T.y_extent[0];
       const Zs = 1;
-      const h_agl = parseFloat(document.getElementById('slice-height').value);
-      const { arr, cmap, title, unit, sym, k } = getSliceField();
+      const h_agl = parseFloat(document.getElementById("slice-height").value);
+      const {
+        arr,
+        cmap,
+        title,
+        unit,
+        sym,
+        k
+      } = getSliceField();
 
       // Slice plane height in world Z = (z_base + h_agl) * Zs
       const z_world = (z_base + h_agl) * Zs;
@@ -698,36 +975,47 @@
       for (let p = 0; p < pos.count; p++) pos.setZ(p, z_world);
       pos.needsUpdate = true;
 
-      let mn = Infinity, mx = -Infinity;
+      let mn = Infinity,
+        mx = -Infinity;
       for (let i = 0; i < arr.length; i++) {
-        if (arr[i] < mn) mn = arr[i]; if (arr[i] > mx) mx = arr[i];
+        if (arr[i] < mn) mn = arr[i];
+        if (arr[i] > mx) mx = arr[i];
       }
-      if (sym) { const abs = Math.max(Math.abs(mn), Math.abs(mx)); mn = -abs; mx = abs; }
+      if (sym) {
+        const abs = Math.max(Math.abs(mn), Math.abs(mx));
+        mn = -abs;
+        mx = abs;
+      }
       const rng = Math.max(mx - mn, 1e-9);
 
       const colors = new Float32Array(pos.count * 3);
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
       for (let p2 = 0; p2 < pos.count; p2++) {
         const t = (arr[p2] - mn) / rng;
         const [r, g, b] = sampleCmap(cmap, Math.max(0, Math.min(1, t)));
-        colors[p2 * 3] = r; colors[p2 * 3 + 1] = g; colors[p2 * 3 + 2] = b;
+        colors[p2 * 3] = r;
+        colors[p2 * 3 + 1] = g;
+        colors[p2 * 3 + 2] = b;
       }
 
       const mat = new THREE.MeshBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0.6,
-        depthWrite: false, side: THREE.DoubleSide,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.6,
+        depthWrite: false,
+        side: THREE.DoubleSide,
       });
       sliceMesh = new THREE.Mesh(geom, mat);
       sliceMesh.position.set(terrainCX(T), terrainCY(T), 0);
       scene.add(sliceMesh);
 
       // Height indicator
-      const hi = document.getElementById('height-indicator');
-      hi.style.display = 'block';
+      const hi = document.getElementById("height-indicator");
+      hi.style.display = "block";
       hi.textContent = `Slice at ${h_agl.toFixed(0)} m AGL — level k=${k}/${simData.grid.nz - 1}`;
 
       // Colorbar for slice field
-      const fmt = v => Math.abs(mx) > 100 ? v.toFixed(0) : v.toFixed(2);
+      const fmt = (v) => (Math.abs(mx) > 100 ? v.toFixed(0) : v.toFixed(2));
       drawColorbar(cmap, mn, mx, `${title} (${unit})`, fmt);
     }
 
@@ -736,23 +1024,43 @@
     // ═══════════════════════════════════════════════════════════════════
 
     function buildArrows() {
-      if (arrowLines) { scene.remove(arrowLines); arrowLines.geometry.dispose(); arrowLines.material.dispose(); arrowLines = null; }
-      if (sliceArrowLines) { scene.remove(sliceArrowLines); sliceArrowLines.geometry.dispose(); sliceArrowLines.material.dispose(); sliceArrowLines = null; }
+      if (arrowLines) {
+        scene.remove(arrowLines);
+        arrowLines.geometry.dispose();
+        arrowLines.material.dispose();
+        arrowLines = null;
+      }
+      if (sliceArrowLines) {
+        scene.remove(sliceArrowLines);
+        sliceArrowLines.geometry.dispose();
+        sliceArrowLines.material.dispose();
+        sliceArrowLines = null;
+      }
       if (!arrowsVisible) return;
 
       const T = simData.terrain;
       const F = simData.fields;
-      const { nx, ny, nz, dz, z_base } = simData.grid;
-      const step = parseInt(document.getElementById('arrow-step').value);
-      const h_agl = parseFloat(document.getElementById('arrow-height').value);
-      const scale = parseFloat(document.getElementById('arrow-scale').value);
+      const {
+        nx,
+        ny,
+        nz,
+        dz,
+        z_base
+      } = simData.grid;
+      const step = parseInt(document.getElementById("arrow-step").value);
+      const h_agl = parseFloat(document.getElementById("arrow-height").value);
+      const scale = parseFloat(document.getElementById("arrow-scale").value);
       const Zs = 1;
-      const cx = terrainCX(T), cy = terrainCY(T);
+      const cx = terrainCX(T),
+        cy = terrainCY(T);
       const xw = T.x_extent[1] - T.x_extent[0];
       const yh = T.y_extent[1] - T.y_extent[0];
 
       // Find k level for arrow height
-      const k_arrow = Math.max(0, Math.min(nz - 1, Math.round(h_agl / dz - 0.5)));
+      const k_arrow = Math.max(
+        0,
+        Math.min(nz - 1, Math.round(h_agl / dz - 0.5)),
+      );
 
       const positions = [];
 
@@ -777,7 +1085,9 @@
           const wz = (elev + h_agl) * Zs;
 
           const p = k_arrow * ny * nx + j * nx + i;
-          const uu = F.u[p], vv = F.v[p], ww = F.w[p];
+          const uu = F.u[p],
+            vv = F.v[p],
+            ww = F.w[p];
           const spd = Math.hypot(uu, vv);
           if (spd < 0.05) continue;
 
@@ -793,12 +1103,20 @@
           const ang = Math.atan2(dyy, dx);
           const hl = len * 0.3;
           positions.push(
-            wx + dx, wy + dyy, wz + dz,
-            wx + dx - hl * Math.cos(ang - 0.45), wy + dyy - hl * Math.sin(ang - 0.45), wz + dz
+            wx + dx,
+            wy + dyy,
+            wz + dz,
+            wx + dx - hl * Math.cos(ang - 0.45),
+            wy + dyy - hl * Math.sin(ang - 0.45),
+            wz + dz,
           );
           positions.push(
-            wx + dx, wy + dyy, wz + dz,
-            wx + dx - hl * Math.cos(ang + 0.45), wy + dyy - hl * Math.sin(ang + 0.45), wz + dz
+            wx + dx,
+            wy + dyy,
+            wz + dz,
+            wx + dx - hl * Math.cos(ang + 0.45),
+            wy + dyy - hl * Math.sin(ang + 0.45),
+            wz + dz,
           );
         }
       }
@@ -808,7 +1126,8 @@
       const geo = new LineSegmentsGeometry();
       geo.setPositions(new Float32Array(positions));
       const mat = new LineMaterial({
-        color: 0xffffff, linewidth: parseFloat(document.getElementById('arrow-width').value),
+        color: 0xffffff,
+        linewidth: parseFloat(document.getElementById("arrow-width").value),
         resolution: new THREE.Vector2(window.innerWidth, window.innerHeight),
       });
       arrowLines = new LineSegments2(geo, mat);
@@ -821,19 +1140,28 @@
     // ═══════════════════════════════════════════════════════════════════
 
     function buildMarkers() {
-      markerObjects.forEach(o => scene.remove(o));
-      labelObjects.forEach(o => o.remove());
-      markerObjects = []; labelObjects = [];
+      markerObjects.forEach((o) => scene.remove(o));
+      labelObjects.forEach((o) => o.remove());
+      markerObjects = [];
+      labelObjects = [];
 
       if (!simData.markers) return;
       const Zs = 1;
 
       const MCFG = {
-        takeoff: { color: 0xff8800, poleColor: 0xcc6600, css: '#ff8800' },
-        landing: { color: 0x00ff88, poleColor: 0x00cc66, css: '#00ff88' },
+        takeoff: {
+          color: 0xff8800,
+          poleColor: 0xcc6600,
+          css: "#ff8800"
+        },
+        landing: {
+          color: 0x00ff88,
+          poleColor: 0x00cc66,
+          css: "#00ff88"
+        },
       };
 
-      simData.markers.forEach(m => {
+      simData.markers.forEach((m) => {
         const cfg = MCFG[m.type] || MCFG.takeoff;
         const poleH = 120;
         const elev = terrainElevAt(m.x, m.y);
@@ -841,7 +1169,11 @@
 
         // Vertical pole
         const poleGeo = new THREE.CylinderGeometry(4, 4, poleH, 8);
-        const poleMat = new THREE.MeshBasicMaterial({ color: cfg.poleColor, depthTest: false, transparent: true });
+        const poleMat = new THREE.MeshBasicMaterial({
+          color: cfg.poleColor,
+          depthTest: false,
+          transparent: true,
+        });
         const pole = new THREE.Mesh(poleGeo, poleMat);
         pole.rotation.x = Math.PI / 2;
         pole.position.set(m.x, m.y, baseZ + poleH / 2);
@@ -851,7 +1183,11 @@
 
         // Cone on top
         const coneGeo = new THREE.ConeGeometry(40, 80, 12);
-        const coneMat = new THREE.MeshBasicMaterial({ color: cfg.color, depthTest: false, transparent: true });
+        const coneMat = new THREE.MeshBasicMaterial({
+          color: cfg.color,
+          depthTest: false,
+          transparent: true,
+        });
         const cone = new THREE.Mesh(coneGeo, coneMat);
         cone.rotation.x = Math.PI / 2;
         cone.position.set(m.x, m.y, baseZ + poleH + 40);
@@ -860,7 +1196,7 @@
         markerObjects.push(cone);
 
         // Label
-        const lbl = document.createElement('div');
+        const lbl = document.createElement("div");
         lbl.style.cssText = `
       position:fixed; pointer-events:none; z-index:200;
       background:rgba(10,15,30,0.82); border:1px solid ${cfg.css};
@@ -879,48 +1215,66 @@
     }
 
     function updateMarkerLabels() {
-      labelObjects.forEach(lbl => {
-        const v = new THREE.Vector3(parseFloat(lbl.dataset.wx), parseFloat(lbl.dataset.wy), parseFloat(lbl.dataset.wz));
+      labelObjects.forEach((lbl) => {
+        const v = new THREE.Vector3(
+          parseFloat(lbl.dataset.wx),
+          parseFloat(lbl.dataset.wy),
+          parseFloat(lbl.dataset.wz),
+        );
         v.project(camera);
         const x = (v.x * 0.5 + 0.5) * window.innerWidth;
         const y = (-v.y * 0.5 + 0.5) * window.innerHeight;
-        lbl.style.display = v.z < 1 ? 'block' : 'none';
-        lbl.style.left = x + 'px';
-        lbl.style.top = y + 'px';
+        lbl.style.display = v.z < 1 ? "block" : "none";
+        lbl.style.left = x + "px";
+        lbl.style.top = y + "px";
       });
       if (clickMarker) {
-        clickMarker.forEach(obj => {
+        clickMarker.forEach((obj) => {
           if (!obj._labelDiv) return;
           const v = obj._worldPos.clone().project(camera);
           const x = (v.x * 0.5 + 0.5) * window.innerWidth;
           const y = (-v.y * 0.5 + 0.5) * window.innerHeight;
-          obj._labelDiv.style.display = v.z < 1 ? 'block' : 'none';
-          obj._labelDiv.style.left = x + 'px';
-          obj._labelDiv.style.top = y + 'px';
+          obj._labelDiv.style.display = v.z < 1 ? "block" : "none";
+          obj._labelDiv.style.left = x + "px";
+          obj._labelDiv.style.top = y + "px";
         });
       }
     }
 
     function buildClickMarker(wx, wy, wz, elevM) {
       if (clickMarker) {
-        clickMarker.forEach(o => { scene.remove(o); if (o._labelDiv) o._labelDiv.remove(); });
+        clickMarker.forEach((o) => {
+          scene.remove(o);
+          if (o._labelDiv) o._labelDiv.remove();
+        });
       }
       const color = 0x4488ff;
       const poleH = 120;
 
-      const markerMat = mat => new THREE.MeshBasicMaterial({ color: mat, depthTest: false, transparent: true });
+      const markerMat = (mat) =>
+        new THREE.MeshBasicMaterial({
+          color: mat,
+          depthTest: false,
+          transparent: true,
+        });
 
-      const pole = new THREE.Mesh(new THREE.CylinderGeometry(4, 4, poleH, 8), markerMat(color));
+      const pole = new THREE.Mesh(
+        new THREE.CylinderGeometry(4, 4, poleH, 8),
+        markerMat(color),
+      );
       pole.rotation.x = Math.PI / 2;
       pole.position.set(wx, wy, wz + poleH / 2);
       pole.renderOrder = 10;
 
-      const cone = new THREE.Mesh(new THREE.ConeGeometry(40, 80, 12), markerMat(color));
+      const cone = new THREE.Mesh(
+        new THREE.ConeGeometry(40, 80, 12),
+        markerMat(color),
+      );
       cone.rotation.x = Math.PI / 2;
       cone.position.set(wx, wy, wz + poleH + 40);
       cone.renderOrder = 10;
 
-      const div = document.createElement('div');
+      const div = document.createElement("div");
       div.style.cssText = `
     position:fixed; pointer-events:none; z-index:200;
     background:rgba(10,15,30,0.82); border:1px solid #4488ff;
@@ -943,7 +1297,7 @@
     // ═══════════════════════════════════════════════════════════════════
 
     function buildNorthArrow() {
-      northMarkerObjects.forEach(o => {
+      northMarkerObjects.forEach((o) => {
         scene.remove(o);
         if (o.material?.map) o.material.map.dispose();
       });
@@ -956,7 +1310,9 @@
       const cy = -(T.y_extent[0] + T.y_extent[1]) / 2;
 
       let minZ = Infinity;
-      for (const row of T.elevation) for (const z of row) if (z < minZ) minZ = z;
+      for (const row of T.elevation)
+        for (const z of row)
+          if (z < minZ) minZ = z;
 
       const halfH = yh;
       const shaftHalfW = xw * 0.055;
@@ -966,36 +1322,44 @@
       const bboxH = halfH * 2;
 
       function makeTexture(color, label) {
-        const CW = 512, CH = Math.round(CW * bboxH / bboxW);
-        const cv = document.createElement('canvas');
-        cv.width = CW; cv.height = CH;
-        const ctx = cv.getContext('2d');
+        const CW = 512,
+          CH = Math.round((CW * bboxH) / bboxW);
+        const cv = document.createElement("canvas");
+        cv.width = CW;
+        cv.height = CH;
+        const ctx = cv.getContext("2d");
 
         function tc(x, y) {
           return [(x / bboxW + 0.5) * CW, (0.5 - y / bboxH) * CH];
         }
 
         const pts = [
-          [-shaftHalfW, -halfH], [shaftHalfW, -halfH],
-          [shaftHalfW, halfH - headH], [headHalfW, halfH - headH],
+          [-shaftHalfW, -halfH],
+          [shaftHalfW, -halfH],
+          [shaftHalfW, halfH - headH],
+          [headHalfW, halfH - headH],
           [0, halfH],
-          [-headHalfW, halfH - headH], [-shaftHalfW, halfH - headH],
+          [-headHalfW, halfH - headH],
+          [-shaftHalfW, halfH - headH],
         ];
         ctx.beginPath();
         ctx.moveTo(...tc(pts[0][0], pts[0][1]));
-        for (let i = 1; i < pts.length; i++) ctx.lineTo(...tc(pts[i][0], pts[i][1]));
+        for (let i = 1; i < pts.length; i++)
+          ctx.lineTo(...tc(pts[i][0], pts[i][1]));
         ctx.closePath();
-        const r = (color >> 16) & 0xff, g = (color >> 8) & 0xff, b = color & 0xff;
+        const r = (color >> 16) & 0xff,
+          g = (color >> 8) & 0xff,
+          b = color & 0xff;
         ctx.fillStyle = `rgba(${r},${g},${b},0.55)`;
         ctx.fill();
 
         const shaftCY = (-halfH + halfH - headH) / 2;
         const [tx, ty] = tc(0, shaftCY);
-        const fontSize = Math.round(CW * (2 * shaftHalfW / bboxW) * 0.42);
+        const fontSize = Math.round(CW * ((2 * shaftHalfW) / bboxW) * 0.42);
         ctx.font = `bold ${fontSize}px 'Segoe UI', sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.shadowColor = 'rgba(0,0,0,0.95)';
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.shadowColor = "rgba(0,0,0,0.95)";
         ctx.shadowBlur = fontSize * 0.3;
         ctx.fillStyle = `rgb(${r},${g},${b})`;
         ctx.fillText(label.toUpperCase(), tx, ty);
@@ -1008,9 +1372,11 @@
         const mesh = new THREE.Mesh(
           new THREE.PlaneGeometry(bboxW, bboxH),
           new THREE.MeshBasicMaterial({
-            map: texture, transparent: true,
-            side: THREE.DoubleSide, depthWrite: false,
-          })
+            map: texture,
+            transparent: true,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+          }),
         );
         mesh.position.set(cx, cy, minZ - zOffset);
         mesh.rotation.z = rotZ;
@@ -1019,40 +1385,55 @@
       }
 
       // North arrow — points +Y (no rotation), red
-      addArrow(0xee2222, 0, 500, 'North');
+      addArrow(0xee2222, 0, 500, "North");
 
       // Wind arrow — points where wind blows TO, light blue
       // wind_dir is FROM direction; TO = FROM + 180, clockwise from north
       // In XY plane (Y=north, X=east): rotation.z = -angle for clockwise from north
       const windFrom = simData.params?.wind_dir ?? 0;
-      const windToRad = ((windFrom + 180) % 360) * Math.PI / 180;
-      addArrow(0x88ccff, -windToRad, 250, 'Wind');
+      const windToRad = (((windFrom + 180) % 360) * Math.PI) / 180;
+      addArrow(0x88ccff, -windToRad, 250, "Wind");
     }
 
     // ═══════════════════════════════════════════════════════════════════
     //  PLUME PROFILE
     // ═══════════════════════════════════════════════════════════════════
 
-    let plumeMode = 'w';
+    let plumeMode = "w";
     let _plumeState = null; // {i, j, elev} for redraw on toggle
 
     // Toggle button wiring — module scripts are deferred, DOM is ready
-    document.querySelectorAll('.ptoggle').forEach(btn => {
-      btn.addEventListener('click', () => {
+    document.querySelectorAll(".ptoggle").forEach((btn) => {
+      btn.addEventListener("click", () => {
         plumeMode = btn.dataset.mode;
-        document.querySelectorAll('.ptoggle').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        if (_plumeState) drawPlumeProfile(_plumeState.i, _plumeState.j, _plumeState.elev);
+        document
+          .querySelectorAll(".ptoggle")
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        if (_plumeState)
+          drawPlumeProfile(_plumeState.i, _plumeState.j, _plumeState.elev);
       });
     });
 
     function drawPlumeProfile(i, j, elev) {
-      _plumeState = { i, j, elev };
-      const canvas = document.getElementById('plume-canvas');
-      const labelsEl = document.getElementById('plume-alt-labels');
-      const section = document.getElementById('plume-section');
-      const controls = document.getElementById('plume-controls');
-      const { nx, ny, nz, dz, z_base, dx, dy } = simData.grid;
+      _plumeState = {
+        i,
+        j,
+        elev
+      };
+      const canvas = document.getElementById("plume-canvas");
+      const labelsEl = document.getElementById("plume-alt-labels");
+      const section = document.getElementById("plume-section");
+      const controls = document.getElementById("plume-controls");
+      const {
+        nx,
+        ny,
+        nz,
+        dz,
+        z_base,
+        dx,
+        dy
+      } = simData.grid;
       const F = simData.fields;
 
       // Build vertical profiles at column (i, j)
@@ -1070,10 +1451,16 @@
         spdPro[k] = Math.hypot(uPro[k], vPro[k]);
         pPro[k] = F.p[idx];
         // vorticity: central diff where possible, edge fallback
-        const i0 = Math.max(0, i - 1), i1 = Math.min(nx - 1, i + 1);
-        const j0 = Math.max(0, j - 1), j1 = Math.min(ny - 1, j + 1);
-        const dv_dx = (F.v[k * ny * nx + j * nx + i1] - F.v[k * ny * nx + j * nx + i0]) / ((i1 - i0) * dx);
-        const du_dy = (F.u[k * ny * nx + j1 * nx + i] - F.u[k * ny * nx + j0 * nx + i]) / ((j1 - j0) * dy);
+        const i0 = Math.max(0, i - 1),
+          i1 = Math.min(nx - 1, i + 1);
+        const j0 = Math.max(0, j - 1),
+          j1 = Math.min(ny - 1, j + 1);
+        const dv_dx =
+          (F.v[k * ny * nx + j * nx + i1] - F.v[k * ny * nx + j * nx + i0]) /
+          ((i1 - i0) * dx);
+        const du_dy =
+          (F.u[k * ny * nx + j1 * nx + i] - F.u[k * ny * nx + j0 * nx + i]) /
+          ((j1 - j0) * dy);
         vortPro[k] = dv_dx - du_dy;
       }
 
@@ -1082,35 +1469,47 @@
       const axisTop = z_base + nz * dz;
       const axisSpan = axisTop - axisBottom;
 
-      const W = canvas.width, H = canvas.height;
-      const PAD_TOP = 8, PAD_BTM = 4, PAD_LR = 4;
+      const W = canvas.width,
+        H = canvas.height;
+      const PAD_TOP = 8,
+        PAD_BTM = 4,
+        PAD_LR = 4;
       const drawH = H - PAD_TOP - PAD_BTM;
       const cx = W / 2;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
 
       ctx.clearRect(0, 0, W, H);
-      ctx.fillStyle = 'rgba(8,12,24,0.95)';
+      ctx.fillStyle = "rgba(8,12,24,0.95)";
       ctx.fillRect(0, 0, W, H);
 
       // Horizontal grid lines
       const gridStep = Math.pow(10, Math.floor(Math.log10(axisSpan / 4)));
       const gridStart = Math.ceil(axisBottom / gridStep) * gridStep;
-      ctx.strokeStyle = 'rgba(80,120,160,0.2)'; ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(80,120,160,0.2)";
+      ctx.lineWidth = 1;
       for (let alt = gridStart; alt <= axisTop; alt += gridStep) {
         const y = PAD_TOP + (1 - (alt - axisBottom) / axisSpan) * drawH;
-        ctx.beginPath(); ctx.moveTo(PAD_LR, y); ctx.lineTo(W - PAD_LR, y); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(PAD_LR, y);
+        ctx.lineTo(W - PAD_LR, y);
+        ctx.stroke();
       }
 
       // Helpers
-      const altY = alt => PAD_TOP + (1 - (alt - axisBottom) / axisSpan) * drawH;
+      const altY = (alt) =>
+        PAD_TOP + (1 - (alt - axisBottom) / axisSpan) * drawH;
       const halfW = W / 2 - PAD_LR - 2;
 
       // Draw a symmetric bar profile (value ±, from center)
       function drawSymBars(pro, vMax, cmapName) {
-        ctx.strokeStyle = 'rgba(80,120,160,0.4)';
-        ctx.beginPath(); ctx.moveTo(cx, PAD_TOP); ctx.lineTo(cx, PAD_TOP + drawH); ctx.stroke();
+        ctx.strokeStyle = "rgba(80,120,160,0.4)";
+        ctx.beginPath();
+        ctx.moveTo(cx, PAD_TOP);
+        ctx.lineTo(cx, PAD_TOP + drawH);
+        ctx.stroke();
         for (let k = 0; k < nz; k++) {
-          const yTop = altY(z_base + (k + 1) * dz), yBot = altY(z_base + k * dz);
+          const yTop = altY(z_base + (k + 1) * dz),
+            yBot = altY(z_base + k * dz);
           const barH = Math.max(1, yBot - yTop);
           const v = pro[k];
           const t = (v / vMax) * 0.5 + 0.5;
@@ -1125,7 +1524,8 @@
       // Draw a one-sided bar profile (always positive, from left edge)
       function drawPosBars(pro, vMin, vMax, cmapName) {
         for (let k = 0; k < nz; k++) {
-          const yTop = altY(z_base + (k + 1) * dz), yBot = altY(z_base + k * dz);
+          const yTop = altY(z_base + (k + 1) * dz),
+            yBot = altY(z_base + k * dz);
           const barH = Math.max(1, yBot - yTop);
           const v = pro[k];
           const t = (v - vMin) / (vMax - vMin || 1);
@@ -1139,100 +1539,153 @@
       // Draw a polyline profile (value → x position)
       function drawLine(pro, vMin, vMax, color, xLeft, xRight) {
         const xRange = xRight - xLeft;
-        ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
         ctx.beginPath();
         for (let k = 0; k < nz; k++) {
           const yMid = altY(z_base + (k + 0.5) * dz);
           const x = xLeft + ((pro[k] - vMin) / (vMax - vMin || 1)) * xRange;
-          if (k === 0) ctx.moveTo(x, yMid); else ctx.lineTo(x, yMid);
+          if (k === 0) ctx.moveTo(x, yMid);
+          else ctx.lineTo(x, yMid);
         }
         ctx.stroke();
       }
 
       // ── Mode-specific rendering ───────────────────────────────────────
-      let xLabel = '', xMin = 0, xMax = 1;
+      let xLabel = "",
+        xMin = 0,
+        xMax = 1;
 
-      if (plumeMode === 'w') {
+      if (plumeMode === "w") {
         const vMax = Math.max(0.01, ...Array.from(wPro).map(Math.abs));
-        drawSymBars(wPro, vMax, 'w');
-        xLabel = 'w (m/s)'; xMin = -vMax; xMax = vMax;
-        ctx.fillStyle = 'rgba(220,240,255,0.9)'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+        drawSymBars(wPro, vMax, "w");
+        xLabel = "w (m/s)";
+        xMin = -vMax;
+        xMax = vMax;
+        ctx.fillStyle = "rgba(220,240,255,0.9)";
+        ctx.font = "bold 9px monospace";
+        ctx.textAlign = "center";
         ctx.fillText(`↕ ${vMax.toFixed(2)} m/s`, cx, PAD_TOP + 10);
-
-      } else if (plumeMode === 'uvw') {
+      } else if (plumeMode === "uvw") {
         const allVals = [...uPro, ...vPro, ...wPro].map(Math.abs);
         const vMax = Math.max(0.01, ...allVals);
         // Vertical guide lines at -vMax and +vMax
-        ctx.strokeStyle = 'rgba(80,120,160,0.4)';
-        ctx.beginPath(); ctx.moveTo(cx, PAD_TOP); ctx.lineTo(cx, PAD_TOP + drawH); ctx.stroke();
+        ctx.strokeStyle = "rgba(80,120,160,0.4)";
+        ctx.beginPath();
+        ctx.moveTo(cx, PAD_TOP);
+        ctx.lineTo(cx, PAD_TOP + drawH);
+        ctx.stroke();
         // Draw 3 polylines
-        drawLine(uPro, -vMax, vMax, 'rgba(255,140,60,0.9)', PAD_LR, W - PAD_LR);
-        drawLine(vPro, -vMax, vMax, 'rgba(60,220,140,0.9)', PAD_LR, W - PAD_LR);
-        drawLine(wPro, -vMax, vMax, 'rgba(100,180,255,0.9)', PAD_LR, W - PAD_LR);
+        drawLine(
+          uPro,
+          -vMax,
+          vMax,
+          "rgba(255,140,60,0.9)",
+          PAD_LR,
+          W - PAD_LR,
+        );
+        drawLine(
+          vPro,
+          -vMax,
+          vMax,
+          "rgba(60,220,140,0.9)",
+          PAD_LR,
+          W - PAD_LR,
+        );
+        drawLine(
+          wPro,
+          -vMax,
+          vMax,
+          "rgba(100,180,255,0.9)",
+          PAD_LR,
+          W - PAD_LR,
+        );
         // Legend
-        ctx.font = '8px monospace';
-        ctx.fillStyle = 'rgba(255,140,60,0.9)'; ctx.textAlign = 'left'; ctx.fillText('U', PAD_LR + 1, PAD_TOP + 9);
-        ctx.fillStyle = 'rgba(60,220,140,0.9)'; ctx.fillText('V', PAD_LR + 13, PAD_TOP + 9);
-        ctx.fillStyle = 'rgba(100,180,255,0.9)'; ctx.fillText('W', PAD_LR + 25, PAD_TOP + 9);
-        xLabel = 'm/s'; xMin = -vMax; xMax = vMax;
-
-      } else if (plumeMode === 'spd') {
+        ctx.font = "8px monospace";
+        ctx.fillStyle = "rgba(255,140,60,0.9)";
+        ctx.textAlign = "left";
+        ctx.fillText("U", PAD_LR + 1, PAD_TOP + 9);
+        ctx.fillStyle = "rgba(60,220,140,0.9)";
+        ctx.fillText("V", PAD_LR + 13, PAD_TOP + 9);
+        ctx.fillStyle = "rgba(100,180,255,0.9)";
+        ctx.fillText("W", PAD_LR + 25, PAD_TOP + 9);
+        xLabel = "m/s";
+        xMin = -vMax;
+        xMax = vMax;
+      } else if (plumeMode === "spd") {
         const sMax = Math.max(0.01, ...spdPro);
-        drawPosBars(spdPro, 0, sMax, 'speed');
-        xLabel = 'Wind speed (m/s)'; xMin = 0; xMax = sMax;
-
-      } else if (plumeMode === 'p') {
-        const pMin = Math.min(...pPro), pMax = Math.max(...pPro);
-        drawPosBars(pPro, pMin, pMax, 'speed');
+        drawPosBars(spdPro, 0, sMax, "speed");
+        xLabel = "Wind speed (m/s)";
+        xMin = 0;
+        xMax = sMax;
+      } else if (plumeMode === "p") {
+        const pMin = Math.min(...pPro),
+          pMax = Math.max(...pPro);
+        drawPosBars(pPro, pMin, pMax, "speed");
         xLabel = `P (Pa) [${pMin.toFixed(0)}–${pMax.toFixed(0)}]`;
-        xMin = pMin; xMax = pMax;
-
-      } else if (plumeMode === 'vort') {
+        xMin = pMin;
+        xMax = pMax;
+      } else if (plumeMode === "vort") {
         const vMax = Math.max(0.001, ...Array.from(vortPro).map(Math.abs));
-        drawSymBars(vortPro, vMax, 'vort');
-        xLabel = 'ωz (1/s)'; xMin = -vMax; xMax = vMax;
-        ctx.fillStyle = 'rgba(220,240,255,0.9)'; ctx.font = 'bold 9px monospace'; ctx.textAlign = 'center';
+        drawSymBars(vortPro, vMax, "vort");
+        xLabel = "ωz (1/s)";
+        xMin = -vMax;
+        xMax = vMax;
+        ctx.fillStyle = "rgba(220,240,255,0.9)";
+        ctx.font = "bold 9px monospace";
+        ctx.textAlign = "center";
         ctx.fillText(`↕ ${vMax.toFixed(4)} 1/s`, cx, PAD_TOP + 10);
       }
 
       // Ground level line
       const groundY = altY(elev);
       ctx.setLineDash([2, 4]);
-      ctx.strokeStyle = 'rgba(140,180,100,0.7)'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(PAD_LR, groundY); ctx.lineTo(W - PAD_LR, groundY); ctx.stroke();
+      ctx.strokeStyle = "rgba(140,180,100,0.7)";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(PAD_LR, groundY);
+      ctx.lineTo(W - PAD_LR, groundY);
+      ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = 'rgba(140,180,100,0.9)'; ctx.font = '8px monospace'; ctx.textAlign = 'right';
+      ctx.fillStyle = "rgba(140,180,100,0.9)";
+      ctx.font = "8px monospace";
+      ctx.textAlign = "right";
       ctx.fillText(`${elev.toFixed(0)} m`, W - PAD_LR - 1, groundY - 2);
 
       // Altitude labels (Y axis)
-      labelsEl.innerHTML = '';
+      labelsEl.innerHTML = "";
       const nLabels = 5;
       for (let k = 0; k <= nLabels; k++) {
-        const span = document.createElement('span');
+        const span = document.createElement("span");
         span.textContent = (axisTop - (k / nLabels) * axisSpan).toFixed(0);
         labelsEl.appendChild(span);
       }
 
       // X-axis tick labels (HTML, below canvas)
-      const fmt = v => Math.abs(v) < 0.01 ? v.toExponential(1) : v.toFixed(Math.abs(v) < 1 ? 2 : 1);
-      const xRow = document.getElementById('plume-x-row');
-      if (plumeMode === 'p' || plumeMode === 'spd') {
-        document.getElementById('plume-x-left').textContent = fmt(xMin);
-        document.getElementById('plume-x-center').textContent = fmt((xMin + xMax) / 2);
-        document.getElementById('plume-x-right').textContent = fmt(xMax);
+      const fmt = (v) =>
+        Math.abs(v) < 0.01 ?
+        v.toExponential(1) :
+        v.toFixed(Math.abs(v) < 1 ? 2 : 1);
+      const xRow = document.getElementById("plume-x-row");
+      if (plumeMode === "p" || plumeMode === "spd") {
+        document.getElementById("plume-x-left").textContent = fmt(xMin);
+        document.getElementById("plume-x-center").textContent = fmt(
+          (xMin + xMax) / 2,
+        );
+        document.getElementById("plume-x-right").textContent = fmt(xMax);
       } else {
-        document.getElementById('plume-x-left').textContent = fmt(xMin);
-        document.getElementById('plume-x-center').textContent = '0';
-        document.getElementById('plume-x-right').textContent = fmt(xMax);
+        document.getElementById("plume-x-left").textContent = fmt(xMin);
+        document.getElementById("plume-x-center").textContent = "0";
+        document.getElementById("plume-x-right").textContent = fmt(xMax);
       }
-      const xTitle = document.getElementById('plume-x-title');
+      const xTitle = document.getElementById("plume-x-title");
       xTitle.textContent = xLabel;
 
-      section.style.display = 'flex';
-      xRow.style.display = 'flex';
-      xTitle.style.display = 'block';
-      controls.style.display = 'flex';
-      document.getElementById('plume-title').style.display = 'block';
+      section.style.display = "flex";
+      xRow.style.display = "flex";
+      xTitle.style.display = "block";
+      controls.style.display = "flex";
+      document.getElementById("plume-title").style.display = "block";
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -1242,78 +1695,127 @@
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
 
-    let _pointerDownX = 0, _pointerDownY = 0;
-    renderer.domElement.addEventListener('pointerdown', e => { _pointerDownX = e.clientX; _pointerDownY = e.clientY; });
+    let _pointerDownX = 0,
+      _pointerDownY = 0;
+    renderer.domElement.addEventListener("pointerdown", (e) => {
+      _pointerDownX = e.clientX;
+      _pointerDownY = e.clientY;
+    });
 
-    renderer.domElement.addEventListener('click', e => {
+    renderer.domElement.addEventListener("click", (e) => {
       if (!terrainMesh) return;
-      const pdx = e.clientX - _pointerDownX, pdy = e.clientY - _pointerDownY;
+      const pdx = e.clientX - _pointerDownX,
+        pdy = e.clientY - _pointerDownY;
       if (pdx * pdx + pdy * pdy > 25) return; // drag — ignore
       mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
       mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
       raycaster.setFromCamera(mouse, camera);
       const hits = raycaster.intersectObject(terrainMesh);
       if (hits.length === 0) {
-        document.getElementById('info-panel').style.display = 'none';
-        document.getElementById('plume-section').style.display = 'none';
-        document.getElementById('plume-x-row').style.display = 'none';
-        document.getElementById('plume-x-title').style.display = 'none';
-        document.getElementById('plume-title').style.display = 'none';
-        document.getElementById('plume-controls').style.display = 'none';
-        if (clickMarker) { clickMarker.forEach(o => { scene.remove(o); if (o._labelDiv) o._labelDiv.remove(); }); clickMarker = null; }
+        document.getElementById("info-panel").style.display = "none";
+        document.getElementById("plume-section").style.display = "none";
+        document.getElementById("plume-x-row").style.display = "none";
+        document.getElementById("plume-x-title").style.display = "none";
+        document.getElementById("plume-title").style.display = "none";
+        document.getElementById("plume-controls").style.display = "none";
+        if (clickMarker) {
+          clickMarker.forEach((o) => {
+            scene.remove(o);
+            if (o._labelDiv) o._labelDiv.remove();
+          });
+          clickMarker = null;
+        }
         return;
       }
 
       const pt = hits[0].point;
       const T = simData.terrain;
       const F = simData.fields;
-      const { nx, ny, nz, dz, z_base } = simData.grid;
+      const {
+        nx,
+        ny,
+        nz,
+        dz,
+        z_base
+      } = simData.grid;
       const xw = T.x_extent[1] - T.x_extent[0];
       const yh = T.y_extent[1] - T.y_extent[0];
-      const cx = terrainCX(T), cy = terrainCY(T);
+      const cx = terrainCX(T),
+        cy = terrainCY(T);
 
       // Convert world back to grid indices
       const gx = pt.x - cx + xw / 2; // local x in [0, xw]
       const gy = pt.y - cy + yh / 2; // local y in [0, yh], y=0=north
-      const gi = Math.round(gx / xw * (nx - 1));
+      const gi = Math.round((gx / xw) * (nx - 1));
       const gj = Math.round((1 - gy / yh) * (ny - 1)); // j=0=north, gy=0=north
       const i = Math.max(0, Math.min(nx - 1, gi));
       const j = Math.max(0, Math.min(ny - 1, gj));
 
       const elev = T.elevation[j][i];
-      const { dx, dy } = simData.grid;
-      const i0 = Math.max(0, i - 1), i1 = Math.min(nx - 1, i + 1);
-      const j0 = Math.max(0, j - 1), j1 = Math.min(ny - 1, j + 1);
+      const {
+        dx,
+        dy
+      } = simData.grid;
+      const i0 = Math.max(0, i - 1),
+        i1 = Math.min(nx - 1, i + 1);
+      const j0 = Math.max(0, j - 1),
+        j1 = Math.min(ny - 1, j + 1);
 
       // Peak values across the full column
-      let peakW = 0, peakWAlt = 0, peakSpd = 0, peakSpdAlt = 0;
-      let peakVort = 0, peakVortAlt = 0;
+      let peakW = 0,
+        peakWAlt = 0,
+        peakSpd = 0,
+        peakSpdAlt = 0;
+      let peakVort = 0,
+        peakVortAlt = 0;
       for (let k = 0; k < nz; k++) {
         const idx = k * ny * nx + j * nx + i;
         const w = F.w[idx];
         const spd = Math.hypot(F.u[idx], F.v[idx]);
-        const dv_dx = (F.v[k * ny * nx + j * nx + i1] - F.v[k * ny * nx + j * nx + i0]) / ((i1 - i0) * dx);
-        const du_dy = (F.u[k * ny * nx + j1 * nx + i] - F.u[k * ny * nx + j0 * nx + i]) / ((j1 - j0) * dy);
+        const dv_dx =
+          (F.v[k * ny * nx + j * nx + i1] - F.v[k * ny * nx + j * nx + i0]) /
+          ((i1 - i0) * dx);
+        const du_dy =
+          (F.u[k * ny * nx + j1 * nx + i] - F.u[k * ny * nx + j0 * nx + i]) /
+          ((j1 - j0) * dy);
         const vort = dv_dx - du_dy;
         const alt = z_base + (k + 0.5) * dz;
-        if (Math.abs(w) > Math.abs(peakW)) { peakW = w; peakWAlt = alt; }
-        if (spd > peakSpd) { peakSpd = spd; peakSpdAlt = alt; }
-        if (Math.abs(vort) > Math.abs(peakVort)) { peakVort = vort; peakVortAlt = alt; }
+        if (Math.abs(w) > Math.abs(peakW)) {
+          peakW = w;
+          peakWAlt = alt;
+        }
+        if (spd > peakSpd) {
+          peakSpd = spd;
+          peakSpdAlt = alt;
+        }
+        if (Math.abs(vort) > Math.abs(peakVort)) {
+          peakVort = vort;
+          peakVortAlt = alt;
+        }
       }
 
       const rows = [
-        ['Elevation', `${elev.toFixed(1)} m`],
-        ['Peak W', `${peakW.toFixed(3)} m/s @ ${peakWAlt.toFixed(0)} m`],
-        ['Peak Speed', `${peakSpd.toFixed(2)} m/s @ ${peakSpdAlt.toFixed(0)} m`],
-        ['Peak Vort', `${peakVort.toExponential(2)} 1/s @ ${peakVortAlt.toFixed(0)} m`],
+        ["Elevation", `${elev.toFixed(1)} m`],
+        ["Peak W", `${peakW.toFixed(3)} m/s @ ${peakWAlt.toFixed(0)} m`],
+        [
+          "Peak Speed",
+          `${peakSpd.toFixed(2)} m/s @ ${peakSpdAlt.toFixed(0)} m`,
+        ],
+        [
+          "Peak Vort",
+          `${peakVort.toExponential(2)} 1/s @ ${peakVortAlt.toFixed(0)} m`,
+        ],
       ];
 
-      const panel = document.getElementById('info-panel');
-      panel.style.display = 'block';
-      const rowsDiv = document.getElementById('info-rows');
-      rowsDiv.innerHTML = rows.map(([label, val]) =>
-        `<div class="info-row"><span class="info-label">${label}</span><span class="info-val">${val}</span></div>`
-      ).join('');
+      const panel = document.getElementById("info-panel");
+      panel.style.display = "block";
+      const rowsDiv = document.getElementById("info-rows");
+      rowsDiv.innerHTML = rows
+        .map(
+          ([label, val]) =>
+          `<div class="info-row"><span class="info-label">${label}</span><span class="info-val">${val}</span></div>`,
+        )
+        .join("");
 
       buildClickMarker(pt.x, pt.y, pt.z, elev);
       drawPlumeProfile(i, j, elev);
@@ -1324,7 +1826,13 @@
     // ═══════════════════════════════════════════════════════════════════
 
     function rebuildAll() {
-      if (clickMarker) { clickMarker.forEach(o => { scene.remove(o); if (o._labelDiv) o._labelDiv.remove(); }); clickMarker = null; }
+      if (clickMarker) {
+        clickMarker.forEach((o) => {
+          scene.remove(o);
+          if (o._labelDiv) o._labelDiv.remove();
+        });
+        clickMarker = null;
+      }
       buildTerrain();
       buildOverlay();
       buildSlice();
@@ -1334,44 +1842,63 @@
 
     window.rebuildAll = rebuildAll;
 
-    window.setSurfaceField = function (name) {
+    window.setSurfaceField = function(name) {
       currentSurfField = name;
-      document.querySelectorAll('#surf-tabs .tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('tab-surf-' + name).classList.add('active');
+      document
+        .querySelectorAll("#surf-tabs .tab-btn")
+        .forEach((b) => b.classList.remove("active"));
+      document.getElementById("tab-surf-" + name).classList.add("active");
       buildOverlay();
     };
-    window.setSliceField = function (name) {
+    window.setSliceField = function(name) {
       currentSliceField = name;
-      document.querySelectorAll('#slice-field-tabs .tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('tab-slice-' + name).classList.add('active');
+      document
+        .querySelectorAll("#slice-field-tabs .tab-btn")
+        .forEach((b) => b.classList.remove("active"));
+      document.getElementById("tab-slice-" + name).classList.add("active");
       buildSlice();
     };
-    window.updateSlice = function () { buildSlice(); };
-    window.toggleSlice = function () {
-      sliceVisible = !sliceVisible;
-      const btn = document.getElementById('slice-toggle');
-      btn.textContent = sliceVisible ? 'ON' : 'OFF';
-      btn.classList.toggle('on', sliceVisible);
+    window.updateSlice = function() {
       buildSlice();
-      document.getElementById('height-indicator').style.display = sliceVisible ? 'block' : 'none';
+    };
+    window.toggleSlice = function() {
+      sliceVisible = !sliceVisible;
+      const btn = document.getElementById("slice-toggle");
+      btn.textContent = sliceVisible ? "ON" : "OFF";
+      btn.classList.toggle("on", sliceVisible);
+      buildSlice();
+      document.getElementById("height-indicator").style.display = sliceVisible ?
+        "block" :
+        "none";
       if (!sliceVisible) buildOverlay(); // restore surface colorbar
     };
-    window.toggleArrows = function () {
+    window.toggleArrows = function() {
       arrowsVisible = !arrowsVisible;
-      const btn = document.getElementById('arrows-toggle');
-      btn.textContent = arrowsVisible ? 'ON' : 'OFF';
-      btn.classList.toggle('on', arrowsVisible);
+      const btn = document.getElementById("arrows-toggle");
+      btn.textContent = arrowsVisible ? "ON" : "OFF";
+      btn.classList.toggle("on", arrowsVisible);
       buildArrows();
     };
-    window.rebuildArrows = function () { buildArrows(); };
-    window.updateArrowWidth = function () {
-      if (arrowLines) arrowLines.material.linewidth = parseFloat(document.getElementById('arrow-width').value);
+    window.rebuildArrows = function() {
+      buildArrows();
     };
-    window.updateTerrainOpacity = function () {
-      if (terrainMesh) terrainMesh.material.opacity = parseFloat(document.getElementById('terr-opacity').value);
+    window.updateArrowWidth = function() {
+      if (arrowLines)
+        arrowLines.material.linewidth = parseFloat(
+          document.getElementById("arrow-width").value,
+        );
     };
-    window.updateOverlayOpacity = function () {
-      if (overlayMesh) overlayMesh.material.opacity = parseFloat(document.getElementById('ov-opacity').value);
+    window.updateTerrainOpacity = function() {
+      if (terrainMesh)
+        terrainMesh.material.opacity = parseFloat(
+          document.getElementById("terr-opacity").value,
+        );
+    };
+    window.updateOverlayOpacity = function() {
+      if (overlayMesh)
+        overlayMesh.material.opacity = parseFloat(
+          document.getElementById("ov-opacity").value,
+        );
     };
 
     function applyPreset(p) {
@@ -1379,21 +1906,23 @@
       window.setSurfaceField(p.surfaceField);
 
       // Overlay opacity
-      document.getElementById('ov-opacity').value = p.overlayOpacity;
-      document.getElementById('ov-opacity-val').textContent = p.overlayOpacity;
+      document.getElementById("ov-opacity").value = p.overlayOpacity;
+      document.getElementById("ov-opacity-val").textContent =
+        p.overlayOpacity;
       window.updateOverlayOpacity();
 
       // Terrain opacity
-      document.getElementById('terr-opacity').value = p.terrainOpacity;
-      document.getElementById('terr-opacity-val').textContent = p.terrainOpacity;
+      document.getElementById("terr-opacity").value = p.terrainOpacity;
+      document.getElementById("terr-opacity-val").textContent =
+        p.terrainOpacity;
       window.updateTerrainOpacity();
 
       // Slice visibility
       if (sliceVisible !== p.showSlice) window.toggleSlice();
 
       // Slice height
-      document.getElementById('slice-height').value = p.sliceHeight;
-      document.getElementById('slice-height-val').textContent = p.sliceHeight;
+      document.getElementById("slice-height").value = p.sliceHeight;
+      document.getElementById("slice-height-val").textContent = p.sliceHeight;
 
       // Slice field (also rebuilds slice)
       window.setSliceField(p.sliceField);
@@ -1402,15 +1931,17 @@
       if (arrowsVisible !== p.showArrows) window.toggleArrows();
 
       // Show/hide panel sections
-      ['surface', 'slice', 'terrain', 'arrows'].forEach(id => {
-        document.getElementById('section-' + id).style.display =
-          p.sections.includes(id) ? '' : 'none';
+      ["surface", "slice", "terrain", "arrows"].forEach((id) => {
+        document.getElementById("section-" + id).style.display =
+          p.sections.includes(id) ? "" : "none";
       });
 
       // Highlight active preset button
-      document.querySelectorAll('#preset-btns .tab-btn').forEach(b => b.classList.remove('active'));
-      const btn = document.getElementById('preset-' + p.id);
-      if (btn) btn.classList.add('active');
+      document
+        .querySelectorAll("#preset-btns .tab-btn")
+        .forEach((b) => b.classList.remove("active"));
+      const btn = document.getElementById("preset-" + p.id);
+      if (btn) btn.classList.add("active");
     }
 
     // ═══════════════════════════════════════════════════════════════════
@@ -1430,16 +1961,17 @@
 
     function idbGet(key) {
       return new Promise((resolve, reject) => {
-        const req = indexedDB.open('paragliding', 1);
-        req.onupgradeneeded = e => {
+        const req = indexedDB.open("paragliding", 1);
+        req.onupgradeneeded = (e) => {
           const db = e.target.result;
-          if (!db.objectStoreNames.contains('sim')) db.createObjectStore('sim');
+          if (!db.objectStoreNames.contains("sim"))
+            db.createObjectStore("sim");
         };
         req.onerror = () => reject(req.error);
-        req.onsuccess = e => {
+        req.onsuccess = (e) => {
           const db = e.target.result;
-          const tx = db.transaction('sim', 'readonly');
-          const get = tx.objectStore('sim').get(key);
+          const tx = db.transaction("sim", "readonly");
+          const get = tx.objectStore("sim").get(key);
           get.onsuccess = () => resolve(get.result);
           get.onerror = () => reject(get.error);
         };
@@ -1447,31 +1979,39 @@
     }
 
     async function loadAndRender() {
-      document.getElementById('loading-msg').textContent = 'Loading from IndexedDB…';
+      document.getElementById("loading-msg").textContent =
+        "Loading from IndexedDB…";
       try {
         const [raw, presets] = await Promise.all([
-          idbGet('ns3d_latest'),
-          fetch('presets-dynamic-advanced.json').then(r => r.json()),
+          idbGet("ns3d_latest"),
+          fetch("presets-dynamic-advanced.json").then((r) => r.json()),
         ]);
-        if (!raw) throw new Error('No ns3d_latest data found. Run the NS3D simulation first.');
+        if (!raw)
+          throw new Error(
+            "No ns3d_latest data found. Run the NS3D simulation first.",
+          );
 
         // Build preset buttons
-        const presetBtns = document.getElementById('preset-btns');
-        presets.forEach(p => {
-          const btn = document.createElement('button');
-          btn.className = 'tab-btn';
-          btn.id = 'preset-' + p.id;
+        const presetBtns = document.getElementById("preset-btns");
+        presets.forEach((p) => {
+          const btn = document.createElement("button");
+          btn.className = "tab-btn";
+          btn.id = "preset-" + p.id;
           btn.textContent = p.label;
           btn.onclick = () => applyPreset(p);
           presetBtns.appendChild(btn);
         });
 
-        document.getElementById('loading-msg').textContent = 'Parsing data…';
+        document.getElementById("loading-msg").textContent = "Parsing data…";
         simData = JSON.parse(raw);
-        if (simData.type !== 'ns3d') throw new Error('Data is not NS3D type. Run NS3D simulation first.');
+        if (simData.type !== "ns3d")
+          throw new Error(
+            "Data is not NS3D type. Run NS3D simulation first.",
+          );
 
-        document.getElementById('loading-msg').textContent = 'Building 3D scene…';
-        await new Promise(r => setTimeout(r, 0)); // yield for paint
+        document.getElementById("loading-msg").textContent =
+          "Building 3D scene…";
+        await new Promise((r) => setTimeout(r, 0)); // yield for paint
 
         buildTerrain();
         buildOverlay();
@@ -1480,21 +2020,24 @@
         buildMarkers();
         buildNorthArrow();
 
-        const defaultPreset = presets.find(p => p.id === 'terrain') || presets[0];
+        const defaultPreset =
+          presets.find((p) => p.id === "terrain") || presets[0];
         applyPreset(defaultPreset);
 
         // Open panel
-        document.getElementById('ui-panel').classList.add('open');
+        document.getElementById("ui-panel").classList.add("open");
 
-        document.getElementById('loading').style.display = 'none';
+        document.getElementById("loading").style.display = "none";
         animate();
 
         // Show simulation params
         const p = simData.params;
-        console.log('NS3D params:', p);
+        console.log("NS3D params:", p);
       } catch (err) {
-        document.getElementById('loading-msg').textContent = `Error: ${err.message}`;
-        document.getElementById('loading-spinner').style.borderTopColor = '#cc4444';
+        document.getElementById("loading-msg").textContent =
+          `Error: ${err.message}`;
+        document.getElementById("loading-spinner").style.borderTopColor =
+          "#cc4444";
         console.error(err);
       }
     }
@@ -1502,17 +2045,21 @@
     loadAndRender();
 
     // Nav dropdown touch support
-    document.querySelectorAll('.nav-dropdown-btn').forEach(function (btn) {
-      btn.addEventListener('click', function (e) {
-        var dd = btn.closest('.nav-dropdown');
-        var isOpen = dd.classList.contains('open');
-        document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
-        if (!isOpen) dd.classList.add('open');
+    document.querySelectorAll(".nav-dropdown-btn").forEach(function(btn) {
+      btn.addEventListener("click", function(e) {
+        var dd = btn.closest(".nav-dropdown");
+        var isOpen = dd.classList.contains("open");
+        document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+          d.classList.remove("open");
+        });
+        if (!isOpen) dd.classList.add("open");
         e.stopPropagation();
       });
     });
-    document.addEventListener('click', function () {
-      document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
+    document.addEventListener("click", function() {
+      document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+        d.classList.remove("open");
+      });
     });
   </script>
 </body>
