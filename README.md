@@ -11,7 +11,7 @@ Then http://localhost:8000 (port forward may be needed).
 Build via
 ```bash
 $ docker compose down
-$ docker compose up --build
+$ docker compose build
 ```
 Serve via
 ```bash
