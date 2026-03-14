@@ -62,7 +62,9 @@
       filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%);
     }
 
-    .nav-logo:hover { background: rgba(100, 160, 255, 0.1); }
+    .nav-logo:hover {
+      background: rgba(100, 160, 255, 0.1);
+    }
 
     .nav-sep {
       width: 1px;
@@ -82,10 +84,20 @@
       transition: background 0.15s, color 0.15s;
     }
 
-    .nav-link:hover { color: #90b8d8; background: rgba(100, 160, 255, 0.08); }
-    .nav-link.nav-active { color: #7eb8ff; background: rgba(100, 160, 255, 0.1); font-weight: 500; }
+    .nav-link:hover {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, 0.08);
+    }
 
-    .nav-dropdown { position: relative; }
+    .nav-link.nav-active {
+      color: #7eb8ff;
+      background: rgba(100, 160, 255, 0.1);
+      font-weight: 500;
+    }
+
+    .nav-dropdown {
+      position: relative;
+    }
 
     .nav-dropdown-btn {
       display: flex;
@@ -103,12 +115,23 @@
       transition: background 0.15s, color 0.15s;
     }
 
-    .nav-dropdown-btn::after { content: '▾'; font-size: 9px; opacity: 0.6; }
+    .nav-dropdown-btn::after {
+      content: '▾';
+      font-size: 9px;
+      opacity: 0.6;
+    }
 
     .nav-dropdown:hover .nav-dropdown-btn,
-    .nav-dropdown-btn:hover { color: #90b8d8; background: rgba(100, 160, 255, 0.08); }
+    .nav-dropdown-btn:hover {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, 0.08);
+    }
 
-    .nav-dropdown-btn.nav-active { color: #7eb8ff; background: rgba(100, 160, 255, 0.1); font-weight: 500; }
+    .nav-dropdown-btn.nav-active {
+      color: #7eb8ff;
+      background: rgba(100, 160, 255, 0.1);
+      font-weight: 500;
+    }
 
     .nav-dropdown-menu {
       position: absolute;
@@ -132,7 +155,11 @@
     }
 
     .nav-dropdown:hover .nav-dropdown-menu,
-    .nav-dropdown.open .nav-dropdown-menu { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .nav-dropdown.open .nav-dropdown-menu {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
 
     .nav-dropdown-item {
       padding: 6px 10px;
@@ -144,13 +171,34 @@
       transition: background 0.15s, color 0.15s;
     }
 
-    .nav-dropdown-item:hover { color: #90b8d8; background: rgba(100, 160, 255, 0.08); }
-    .nav-dropdown-item.nav-active { color: #7eb8ff; background: rgba(100, 160, 255, 0.1); font-weight: 500; }
+    .nav-dropdown-item:hover {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, 0.08);
+    }
 
-    .page { max-width: 860px; margin: 0 auto; padding: 64px 24px 80px; }
+    .nav-dropdown-item.nav-active {
+      color: #7eb8ff;
+      background: rgba(100, 160, 255, 0.1);
+      font-weight: 500;
+    }
 
-    h1 { font-size: 24px; color: #7eb8ff; margin-bottom: 6px; }
-    .subtitle { color: #4a7090; font-size: 14px; margin-bottom: 48px; }
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 64px 24px 80px;
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #7eb8ff;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: #4a7090;
+      font-size: 14px;
+      margin-bottom: 48px;
+    }
 
     h2 {
       font-size: 17px;
@@ -160,9 +208,17 @@
       border-bottom: 1px solid rgba(100, 160, 255, 0.15);
     }
 
-    h3 { font-size: 14px; color: #90c8e8; margin: 22px 0 8px; font-weight: 600; }
+    h3 {
+      font-size: 14px;
+      color: #90c8e8;
+      margin: 22px 0 8px;
+      font-weight: 600;
+    }
 
-    p { margin-bottom: 12px; color: #a8c0d4; }
+    p {
+      margin-bottom: 12px;
+      color: #a8c0d4;
+    }
 
     .eq {
       font-family: 'Courier New', monospace;
@@ -210,7 +266,9 @@
       font-size: 13px;
     }
 
-    .param-table tr:last-child td { border-bottom: none; }
+    .param-table tr:last-child td {
+      border-bottom: none;
+    }
 
     .param-table td:first-child {
       color: #7eb8ff;
@@ -219,8 +277,15 @@
       white-space: nowrap;
     }
 
-    .param-table td:nth-child(2) { color: #7a9ab0; font-size: 12px; white-space: nowrap; }
-    .param-table td:nth-child(3) { color: #a8c0d4; }
+    .param-table td:nth-child(2) {
+      color: #7a9ab0;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .param-table td:nth-child(3) {
+      color: #a8c0d4;
+    }
 
     .lc-table {
       width: 100%;
@@ -245,7 +310,9 @@
       color: #a8c0d4;
     }
 
-    .lc-table tr:last-child td { border-bottom: none; }
+    .lc-table tr:last-child td {
+      border-bottom: none;
+    }
 
     .box {
       background: rgba(100, 160, 255, 0.05);
@@ -255,13 +322,29 @@
       margin: 16px 0;
     }
 
-    .box.note { border-color: rgba(255, 60, 60, 0.3); background: rgba(255, 30, 30, 0.05); }
-    .box.note li { color: #c06060; }
+    .box.note {
+      border-color: rgba(255, 60, 60, 0.3);
+      background: rgba(255, 30, 30, 0.05);
+    }
 
-    .box.warn { border-color: rgba(255, 180, 60, 0.3); background: rgba(255, 160, 30, 0.05); }
-    .box.warn li { color: #c09060; }
+    .box.note li {
+      color: #c06060;
+    }
 
-    .step { display: flex; gap: 12px; margin: 8px 0; }
+    .box.warn {
+      border-color: rgba(255, 180, 60, 0.3);
+      background: rgba(255, 160, 30, 0.05);
+    }
+
+    .box.warn li {
+      color: #c09060;
+    }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      margin: 8px 0;
+    }
 
     .step-num {
       flex-shrink: 0;
@@ -278,17 +361,40 @@
       margin-top: 2px;
     }
 
-    .step-body { flex: 1; color: #a8c0d4; }
+    .step-body {
+      flex: 1;
+      color: #a8c0d4;
+    }
 
-    ul { padding-left: 20px; margin-bottom: 12px; }
-    ul li { margin-bottom: 5px; color: #a8c0d4; }
+    ul {
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    ul li {
+      margin-bottom: 5px;
+      color: #a8c0d4;
+    }
 
     @media (max-width: 768px) {
-      .page { padding: 52px 16px 60px; }
-      h1 { font-size: 20px; }
-      h2 { font-size: 15px; }
-      h3 { font-size: 13px; }
-      .param-table, .lc-table {
+      .page {
+        padding: 52px 16px 60px;
+      }
+
+      h1 {
+        font-size: 20px;
+      }
+
+      h2 {
+        font-size: 15px;
+      }
+
+      h3 {
+        font-size: 13px;
+      }
+
+      .param-table,
+      .lc-table {
         display: block;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -297,13 +403,38 @@
     }
 
     @media (max-width: 480px) {
-      .page { padding: 48px 10px 40px; }
-      h1 { font-size: 17px; }
-      h2 { font-size: 13px; letter-spacing: 0.5px; margin: 32px 0 14px; }
-      h3 { font-size: 12px; }
-      p, li { font-size: 13px; line-height: 1.6; }
-      .eq { font-size: 11px; padding: 10px 12px; }
-      .step { gap: 8px; }
+      .page {
+        padding: 48px 10px 40px;
+      }
+
+      h1 {
+        font-size: 17px;
+      }
+
+      h2 {
+        font-size: 13px;
+        letter-spacing: 0.5px;
+        margin: 32px 0 14px;
+      }
+
+      h3 {
+        font-size: 12px;
+      }
+
+      p,
+      li {
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .eq {
+        font-size: 11px;
+        padding: 10px 12px;
+      }
+
+      .step {
+        gap: 8px;
+      }
     }
   </style>
 </head>
@@ -352,7 +483,8 @@
   <div class="page">
 
     <h1>Wind NS Simulation — Technical Documentation</h1>
-    <p class="subtitle">Full 3D incompressible Navier-Stokes solver for wind flow over terrain with surface roughness</p>
+    <p class="subtitle">Full 3D incompressible Navier-Stokes solver for wind flow over terrain with surface roughness
+    </p>
 
     <!-- ─ OVERVIEW ─ -->
     <h2>Overview</h2>
@@ -382,16 +514,16 @@
       constant (no buoyancy, no temperature). The coordinate system is x = East, y = South, z = Up.
     </p>
     <div class="eq">Momentum:
-  ∂U/∂t + (u·∇)U = −∂p/∂x + ν·∇²U
-  ∂V/∂t + (u·∇)V = −∂p/∂y + ν·∇²V
-  ∂W/∂t + (u·∇)W = −∂p/∂z + ν·∇²W
+      ∂U/∂t + (u·∇)U = −∂p/∂x + ν·∇²U
+      ∂V/∂t + (u·∇)V = −∂p/∂y + ν·∇²V
+      ∂W/∂t + (u·∇)W = −∂p/∂z + ν·∇²W
 
-Continuity (incompressibility):
-  ∂U/∂x + ∂V/∂y + ∂W/∂z = 0
+      Continuity (incompressibility):
+      ∂U/∂x + ∂V/∂y + ∂W/∂z = 0
 
-where  u = (U, V, W)  is the 3D velocity
-       p  is kinematic pressure (Pa / ρ = m²/s²)
-       ν  is kinematic (turbulent) viscosity (m²/s)</div>
+      where u = (U, V, W) is the 3D velocity
+      p is kinematic pressure (Pa / ρ = m²/s²)
+      ν is kinematic (turbulent) viscosity (m²/s)</div>
     <p>
       There is no gravity term in the momentum equations (the flow is horizontal and density is
       constant, so buoyancy is absent). The only vertical forcing is through pressure gradients
@@ -403,13 +535,13 @@ where  u = (U, V, W)  is the 3D velocity
       Near a rough surface, the mean wind speed follows a logarithmic profile with height above
       ground. This is the standard atmospheric surface-layer law:
     </p>
-    <div class="eq">U(z) = U_ref · ln(z / z₀) / ln(z_ref / z₀)   for z > z₀
-U(z) = 0                                     for z ≤ z₀
+    <div class="eq">U(z) = U_ref · ln(z / z₀) / ln(z_ref / z₀) for z > z₀
+      U(z) = 0 for z ≤ z₀
 
-where  z     = height above local terrain surface
-       z₀    = aerodynamic roughness length (land-cover dependent)
-       z_ref = reference height where speed = U_ref (typically 100 m)
-       U_ref = reference wind speed (user parameter)</div>
+      where z = height above local terrain surface
+      z₀ = aerodynamic roughness length (land-cover dependent)
+      z_ref = reference height where speed = U_ref (typically 100 m)
+      U_ref = reference wind speed (user parameter)</div>
     <p>
       This profile is applied at simulation initialisation and at inflow boundary cells every
       time step. It ensures the wind is slower close to rough surfaces (forest, built-up areas)
@@ -429,438 +561,493 @@ where  z     = height above local terrain surface
         <th>z₀ (m)</th>
         <th>Physical meaning</th>
       </tr>
-      <tr><td>Permanent water</td><td>80</td><td>0.0002</td><td>Charnock relation (wave-dependent); almost frictionless</td></tr>
-      <tr><td>Snow / ice</td><td>70</td><td>0.001</td><td>Smooth, hard surface</td></tr>
-      <tr><td>Bare / sparse veg.</td><td>60</td><td>0.01</td><td>Desert, rocky alpine</td></tr>
-      <tr><td>Grassland</td><td>30</td><td>0.03</td><td>Short grass — reference surface</td></tr>
-      <tr><td>Herb. wetland</td><td>90</td><td>0.05</td><td>Reed beds and marshes</td></tr>
-      <tr><td>Moss / lichen</td><td>100</td><td>0.05</td><td>Alpine heath</td></tr>
-      <tr><td>Cropland</td><td>40</td><td>0.10</td><td>Cereal crops, row crops</td></tr>
-      <tr><td>Shrubland</td><td>20</td><td>0.30</td><td>Garrigue, maquis</td></tr>
-      <tr><td>Mangrove</td><td>95</td><td>0.50</td><td>Dense coastal vegetation</td></tr>
-      <tr><td>Tree cover</td><td>10</td><td>1.00</td><td>Closed-canopy forest</td></tr>
-      <tr><td>Built-up</td><td>50</td><td>1.50</td><td>Urban: buildings impose large drag</td></tr>
+      <tr>
+        <td>Permanent water</td>
+        <td>80</td>
+        <td>0.0002</td>
+        <td>Charnock relation (wave-dependent); almost frictionless</td>
+      </tr>
+      <tr>
+        <td>Snow / ice</td>
+        <td>70</td>
+        <td>0.001</td>
+        <td>Smooth, hard surface</td>
+      </tr>
+      <tr>
+        <td>Bare / sparse veg.</td>
+        <td>60</td>
+        <td>0.01</td>
+        <td>Desert, rocky alpine</td>
+      </tr>
+      <tr>
+        <td>Grassland</td>
+        <td>30</td>
+        <td>0.03</td>
+        <td>Short grass — reference surface</td>
+      </tr>
+      <tr>
+        <td>Herb. wetland</td>
+        <td>90</td>
+        <td>0.05</td>
+        <td>Reed beds and marshes</td>
+      </tr>
+      <tr>
+        <td>Moss / lichen</td>
+        <td>100</td>
+        <td>0.05</td>
+        <td>Alpine heath</td>
+      </tr>
+      <tr>
+        <td>Cropland</td>
+        <td>40</td>
+        <td>0.10</td>
+        <td>Cereal crops, row crops</td>
+      </tr>
+      <tr>
+        <td>Shrubland</td>
+        <td>20</td>
+        <td>0.30</td>
+        <td>Garrigue, maquis</td>
+      </tr>
+      <tr>
+        <td>Mangrove</td>
+        <td>95</td>
+        <td>0.50</td>
+        <td>Dense coastal vegetation</td>
+      </tr>
+      <tr>
+        <td>Tree cover</td>
+        <td>10</td>
+        <td>1.00</td>
+        <td>Closed-canopy forest</td>
+      </tr>
+      <tr>
+        <td>Built-up</td>
+        <td>50</td>
+        <td>1.50</td>
+        <td>Urban: buildings impose large drag</td>
+      </tr>
     </table>
     <p>
       Fallback heuristic when ESA WorldCover is unavailable:
     </p>
-    <div class="eq">if z > 2400 m             → Snow/ice   (z₀ = 0.001 m)
-else if slope > 0.5       → Bare/sparse (z₀ = 0.01 m)
-else if slope > 0.25      → Shrubland  (z₀ = 0.30 m)
-else if z < 500 m
-     and slope < 0.05     → Cropland   (z₀ = 0.10 m)
-else                      → Grassland  (z₀ = 0.03 m)</div>
+    <div class="eq">if z > 2400 m → Snow/ice (z₀ = 0.001 m)
+      else if slope > 0.5 → Bare/sparse (z₀ = 0.01 m)
+      else if slope > 0.25 → Shrubland (z₀ = 0.30 m)
+      else if z < 500 m and slope < 0.05 → Cropland (z₀=0.10 m) else → Grassland (z₀=0.03 m)</div>
 
-    <h3>4. Terrain blocking — solid mask</h3>
-    <p>
-      The 3D grid is divided into fluid and solid cells. A cell at height <code>z_c</code> above
-      the lowest terrain point is solid if its centre lies below the local terrain surface:
-    </p>
-    <div class="eq">z_c = (k + 0.5) · dz      [cell centre height above base]
-SOLID[k,j,i] = 1   if  z_c ≤ Z_rel[j,i]   (inside terrain)
-SOLID[k,j,i] = 0   if  z_c  > Z_rel[j,i]   (air)</div>
-    <p>
-      Solid cells are enforced with a <strong>no-slip</strong> condition: U = V = W = 0. The
-      terrain therefore acts as a physical obstacle that diverts and accelerates the flow.
-    </p>
+        <h3>4. Terrain blocking — solid mask</h3>
+        <p>
+          The 3D grid is divided into fluid and solid cells. A cell at height <code>z_c</code> above
+          the lowest terrain point is solid if its centre lies below the local terrain surface:
+        </p>
+        <div class="eq">z_c = (k + 0.5) · dz [cell centre height above base]
+          SOLID[k,j,i] = 1 if z_c ≤ Z_rel[j,i] (inside terrain)
+          SOLID[k,j,i] = 0 if z_c > Z_rel[j,i] (air)</div>
+        <p>
+          Solid cells are enforced with a <strong>no-slip</strong> condition: U = V = W = 0. The
+          terrain therefore acts as a physical obstacle that diverts and accelerates the flow.
+        </p>
 
-    <!-- ─ NUMERICAL METHOD ─ -->
-    <h2>Numerical Method (Chorin Projection)</h2>
+        <!-- ─ NUMERICAL METHOD ─ -->
+        <h2>Numerical Method (Chorin Projection)</h2>
 
-    <p>
-      Each time step applies the following sequence to advance the velocity and pressure fields:
-    </p>
+        <p>
+          Each time step applies the following sequence to advance the velocity and pressure fields:
+        </p>
 
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-body">
-        <b>Semi-Lagrangian advection</b> — for each fluid cell, back-trace the Lagrangian
-        departure point by following the velocity backward in time, then interpolate the
-        field value there using trilinear interpolation:
-        <br><code>x_d = x − U·dt,  y_d = y + V·dt,  z_d = z − W·dt</code><br>
-        (the +V sign compensates for j increasing southward). This scheme is unconditionally
-        stable for any Courant number, allowing time steps larger than explicit schemes.
-      </div>
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <b>Semi-Lagrangian advection</b> — for each fluid cell, back-trace the Lagrangian
+            departure point by following the velocity backward in time, then interpolate the
+            field value there using trilinear interpolation:
+            <br><code>x_d = x − U·dt,  y_d = y + V·dt,  z_d = z − W·dt</code><br>
+            (the +V sign compensates for j increasing southward). This scheme is unconditionally
+            stable for any Courant number, allowing time steps larger than explicit schemes.
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <b>Explicit diffusion</b> — apply the viscous term with forward Euler:
+            <br><code>u* = u_adv + ν · ∇²u · dt</code><br>
+            The Laplacian uses a standard 7-point 3D stencil (central differences). The viscosity ν
+            is clamped by a diffusion-CFL condition to prevent instability:
+            <br><code>ν ≤ diff_safety · min(dx², dy², dz²) / dt</code>
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <b>Boundary conditions on u*</b> — apply inflow (log profile), no-slip on solid cells,
+            free-slip on the top, and Neumann on outflow edges before the pressure solve.
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <b>Divergence of u*</b> — compute:
+            <br><code>div = ∂U*/∂x − ∂V*/∂y + ∂W*/∂z</code><br>
+            (the −∂V*/∂y accounts for the y-axis convention where j increases southward). Non-zero
+            divergence indicates mass imbalance that the pressure step must correct.
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <b>Pressure Poisson equation</b> — solve ∇²p = div/dt using <strong>Jacobi iterations</strong>:
+            <div class="eq" style="margin:6px 0">p_new[i,j,k] = ( (p_e + p_w)/dx² + (p_n + p_s)/dy² + (p_u + p_d)/dz²
+              − div/dt ) / (2/dx² + 2/dy² + 2/dz²)</div>
+            Outflow boundaries: p = 0 (Dirichlet). Solid and top: ∂p/∂n = 0 (Neumann, i.e. copy
+            from fluid neighbour).
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <b>Velocity projection</b> — subtract the pressure gradient to enforce incompressibility:
+            <br><code>U = U* − dt · ∂p/∂x</code><br>
+            <code>V = V* + dt · ∂p/∂y</code> (+sign: y-axis convention)<br>
+            <code>W = W* − dt · ∂p/∂z</code><br>
+            After projection, ∇·u ≈ 0 (to the residual accuracy of the Jacobi solver).
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-num">7</div>
+          <div class="step-body">
+            <b>Re-apply boundary conditions</b> — enforce no-slip and inflow conditions after
+            projection to prevent the pressure step from violating them.
+          </div>
+        </div>
+
+        <h3>Time step calculation</h3>
+        <div class="eq">dt_adv = CFL · min(dx, dy) / |u|_max [semi-Lagrangian advective limit]
+          dt_diff = diff_safety · min(dx², dy², dz²) / ν [diffusion stability limit]
+          dt = min(dt_adv, dt_diff, dt_max) [smallest wins]</div>
+        <p>
+          Because semi-Lagrangian advection is unconditionally stable, the time step is often limited
+          by the diffusion condition or by <code>dt_max</code>. The CFL factor can safely exceed 1.0
+          (typical: 1.5–2.5) without instability from advection.
+        </p>
+
+        <!-- ─ BOUNDARY CONDITIONS ─ -->
+        <h2>Boundary Conditions</h2>
+
+        <table class="param-table">
+          <tr>
+            <th>Boundary</th>
+            <th>Velocity</th>
+            <th>Pressure</th>
+          </tr>
+          <tr>
+            <td>Solid terrain (any k)</td>
+            <td>No-slip: U = V = W = 0</td>
+            <td>Neumann: ∂p/∂n = 0</td>
+          </tr>
+          <tr>
+            <td>Inflow lateral edges</td>
+            <td>Log profile: U = U_ref·f(z,z₀), V = V_ref·f(z,z₀), W = 0</td>
+            <td>Neumann</td>
+          </tr>
+          <tr>
+            <td>Outflow lateral edges</td>
+            <td>Neumann: copy from interior neighbour</td>
+            <td>Dirichlet: p = 0</td>
+          </tr>
+          <tr>
+            <td>Top (k = NZ−1)</td>
+            <td>Free-slip: U_top = U_{NZ-2}, V_top = V_{NZ-2}, W_top = 0</td>
+            <td>Neumann</td>
+          </tr>
+          <tr>
+            <td>Bottom (k = 0, not solid)</td>
+            <td>Neumann: U_0 = U_1, V_0 = V_1, W_0 = 0</td>
+            <td>Neumann</td>
+          </tr>
+        </table>
+
+        <p>
+          The inflow log factor is computed as:
+        </p>
+        <div class="eq">f(z, z₀) = min(1.0, ln(z / z₀) / ln(z_ref / z₀) ) for z > z₀
+          f(z, z₀) = 0 for z ≤ z₀</div>
+        <p>
+          where <code>z</code> is the height above the local terrain surface (not above sea level).
+          The factor is clamped to 1 so the log profile does not overshoot the reference speed above
+          <code>z_ref</code>.
+        </p>
+
+        <!-- ─ PARAMETERS ─ -->
+        <h2>Parameters and Their Effects</h2>
+
+        <h3>Grid and domain</h3>
+        <table class="param-table">
+          <tr>
+            <th>Parameter</th>
+            <th>Typical value</th>
+            <th>Effect</th>
+          </tr>
+          <tr>
+            <td>NX, NY</td>
+            <td>32–80</td>
+            <td>Horizontal grid resolution. Finer grids resolve narrower terrain features and
+              tighter boundary layers but increase memory (NX·NY·NZ cells) and computation time.</td>
+          </tr>
+          <tr>
+            <td>NZ</td>
+            <td>20–40</td>
+            <td>Vertical layers. More layers improve the representation of the log profile near
+              the surface and resolve vertical flow structure (separation bubbles, lee waves).
+              Decreasing dz tightens the diffusion time-step limit.</td>
+          </tr>
+          <tr>
+            <td>h_domain</td>
+            <td>1000–3000 m</td>
+            <td>Domain height above the highest terrain point. Should be at least 3–5× the
+              maximum ridge height to avoid the top boundary interfering with flow over ridges.
+              Too small truncates the wind profile aloft.</td>
+          </tr>
+          <tr>
+            <td>dt_max</td>
+            <td>5–30 s</td>
+            <td>Hard cap on the time step. Prevents the adaptive time step from becoming
+              too large in regions with very slow flow. Reduce if the solution diverges.</td>
+          </tr>
+        </table>
+
+        <h3>Wind input</h3>
+        <table class="param-table">
+          <tr>
+            <th>Parameter</th>
+            <th>Typical value</th>
+            <th>Effect</th>
+          </tr>
+          <tr>
+            <td>Wind direction</td>
+            <td>0–360°</td>
+            <td>Compass bearing the wind comes from. Determines the inflow edge(s) and the
+              direction of the log-profile inflow. Controls which slopes are windward (acceleration,
+              uplift) and which are lee (deceleration, recirculation).</td>
+          </tr>
+          <tr>
+            <td>U_ref (wind speed)</td>
+            <td>2–25 m/s</td>
+            <td>Reference wind speed at z_ref above the surface. Scales the entire inflow log
+              profile and therefore all velocities in the domain. Stronger wind amplifies all
+              flow features proportionally (the NS equations are linear in U for steady laminar flow
+              — but non-linear advection creates speed-dependent patterns).</td>
+          </tr>
+          <tr>
+            <td>z_ref</td>
+            <td>50–200 m</td>
+            <td>Height at which U_ref is specified. The log profile is anchored here. Increasing
+              z_ref while keeping U_ref constant effectively shifts the profile upward, producing
+              faster flow near the surface for the same reference speed.</td>
+          </tr>
+        </table>
+
+        <h3>Roughness and boundary layer</h3>
+        <table class="param-table">
+          <tr>
+            <th>Parameter</th>
+            <th>Typical value</th>
+            <th>Effect</th>
+          </tr>
+          <tr>
+            <td>z₀ (log_z0)</td>
+            <td>0.001–1.5 m</td>
+            <td>Aerodynamic roughness length. Used as a scalar fallback when ESA WorldCover
+              is not loaded. Larger z₀ → slower near-surface wind, deeper boundary layer,
+              more drag on the flow. Small z₀ (water, snow) → fast surface wind, thin boundary
+              layer. Overridden per-cell by the land cover map when available.</td>
+          </tr>
+          <tr>
+            <td>ν (visc)</td>
+            <td>1–500 m²/s</td>
+            <td>Kinematic (turbulent eddy) viscosity. Diffuses momentum laterally and vertically.
+              Higher ν → smoother velocity field, lee recirculations are broadened and weakened,
+              sharp shear layers are smeared. Lower ν → sharper gradients, stronger separation zones,
+              risk of numerical oscillations if too low for the grid resolution.</td>
+          </tr>
+          <tr>
+            <td>diff_safety</td>
+            <td>0.1–0.25</td>
+            <td>Safety factor for the diffusion time-step limit:
+              <code>ν ≤ diff_safety · Δ² / dt</code>. Lower values make the scheme more conservative
+              (smaller effective ν per step). Increase only if the diffusion step is artificially
+              limiting dt on fine grids.
+            </td>
+          </tr>
+        </table>
+
+        <h3>Pressure solver</h3>
+        <table class="param-table">
+          <tr>
+            <th>Parameter</th>
+            <th>Typical value</th>
+            <th>Effect</th>
+          </tr>
+          <tr>
+            <td>p_iter</td>
+            <td>20–80</td>
+            <td>Number of Jacobi iterations per time step. More iterations → pressure field
+              converges closer to the true solution of ∇²p = div/dt → velocity field is more
+              nearly divergence-free. Too few leaves residual divergence that accumulates over
+              time and can destabilise the solution. Too many wastes computation; for most
+              grids 30–60 is sufficient.</td>
+          </tr>
+          <tr>
+            <td>CFL</td>
+            <td>1.0–2.5</td>
+            <td>Courant number for the semi-Lagrangian advection step. Since semi-Lagrangian
+              is unconditionally stable, values above 1 are safe. Higher CFL → larger time steps
+              → faster wall-clock time per simulated second. Very large CFL (>3) may degrade
+              accuracy of the back-traced departure point (trilinear interpolation error grows).</td>
+          </tr>
+        </table>
+
+        <!-- ─ OUTPUT FIELDS ─ -->
+        <h2>Output Fields</h2>
+
+        <table class="param-table">
+          <tr>
+            <th>Field</th>
+            <th>Symbol</th>
+            <th>Description</th>
+          </tr>
+          <tr>
+            <td>Surface wind speed</td>
+            <td>√(U²+V²) at surface</td>
+            <td>Horizontal wind speed at the lowest fluid cell above the terrain. Blue→green→yellow.
+              Acceleration over ridges, deceleration in wakes. Primary indicator for mechanical
+              conditions at flying height.</td>
+          </tr>
+          <tr>
+            <td>Vertical wind</td>
+            <td>W at surface level</td>
+            <td>Vertical velocity at the first fluid cell. Red = rising (orographic uplift, lee
+              convergence). Blue = sinking (lee side, valleys, divergence). Most directly relevant
+              to ridge soaring and rotor detection.</td>
+          </tr>
+          <tr>
+            <td>Pressure</td>
+            <td>p at surface level</td>
+            <td>Kinematic pressure anomaly (Pa/ρ). High pressure (red) upwind of obstacles
+              — stagnation zones. Low pressure (blue) in wakes and over crests (Bernoulli
+              acceleration). Useful for identifying flow separation points.</td>
+          </tr>
+          <tr>
+            <td>Vorticity</td>
+            <td>∂V/∂x − ∂U/∂y at surface</td>
+            <td>Horizontal vorticity at the surface level. Red = cyclonic (CCW); blue = anticyclonic
+              (CW). Marks shear layers, separated wakes, and the edges of recirculation zones.
+              High vorticity → turbulence risk.</td>
+          </tr>
+        </table>
+
+        <!-- ─ SIMPLIFICATIONS ─ -->
+        <h2>Simplifications</h2>
+        <div class="box warn">
+          <ul>
+            <li><strong>Incompressibility</strong>: density is constant everywhere — no sound waves,
+              no compressibility effects. Valid for wind speeds well below ~100 m/s. Eliminates the
+              need for an energy equation.</li>
+            <li><strong>Constant turbulent viscosity ν</strong>: a single scalar viscosity is used
+              rather than a spatially varying turbulence model (e.g. k-ε or Smagorinsky). The
+              Smagorinsky model is used in the Thermal NS simulation but not here — ν must be set
+              manually.</li>
+            <li><strong>Neutral atmosphere</strong>: no stratification, no buoyancy. The log profile
+              assumes a neutral (adiabatic) atmospheric surface layer. Stable or unstable stratification
+              would modify the profile (Monin-Obukhov similarity theory) but is not implemented.</li>
+            <li><strong>Flat top boundary</strong>: the domain top is a horizontal plane with free-slip.
+              This reflects vertical momentum back into the domain rather than allowing it to radiate
+              upward — an artefact for strong updrafts reaching the top.</li>
+            <li><strong>Jacobi pressure solver</strong>: converges slowly for large grids; many iterations
+              may be needed to reach acceptable divergence residuals. SOR or a multigrid solver would
+              converge faster but is not implemented.</li>
+            <li><strong>Steady inflow</strong>: wind speed and direction are fixed in time. No gusts,
+              no diurnal variation, no mesoscale dynamics.</li>
+            <li><strong>No terrain-following coordinates</strong>: the grid is Cartesian; terrain is
+              represented as blocked cells. Cells that straddle the exact terrain surface are either
+              fully solid or fully fluid — no partial-cell treatment. This slightly over-estimates the
+              terrain height by up to one dz.</li>
+          </ul>
+        </div>
+
+        <!-- ─ LIMITATIONS ─ -->
+        <h2>Limitations</h2>
+        <div class="box note">
+          <ul>
+            <li><strong>No thermal effects</strong> — no solar heating, no buoyancy, no convective
+              thermals. For thermally driven vertical motion, use the Thermal NS simulation.</li>
+            <li><strong>No atmospheric stratification</strong> — gravity waves, lee waves, and wave
+              breaking (which cause severe turbulence at altitude) require a stratified atmosphere
+              and are absent here.</li>
+            <li><strong>No Coriolis force</strong> — negligible for domains &lt; 50 km but formally absent.</li>
+            <li><strong>No moisture</strong> — clouds, precipitation, and latent heat are not represented.</li>
+            <li><strong>No synoptic forcing</strong> — large-scale pressure gradients, fronts, and
+              mesoscale weather systems are not modelled. The inflow is a simple uniform log profile,
+              not a realistic atmospheric wind profile with jets or wind shear.</li>
+            <li><strong>Slow pressure convergence</strong> — the Jacobi solver requires many more
+              iterations than SOR or multigrid to achieve low divergence residuals, especially on
+              fine 3D grids. The flow may not be fully divergence-free within practical iteration counts.</li>
+            <li><strong>No wall model</strong> — the log profile is enforced at inflow boundaries and
+              at initialisation, but there is no dynamic wall model that adjusts the near-wall velocity
+              at internal solid faces each step. Flow separation from steep terrain faces may be
+              under-represented.</li>
+          </ul>
+        </div>
+
+        <!-- ─ TIPS ─ -->
+        <h2>Tips for Useful Results</h2>
+        <ul>
+          <li>Allow at least 100–300 time steps for the flow to develop from the initial log profile
+            to a quasi-steady state. The simulation is not initialised with zero velocity, so
+            convergence is faster than a cold start.</li>
+          <li>Increase <code>p_iter</code> to 50–80 if the vertical wind field looks noisy or shows
+            checkerboard patterns — these are symptoms of insufficient pressure convergence
+            (residual divergence).</li>
+          <li>Set <code>ν</code> to 5–50 m²/s for mountain-scale flows (dx ≈ 200 m). At coarser
+            resolution, increase ν to damp sub-grid instabilities. At finer resolution, ν can be
+            reduced for sharper features.</li>
+          <li>The <strong>vertical wind</strong> (W) map is most relevant for paragliding: red
+            patches on windward ridges indicate dynamic (orographic) lift zones; blue patches
+            indicate sink on the lee side.</li>
+          <li>The <strong>pressure</strong> map identifies stagnation zones (high p, blue upwind)
+            and suction peaks (low p over crests). The crest is where orographic lift transitions
+            to lee-side sink.</li>
+          <li>Load ESA WorldCover land cover for per-cell roughness. Without it, a single scalar
+            z₀ is used for the whole domain, which misses the contrast between forest (slow wind
+            aloft, strong drag) and bare rock (fast near-surface wind).</li>
+          <li>Use a higher <code>CFL</code> (1.5–2.0) to speed up the simulation without sacrificing
+            stability. Only reduce CFL if the back-traced departure points land outside the domain
+            frequently (very strong winds with coarse grids).</li>
+        </ul>
+
     </div>
 
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-body">
-        <b>Explicit diffusion</b> — apply the viscous term with forward Euler:
-        <br><code>u* = u_adv + ν · ∇²u · dt</code><br>
-        The Laplacian uses a standard 7-point 3D stencil (central differences). The viscosity ν
-        is clamped by a diffusion-CFL condition to prevent instability:
-        <br><code>ν ≤ diff_safety · min(dx², dy², dz²) / dt</code>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-body">
-        <b>Boundary conditions on u*</b> — apply inflow (log profile), no-slip on solid cells,
-        free-slip on the top, and Neumann on outflow edges before the pressure solve.
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-body">
-        <b>Divergence of u*</b> — compute:
-        <br><code>div = ∂U*/∂x − ∂V*/∂y + ∂W*/∂z</code><br>
-        (the −∂V*/∂y accounts for the y-axis convention where j increases southward). Non-zero
-        divergence indicates mass imbalance that the pressure step must correct.
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-num">5</div>
-      <div class="step-body">
-        <b>Pressure Poisson equation</b> — solve ∇²p = div/dt using <strong>Jacobi iterations</strong>:
-        <div class="eq" style="margin:6px 0">p_new[i,j,k] = ( (p_e + p_w)/dx² + (p_n + p_s)/dy² + (p_u + p_d)/dz²
-               − div/dt ) / (2/dx² + 2/dy² + 2/dz²)</div>
-        Outflow boundaries: p = 0 (Dirichlet). Solid and top: ∂p/∂n = 0 (Neumann, i.e. copy
-        from fluid neighbour).
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-num">6</div>
-      <div class="step-body">
-        <b>Velocity projection</b> — subtract the pressure gradient to enforce incompressibility:
-        <br><code>U = U* − dt · ∂p/∂x</code><br>
-        <code>V = V* + dt · ∂p/∂y</code>  (+sign: y-axis convention)<br>
-        <code>W = W* − dt · ∂p/∂z</code><br>
-        After projection, ∇·u ≈ 0 (to the residual accuracy of the Jacobi solver).
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-num">7</div>
-      <div class="step-body">
-        <b>Re-apply boundary conditions</b> — enforce no-slip and inflow conditions after
-        projection to prevent the pressure step from violating them.
-      </div>
-    </div>
-
-    <h3>Time step calculation</h3>
-    <div class="eq">dt_adv  = CFL · min(dx, dy) / |u|_max        [semi-Lagrangian advective limit]
-dt_diff = diff_safety · min(dx², dy², dz²) / ν  [diffusion stability limit]
-dt      = min(dt_adv, dt_diff, dt_max)           [smallest wins]</div>
-    <p>
-      Because semi-Lagrangian advection is unconditionally stable, the time step is often limited
-      by the diffusion condition or by <code>dt_max</code>. The CFL factor can safely exceed 1.0
-      (typical: 1.5–2.5) without instability from advection.
-    </p>
-
-    <!-- ─ BOUNDARY CONDITIONS ─ -->
-    <h2>Boundary Conditions</h2>
-
-    <table class="param-table">
-      <tr>
-        <th>Boundary</th>
-        <th>Velocity</th>
-        <th>Pressure</th>
-      </tr>
-      <tr>
-        <td>Solid terrain (any k)</td>
-        <td>No-slip: U = V = W = 0</td>
-        <td>Neumann: ∂p/∂n = 0</td>
-      </tr>
-      <tr>
-        <td>Inflow lateral edges</td>
-        <td>Log profile: U = U_ref·f(z,z₀), V = V_ref·f(z,z₀), W = 0</td>
-        <td>Neumann</td>
-      </tr>
-      <tr>
-        <td>Outflow lateral edges</td>
-        <td>Neumann: copy from interior neighbour</td>
-        <td>Dirichlet: p = 0</td>
-      </tr>
-      <tr>
-        <td>Top (k = NZ−1)</td>
-        <td>Free-slip: U_top = U_{NZ-2}, V_top = V_{NZ-2}, W_top = 0</td>
-        <td>Neumann</td>
-      </tr>
-      <tr>
-        <td>Bottom (k = 0, not solid)</td>
-        <td>Neumann: U_0 = U_1, V_0 = V_1, W_0 = 0</td>
-        <td>Neumann</td>
-      </tr>
-    </table>
-
-    <p>
-      The inflow log factor is computed as:
-    </p>
-    <div class="eq">f(z, z₀) = min(1.0,  ln(z / z₀) / ln(z_ref / z₀) )   for z > z₀
-f(z, z₀) = 0                                         for z ≤ z₀</div>
-    <p>
-      where <code>z</code> is the height above the local terrain surface (not above sea level).
-      The factor is clamped to 1 so the log profile does not overshoot the reference speed above
-      <code>z_ref</code>.
-    </p>
-
-    <!-- ─ PARAMETERS ─ -->
-    <h2>Parameters and Their Effects</h2>
-
-    <h3>Grid and domain</h3>
-    <table class="param-table">
-      <tr>
-        <th>Parameter</th>
-        <th>Typical value</th>
-        <th>Effect</th>
-      </tr>
-      <tr>
-        <td>NX, NY</td>
-        <td>32–80</td>
-        <td>Horizontal grid resolution. Finer grids resolve narrower terrain features and
-          tighter boundary layers but increase memory (NX·NY·NZ cells) and computation time.</td>
-      </tr>
-      <tr>
-        <td>NZ</td>
-        <td>20–40</td>
-        <td>Vertical layers. More layers improve the representation of the log profile near
-          the surface and resolve vertical flow structure (separation bubbles, lee waves).
-          Decreasing dz tightens the diffusion time-step limit.</td>
-      </tr>
-      <tr>
-        <td>h_domain</td>
-        <td>1000–3000 m</td>
-        <td>Domain height above the highest terrain point. Should be at least 3–5× the
-          maximum ridge height to avoid the top boundary interfering with flow over ridges.
-          Too small truncates the wind profile aloft.</td>
-      </tr>
-      <tr>
-        <td>dt_max</td>
-        <td>5–30 s</td>
-        <td>Hard cap on the time step. Prevents the adaptive time step from becoming
-          too large in regions with very slow flow. Reduce if the solution diverges.</td>
-      </tr>
-    </table>
-
-    <h3>Wind input</h3>
-    <table class="param-table">
-      <tr>
-        <th>Parameter</th>
-        <th>Typical value</th>
-        <th>Effect</th>
-      </tr>
-      <tr>
-        <td>Wind direction</td>
-        <td>0–360°</td>
-        <td>Compass bearing the wind comes from. Determines the inflow edge(s) and the
-          direction of the log-profile inflow. Controls which slopes are windward (acceleration,
-          uplift) and which are lee (deceleration, recirculation).</td>
-      </tr>
-      <tr>
-        <td>U_ref (wind speed)</td>
-        <td>2–25 m/s</td>
-        <td>Reference wind speed at z_ref above the surface. Scales the entire inflow log
-          profile and therefore all velocities in the domain. Stronger wind amplifies all
-          flow features proportionally (the NS equations are linear in U for steady laminar flow
-          — but non-linear advection creates speed-dependent patterns).</td>
-      </tr>
-      <tr>
-        <td>z_ref</td>
-        <td>50–200 m</td>
-        <td>Height at which U_ref is specified. The log profile is anchored here. Increasing
-          z_ref while keeping U_ref constant effectively shifts the profile upward, producing
-          faster flow near the surface for the same reference speed.</td>
-      </tr>
-    </table>
-
-    <h3>Roughness and boundary layer</h3>
-    <table class="param-table">
-      <tr>
-        <th>Parameter</th>
-        <th>Typical value</th>
-        <th>Effect</th>
-      </tr>
-      <tr>
-        <td>z₀ (log_z0)</td>
-        <td>0.001–1.5 m</td>
-        <td>Aerodynamic roughness length. Used as a scalar fallback when ESA WorldCover
-          is not loaded. Larger z₀ → slower near-surface wind, deeper boundary layer,
-          more drag on the flow. Small z₀ (water, snow) → fast surface wind, thin boundary
-          layer. Overridden per-cell by the land cover map when available.</td>
-      </tr>
-      <tr>
-        <td>ν (visc)</td>
-        <td>1–500 m²/s</td>
-        <td>Kinematic (turbulent eddy) viscosity. Diffuses momentum laterally and vertically.
-          Higher ν → smoother velocity field, lee recirculations are broadened and weakened,
-          sharp shear layers are smeared. Lower ν → sharper gradients, stronger separation zones,
-          risk of numerical oscillations if too low for the grid resolution.</td>
-      </tr>
-      <tr>
-        <td>diff_safety</td>
-        <td>0.1–0.25</td>
-        <td>Safety factor for the diffusion time-step limit:
-          <code>ν ≤ diff_safety · Δ² / dt</code>. Lower values make the scheme more conservative
-          (smaller effective ν per step). Increase only if the diffusion step is artificially
-          limiting dt on fine grids.</td>
-      </tr>
-    </table>
-
-    <h3>Pressure solver</h3>
-    <table class="param-table">
-      <tr>
-        <th>Parameter</th>
-        <th>Typical value</th>
-        <th>Effect</th>
-      </tr>
-      <tr>
-        <td>p_iter</td>
-        <td>20–80</td>
-        <td>Number of Jacobi iterations per time step. More iterations → pressure field
-          converges closer to the true solution of ∇²p = div/dt → velocity field is more
-          nearly divergence-free. Too few leaves residual divergence that accumulates over
-          time and can destabilise the solution. Too many wastes computation; for most
-          grids 30–60 is sufficient.</td>
-      </tr>
-      <tr>
-        <td>CFL</td>
-        <td>1.0–2.5</td>
-        <td>Courant number for the semi-Lagrangian advection step. Since semi-Lagrangian
-          is unconditionally stable, values above 1 are safe. Higher CFL → larger time steps
-          → faster wall-clock time per simulated second. Very large CFL (>3) may degrade
-          accuracy of the back-traced departure point (trilinear interpolation error grows).</td>
-      </tr>
-    </table>
-
-    <!-- ─ OUTPUT FIELDS ─ -->
-    <h2>Output Fields</h2>
-
-    <table class="param-table">
-      <tr>
-        <th>Field</th>
-        <th>Symbol</th>
-        <th>Description</th>
-      </tr>
-      <tr>
-        <td>Surface wind speed</td>
-        <td>√(U²+V²) at surface</td>
-        <td>Horizontal wind speed at the lowest fluid cell above the terrain. Blue→green→yellow.
-          Acceleration over ridges, deceleration in wakes. Primary indicator for mechanical
-          conditions at flying height.</td>
-      </tr>
-      <tr>
-        <td>Vertical wind</td>
-        <td>W at surface level</td>
-        <td>Vertical velocity at the first fluid cell. Red = rising (orographic uplift, lee
-          convergence). Blue = sinking (lee side, valleys, divergence). Most directly relevant
-          to ridge soaring and rotor detection.</td>
-      </tr>
-      <tr>
-        <td>Pressure</td>
-        <td>p at surface level</td>
-        <td>Kinematic pressure anomaly (Pa/ρ). High pressure (red) upwind of obstacles
-          — stagnation zones. Low pressure (blue) in wakes and over crests (Bernoulli
-          acceleration). Useful for identifying flow separation points.</td>
-      </tr>
-      <tr>
-        <td>Vorticity</td>
-        <td>∂V/∂x − ∂U/∂y at surface</td>
-        <td>Horizontal vorticity at the surface level. Red = cyclonic (CCW); blue = anticyclonic
-          (CW). Marks shear layers, separated wakes, and the edges of recirculation zones.
-          High vorticity → turbulence risk.</td>
-      </tr>
-    </table>
-
-    <!-- ─ SIMPLIFICATIONS ─ -->
-    <h2>Simplifications</h2>
-    <div class="box warn">
-      <ul>
-        <li><strong>Incompressibility</strong>: density is constant everywhere — no sound waves,
-          no compressibility effects. Valid for wind speeds well below ~100 m/s. Eliminates the
-          need for an energy equation.</li>
-        <li><strong>Constant turbulent viscosity ν</strong>: a single scalar viscosity is used
-          rather than a spatially varying turbulence model (e.g. k-ε or Smagorinsky). The
-          Smagorinsky model is used in the Thermal NS simulation but not here — ν must be set
-          manually.</li>
-        <li><strong>Neutral atmosphere</strong>: no stratification, no buoyancy. The log profile
-          assumes a neutral (adiabatic) atmospheric surface layer. Stable or unstable stratification
-          would modify the profile (Monin-Obukhov similarity theory) but is not implemented.</li>
-        <li><strong>Flat top boundary</strong>: the domain top is a horizontal plane with free-slip.
-          This reflects vertical momentum back into the domain rather than allowing it to radiate
-          upward — an artefact for strong updrafts reaching the top.</li>
-        <li><strong>Jacobi pressure solver</strong>: converges slowly for large grids; many iterations
-          may be needed to reach acceptable divergence residuals. SOR or a multigrid solver would
-          converge faster but is not implemented.</li>
-        <li><strong>Steady inflow</strong>: wind speed and direction are fixed in time. No gusts,
-          no diurnal variation, no mesoscale dynamics.</li>
-        <li><strong>No terrain-following coordinates</strong>: the grid is Cartesian; terrain is
-          represented as blocked cells. Cells that straddle the exact terrain surface are either
-          fully solid or fully fluid — no partial-cell treatment. This slightly over-estimates the
-          terrain height by up to one dz.</li>
-      </ul>
-    </div>
-
-    <!-- ─ LIMITATIONS ─ -->
-    <h2>Limitations</h2>
-    <div class="box note">
-      <ul>
-        <li><strong>No thermal effects</strong> — no solar heating, no buoyancy, no convective
-          thermals. For thermally driven vertical motion, use the Thermal NS simulation.</li>
-        <li><strong>No atmospheric stratification</strong> — gravity waves, lee waves, and wave
-          breaking (which cause severe turbulence at altitude) require a stratified atmosphere
-          and are absent here.</li>
-        <li><strong>No Coriolis force</strong> — negligible for domains &lt; 50 km but formally absent.</li>
-        <li><strong>No moisture</strong> — clouds, precipitation, and latent heat are not represented.</li>
-        <li><strong>No synoptic forcing</strong> — large-scale pressure gradients, fronts, and
-          mesoscale weather systems are not modelled. The inflow is a simple uniform log profile,
-          not a realistic atmospheric wind profile with jets or wind shear.</li>
-        <li><strong>Slow pressure convergence</strong> — the Jacobi solver requires many more
-          iterations than SOR or multigrid to achieve low divergence residuals, especially on
-          fine 3D grids. The flow may not be fully divergence-free within practical iteration counts.</li>
-        <li><strong>No wall model</strong> — the log profile is enforced at inflow boundaries and
-          at initialisation, but there is no dynamic wall model that adjusts the near-wall velocity
-          at internal solid faces each step. Flow separation from steep terrain faces may be
-          under-represented.</li>
-      </ul>
-    </div>
-
-    <!-- ─ TIPS ─ -->
-    <h2>Tips for Useful Results</h2>
-    <ul>
-      <li>Allow at least 100–300 time steps for the flow to develop from the initial log profile
-        to a quasi-steady state. The simulation is not initialised with zero velocity, so
-        convergence is faster than a cold start.</li>
-      <li>Increase <code>p_iter</code> to 50–80 if the vertical wind field looks noisy or shows
-        checkerboard patterns — these are symptoms of insufficient pressure convergence
-        (residual divergence).</li>
-      <li>Set <code>ν</code> to 5–50 m²/s for mountain-scale flows (dx ≈ 200 m). At coarser
-        resolution, increase ν to damp sub-grid instabilities. At finer resolution, ν can be
-        reduced for sharper features.</li>
-      <li>The <strong>vertical wind</strong> (W) map is most relevant for paragliding: red
-        patches on windward ridges indicate dynamic (orographic) lift zones; blue patches
-        indicate sink on the lee side.</li>
-      <li>The <strong>pressure</strong> map identifies stagnation zones (high p, blue upwind)
-        and suction peaks (low p over crests). The crest is where orographic lift transitions
-        to lee-side sink.</li>
-      <li>Load ESA WorldCover land cover for per-cell roughness. Without it, a single scalar
-        z₀ is used for the whole domain, which misses the contrast between forest (slow wind
-        aloft, strong drag) and bare rock (fast near-surface wind).</li>
-      <li>Use a higher <code>CFL</code> (1.5–2.0) to speed up the simulation without sacrificing
-        stability. Only reduce CFL if the back-traced departure points land outside the domain
-        frequently (very strong winds with coarse grids).</li>
-    </ul>
-
-  </div>
-
-  <script>
-    document.querySelectorAll('.nav-dropdown-btn').forEach(function(btn) {
-      btn.addEventListener('click', function(e) {
-        var dd = btn.closest('.nav-dropdown');
-        var isOpen = dd.classList.contains('open');
-        document.querySelectorAll('.nav-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
-        if (!isOpen) dd.classList.add('open');
-        e.stopPropagation();
+    <script>
+      document.querySelectorAll('.nav-dropdown-btn').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          var dd = btn.closest('.nav-dropdown');
+          var isOpen = dd.classList.contains('open');
+          document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
+          if (!isOpen) dd.classList.add('open');
+          e.stopPropagation();
+        });
       });
-    });
-    document.addEventListener('click', function() {
-      document.querySelectorAll('.nav-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
-    });
-  </script>
+      document.addEventListener('click', function () {
+        document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
+      });
+    </script>
 
 </body>
+
 </html>

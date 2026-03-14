@@ -696,6 +696,7 @@
       <div class="nav-dropdown-menu">
         <a href="simulate-dynamic" class="nav-dropdown-item">Simulate</a>
         <a href="view-dynamic" class="nav-dropdown-item">View</a>
+        <a href="about-dynamic" class="nav-dropdown-item">About</a>
       </div>
     </div>
     <div class="nav-dropdown">
@@ -703,6 +704,7 @@
       <div class="nav-dropdown-menu">
         <a href="simulate-dynamic-advanced" class="nav-dropdown-item">Simulate</a>
         <a href="view-dynamic-advanced" class="nav-dropdown-item">View</a>
+        <a href="about-dynamic-advanced" class="nav-dropdown-item">About</a>
       </div>
     </div>
   </nav>
@@ -2800,17 +2802,17 @@
     }
 
     // Nav dropdown touch support
-    document.querySelectorAll('.nav-dropdown-btn').forEach(function(btn) {
-      btn.addEventListener('click', function(e) {
+    document.querySelectorAll('.nav-dropdown-btn').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
         var dd = btn.closest('.nav-dropdown');
         var isOpen = dd.classList.contains('open');
-        document.querySelectorAll('.nav-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
+        document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
         if (!isOpen) dd.classList.add('open');
         e.stopPropagation();
       });
     });
-    document.addEventListener('click', function() {
-      document.querySelectorAll('.nav-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
+    document.addEventListener('click', function () {
+      document.querySelectorAll('.nav-dropdown.open').forEach(function (d) { d.classList.remove('open'); });
     });
   </script>
 </body>
