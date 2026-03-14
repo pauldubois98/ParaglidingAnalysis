@@ -64,41 +64,6 @@
       line-height: 1.5;
     }
 
-    /* ── Preset buttons ── */
-    .tab-row {
-      display: flex;
-      gap: 3px;
-      flex-wrap: wrap;
-      margin-bottom: 8px;
-    }
-
-    .tab-btn {
-      flex: 1;
-      padding: 4px 5px;
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .4px;
-      border-radius: 10px;
-      border: 1px solid rgba(100, 160, 255, .25);
-      color: #4a6888;
-      background: transparent;
-      cursor: pointer;
-      transition: .15s;
-    }
-
-    .tab-btn.active {
-      color: #7eb8ff;
-      border-color: rgba(100, 160, 255, .6);
-      background: rgba(100, 160, 255, .12);
-    }
-
-    .tab-btn:hover:not(.active) {
-      color: #90b8d8;
-      background: rgba(100, 160, 255, .08);
-    }
-
-
     /* ── Visibility control ── */
     .ctrl-hidden {
       display: none !important;
@@ -234,12 +199,6 @@
       margin: 0 auto 10px;
     }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
     /* ── Info panel ── */
     #info-panel {
       position: absolute;
@@ -263,31 +222,6 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-bottom: 4px;
-    }
-
-    #info-panel .info-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 5px;
-      border-bottom: 1px solid rgba(100, 160, 255, 0.08);
-      padding-bottom: 5px;
-    }
-
-    #info-panel .info-row:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-
-    #info-panel .info-label {
-      color: #6888a0;
-    }
-
-    #info-panel .info-val {
-      color: #e0f0ff;
-      font-weight: bold;
-      text-align: right;
     }
 
     #plume-yaxis {

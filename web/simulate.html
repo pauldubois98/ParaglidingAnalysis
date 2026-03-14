@@ -20,109 +20,6 @@
       width: 100vw;
     }
 
-    /* ── Main console area ── */
-    #console-area {
-      position: absolute;
-      inset: 44px 366px 28px 0;
-      display: flex;
-      flex-direction: column;
-      padding: 16px;
-    }
-
-    #log-output {
-      flex: 1;
-      overflow-y: auto;
-      font-family: 'Consolas', 'Courier New', monospace;
-      font-size: 12px;
-      line-height: 1.6;
-      padding: 12px;
-      background: rgba(5, 8, 18, 0.7);
-      border: 1px solid rgba(100, 160, 255, 0.15);
-      border-radius: 8px;
-    }
-
-    #log-output .log-info {
-      color: #5588aa;
-    }
-
-    #log-output .log-success {
-      color: #30c870;
-    }
-
-    #log-output .log-warn {
-      color: #c8a040;
-    }
-
-    #log-output .log-error {
-      color: #cc4444;
-    }
-
-    .log-ts {
-      color: #334455;
-      margin-right: 6px;
-    }
-
-    /* ── Progress bar ── */
-    #progress-wrap {
-      margin-top: 10px;
-      height: 6px;
-      background: rgba(100, 160, 255, 0.1);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-
-    #progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #3a6080, #7eb8ff);
-      transition: width 0.2s;
-      border-radius: 3px;
-    }
-
-    /* ── Fetch plots ── */
-    #plots-area {
-      display: none;
-      flex-direction: row;
-      gap: 10px;
-      margin-top: 10px;
-      height: 170px;
-      flex-shrink: 0;
-    }
-
-    .plot-box {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      background: rgba(5, 8, 18, 0.7);
-      border: 1px solid rgba(100, 160, 255, 0.15);
-      border-radius: 8px;
-      padding: 6px 6px 4px;
-      overflow: hidden;
-      min-width: 0;
-    }
-
-    .plot-title {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: #3a6080;
-      margin-bottom: 4px;
-      flex-shrink: 0;
-      text-align: center;
-    }
-
-    .plot-box canvas {
-      max-width: 100%;
-      max-height: 140px;
-      width: auto;
-      height: auto;
-      display: block;
-      image-rendering: pixelated;
-      border-radius: 4px;
-    }
-
     /* ── Simulation plots ── */
     #sim-plots-area {
       display: none;
@@ -131,34 +28,6 @@
       margin-top: 10px;
       height: 170px;
       flex-shrink: 0;
-    }
-
-    /* ── Status bar ── */
-    #status-bar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 28px;
-      background: rgba(5, 8, 18, 0.9);
-      border-top: 1px solid rgba(100, 160, 255, 0.15);
-      display: flex;
-      align-items: center;
-      padding: 0 14px;
-      font-size: 11px;
-      color: #3a6080;
-    }
-
-    /* ── Right panel ── */
-    #settings-area {
-      position: absolute;
-      top: 44px;
-      right: 16px;
-      width: 350px;
-      bottom: 32px;
-      display: flex;
-      flex-direction: column;
-      padding: 16px;
     }
 
     .section-title {
@@ -174,20 +43,6 @@
 
     .section-title:first-child {
       margin-top: 0;
-    }
-
-    .field-label {
-      font-size: 11px;
-      color: #99b8d0;
-      margin-bottom: 2px;
-      display: block;
-    }
-
-    .field-hint {
-      font-size: 10px;
-      color: #3a6080;
-      margin-bottom: 8px;
-      line-height: 1.4;
     }
 
     input[type="number"],
@@ -209,110 +64,8 @@
       border-color: rgba(100, 160, 255, 0.5);
     }
 
-    input:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      margin-bottom: 2px;
-    }
-
-    .grid-2 .field-label {
-      font-size: 10px;
-    }
-
     .hide {
       display: none;
-    }
-
-    input[type="checkbox"] {
-      accent-color: #7eb8ff;
-      margin-right: 6px;
-      vertical-align: middle;
-    }
-
-    .checkbox-row {
-      display: flex;
-      align-items: center;
-      font-size: 12px;
-      color: #99b8d0;
-      margin-bottom: 2px;
-    }
-
-    .radio-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 8px;
-      padding: 8px 10px;
-      background: rgba(100, 160, 255, 0.05);
-      border: 1px solid rgba(100, 160, 255, 0.15);
-      border-radius: 6px;
-    }
-
-    .radio-group label {
-      display: flex;
-      align-items: center;
-      font-size: 12px;
-      color: #99b8d0;
-      cursor: pointer;
-      padding: 4px 0;
-    }
-
-    .radio-group input[type="radio"] {
-      accent-color: #7eb8ff;
-      margin-right: 8px;
-      flex-shrink: 0;
-    }
-
-    .footer-row {
-      display: flex;
-      gap: 6px;
-    }
-
-    .btn {
-      flex: 1;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      padding: 7px 8px;
-      font-size: 11px;
-      font-family: inherit;
-      font-weight: 600;
-      border-radius: 20px;
-      border: 1px solid;
-      cursor: pointer;
-      letter-spacing: 0.2px;
-      white-space: nowrap;
-      transition: background 0.18s, border-color 0.18s, color 0.18s;
-    }
-
-    .btn:disabled {
-      opacity: 0.32;
-      cursor: not-allowed;
-    }
-
-    .btn-fetch {
-      color: #a0ceff;
-      border-color: rgba(100, 160, 255, 0.35);
-      background: rgba(100, 160, 255, 0.09);
-    }
-
-    .btn-sim {
-      color: #7eb8ff;
-      border-color: rgba(100, 160, 255, 0.28);
-      background: rgba(100, 160, 255, 0.06);
-    }
-
-    .btn-map {
-      color: #60e0a0;
-      border-color: rgba(50, 195, 95, 0.35);
-      background: rgba(50, 195, 95, 0.09);
     }
 
     .btn-dl {
@@ -321,35 +74,9 @@
       background: rgba(240, 155, 40, 0.08);
     }
 
-    .btn-fetch:not(:disabled):hover {
-      background: rgba(100, 160, 255, 0.2);
-      border-color: rgba(100, 160, 255, 0.6);
-    }
-
-    .btn-sim:not(:disabled):hover {
-      background: rgba(100, 160, 255, 0.2);
-      border-color: rgba(100, 160, 255, 0.6);
-    }
-
-    .btn-map:not(:disabled):hover {
-      background: rgba(50, 195, 95, 0.2);
-      border-color: rgba(50, 195, 95, 0.6);
-    }
-
     .btn-dl:not(:disabled):hover {
       background: rgba(240, 155, 40, 0.2);
       border-color: rgba(240, 175, 50, 0.6);
-    }
-
-    .btn-stop {
-      color: #ff8080;
-      border-color: rgba(255, 80, 80, 0.35);
-      background: rgba(255, 80, 80, 0.09);
-    }
-
-    .btn-stop:not(:disabled):hover {
-      background: rgba(255, 80, 80, 0.2);
-      border-color: rgba(255, 80, 80, 0.6);
     }
 
     .link-area {
@@ -375,8 +102,6 @@
       border-color: rgba(100, 160, 255, 0.6);
       color: #c8dff0;
     }
-
-
 
     /* mobile layout → styles.css (body.sim-page) */
   </style>

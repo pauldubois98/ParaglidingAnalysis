@@ -649,5 +649,399 @@ ul li {
   gap: 7px;
 }
 
+/* ================================================================
+   Simulate pages — core layout  (all 4 simulate pages)
+   ================================================================ */
 
+#console-area {
+  position: absolute;
+  inset: 44px 366px 28px 0;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
 
+#log-output {
+  flex: 1;
+  overflow-y: auto;
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  padding: 12px;
+  background: rgba(5, 8, 18, 0.7);
+  border: 1px solid rgba(100, 160, 255, 0.15);
+  border-radius: 8px;
+}
+
+#log-output .log-info    { color: #5588aa; }
+#log-output .log-success { color: #30c870; }
+#log-output .log-warn    { color: #c8a040; }
+#log-output .log-error   { color: #cc4444; }
+
+.log-ts {
+  color: #334455;
+  margin-right: 6px;
+}
+
+#progress-wrap {
+  margin-top: 10px;
+  height: 6px;
+  background: rgba(100, 160, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+#progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #3a6080, #7eb8ff);
+  transition: width 0.2s;
+  border-radius: 3px;
+}
+
+#plots-area {
+  display: none;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 10px;
+  height: 170px;
+  flex-shrink: 0;
+}
+
+.plot-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(5, 8, 18, 0.7);
+  border: 1px solid rgba(100, 160, 255, 0.15);
+  border-radius: 8px;
+  padding: 6px 6px 4px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.plot-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #3a6080;
+  margin-bottom: 4px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+#settings-area {
+  position: absolute;
+  top: 44px;
+  right: 16px;
+  width: 350px;
+  bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+#status-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 28px;
+  background: rgba(5, 8, 18, 0.9);
+  border-top: 1px solid rgba(100, 160, 255, 0.15);
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  font-size: 11px;
+  color: #3a6080;
+}
+
+/* ================================================================
+   Simulate pages — controls  (all 4 simulate pages share btn +
+   field-label etc.; checkbox/radio/input:disabled used by the
+   non-dynamic pair only)
+   ================================================================ */
+
+.field-label {
+  font-size: 11px;
+  color: #99b8d0;
+  margin-bottom: 2px;
+  display: block;
+}
+
+.field-hint {
+  font-size: 10px;
+  color: #3a6080;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 2px;
+}
+
+.grid-2 .field-label {
+  font-size: 10px;
+}
+
+.footer-row {
+  display: flex;
+  gap: 6px;
+}
+
+input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+input[type="checkbox"] {
+  accent-color: #7eb8ff;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #99b8d0;
+  margin-bottom: 2px;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  background: rgba(100, 160, 255, 0.05);
+  border: 1px solid rgba(100, 160, 255, 0.15);
+  border-radius: 6px;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  font-size: 12px;
+  color: #99b8d0;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.radio-group input[type="radio"] {
+  accent-color: #7eb8ff;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 8px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 600;
+  border-radius: 20px;
+  border: 1px solid;
+  cursor: pointer;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+}
+
+.btn:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.btn-fetch {
+  color: #a0ceff;
+  border-color: rgba(100, 160, 255, 0.35);
+  background: rgba(100, 160, 255, 0.09);
+}
+
+.btn-sim {
+  color: #7eb8ff;
+  border-color: rgba(100, 160, 255, 0.28);
+  background: rgba(100, 160, 255, 0.06);
+}
+
+.btn-stop {
+  color: #ff8080;
+  border-color: rgba(255, 80, 80, 0.35);
+  background: rgba(255, 80, 80, 0.09);
+}
+
+.btn-map {
+  color: #60e0a0;
+  border-color: rgba(50, 195, 95, 0.35);
+  background: rgba(50, 195, 95, 0.09);
+}
+
+.btn-fetch:not(:disabled):hover {
+  background: rgba(100, 160, 255, 0.2);
+  border-color: rgba(100, 160, 255, 0.6);
+}
+
+.btn-sim:not(:disabled):hover {
+  background: rgba(100, 160, 255, 0.2);
+  border-color: rgba(100, 160, 255, 0.6);
+}
+
+.btn-stop:not(:disabled):hover {
+  background: rgba(255, 80, 80, 0.2);
+  border-color: rgba(255, 80, 80, 0.6);
+}
+
+.btn-map:not(:disabled):hover {
+  background: rgba(50, 195, 95, 0.2);
+  border-color: rgba(50, 195, 95, 0.6);
+}
+
+/* ================================================================
+   View pages — tab buttons  (all 4 view pages)
+   ================================================================ */
+
+.tab-row {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 4px 5px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-radius: 10px;
+  border: 1px solid rgba(100, 160, 255, 0.25);
+  color: #4a6888;
+  background: transparent;
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+.tab-btn.active {
+  color: #7eb8ff;
+  border-color: rgba(100, 160, 255, 0.6);
+  background: rgba(100, 160, 255, 0.12);
+}
+
+.tab-btn:hover:not(.active) {
+  color: #90b8d8;
+  background: rgba(100, 160, 255, 0.08);
+}
+
+/* ================================================================
+   View pages — info panel rows  (all 4 view pages)
+   ================================================================ */
+
+.ctrl-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #99b8d0;
+  margin-bottom: 4px;
+}
+
+.ctrl-label span {
+  color: #7eb8ff;
+  font-weight: 600;
+}
+
+#info-panel .info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 5px;
+  border-bottom: 1px solid rgba(100, 160, 255, 0.08);
+  padding-bottom: 5px;
+}
+
+#info-panel .info-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+#info-panel .info-label { color: #6888a0; }
+
+#info-panel .info-val {
+  color: #e0f0ff;
+  font-weight: bold;
+  text-align: right;
+}
+
+/* ================================================================
+   View pages — colorbar  (view-dynamic + view-dynamic-advanced)
+   ================================================================ */
+
+#colorbar-wrap {
+  position: absolute;
+  left: 16px;
+  bottom: 20px;
+  background: rgba(10, 15, 30, 0.82);
+  border: 1px solid rgba(100, 160, 255, 0.2);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+#colorbar-title {
+  text-align: center;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #7eb8ff;
+  font-size: 10px;
+}
+
+#colorbar-body {
+  display: flex;
+  gap: 5px;
+  align-items: stretch;
+}
+
+#colorbar-canvas {
+  width: 20px;
+  height: 160px;
+  border-radius: 3px;
+  border: 1px solid rgba(100, 160, 255, 0.15);
+}
+
+#colorbar-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 160px;
+  font-size: 9px;
+  color: #99b8d0;
+  line-height: 1;
+}
+
+/* ================================================================
+   View pages — spinner  (@keyframes spin shared by all 4 view
+   pages; #loading-spinner used by the dynamic pair)
+   ================================================================ */
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+#loading-spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid rgba(100, 160, 255, 0.15);
+  border-top-color: #7eb8ff;
+  animation: spin 0.9s linear infinite;
+}
