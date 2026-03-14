@@ -271,6 +271,11 @@
       <label>Terrain (elevation) <span id="terrain-op-val">0.85</span></label>
       <input type="range" id="terrain-op" min="0" max="1" step="0.05" value="0.85" />
     </div>
+    <div class="cg" id="cg-satellite-op">
+      <label>Satellite <span id="satellite-op-val">0.00</span>
+        <span id="satellite-status" style="font-size:10px; color:#7eb8ff; font-weight:normal"></span></label>
+      <input type="range" id="satellite-op" min="0" max="1" step="0.05" value="0" />
+    </div>
     <div class="cg" id="cg-theta-op">
       <label>θ' temp. anomaly <span id="theta-op-val">0.70</span></label>
       <input type="range" id="theta-op" min="0" max="1" step="0.05" value="0.70" />
@@ -607,6 +612,7 @@
     // Map slider id → val-display id (mirrors bindOp calls in init)
     const SLIDER_VAL_ID = {
       "terrain-op": "terrain-op-val",
+      "satellite-op": "satellite-op-val",
       "theta-op": "theta-op-val",
       "wvel-op": "wvel-op-val",
       "conv-op": "conv-op-val",
@@ -623,6 +629,7 @@
       "cg-time",
       "sec-overlays",
       "cg-terrain-op",
+      "cg-satellite-op",
       "cg-theta-op",
       "cg-wvel-op",
       "cg-conv-op",
@@ -754,6 +761,7 @@
       if (globalMaxW < 0.01) globalMaxW = 1;
 
       buildTerrain(T);
+      buildSatelliteOverlay(T); // async — populates when tiles arrive
       buildNorthArrow();
       buildOverlay(T, "theta");
       buildOverlay(T, "wvel");
@@ -861,6 +869,9 @@
         if (terrainMat) terrainMat.opacity = v;
         updateColorbars();
       });
+      bindOp("satellite-op", "satellite-op-val", (v) => {
+        if (window._satelliteMat) window._satelliteMat.opacity = v;
+      });
       bindOp("theta-op", "theta-op-val", (v) => {
         if (thetaMat) thetaMat.opacity = v;
         updateColorbars();
@@ -961,6 +972,139 @@
       toggleCb("cb-elev-wrap", terrOp > 0);
       toggleCb("cb-theta-wrap", thetaVis);
       toggleCb("cb-wvel-wrap", wVis);
+    }
+
+    // ── Satellite imagery overlay ─────────────────────────────────────────────────
+    let satelliteMesh = null;
+
+    function _latLonToTile(lat, lon, zoom) {
+      const n = Math.pow(2, zoom);
+      const x = Math.floor((lon + 180) / 360 * n);
+      const latRad = lat * Math.PI / 180;
+      const y = Math.floor((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2 * n);
+      return { x, y };
+    }
+
+    function _tileToLon(x, zoom) {
+      return x / Math.pow(2, zoom) * 360 - 180;
+    }
+
+    function _tileToLat(y, zoom) {
+      const n = Math.PI - 2 * Math.PI * y / Math.pow(2, zoom);
+      return (180 / Math.PI) * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n)));
+    }
+
+    async function _fetchSatelliteTiles(bbox, zoom) {
+      const TILE_SIZE = 256;
+      const tileNW = _latLonToTile(bbox.latMax, bbox.lonMin, zoom);
+      const tileSE = _latLonToTile(bbox.latMin, bbox.lonMax, zoom);
+      const cols = tileSE.x - tileNW.x + 1;
+      const rows = tileSE.y - tileNW.y + 1;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = cols * TILE_SIZE;
+      canvas.height = rows * TILE_SIZE;
+      const ctx = canvas.getContext('2d');
+
+      await Promise.all(
+        Array.from({ length: rows }, (_, ry) =>
+          Array.from({ length: cols }, (_, rx) => {
+            const tx = tileNW.x + rx, ty = tileNW.y + ry;
+            const url = `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/${zoom}/${ty}/${tx}`;
+            return fetch(url)
+              .then(r => r.blob())
+              .then(blob => createImageBitmap(blob))
+              .then(bmp => ctx.drawImage(bmp, rx * TILE_SIZE, ry * TILE_SIZE));
+          })
+        ).flat()
+      );
+
+      const lonW = _tileToLon(tileNW.x, zoom);
+      const lonE = _tileToLon(tileSE.x + 1, zoom);
+      const latN = _tileToLat(tileNW.y, zoom);
+      const latS = _tileToLat(tileSE.y + 1, zoom);
+      const W = cols * TILE_SIZE, H = rows * TILE_SIZE;
+      const cx = Math.round((bbox.lonMin - lonW) / (lonE - lonW) * W);
+      const cy = Math.round((latN - bbox.latMax) / (latN - latS) * H);
+      const cw = Math.round((bbox.lonMax - bbox.lonMin) / (lonE - lonW) * W);
+      const ch = Math.round((bbox.latMax - bbox.latMin) / (latN - latS) * H);
+
+      const out = document.createElement('canvas');
+      out.width = cw;
+      out.height = ch;
+      out.getContext('2d').drawImage(canvas, cx, cy, cw, ch, 0, 0, cw, ch);
+      return out;
+    }
+
+    async function buildSatelliteOverlay(T) {
+      if (satelliteMesh) {
+        scene.remove(satelliteMesh);
+        satelliteMesh.geometry.dispose();
+        satelliteMesh.material.dispose();
+        satelliteMesh = null;
+      }
+      if (!T.projection_origin) return;
+
+      const { x_extent, y_extent, projection_origin } = T;
+      const R = 111320;
+      const cosLat = Math.cos(projection_origin.lat * Math.PI / 180);
+      const bbox = {
+        latMin: projection_origin.lat + y_extent[0] / R,
+        latMax: projection_origin.lat + y_extent[1] / R,
+        lonMin: projection_origin.lon + x_extent[0] / (R * cosLat),
+        lonMax: projection_origin.lon + x_extent[1] / (R * cosLat),
+      };
+
+      const statusEl = document.getElementById('satellite-status');
+      statusEl.textContent = 'fetching…';
+
+      let tileCanvas;
+      try {
+        tileCanvas = await _fetchSatelliteTiles(bbox, 15);
+      } catch (e) {
+        statusEl.textContent = 'failed';
+        console.error('Satellite tiles error:', e);
+        return;
+      }
+      statusEl.textContent = '';
+
+      const texture = new THREE.CanvasTexture(tileCanvas);
+
+      const hasMesh = T.mesh_elevation && T.mesh_nx && T.mesh_ny;
+      const elev = hasMesh ? T.mesh_elevation : T.elevation;
+      const nx = hasMesh ? T.mesh_nx : T.nx;
+      const ny = hasMesh ? T.mesh_ny : T.ny;
+
+      const geom = new THREE.PlaneGeometry(
+        x_extent[1] - x_extent[0],
+        y_extent[1] - y_extent[0],
+        nx - 1,
+        ny - 1,
+      );
+      const pos = geom.attributes.position;
+      for (let j = 0; j < ny; j++)
+        for (let i = 0; i < nx; i++)
+          pos.setZ(j * nx + i, elev[j][i] + 2);
+      pos.needsUpdate = true;
+
+      const mat = new THREE.MeshBasicMaterial({
+        map: texture,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+      });
+      window._satelliteMat = mat;
+
+      satelliteMesh = new THREE.Mesh(geom, mat);
+      satelliteMesh.position.set(
+        (x_extent[0] + x_extent[1]) / 2,
+        -(y_extent[0] + y_extent[1]) / 2,
+        0,
+      );
+      scene.add(satelliteMesh);
+
+      const opEl = document.getElementById('satellite-op');
+      if (opEl && parseFloat(opEl.value) > 0) mat.opacity = parseFloat(opEl.value);
     }
 
     // ── Terrain ───────────────────────────────────────────────────────────────────

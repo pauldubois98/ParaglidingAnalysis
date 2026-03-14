@@ -1,9 +1,36 @@
 [
   {
+    "label": "Satellite",
+    "tip": "Real aerial imagery draped over the terrain",
+    "sliders": {
+      "terrain-op": 0,
+      "satellite-op": 0.95,
+      "theta-op": 0,
+      "wvel-op": 0,
+      "conv-op": 0,
+      "wind-op": 0,
+      "ew-op": 0,
+      "ns-op": 0,
+      "z-op": 0,
+      "amb": 2.0,
+      "sun-int": 3.0
+    },
+    "sliders_visible": [
+      "sec-time",
+      "cg-time",
+      "sec-overlays",
+      "cg-satellite-op",
+      "sec-lighting",
+      "cg-amb",
+      "cg-sun-int"
+    ]
+  },
+  {
     "label": "Terrain",
     "tip": "3D terrain only, no simulation overlays",
     "sliders": {
       "terrain-op": 0.95,
+      "satellite-op": 0,
       "theta-op": 0,
       "wvel-op": 0,
       "conv-op": 0,
@@ -30,6 +57,7 @@
     "tip": "Surface temperature anomaly — where the ground heats the boundary layer",
     "sliders": {
       "terrain-op": 1,
+      "satellite-op": 0,
       "theta-op": 0.7,
       "wvel-op": 0,
       "conv-op": 0,
@@ -53,6 +81,7 @@
     "tip": "Vertical velocity at the surface level — rising (red) and sinking (blue) air",
     "sliders": {
       "terrain-op": 1,
+      "satellite-op": 0,
       "theta-op": 0,
       "wvel-op": 0.7,
       "conv-op": 0,
@@ -76,6 +105,7 @@
     "tip": "East-West vertical cross-section — temperature anomaly through the plume",
     "sliders": {
       "terrain-op": 0.70,
+      "satellite-op": 0,
       "theta-op": 0,
       "wvel-op": 0,
       "conv-op": 0,
@@ -103,6 +133,7 @@
     "tip": "North-South vertical cross-section — temperature anomaly through the plume",
     "sliders": {
       "terrain-op": 0.70,
+      "satellite-op": 0,
       "theta-op": 0,
       "wvel-op": 0,
       "conv-op": 0,
@@ -130,6 +161,7 @@
     "tip": "Horizontal plane at a chosen altitude — inspect any level of the atmosphere",
     "sliders": {
       "terrain-op": 0.70,
+      "satellite-op": 0,
       "theta-op": 0,
       "wvel-op": 0,
       "conv-op": 0,
@@ -157,6 +189,7 @@
     "tip": "Surface wind convergence — where horizontal flow converges to trigger thermals",
     "sliders": {
       "terrain-op": 1.0,
+      "satellite-op": 0,
       "theta-op": 0,
       "wvel-op": 0,
       "conv-op": 0.85,
@@ -180,6 +213,7 @@
     "tip": "Surface θ' + EW and NS vertical cross-sections — full plume structure at a glance",
     "sliders": {
       "terrain-op": 0.60,
+      "satellite-op": 0,
       "theta-op": 0.50,
       "wvel-op": 0,
       "conv-op": 0,
@@ -212,6 +246,7 @@
     "tip": "Vertical velocity on EW + NS slices — see the full 3D updraft core",
     "sliders": {
       "terrain-op": 0.60,
+      "satellite-op": 0,
       "theta-op": 0,
       "wvel-op": 0.40,
       "conv-op": 0,
