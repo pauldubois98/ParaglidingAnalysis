@@ -300,22 +300,16 @@
       updateCompassDisplay();
 
       function setVal(id, v) { const el = document.getElementById(id); if (el && v != null) el.value = v; }
-      function applyLocalStorage() {
-        try {
-          const saved = JSON.parse(localStorage.getItem('paragliding_area') || 'null');
-          if (saved) {
-            if (saved.bbox) { setVal('min_lat', saved.bbox.min_lat); setVal('max_lat', saved.bbox.max_lat); setVal('min_lon', saved.bbox.min_lon); setVal('max_lon', saved.bbox.max_lon); }
-            if (saved.takeoff) { setVal('takeoff_lat', saved.takeoff.lat); setVal('takeoff_lon', saved.takeoff.lon); }
-            if (saved.landing) { setVal('landing_lat', saved.landing.lat); setVal('landing_lon', saved.landing.lon); }
-          }
-        } catch (e) { }
+      // Load area from localStorage (redirect to area page if missing)
+      {
+        const saved = (() => { try { return JSON.parse(localStorage.getItem('paragliding_area') || 'null'); } catch(e) { return null; } })();
+        if (!saved) { location.href = 'area'; }
+        else {
+          if (saved.bbox) { setVal('min_lat', saved.bbox.min_lat); setVal('max_lat', saved.bbox.max_lat); setVal('min_lon', saved.bbox.min_lon); setVal('max_lon', saved.bbox.max_lon); }
+          if (saved.takeoff) { setVal('takeoff_lat', saved.takeoff.lat); setVal('takeoff_lon', saved.takeoff.lon); }
+          if (saved.landing) { setVal('landing_lat', saved.landing.lat); setVal('landing_lon', saved.landing.lon); }
+        }
       }
-      fetch('config.json').then(r => r.json()).then(cfg => {
-        const b = cfg.area?.bbox;
-        if (b) { setVal('min_lat', b.min_lat); setVal('max_lat', b.max_lat); setVal('min_lon', b.min_lon); setVal('max_lon', b.max_lon); }
-        setVal('takeoff_lat', cfg.area?.takeoff?.lat); setVal('takeoff_lon', cfg.area?.takeoff?.lon);
-        setVal('landing_lat', cfg.area?.landing?.lat); setVal('landing_lon', cfg.area?.landing?.lon);
-      }).catch(() => { }).finally(() => applyLocalStorage());
 
       function compassDrag(e0) {
         e0.preventDefault();
