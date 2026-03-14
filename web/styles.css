@@ -466,6 +466,73 @@ ul li {
   overflow: hidden;
 }
 
+@media (max-width: 768px) {
+  #sim-ui-panel {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  body.sim-page {
+    overflow-y: auto !important;
+    height: auto !important;
+    min-height: 100vh;
+    padding-top: 44px;
+  }
+
+  body.sim-page #status-bar {
+    position: sticky !important;
+    top: 44px !important;
+    bottom: auto !important;
+    height: auto !important;
+    padding: 7px 14px;
+    z-index: 100;
+  }
+
+  body.sim-page #console-area {
+    position: relative !important;
+    inset: auto !important;
+    width: 100%;
+    min-height: 40vh;
+    padding: 10px;
+    margin-top: 0;
+  }
+
+  body.sim-page #plots-area,
+  body.sim-page #sim-plots-area,
+  body.sim-page #plots-area-sim {
+    height: auto !important;
+    flex-wrap: wrap;
+  }
+
+  body.sim-page .plot-box {
+    flex: 0 0 calc(50% - 5px) !important;
+    height: 140px !important;
+  }
+
+  body.sim-page #settings-area {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    padding: 0;
+  }
+
+  body.sim-page input[type="number"],
+  body.sim-page input[type="date"],
+  body.sim-page input[type="text"],
+  body.sim-page input[type="range"] {
+    font-size: 16px !important;
+  }
+
+  body.sim-page .btn {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+}
+
 /* ================================================================
    #ui-panel — view pages: absolute slide-in overlay
    ================================================================ */
