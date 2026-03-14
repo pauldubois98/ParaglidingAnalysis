@@ -119,7 +119,7 @@
           </button>
         </div>
         <div class="field-hint" style="margin-top: -4px">
-          Coarse: fast preview (40×40×20, 30 p-iter).<br />
+          Coarse: fast preview (41×41×20, 30 p-iter).<br />
           Refined: high precision (DEM res, 40 NZ, 80 p-iter).
         </div>
 
@@ -223,10 +223,10 @@
         <div class="section-title">3-D Grid</div>
         <div class="grid-2">
           <div>
-            <label class="field-label">Sim NX (W–E cells)</label><input type="number" id="sim_nx" min="16" max="256" step="8" value="40" />
+            <label class="field-label">Sim NX (W–E cells)</label><input type="number" id="sim_nx" min="15" max="255" step="2" value="41" />
           </div>
           <div>
-            <label class="field-label">Sim NY (S–N cells)</label><input type="number" id="sim_ny" min="16" max="256" step="8" value="40" />
+            <label class="field-label">Sim NY (S–N cells)</label><input type="number" id="sim_ny" min="15" max="255" step="2" value="41" />
           </div>
         </div>
         <div class="grid-2">
@@ -1680,8 +1680,8 @@
           dx,
           dy
         } = terrainData;
-        const nx2 = Math.round(nx / 2);
-        const ny2 = Math.round(ny / 2);
+        const nx2 = Math.round(nx / 2)+1;
+        const ny2 = Math.round(ny / 2)+1;
         const dx2 = dx * 2;
         const dy2 = dx * 2;
         log(
@@ -1931,8 +1931,8 @@
     function applyPreset(name) {
       const s = (v) => v; // shorthand
       if (name === "coarse") {
-        const nx = terrainData ? Math.round(terrainData.nx / 2) : 40;
-        const ny = terrainData ? Math.round(terrainData.ny / 2) : 40;
+        const nx = terrainData ? Math.round(terrainData.nx / 2)+1 : 41;
+        const ny = terrainData ? Math.round(terrainData.ny / 2)+1 : 41;
         document.getElementById("sim_nx").value = nx;
         document.getElementById("sim_ny").value = ny;
         document.getElementById("nz").value = 20;
