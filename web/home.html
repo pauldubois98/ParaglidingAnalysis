@@ -23,23 +23,24 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 44px 20px 48px 20px;
+      justify-content: flex-start;
+      padding: 60px 20px 48px 20px;
     }
 
     .page {
       width: 100%;
-      max-width: 680px;
+      max-width: 980px;
     }
 
     header {
       text-align: center;
-      margin-bottom: 48px;
+      margin-bottom: 40px;
+      padding-top: 8px;
     }
 
     .logo {
-      width: 112px;
-      height: 112px;
+      width: 96px;
+      height: 96px;
       margin: 0 auto 12px;
     }
 
@@ -50,7 +51,7 @@
     }
 
     header h1 {
-      font-size: 28px;
+      font-size: 26px;
       color: #7eb8ff;
       font-weight: 300;
       letter-spacing: 1px;
@@ -58,169 +59,236 @@
     }
 
     header p {
-      font-size: 14px;
+      font-size: 13px;
       color: #5577aa;
       line-height: 1.6;
-      max-width: 420px;
+      max-width: 480px;
       margin: 0 auto;
     }
 
-    .card-badge {
-      position: absolute;
-      top: 6px;
-      right: 6px;
-      font-size: 9px;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      color: #7eb8ff;
-      background: rgba(30, 60, 120, 0.85);
-      border: 1px solid rgba(100, 160, 255, 0.35);
-      border-radius: 4px;
-      padding: 1px 5px;
-      pointer-events: none;
-    }
-
-    .section-label {
-      text-align: center;
-      font-size: 10px;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: #3a5580;
-      margin-top: 28px;
-      margin-bottom: 10px;
-    }
-
-    .card-shared {
-      display: grid;
-      grid-template-columns: 1fr;
-      max-width: 260px;
-      margin: 0 auto;
-    }
-
-    .cards {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
-    }
-
-    .card {
-      position: relative;
+    /* ── Area card ── */
+    .area-wrap {
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+
+    .area-card {
+      display: flex;
       align-items: center;
-      text-align: center;
-      gap: 14px;
-      padding: 32px 20px 24px;
+      gap: 16px;
+      padding: 16px 28px;
       background: rgba(15, 25, 45, 0.7);
-      border: 1px solid rgba(100, 160, 255, 0.15);
-      border-radius: 16px;
+      border: 1px solid rgba(100, 160, 255, 0.2);
+      border-radius: 14px;
       text-decoration: none;
       color: #c8d8e8;
       transition: background 0.2s, border-color 0.2s, transform 0.18s;
     }
 
-    .card:visited,
-    .card:active {
-      color: #c8d8e8;
-    }
-
-    .card:hover {
+    .area-card:hover {
       background: rgba(25, 45, 80, 0.75);
-      border-color: rgba(100, 160, 255, 0.4);
-      transform: translateY(-3px);
+      border-color: rgba(100, 160, 255, 0.45);
+      transform: translateY(-2px);
     }
 
-    .card-icon {
-      width: 96px;
-      height: 96px;
-      padding: 14px;
+    .area-icon {
+      width: 52px;
+      height: 52px;
+      padding: 10px;
       background: rgba(100, 160, 255, 0.08);
-      border-radius: 18px;
+      border-radius: 12px;
       flex-shrink: 0;
-      transition: background 0.2s;
     }
 
-    .card:hover .card-icon {
-      background: rgba(100, 160, 255, 0.14);
-    }
-
-    .card-icon img,
-    .logo img {
+    .area-icon img {
       width: 100%;
       height: 100%;
       object-fit: contain;
       filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%);
     }
 
-    .card-title {
-      font-size: 15px;
+    .area-title {
+      font-size: 14px;
       font-weight: 600;
-      letter-spacing: 0.3px;
       color: #7eb8ff;
+      margin-bottom: 3px;
     }
 
-    .card-desc {
+    .area-desc {
       font-size: 12px;
-      line-height: 1.55;
-      color: #6888a8;
-    }
-
-    .pipeline-hint {
-      margin-top: 24px;
-      padding: 14px 18px;
-      background: rgba(15, 25, 45, 0.5);
-      border: 1px solid rgba(100, 160, 255, 0.1);
-      border-radius: 10px;
-      font-size: 12px;
-      color: #3a6080;
-      text-align: center;
-      line-height: 1.7;
-    }
-
-    .pipeline-hint span {
       color: #5577aa;
     }
 
+    /* ── Section divider ── */
+    .section-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .section-row-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #3a5580;
+      white-space: nowrap;
+    }
+
+    .section-row-line {
+      flex: 1;
+      height: 1px;
+      background: rgba(100, 160, 255, 0.1);
+    }
+
+    /* ── Workflow grid ── */
+    .workflows {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .wf-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 22px 22px 18px;
+      background: rgba(15, 25, 45, 0.7);
+      border: 1px solid rgba(100, 160, 255, 0.15);
+      border-radius: 14px;
+      gap: 12px;
+    }
+
+    .wf-badge {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #7eb8ff;
+      background: rgba(30, 60, 120, 0.85);
+      border: 1px solid rgba(100, 160, 255, 0.35);
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+
+    .wf-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .wf-icon {
+      width: 52px;
+      height: 52px;
+      padding: 10px;
+      background: rgba(100, 160, 255, 0.08);
+      border-radius: 12px;
+      flex-shrink: 0;
+    }
+
+    .wf-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%);
+    }
+
+    .wf-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #7eb8ff;
+      margin-bottom: 2px;
+    }
+
+    .wf-model {
+      font-size: 11px;
+      color: #3a6080;
+      font-family: 'Courier New', monospace;
+    }
+
+    .wf-desc {
+      font-size: 12px;
+      line-height: 1.6;
+      color: #6888a8;
+    }
+
+    .wf-outputs {
+      font-size: 11px;
+      color: #3a5a78;
+      line-height: 1.6;
+    }
+
+    .wf-outputs strong {
+      color: #4a7090;
+      font-weight: 600;
+    }
+
+    .wf-links {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+    .wf-link {
+      padding: 5px 14px;
+      font-size: 12px;
+      border-radius: 6px;
+      text-decoration: none;
+      border: 1px solid rgba(100, 160, 255, 0.25);
+      color: #7eb8ff;
+      background: rgba(100, 160, 255, 0.07);
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .wf-link:hover {
+      background: rgba(100, 160, 255, 0.16);
+      border-color: rgba(100, 160, 255, 0.5);
+    }
+
+    .wf-link.primary {
+      background: rgba(100, 160, 255, 0.14);
+      border-color: rgba(100, 160, 255, 0.4);
+    }
+
+    .wf-link.primary:hover {
+      background: rgba(100, 160, 255, 0.24);
+    }
+
     footer {
-      margin-top: 40px;
+      margin-top: 36px;
       font-size: 11px;
       color: #2a3a50;
       text-align: center;
     }
 
-    .split {
-      display: flex;
-      flex-direction: row;
-    }
+    @media (max-width: 640px) {
+      .workflows {
+        grid-template-columns: 1fr;
+      }
 
-    .workflow {
-      flex: 1;
-      margin: 12px;
+      header h1 {
+        font-size: 20px;
+      }
+
+      .area-card {
+        padding: 12px 18px;
+      }
     }
 
     @media (max-width: 480px) {
-      header h1 {
-        font-size: 22px;
+      .wf-card {
+        padding: 16px 14px 14px;
       }
 
-      .cards {
-        gap: 5px;
-      }
-
-      .workflow {
-        margin: 4px;
-      }
-
-      .card {
-        padding: 24px 16px 18px;
-        gap: 10px;
-      }
-
-      .card-icon {
-        width: 72px;
-        height: 72px;
-        padding: 10px;
+      .wf-icon {
+        width: 42px;
+        height: 42px;
+        padding: 8px;
       }
     }
 
@@ -440,77 +508,149 @@
 
     <header>
       <div class="logo"><img src="icons/favicon.svg" alt=""></div>
-      <h1>Paragliding Thermals</h1>
-      <p>Solar heating simulation and 3D thermal visualization for paragliding sites</p>
+      <h1>Paragliding Air Flow</h1>
+      <p>Browser-based atmospheric simulations for paragliding site analysis — thermal convection and orographic wind
+        flow over real terrain</p>
     </header>
 
-    <div class="section-label">Shared</div>
-    <div class="card-shared">
-      <a href="area" class="card">
-        <div class="card-icon"><img src="icons/favicon-area1.svg" data-icon="area" data-count="5" alt=""></div>
-        <div class="card-title">Select Area</div>
-        <div class="card-desc">Define the bounding box, take-off, and landing points on a map</div>
+    <!-- ── Step 0: Area ── -->
+    <div class="area-wrap">
+      <a href="area" class="area-card">
+        <div class="area-icon"><img src="icons/favicon-area1.svg" data-icon="area" data-count="5" alt=""></div>
+        <div class="area-text">
+          <div class="area-title">Step 0 — Select Area</div>
+          <div class="area-desc">Draw the bounding box, mark take-off and landing on a map. Required by all workflows.
+          </div>
+        </div>
       </a>
     </div>
 
-    <div class="split">
-      <div class="workflow">
-        <div class="section-label">Basic</div>
-        <div class="cards">
-          <a href="simulate" class="card">
-            <div class="card-icon"><img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4"
-                alt=""></div>
-            <div class="card-title">Simulation</div>
-            <div class="card-desc">Fetch terrain data and run the thermal physics pipeline</div>
-          </a>
-          <a href="view" class="card">
-            <div class="card-icon"><img src="icons/favicon-view1.svg" data-icon="view" data-count="3" alt=""></div>
-            <div class="card-title">Visualize</div>
-            <div class="card-desc">3D terrain with thermal heatmaps, flow arrows, and plume profiles</div>
-          </a>
-          <a href="about" class="card">
-            <div class="card-icon"><img src="icons/favicon-about1.svg" data-icon="about" data-count="4" alt=""></div>
-            <div class="card-title">How It Works</div>
-            <div class="card-desc">Physics models, data sources, and simplifications explained</div>
-          </a>
+    <!-- ── Thermal workflows ── -->
+    <div class="section-row">
+      <div class="section-row-label">Thermal convection</div>
+      <div class="section-row-line"></div>
+    </div>
+
+    <div class="workflows">
+
+      <!-- Thermal basic -->
+      <div class="wf-card">
+        <div class="wf-header">
+          <div class="wf-icon"><img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4" alt="">
+          </div>
+          <div>
+            <div class="wf-title">Thermal</div>
+            <div class="wf-model">Pre-computed · 2D heatmap</div>
+          </div>
+        </div>
+        <div class="wf-desc">
+          Computes surface heat flux from solar geometry, terrain slope, land cover (ESA WorldCover), and
+          atmospheric transmittance. The ground temperature anomaly is resolved per-cell and converted to
+          a thermal strength index — fast enough to run a full day of hourly snapshots in seconds.
+        </div>
+        <div class="wf-outputs">
+          <strong>Outputs:</strong> surface temperature anomaly · thermal index · shadow mask · sun elevation
+        </div>
+        <div class="wf-links">
+          <a href="simulate" class="wf-link primary">Simulate</a>
+          <a href="view" class="wf-link">View</a>
+          <a href="about" class="wf-link">About</a>
         </div>
       </div>
 
-      <div class="workflow">
-        <div class="section-label">Navier-Stokes</div>
-        <div class="cards">
-          <a href="simulate-advanced" class="card">
-            <div class="card-badge">NS</div>
-            <div class="card-icon"><img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4"
-                alt=""></div>
-            <div class="card-title">Simulate NS</div>
-            <div class="card-desc">Full 3D Navier-Stokes simulation with Boussinesq buoyancy and LES turbulence</div>
-          </a>
-          <a href="view-advanced" class="card">
-            <div class="card-badge">NS</div>
-            <div class="card-icon"><img src="icons/favicon-view1.svg" data-icon="view" data-count="3" alt=""></div>
-            <div class="card-title">View NS</div>
-            <div class="card-desc">3D viewer with cross-section slices, vertical profiles, and wind arrows</div>
-          </a>
-          <a href="about-advanced" class="card">
-            <div class="card-badge">NS</div>
-            <div class="card-icon"><img src="icons/favicon-about1.svg" data-icon="about" data-count="4" alt=""></div>
-            <div class="card-title">About NS</div>
-            <div class="card-desc">Equations, numerical method, parameters, and limitations of the NS solver</div>
-          </a>
+      <!-- Thermal NS -->
+      <div class="wf-card">
+        <div class="wf-badge">NS</div>
+        <div class="wf-header">
+          <div class="wf-icon"><img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4" alt="">
+          </div>
+          <div>
+            <div class="wf-title">Thermal NS</div>
+            <div class="wf-model">3D Navier-Stokes · Boussinesq · LES</div>
+          </div>
+        </div>
+        <div class="wf-desc">
+          Full 3D incompressible Navier-Stokes solver under the Boussinesq approximation: solar heating
+          warms the ground, which injects buoyancy into the boundary layer, driving convective thermal
+          plumes. Smagorinsky LES turbulence closure and a Red-Black SOR pressure solver. Runs in a
+          Web Worker; takes minutes for a coarse grid.
+        </div>
+        <div class="wf-outputs">
+          <strong>Outputs:</strong> 3D temperature anomaly θ' · vertical wind w · convergence · cross-section slices
+        </div>
+        <div class="wf-links">
+          <a href="simulate-advanced" class="wf-link primary">Simulate</a>
+          <a href="view-advanced" class="wf-link">View</a>
+          <a href="about-advanced" class="wf-link">About</a>
         </div>
       </div>
+
     </div>
 
-
-    <div class="pipeline-hint">
-      Workflow: <span>Select Area</span> → <span>Simulate</span> → <span>View</span> | <span>About</span>
-    </div>
-    <div class="pipeline-hint">
-      Workflow NS: <span>Select Area</span> → <span>Simulate NS</span> → <span>View NS</span> | <span>About NS</span>
+    <!-- ── Wind workflows ── -->
+    <div class="section-row" style="margin-top:24px;">
+      <div class="section-row-label">Orographic wind</div>
+      <div class="section-row-line"></div>
     </div>
 
-    <footer>Paragliding thermal simulation</footer>
+    <div class="workflows">
+
+      <!-- Wind SWE -->
+      <div class="wf-card">
+        <div class="wf-header">
+          <div class="wf-icon"><img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4" alt="">
+          </div>
+          <div>
+            <div class="wf-title">Wind</div>
+            <div class="wf-model">2D Shallow Water Equations · explicit FD</div>
+          </div>
+        </div>
+        <div class="wf-desc">
+          Solves the 2D shallow water equations (SWE) with reduced gravity over real terrain.
+          The atmosphere is modelled as a single layer of depth h flowing over the orographic floor.
+          Terrain-blocking, orographic lifting, Froude number transitions, hydraulic jumps, and
+          vorticity wakes emerge naturally. Runs to quasi-steady state in seconds to minutes.
+        </div>
+        <div class="wf-outputs">
+          <strong>Outputs:</strong> wind speed · vertical wind proxy · Froude number · vorticity · flow depth
+        </div>
+        <div class="wf-links">
+          <a href="simulate-dynamic" class="wf-link primary">Simulate</a>
+          <a href="view-dynamic" class="wf-link">View</a>
+          <a href="about-dynamic" class="wf-link">About</a>
+        </div>
+      </div>
+
+      <!-- Wind NS -->
+      <div class="wf-card">
+        <div class="wf-badge">NS</div>
+        <div class="wf-header">
+          <div class="wf-icon"><img src="icons/favicon-simulation1.svg" data-icon="simulation" data-count="4" alt="">
+          </div>
+          <div>
+            <div class="wf-title">Wind NS</div>
+            <div class="wf-model">3D Navier-Stokes · log profile · land-cover roughness</div>
+          </div>
+        </div>
+        <div class="wf-desc">
+          Full 3D incompressible Navier-Stokes solver for mechanical wind flow. Terrain cells are
+          blocked (no-slip); inflow uses a logarithmic wind profile anchored to a per-cell roughness
+          length z₀ derived from ESA WorldCover. Semi-Lagrangian advection and a Jacobi pressure
+          Poisson solver. Resolves lee-side recirculation, flow separation, and surface-layer structure.
+        </div>
+        <div class="wf-outputs">
+          <strong>Outputs:</strong> 3D velocity (U, V, W) · surface wind speed · vertical wind · pressure · vorticity
+        </div>
+        <div class="wf-links">
+          <a href="simulate-dynamic-advanced" class="wf-link primary">Simulate</a>
+          <a href="view-dynamic-advanced" class="wf-link">View</a>
+          <a href="about-dynamic-advanced" class="wf-link">About</a>
+        </div>
+      </div>
+
+    </div>
+
+    <footer>Select Area → Simulate → View &nbsp;|&nbsp; All simulations run in the browser</footer>
 
   </div>
   <script>
