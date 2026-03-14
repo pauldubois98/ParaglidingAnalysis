@@ -49,7 +49,7 @@
     ]
   },
   {
-    "label": "Vertical w",
+    "label": "Vertical wind",
     "tip": "Vertical velocity at the surface level — rising (red) and sinking (blue) air",
     "sliders": {
       "terrain-op": 1,

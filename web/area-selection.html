@@ -1,0 +1,1059 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
+  <title>Flow — Area Selection</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    body {
+      background: #08111e;
+      color: #c8d8e8;
+      font-family: "Segoe UI", sans-serif;
+      font-size: 14px;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ── Map fills the whole viewport ── */
+    #map {
+      width: 100vw;
+      height: 100vh;
+      background: #0d1a2e;
+      margin-top: 44px;
+    }
+
+    .leaflet-tile {
+      filter: brightness(0.72) saturate(0.55) hue-rotate(195deg);
+    }
+
+    /* ── Floating panel ── */
+    #panel {
+      position: absolute;
+      bottom: 28px;
+      right: 16px;
+      width: 260px;
+      background: rgba(10, 15, 30, 0.88);
+      border: 1px solid rgba(100, 160, 255, 0.3);
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      max-height: calc(100vh - 44px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #panel-header {
+      padding: 13px 16px 10px;
+    }
+
+    #panel-header h2 {
+      font-size: 13px;
+      margin: 0;
+    }
+
+    #panel-footer {
+      padding: 10px 16px 13px;
+      gap: 6px;
+    }
+
+    /* ── Editable coord fields ── */
+    .coord-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-bottom: 4px;
+    }
+
+    .coord-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .coord-cell.full {
+      grid-column: 1 / -1;
+    }
+
+    .coord-label {
+      font-size: 10px;
+      color: #3a6080;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+    }
+
+    .coord-input {
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      color: #90c8e8;
+      background: rgba(20, 35, 60, 0.8);
+      border: 1px solid rgba(100, 160, 255, 0.18);
+      border-radius: 5px;
+      padding: 5px 7px;
+      width: 100%;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .coord-input:focus {
+      border-color: rgba(100, 160, 255, 0.55);
+      color: #c8e8ff;
+    }
+
+    .coord-input.readonly {
+      color: #5577aa;
+      cursor: default;
+      background: rgba(15, 25, 45, 0.6);
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 7px 12px;
+      border: 1px solid rgba(100, 160, 255, 0.35);
+      border-radius: 6px;
+      background: rgba(30, 55, 100, 0.3);
+      color: #a0c8e8;
+      font-size: 11px;
+      font-family: inherit;
+      cursor: pointer;
+      text-align: center;
+      transition:
+        background 0.15s,
+        color 0.15s,
+        border-color 0.15s;
+      margin-bottom: 6px;
+    }
+
+    .btn:last-child {
+      margin-bottom: 0;
+    }
+
+    .btn:hover {
+      background: rgba(60, 110, 180, 0.4);
+      color: #d0e8ff;
+      border-color: rgba(100, 160, 255, 0.6);
+    }
+
+    .btn:active {
+      background: rgba(60, 110, 180, 0.6);
+    }
+
+    .btn.active {
+      background: rgba(60, 110, 180, 0.5);
+      color: #d0e8ff;
+      border-color: rgba(100, 200, 255, 0.7);
+    }
+
+    .btn.marker-active {
+      background: rgba(255, 120, 30, 0.25);
+      color: #ffaa60;
+      border-color: rgba(255, 120, 30, 0.6);
+    }
+
+    .btn.marker-active.landing {
+      background: rgba(30, 200, 100, 0.2);
+      color: #60ff90;
+      border-color: rgba(30, 200, 100, 0.6);
+    }
+
+    .btn.reset {
+      color: #6688aa;
+      border-color: rgba(100, 160, 255, 0.2);
+      background: transparent;
+    }
+
+    .btn.reset:hover {
+      background: rgba(30, 55, 100, 0.3);
+      color: #a0c8e8;
+    }
+
+    .btn.set-btn {
+      background: rgba(30, 180, 100, 0.22);
+      border-color: rgba(30, 200, 100, 0.55);
+      color: #50e898;
+    }
+
+    .btn.set-btn:hover {
+      background: rgba(30, 180, 100, 0.38);
+      border-color: rgba(30, 200, 100, 0.8);
+      color: #80ffb0;
+    }
+
+    /* ── Size info (read-only) ── */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #506080;
+      margin-top: 6px;
+    }
+
+    .info-row span {
+      color: #7099b8;
+    }
+
+    /* ── Legend box (bottom-left, Leaflet-style) ── */
+    #legend {
+      position: absolute;
+      bottom: 28px;
+      left: 16px;
+      background: rgba(10, 15, 30, 0.85);
+      border: 1px solid rgba(100, 160, 255, 0.25);
+      border-radius: 10px;
+      padding: 10px 14px;
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      font-size: 11px;
+    }
+
+    .legend-title {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #3a6080;
+      margin-bottom: 7px;
+    }
+
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+      color: #7099b8;
+    }
+
+    .legend-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .legend-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .legend-line {
+      width: 22px;
+      height: 3px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .legend-line.dashed {
+      background: none;
+      border-top: 2px dashed;
+      height: 0;
+    }
+
+    /* ── Status bar ── */
+    #status {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 5px 16px;
+      font-size: 11px;
+      color: #3a5070;
+      background: rgba(8, 14, 26, 0.75);
+      z-index: 999;
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+
+    /* Draw cursor */
+    #map.draw-mode {
+      cursor: crosshair;
+    }
+
+    #map.place-mode {
+      cursor: cell;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 36px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: rgba(30, 80, 50, 0.95);
+      border: 1px solid rgba(80, 200, 120, 0.5);
+      color: #80e8a0;
+      font-size: 12px;
+      padding: 6px 18px;
+      border-radius: 20px;
+      opacity: 0;
+      transition:
+        opacity 0.2s,
+        transform 0.2s;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    #toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Mobile panel toggle button ── */
+    #panel-toggle {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      #panel-toggle {
+        display: block;
+      }
+
+      #panel {
+        top: auto;
+        bottom: 0;
+        right: 0;
+        left: 0;
+        width: 100%;
+        max-height: 80vh;
+        border-radius: 16px 16px 0 0;
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #panel.panel-open {
+        transform: translateY(0);
+      }
+
+      #legend {
+        display: none;
+      }
+
+      .btn {
+        padding: 10px 12px;
+        font-size: 12px;
+      }
+
+      .coord-input {
+        padding: 7px 9px;
+        font-size: 13px;
+      }
+
+      input[type="number"] {
+        font-size: 16px;
+      }
+
+      /* prevent iOS zoom */
+    }
+  </style>
+</head>
+
+<body>
+  <nav id="header-nav">
+    <a href="air-flow" class="nav-logo"><img src="icons/favicon.svg" alt="" /><span>Home</span></a>
+    <div class="nav-sep"></div>
+    <a href="area-selection" class="nav-link nav-active">Area</a>
+    <div class="nav-sep"></div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Thermal</button>
+      <div class="nav-dropdown-menu">
+        <a href="thermal-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="thermal-view" class="nav-dropdown-item">View</a>
+        <a href="thermal-about" class="nav-dropdown-item">About</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Thermal NS</button>
+      <div class="nav-dropdown-menu">
+        <a href="thermal-ns-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="thermal-ns-view" class="nav-dropdown-item">View</a>
+        <a href="thermal-ns-about" class="nav-dropdown-item">About</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Wind</button>
+      <div class="nav-dropdown-menu">
+        <a href="wind-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="wind-view" class="nav-dropdown-item">View</a>
+        <a href="wind-about" class="nav-dropdown-item">About</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Wind NS</button>
+      <div class="nav-dropdown-menu">
+        <a href="wind-ns-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="wind-ns-view" class="nav-dropdown-item">View</a>
+        <a href="wind-ns-about" class="nav-dropdown-item">About</a>
+      </div>
+    </div>
+  </nav>
+
+  <div id="map"></div>
+
+  <button id="panel-toggle" onclick="document.getElementById('panel').classList.toggle('panel-open')" title="Toggle panel">
+    ☰
+  </button>
+
+  <!-- ── Floating panel ── -->
+  <div id="panel">
+    <div id="panel-header">
+      <h2>Area of Interest</h2>
+      <div class="subtitle">Select the area to analyse</div>
+    </div>
+
+    <div id="panel-body">
+      <div class="section-title">Bounding box</div>
+      <div class="coord-grid">
+        <div class="coord-cell">
+          <div class="coord-label">North (max lat)</div>
+          <input class="coord-input" id="in-max-lat" type="number" step="0.0001" />
+        </div>
+        <div class="coord-cell">
+          <div class="coord-label">South (min lat)</div>
+          <input class="coord-input" id="in-min-lat" type="number" step="0.0001" />
+        </div>
+        <div class="coord-cell">
+          <div class="coord-label">West (min lon)</div>
+          <input class="coord-input" id="in-min-lon" type="number" step="0.0001" />
+        </div>
+        <div class="coord-cell">
+          <div class="coord-label">East (max lon)</div>
+          <input class="coord-input" id="in-max-lon" type="number" step="0.0001" />
+        </div>
+        <div class="coord-cell full">
+          <div class="coord-label">Center (auto)</div>
+          <input class="coord-input readonly" id="in-center" type="text" readonly />
+        </div>
+      </div>
+      <div class="info-row">Size: <span id="info-size">—</span></div>
+      <div id="size-warning" style="
+            display: none;
+            margin-top: 4px;
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 6px;
+          "></div>
+
+      <div class="section-title" style="margin-top: 12px">Actions</div>
+      <button class="btn" id="btn-draw">Draw bbox on map</button>
+      <button class="btn reset" id="btn-reset">
+        Reset to default (Arbas)
+      </button>
+
+      <div class="section-title">Markers</div>
+      <div class="coord-grid">
+        <div class="coord-cell">
+          <div class="coord-label">Take-off lat</div>
+          <input class="coord-input" id="in-to-lat" type="number" step="0.00001" />
+        </div>
+        <div class="coord-cell">
+          <div class="coord-label">Take-off lon</div>
+          <input class="coord-input" id="in-to-lon" type="number" step="0.00001" />
+        </div>
+      </div>
+      <button class="btn" id="btn-place-to" style="margin-top: 6px">
+        Place take-off on map
+      </button>
+      <div class="coord-grid">
+        <div class="coord-cell">
+          <div class="coord-label">Landing lat</div>
+          <input class="coord-input" id="in-la-lat" type="number" step="0.00001" />
+        </div>
+        <div class="coord-cell">
+          <div class="coord-label">Landing lon</div>
+          <input class="coord-input" id="in-la-lon" type="number" step="0.00001" />
+        </div>
+      </div>
+      <button class="btn" id="btn-place-la">Place landing on map</button>
+    </div>
+    <!-- /panel-body -->
+
+    <div id="panel-footer">
+      <button class="btn set-btn" id="btn-set-area">
+        Set area and markers
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Legend ── -->
+  <div id="legend">
+    <div class="legend-title">Legend</div>
+    <div class="legend-row">
+      <div class="legend-line dashed" style="border-color: #4a9eff; width: 22px"></div>
+      Default bbox (Arbas)
+    </div>
+    <div class="legend-row">
+      <div class="legend-line" style="background: #ffaa00"></div>
+      Current selection
+    </div>
+    <div class="legend-row">
+      <div class="legend-dot" style="background: #ff6030; box-shadow: 0 0 5px #ff6030"></div>
+      Take-off
+    </div>
+    <div class="legend-row">
+      <div class="legend-dot" style="background: #30ff80; box-shadow: 0 0 5px #30ff80"></div>
+      Landing
+    </div>
+  </div>
+
+  <div id="status">
+    Drag the map to explore. Use "Draw bbox" or edit the fields to define the
+    area.
+  </div>
+  <div id="toast"></div>
+
+  <script>
+    // ── Persistent state ──────────────────────────────────────────────────────────
+    const STORAGE_KEY = "paragliding_area";
+
+    function saveAreaState() {
+      const state = {
+        bbox: bboxFromFields(),
+        takeoff: {
+          lat: getField("in-to-lat"),
+          lon: getField("in-to-lon")
+        },
+        landing: {
+          lat: getField("in-la-lat"),
+          lon: getField("in-la-lon")
+        },
+      };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    function loadAreaState() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function setAreaReady(_ready) {}
+
+    // ── Defaults ──────────────────────────────────────────────────────────────────
+    const DEFAULTS = {
+      bbox: {
+        min_lon: 0.8384807238737125,
+        max_lon: 0.933902446260169,
+        min_lat: 42.96106090862103,
+        max_lat: 43.014963556361636,
+      },
+      takeoff: {
+        lat: 42.96939867981149,
+        lon: 0.8859389033562173
+      },
+      landing: {
+        lat: 42.99216012970225,
+        lon: 0.9039819278411977
+      },
+    };
+
+    // ── Map ───────────────────────────────────────────────────────────────────────
+    const map = L.map("map", {
+      center: [42.99, 0.885],
+      zoom: 12,
+      zoomControl: true,
+    });
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 18,
+    }).addTo(map);
+
+    // ── Marker icons ──────────────────────────────────────────────────────────────
+    function makeIcon(color) {
+      return L.divIcon({
+        className: "",
+        html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:2px solid rgba(255,255,255,0.5);box-shadow:0 0 7px ${color};"></div>`,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+      });
+    }
+
+    let takeoffMarker = L.marker(
+        [DEFAULTS.takeoff.lat, DEFAULTS.takeoff.lon], {
+          icon: makeIcon("#ff6030"),
+          draggable: true
+        },
+      )
+      .bindTooltip("Take-off")
+      .addTo(map);
+    let landingMarker = L.marker(
+        [DEFAULTS.landing.lat, DEFAULTS.landing.lon], {
+          icon: makeIcon("#30ff80"),
+          draggable: true
+        },
+      )
+      .bindTooltip("Landing")
+      .addTo(map);
+
+    takeoffMarker.on("dragend", () => {
+      const ll = takeoffMarker.getLatLng();
+      setField("in-to-lat", ll.lat, 8);
+      setField("in-to-lon", ll.lng, 8);
+      setAreaReady(false);
+    });
+    landingMarker.on("dragend", () => {
+      const ll = landingMarker.getLatLng();
+      setField("in-la-lat", ll.lat, 8);
+      setField("in-la-lon", ll.lng, 8);
+      setAreaReady(false);
+    });
+
+    // ── Rectangles ────────────────────────────────────────────────────────────────
+    const defaultRect = L.rectangle(
+      [
+        [DEFAULTS.bbox.min_lat, DEFAULTS.bbox.min_lon],
+        [DEFAULTS.bbox.max_lat, DEFAULTS.bbox.max_lon],
+      ], {
+        color: "#4a9eff",
+        weight: 1.5,
+        opacity: 0.7,
+        fillOpacity: 0.04,
+        dashArray: "6 4",
+      },
+    ).addTo(map);
+
+    let selRect = null;
+
+    function setSelRect(b) {
+      const bounds = [
+        [b.min_lat, b.min_lon],
+        [b.max_lat, b.max_lon],
+      ];
+      if (selRect) selRect.setBounds(bounds);
+      else
+        selRect = L.rectangle(bounds, {
+          color: "#ffaa00",
+          weight: 2.5,
+          opacity: 1,
+          fillOpacity: 0.07,
+        }).addTo(map);
+    }
+
+    // ── Field helpers ─────────────────────────────────────────────────────────────
+    function setField(id, val, decimals = 6) {
+      document.getElementById(id).value =
+        typeof val === "number" ? val.toFixed(decimals) : val;
+    }
+
+    function getField(id) {
+      return parseFloat(document.getElementById(id).value);
+    }
+
+    function updateCenterAndSize() {
+      const minLat = getField("in-min-lat"),
+        maxLat = getField("in-max-lat");
+      const minLon = getField("in-min-lon"),
+        maxLon = getField("in-max-lon");
+      if ([minLat, maxLat, minLon, maxLon].some(isNaN)) return;
+      const cLat = (minLat + maxLat) / 2,
+        cLon = (minLon + maxLon) / 2;
+      document.getElementById("in-center").value =
+        `${cLat.toFixed(6)}, ${cLon.toFixed(6)}`;
+      const wKm = haversineKm(cLat, minLon, cLat, maxLon);
+      const hKm = haversineKm(minLat, cLon, maxLat, cLon);
+      const area = wKm * hKm;
+      document.getElementById("info-size").textContent =
+        `${wKm.toFixed(1)} × ${hKm.toFixed(1)} km  (${area.toFixed(1)} km²)`;
+      const warn = document.getElementById("size-warning");
+      if (area < 10) {
+        warn.style.display = "block";
+        warn.style.background = "rgba(255,160,0,0.15)";
+        warn.style.color = "#ffaa00";
+        warn.style.border = "1px solid rgba(255,160,0,0.3)";
+        warn.textContent = "⚠ Area too small — simulation will lack detail.";
+      } else if (area > 200) {
+        warn.style.display = "block";
+        warn.style.background = "rgba(255,80,80,0.12)";
+        warn.style.color = "#ff6060";
+        warn.style.border = "1px solid rgba(255,80,80,0.3)";
+        warn.textContent = "⚠ Area very large — simulation will be slow.";
+      } else {
+        warn.style.display = "none";
+      }
+    }
+
+    function bboxFromFields() {
+      return {
+        min_lat: getField("in-min-lat"),
+        max_lat: getField("in-max-lat"),
+        min_lon: getField("in-min-lon"),
+        max_lon: getField("in-max-lon"),
+      };
+    }
+
+    function applyBbox(b) {
+      setField("in-min-lat", b.min_lat);
+      setField("in-max-lat", b.max_lat);
+      setField("in-min-lon", b.min_lon);
+      setField("in-max-lon", b.max_lon);
+      updateCenterAndSize();
+      setSelRect(b);
+    }
+
+    function applyTakeoff(lat, lon) {
+      setField("in-to-lat", lat, 8);
+      setField("in-to-lon", lon, 8);
+      takeoffMarker.setLatLng([lat, lon]);
+    }
+
+    function applyLanding(lat, lon) {
+      setField("in-la-lat", lat, 8);
+      setField("in-la-lon", lon, 8);
+      landingMarker.setLatLng([lat, lon]);
+    }
+
+    // ── Init fields (restore saved state, fall back to defaults) ──────────────────
+    const _saved = loadAreaState();
+    applyBbox(_saved?.bbox || DEFAULTS.bbox);
+    applyTakeoff(
+      (_saved?.takeoff || DEFAULTS.takeoff).lat,
+      (_saved?.takeoff || DEFAULTS.takeoff).lon,
+    );
+    applyLanding(
+      (_saved?.landing || DEFAULTS.landing).lat,
+      (_saved?.landing || DEFAULTS.landing).lon,
+    );
+    if (_saved) setAreaReady(true);
+
+    // ── Live field editing → update rect ─────────────────────────────────────────
+    ["in-min-lat", "in-max-lat", "in-min-lon", "in-max-lon"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        updateCenterAndSize();
+        const b = bboxFromFields();
+        if (
+          b.min_lat < b.max_lat &&
+          b.min_lon < b.max_lon && [b.min_lat, b.max_lat, b.min_lon, b.max_lon].every((v) => !isNaN(v))
+        ) {
+          setSelRect(b);
+        }
+        setAreaReady(false);
+      });
+    });
+
+    ["in-to-lat", "in-to-lon"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        const lat = getField("in-to-lat"),
+          lon = getField("in-to-lon");
+        if (!isNaN(lat) && !isNaN(lon)) {
+          takeoffMarker.setLatLng([lat, lon]);
+        }
+        setAreaReady(false);
+      });
+    });
+    ["in-la-lat", "in-la-lon"].forEach((id) => {
+      document.getElementById(id).addEventListener("input", () => {
+        const lat = getField("in-la-lat"),
+          lon = getField("in-la-lon");
+        if (!isNaN(lat) && !isNaN(lon)) {
+          landingMarker.setLatLng([lat, lon]);
+        }
+        setAreaReady(false);
+      });
+    });
+
+    // ── Draw bbox mode ────────────────────────────────────────────────────────────
+    let drawMode = false,
+      drawStart = null,
+      drawPreview = null;
+    let tapCorner1 = null,
+      tapCorner1Marker = null;
+
+    const isTouch = () => navigator.maxTouchPoints > 0;
+
+    function enterDraw() {
+      exitPlace();
+      drawMode = true;
+      tapCorner1 = null;
+      map.dragging.disable();
+      map.doubleClickZoom.disable();
+      map.getContainer().classList.add("draw-mode");
+      document.getElementById("btn-draw").textContent = "Cancel draw";
+      document.getElementById("btn-draw").classList.add("active");
+      setStatus(
+        isTouch() ?
+        "Tap the first corner of the area." :
+        "Click and drag on the map to draw the bounding box.",
+      );
+    }
+
+    function exitDraw() {
+      drawMode = false;
+      drawStart = null;
+      tapCorner1 = null;
+      if (drawPreview) {
+        drawPreview.remove();
+        drawPreview = null;
+      }
+      if (tapCorner1Marker) {
+        tapCorner1Marker.remove();
+        tapCorner1Marker = null;
+      }
+      map.dragging.enable();
+      map.doubleClickZoom.enable();
+      map.getContainer().classList.remove("draw-mode");
+      document.getElementById("btn-draw").textContent = "Draw bbox on map";
+      document.getElementById("btn-draw").classList.remove("active");
+    }
+
+    document.getElementById("btn-draw").addEventListener("click", () => {
+      if (drawMode) exitDraw();
+      else enterDraw();
+    });
+
+    document.getElementById("btn-reset").addEventListener("click", () => {
+      exitDraw();
+      exitPlace();
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {}
+      applyBbox(DEFAULTS.bbox);
+      applyTakeoff(DEFAULTS.takeoff.lat, DEFAULTS.takeoff.lon);
+      applyLanding(DEFAULTS.landing.lat, DEFAULTS.landing.lon);
+      map.fitBounds(
+        [
+          [DEFAULTS.bbox.min_lat, DEFAULTS.bbox.min_lon],
+          [DEFAULTS.bbox.max_lat, DEFAULTS.bbox.max_lon],
+        ], {
+          padding: [40, 40]
+        },
+      );
+      setAreaReady(false);
+      setStatus("Reset to default Arbas values.");
+    });
+
+    // ── Place marker mode ─────────────────────────────────────────────────────────
+    let placeMode = null; // 'takeoff' | 'landing' | null
+
+    function enterPlace(type) {
+      exitDraw();
+      if (placeMode === type) {
+        exitPlace();
+        return;
+      }
+      exitPlace();
+      placeMode = type;
+      map.dragging.disable();
+      map.doubleClickZoom.disable();
+      map.getContainer().classList.add("place-mode");
+      const btn = document.getElementById(
+        type === "takeoff" ? "btn-place-to" : "btn-place-la",
+      );
+      btn.textContent =
+        type === "takeoff" ?
+        "Click map to place take-off…" :
+        "Click map to place landing…";
+      btn.classList.add("marker-active");
+      if (type === "landing") btn.classList.add("landing");
+      setStatus(`Click anywhere on the map to place the ${type} marker.`);
+    }
+
+    function exitPlace() {
+      if (!placeMode) return;
+      map.dragging.enable();
+      map.doubleClickZoom.enable();
+      map.getContainer().classList.remove("place-mode");
+      const btn = document.getElementById(
+        placeMode === "takeoff" ? "btn-place-to" : "btn-place-la",
+      );
+      btn.textContent =
+        placeMode === "takeoff" ?
+        "Place take-off on map" :
+        "Place landing on map";
+      btn.classList.remove("marker-active", "landing");
+      placeMode = null;
+      setStatus(
+        'Drag the map to explore. Use "Draw bbox" or edit the fields to define the area.',
+      );
+    }
+
+    document
+      .getElementById("btn-place-to")
+      .addEventListener("click", () => enterPlace("takeoff"));
+    document
+      .getElementById("btn-place-la")
+      .addEventListener("click", () => enterPlace("landing"));
+
+    // ── Map events ────────────────────────────────────────────────────────────────
+
+    // Desktop: drag to draw bbox
+    map.on("mousedown", (e) => {
+      if (drawMode && !isTouch()) drawStart = e.latlng;
+    });
+    map.on("mousemove", (e) => {
+      if (!drawMode || !drawStart || isTouch()) return;
+      const b = toBbox(drawStart, e.latlng);
+      if (drawPreview)
+        drawPreview.setBounds([
+          [b.min_lat, b.min_lon],
+          [b.max_lat, b.max_lon],
+        ]);
+      else
+        drawPreview = L.rectangle(
+          [
+            [b.min_lat, b.min_lon],
+            [b.max_lat, b.max_lon],
+          ], {
+            color: "#ffaa00",
+            weight: 2,
+            opacity: 0.8,
+            fillOpacity: 0.08,
+            dashArray: "5 3",
+          },
+        ).addTo(map);
+    });
+    map.on("mouseup", (e) => {
+      if (drawMode && drawStart && !isTouch()) {
+        const b = toBbox(drawStart, e.latlng);
+        if (drawPreview) {
+          drawPreview.remove();
+          drawPreview = null;
+        }
+        const wKm = haversineKm(b.min_lat, b.min_lon, b.min_lat, b.max_lon);
+        const hKm = haversineKm(b.min_lat, b.min_lon, b.max_lat, b.min_lon);
+        if (wKm < 0.3 || hKm < 0.3) {
+          drawStart = null;
+          setStatus("Selection too small — drag further to define an area.");
+          return;
+        }
+        applyBbox(b);
+        exitDraw();
+        setAreaReady(false);
+        setStatus("Bbox set. Edit the fields to fine-tune the coordinates.");
+      }
+    });
+
+    // Click/tap: two-tap draw (touch) + place marker (both)
+    map.on("click", (e) => {
+      // Place marker mode
+      if (placeMode) {
+        if (placeMode === "takeoff") applyTakeoff(e.latlng.lat, e.latlng.lng);
+        else applyLanding(e.latlng.lat, e.latlng.lng);
+        exitPlace();
+        setAreaReady(false);
+        return;
+      }
+      // Touch two-tap bbox draw
+      if (drawMode && isTouch()) {
+        if (!tapCorner1) {
+          tapCorner1 = e.latlng;
+          if (tapCorner1Marker) tapCorner1Marker.remove();
+          tapCorner1Marker = L.circleMarker(e.latlng, {
+              radius: 8,
+              color: "#ffaa00",
+              fillColor: "#ffaa00",
+              fillOpacity: 0.9,
+              weight: 2,
+            })
+            .bindTooltip("Corner 1", {
+              permanent: true,
+              direction: "top",
+              offset: [0, -10],
+            })
+            .addTo(map);
+          setStatus("Good — now tap the opposite corner.");
+        } else {
+          const b = toBbox(tapCorner1, e.latlng);
+          if (tapCorner1Marker) {
+            tapCorner1Marker.remove();
+            tapCorner1Marker = null;
+          }
+          const wKm = haversineKm(b.min_lat, b.min_lon, b.min_lat, b.max_lon);
+          const hKm = haversineKm(b.min_lat, b.min_lon, b.max_lat, b.min_lon);
+          if (wKm < 0.3 || hKm < 0.3) {
+            tapCorner1 = null;
+            setStatus("Taps too close — tap again for the first corner.");
+            return;
+          }
+          applyBbox(b);
+          exitDraw();
+          setAreaReady(false);
+          setStatus(
+            "Bbox set. Edit the fields to fine-tune the coordinates.",
+          );
+        }
+      }
+    });
+
+    // ── Helpers ───────────────────────────────────────────────────────────────────
+    function toBbox(a, b) {
+      return {
+        min_lat: Math.min(a.lat, b.lat),
+        max_lat: Math.max(a.lat, b.lat),
+        min_lon: Math.min(a.lng, b.lng),
+        max_lon: Math.max(a.lng, b.lng),
+      };
+    }
+
+    function haversineKm(lat1, lon1, lat2, lon2) {
+      const R = 6371,
+        toR = Math.PI / 180;
+      const dLat = (lat2 - lat1) * toR,
+        dLon = (lon2 - lon1) * toR;
+      const a =
+        Math.sin(dLat / 2) ** 2 +
+        Math.cos(lat1 * toR) * Math.cos(lat2 * toR) * Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function setStatus(msg) {
+      document.getElementById("status").textContent = msg;
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 1800);
+    }
+
+    // ── Initial map fit ───────────────────────────────────────────────────────────
+    const _initBbox = _saved?.bbox || DEFAULTS.bbox;
+    map.fitBounds(
+      [
+        [_initBbox.min_lat, _initBbox.min_lon],
+        [_initBbox.max_lat, _initBbox.max_lon],
+      ], {
+        padding: [40, 40]
+      },
+    );
+
+    // ── Set area and markers ──────────────────────────────────────────────────────
+    document.getElementById("btn-set-area").addEventListener("click", () => {
+      saveAreaState();
+      setAreaReady(true);
+      showToast("Area and markers saved.");
+    });
+  </script>
+  <script>
+    // Nav dropdown touch support
+    document.querySelectorAll(".nav-dropdown-btn").forEach(function(btn) {
+      btn.addEventListener("click", function(e) {
+        var dd = btn.closest(".nav-dropdown");
+        var isOpen = dd.classList.contains("open");
+        document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+          d.classList.remove("open");
+        });
+        if (!isOpen) dd.classList.add("open");
+        e.stopPropagation();
+      });
+    });
+    document.addEventListener("click", function() {
+      document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+        d.classList.remove("open");
+      });
+    });
+  </script>
+</body>
+
+</html>

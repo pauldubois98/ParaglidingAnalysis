@@ -7,6 +7,11 @@ python server.py
 ```
 Then http://localhost:8000 (port forward may be needed).
 
+Formatting all HTML files:
+```bash
+$ npx js-beautify --type html --indent-size 2 --replace web/*.html
+```
+
 ## Production
 Build via
 ```bash

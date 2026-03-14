@@ -1,22 +1,17 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
-  <title>Thermals</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
+  <title>Thermal — View</title>
+  <link rel="stylesheet" href="styles.css" />
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
       background: #0a0f1a;
       color: #e0e8f0;
-      font-family: 'Segoe UI', sans-serif;
+      font-family: "Segoe UI", sans-serif;
       overflow: hidden;
     }
 
@@ -25,38 +20,6 @@
       height: 100vh;
       position: relative;
       margin-top: 44px;
-    }
-
-    canvas {
-      display: block;
-    }
-
-    #ui-panel {
-      position: absolute;
-      top: 52px;
-      right: 8px;
-      width: 250px;
-      background: rgba(10, 15, 30, 0.85);
-      border: 1px solid rgba(100, 160, 255, 0.3);
-      border-radius: 12px;
-      padding: 16px;
-      backdrop-filter: blur(8px);
-      transform: translateX(calc(100% + 20px));
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      max-height: calc(100vh - 68px);
-      overflow-y: auto;
-    }
-
-    #ui-panel.panel-open {
-      transform: translateX(0);
-    }
-
-    #ui-panel h2 {
-      font-size: 14px;
-      color: #7eb8ff;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 12px;
     }
 
     .control-group {
@@ -76,25 +39,6 @@
       font-weight: bold;
     }
 
-    input[type="range"] {
-      width: 100%;
-      appearance: none;
-      -webkit-appearance: none;
-      height: 4px;
-      background: rgba(100, 160, 255, 0.2);
-      border-radius: 2px;
-      outline: none;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #7eb8ff;
-      cursor: pointer;
-    }
-
     .scenario-btn {
       display: inline-block;
       padding: 4px 10px;
@@ -112,18 +56,6 @@
       background: #7eb8ff;
       color: #0a0f1a;
       border-color: #7eb8ff;
-    }
-
-    #colorbars {
-      position: absolute;
-      bottom: 24px;
-      left: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: flex-end;
-      justify-content: flex-end;
-      max-width: 420px;
     }
 
     .mode-btn {
@@ -151,40 +83,6 @@
       border-color: #7eb8ff88;
     }
 
-    .colorbar {
-      background: rgba(10, 15, 30, 0.82);
-      border: 1px solid rgba(100, 160, 255, 0.2);
-      border-radius: 8px;
-      padding: 10px 12px;
-    }
-
-    .colorbar-title {
-      text-align: center;
-      margin-bottom: 6px;
-      font-weight: bold;
-      color: #7eb8ff;
-      font-size: 11px;
-    }
-
-    .colorbar-body {
-      display: flex;
-      gap: 6px;
-      align-items: stretch;
-    }
-
-    .colorbar-canvas {
-      border-radius: 3px;
-    }
-
-    .colorbar-labels {
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      font-size: 10px;
-      color: #99b8d0;
-      line-height: 1;
-    }
-
     #loading {
       position: absolute;
       top: 50%;
@@ -202,67 +100,6 @@
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
       margin: 0 auto 12px;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    #info-panel {
-      position: absolute;
-      top: 52px;
-      left: 16px;
-      width: 250px;
-      background: rgba(10, 15, 30, 0.85);
-      border: 1px solid rgba(100, 160, 255, 0.3);
-      border-radius: 12px;
-      padding: 16px;
-      font-size: 12px;
-      color: #c8d8e8;
-      backdrop-filter: blur(8px);
-      display: none;
-      z-index: 10;
-    }
-
-    #info-panel h3 {
-      font-size: 14px;
-      color: #7eb8ff;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 4px;
-    }
-
-    #info-panel .info-coords {
-      font-size: 10px;
-      color: #7eb8ff;
-      margin-bottom: 10px;
-    }
-
-    #info-panel .info-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 5px;
-      border-bottom: 1px solid rgba(100, 160, 255, 0.08);
-      padding-bottom: 5px;
-    }
-
-    #info-panel .info-row:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-
-    #info-panel .info-label {
-      color: #6888a0;
-    }
-
-    #info-panel .info-val {
-      color: #e0f0ff;
-      font-weight: bold;
-      text-align: right;
     }
 
     #plume-section {
@@ -303,161 +140,7 @@
       border-radius: 4px;
     }
 
-    /* ── Header nav ── */
-    #header-nav {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 44px;
-      z-index: 3000;
-      display: flex;
-      align-items: center;
-      padding: 0 12px;
-      gap: 2px;
-      background: rgba(6, 10, 20, 0.92);
-      border-bottom: 1px solid rgba(100, 160, 255, 0.12);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-    }
-
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 5px 9px;
-      margin-right: 4px;
-      color: #7eb8ff;
-      text-decoration: none;
-      font-size: 12px;
-      font-weight: 600;
-      border-radius: 6px;
-      white-space: nowrap;
-      transition: background 0.15s;
-    }
-
-    .nav-logo img {
-      width: 18px;
-      height: 18px;
-      filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%);
-    }
-
-    .nav-logo:hover {
-      background: rgba(100, 160, 255, 0.1);
-    }
-
-    .nav-sep {
-      width: 1px;
-      height: 18px;
-      background: rgba(100, 160, 255, 0.12);
-      margin: 0 2px;
-      flex-shrink: 0;
-    }
-
-    .nav-link {
-      padding: 5px 10px;
-      color: #4a6888;
-      text-decoration: none;
-      font-size: 12px;
-      border-radius: 6px;
-      white-space: nowrap;
-      transition: background 0.15s, color 0.15s;
-    }
-
-    .nav-link:hover {
-      color: #90b8d8;
-      background: rgba(100, 160, 255, 0.08);
-    }
-
-    .nav-link.nav-active {
-      color: #7eb8ff;
-      background: rgba(100, 160, 255, 0.1);
-      font-weight: 500;
-    }
-
-    @media (max-width: 480px) {
-      .nav-logo span {
-        display: none;
-      }
-
-      .nav-link {
-        padding: 5px 7px;
-        font-size: 11px;
-      }
-    }
-
-    /* ── Panel toggle button ── */
-    #panel-toggle {
-      position: absolute;
-      top: 52px;
-      right: 8px;
-      z-index: 1002;
-      background: rgba(10, 15, 30, 0.88);
-      border: 1px solid rgba(100, 160, 255, 0.35);
-      border-radius: 12px;
-      color: #7eb8ff;
-      padding: 9px 14px;
-      font-size: 15px;
-      line-height: 1;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      transition: background 0.15s, right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    #panel-toggle:active {
-      background: rgba(30, 55, 100, 0.7);
-    }
-
     @media (max-width: 768px) {
-      #ui-panel {
-        top: auto !important;
-        right: 0 !important;
-        left: 0 !important;
-        bottom: 0 !important;
-        width: 100% !important;
-        max-height: 72vh;
-        max-height: 72dvh;
-        border-radius: 14px 14px 0 0;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        transform: translateY(100%);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      #ui-panel.panel-open {
-        transform: translateY(0);
-      }
-
-      #info-panel {
-        top: auto !important;
-        left: 0 !important;
-        right: 0 !important;
-        bottom: 0 !important;
-        width: 100% !important;
-        max-height: 55vh;
-        border-radius: 14px 14px 0 0;
-        overflow-y: auto;
-      }
-
-      #colorbars {
-        bottom: auto !important;
-        top: 52px !important;
-        /* 8 + 44 = 52px */
-        left: 8px !important;
-        max-width: calc(100vw - 16px);
-        overflow-x: auto;
-        flex-wrap: nowrap;
-        -webkit-overflow-scrolling: touch;
-        gap: 6px;
-      }
-
-      .colorbar {
-        padding: 6px 8px;
-      }
-
-      .colorbar-canvas {
-        height: 80px !important;
-      }
 
       /* Larger touch targets for range sliders */
       input[type="range"]::-webkit-slider-thumb {
@@ -476,203 +159,247 @@
 
 <body>
   <div id="canvas-container">
-    <div id="info-panel">
-      <div id="info-rows"></div>
-      <div id="plume-section" style="display:none">
-        <h4>Thermal plume profile</h4>
-        <div id="plume-wrap">
-          <div id="plume-alt-labels"></div>
-          <canvas id="plume-canvas" width="180" height="360"></canvas>
-        </div>
-      </div>
-    </div>
     <div id="loading">
       <div class="spinner"></div>
       <div>Loading simulation data...</div>
     </div>
   </div>
+  <div id="info-panel">
+    <h3>Selected point</h3>
+    <div id="info-rows"></div>
+    <div id="plume-section" style="display: none">
+      <h4>Thermal plume profile</h4>
+      <div id="plume-wrap">
+        <div id="plume-alt-labels"></div>
+        <canvas id="plume-canvas" width="180" height="360"></canvas>
+      </div>
+    </div>
+  </div>
 
-  <div id="ui-panel" class="panel-open">
-    <h2>Paragliding thermal simulations</h2>
+  <div id="ui-panel" class="open">
+    <h2>Thermal</h2>
 
     <div class="control-group">
-      <div id="mode-buttons"></div>
+      <div id="preset-buttons" class="tab-row"></div>
     </div>
 
     <div class="control-group" data-for="time-slider">
-      <label>Time of day <span id="time-display" style="color:#7eb8ff;font-weight:bold">—</span></label>
-      <input type="range" id="time-slider" min="0" max="0" step="1" value="0" style="width:100%;margin-top:4px">
-      <div id="sun-pos-info" style="font-size:10px;color:#556677;margin-top:3px">—</div>
+      <label>Time of day
+        <span id="time-display" style="color: #7eb8ff; font-weight: bold">—</span></label>
+      <input type="range" id="time-slider" min="0" max="0" step="1" value="0" style="width: 100%; margin-top: 4px" />
+      <div id="sun-pos-info" style="font-size: 10px; color: #556677; margin-top: 3px">
+        —
+      </div>
     </div>
 
     <div class="control-group" data-for="ambient-intensity">
       <label>Ambient light <span id="ambient-intensity-val">2.0</span></label>
-      <input type="range" id="ambient-intensity" min="0" max="6" step="0.1" value="2.0" data-decimals="1">
+      <input type="range" id="ambient-intensity" min="0" max="25" step="0.1" value="2.0" data-decimals="1" />
     </div>
 
     <div class="control-group" data-for="sun-intensity">
       <label>Sun intensity <span id="sun-intensity-val">3.0</span></label>
-      <input type="range" id="sun-intensity" min="0" max="8" step="0.1" value="3.0" data-decimals="1">
+      <input type="range" id="sun-intensity" min="0" max="10" step="0.1" value="3.0" data-decimals="1" />
     </div>
 
     <div class="control-group" data-for="terrain-opacity">
       <label>Terrain (elevation) <span id="terrain-opacity-val">0.80</span></label>
-      <input type="range" id="terrain-opacity" min="0" max="1" step="0.05" value="0.8" data-decimals="2">
+      <input type="range" id="terrain-opacity" min="0" max="1" step="0.05" value="0.8" data-decimals="2" />
     </div>
 
     <div class="control-group" data-for="neutral-opacity">
       <label>Neutral <span id="neutral-opacity-val">0.00</span></label>
-      <input type="range" id="neutral-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
+      <input type="range" id="neutral-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2" />
     </div>
 
     <div class="control-group" data-for="heatmap-opacity">
       <label>Thermals (ΔT) <span id="heatmap-opacity-val">0.70</span></label>
-      <input type="range" id="heatmap-opacity" min="0" max="1" step="0.05" value="0.7" data-decimals="2">
+      <input type="range" id="heatmap-opacity" min="0" max="1" step="0.05" value="0.7" data-decimals="2" />
     </div>
 
     <div class="control-group" data-for="heat-accum-opacity">
-      <label>Daily heat accum. <span id="heat-accum-opacity-val">0.00</span></label>
-      <input type="range" id="heat-accum-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
+      <label>Daily heat accum.
+        <span id="heat-accum-opacity-val">0.00</span></label>
+      <input type="range" id="heat-accum-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2" />
     </div>
 
     <div class="control-group" data-for="albedo-opacity">
       <label>Albedo <span id="albedo-opacity-val">0.00</span></label>
-      <input type="range" id="albedo-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
+      <input type="range" id="albedo-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2" />
     </div>
 
     <div class="control-group" data-for="slope-opacity">
       <label>Slope <span id="slope-opacity-val">0.00</span></label>
-      <input type="range" id="slope-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
+      <input type="range" id="slope-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2" />
     </div>
 
     <div class="control-group" data-for="collector-opacity">
       <label>Collecting zones <span id="collector-opacity-val">0.00</span></label>
-      <input type="range" id="collector-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
+      <input type="range" id="collector-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2" />
     </div>
 
     <div class="control-group" data-for="trigger-opacity">
       <label>Trigger zones <span id="trigger-opacity-val">0.00</span></label>
-      <input type="range" id="trigger-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
+      <input type="range" id="trigger-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2" />
     </div>
 
     <div class="control-group" data-for="shadow-darkness">
       <label>Shadow darkness <span id="shadow-darkness-val">0.70</span></label>
-      <input type="range" id="shadow-darkness" min="0" max="1" step="0.05" value="0.7" data-decimals="2">
+      <input type="range" id="shadow-darkness" min="0" max="1" step="0.05" value="0.7" data-decimals="2" />
     </div>
 
     <div class="control-group" data-for="thermal-top-opacity">
       <label>Thermal top <span id="thermal-top-opacity-val">0.00</span></label>
-      <input type="range" id="thermal-top-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
+      <input type="range" id="thermal-top-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2" />
     </div>
 
     <div class="control-group" data-for="flow-opacity">
       <label>Flow arrows <span id="flow-opacity-val">0.00</span></label>
-      <input type="range" id="flow-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2">
+      <input type="range" id="flow-opacity" min="0" max="1" step="0.05" value="0" data-decimals="2" />
     </div>
 
     <div class="control-group" data-for="elr">
       <label>ELR <span id="elr-val">6.5</span> K/km</label>
-      <input type="range" id="elr" min="3" max="9" step="0.1" value="6.5" data-decimals="1">
+      <input type="range" id="elr" min="3" max="9" step="0.1" value="6.5" data-decimals="1" />
     </div>
 
     <div class="control-group" data-for="trigger-threshold">
-      <label>Trigger threshold <span id="trigger-threshold-val">1.5</span> K</label>
-      <input type="range" id="trigger-threshold" min="0" max="5" step="0.1" value="1.5" data-decimals="1">
+      <label>Trigger threshold
+        <span id="trigger-threshold-val">1.5</span> K</label>
+      <input type="range" id="trigger-threshold" min="0" max="5" step="0.1" value="1.5" data-decimals="1" />
     </div>
 
-    <div class="control-group" style="margin-top:10px; font-size:11px; color:#668; line-height:1.5">
+    <div class="control-group" style="margin-top: 10px; font-size: 11px; color: #668; line-height: 1.5">
       Drag to rotate · Scroll to zoom · Right-drag to pan
     </div>
   </div>
 
   <nav id="header-nav">
-    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+    <a href="air-flow" class="nav-logo"><img src="icons/favicon.svg" alt="" /><span>Home</span></a>
     <div class="nav-sep"></div>
-    <a href="area" class="nav-link">Area</a>
-    <a href="simulate" class="nav-link">Simulate</a>
-    <a href="view" class="nav-link nav-active">View</a>
-    <a href="about" class="nav-link">About</a>
+    <a href="area-selection" class="nav-link">Area</a>
+    <div class="nav-sep"></div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn nav-active">Thermal</button>
+      <div class="nav-dropdown-menu">
+        <a href="thermal-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="thermal-view" class="nav-dropdown-item nav-active">View</a>
+        <a href="thermal-about" class="nav-dropdown-item">About</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Thermal NS</button>
+      <div class="nav-dropdown-menu">
+        <a href="thermal-ns-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="thermal-ns-view" class="nav-dropdown-item">View</a>
+        <a href="thermal-ns-about" class="nav-dropdown-item">About</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Wind</button>
+      <div class="nav-dropdown-menu">
+        <a href="wind-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="wind-view" class="nav-dropdown-item">View</a>
+        <a href="wind-about" class="nav-dropdown-item">About</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Wind NS</button>
+      <div class="nav-dropdown-menu">
+        <a href="wind-ns-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="wind-ns-view" class="nav-dropdown-item">View</a>
+        <a href="wind-ns-about" class="nav-dropdown-item">About</a>
+      </div>
+    </div>
   </nav>
 
-  <button id="panel-toggle"
-    onclick="const p=document.getElementById('ui-panel');p.classList.toggle('panel-open');this.textContent=p.classList.contains('panel-open')?'✕':'☰';"
-    title="Toggle controls">✕</button>
+  <button id="panel-toggle" onclick="
+        const p = document.getElementById('ui-panel');
+        p.classList.toggle('open');
+        this.textContent = p.classList.contains('open') ? '✕' : '☰';
+      " title="Toggle controls">
+    ✕
+  </button>
 
   <div id="colorbars">
-    <div class="colorbar" id="cb-elevation-wrap" style="display:none">
+    <div class="colorbar" id="cb-elevation-wrap" style="display: none">
       <div class="colorbar-title">Elevation (m)</div>
       <div class="colorbar-body">
-        <canvas class="colorbar-canvas" id="cb-elevation" width="20" height="180"></canvas>
+        <canvas class="colorbar-canvas" id="cb-elevation" width="20" height="160"></canvas>
         <div class="colorbar-labels" id="cb-elevation-labels"></div>
       </div>
     </div>
-    <div class="colorbar" id="cb-thermal-wrap" style="display:none">
+    <div class="colorbar" id="cb-thermal-wrap" style="display: none">
       <div class="colorbar-title">Thermal ΔT (K)</div>
       <div class="colorbar-body">
-        <canvas class="colorbar-canvas" id="cb-thermal" width="20" height="180"></canvas>
+        <canvas class="colorbar-canvas" id="cb-thermal" width="20" height="160"></canvas>
         <div class="colorbar-labels" id="cb-thermal-labels"></div>
       </div>
     </div>
-    <div class="colorbar" id="cb-albedo-wrap" style="display:none">
+    <div class="colorbar" id="cb-albedo-wrap" style="display: none">
       <div class="colorbar-title">Thermal factor</div>
       <div class="colorbar-body">
-        <canvas class="colorbar-canvas" id="cb-albedo" width="20" height="180"></canvas>
+        <canvas class="colorbar-canvas" id="cb-albedo" width="20" height="160"></canvas>
         <div class="colorbar-labels" id="cb-albedo-labels"></div>
       </div>
     </div>
-    <div class="colorbar" id="cb-slope-wrap" style="display:none">
+    <div class="colorbar" id="cb-slope-wrap" style="display: none">
       <div class="colorbar-title">Slope (°)</div>
       <div class="colorbar-body">
-        <canvas class="colorbar-canvas" id="cb-slope" width="20" height="180"></canvas>
+        <canvas class="colorbar-canvas" id="cb-slope" width="20" height="160"></canvas>
         <div class="colorbar-labels" id="cb-slope-labels"></div>
       </div>
     </div>
-    <div class="colorbar" id="cb-thermal-top-wrap" style="display:none">
+    <div class="colorbar" id="cb-thermal-top-wrap" style="display: none">
       <div class="colorbar-title">Thermal top AGL (m)</div>
       <div class="colorbar-body">
-        <canvas class="colorbar-canvas" id="cb-thermal-top" width="20" height="180"></canvas>
+        <canvas class="colorbar-canvas" id="cb-thermal-top" width="20" height="160"></canvas>
         <div class="colorbar-labels" id="cb-thermal-top-labels"></div>
       </div>
     </div>
-    <div class="colorbar" id="cb-heat-accum-wrap" style="display:none">
+    <div class="colorbar" id="cb-heat-accum-wrap" style="display: none">
       <div class="colorbar-title">Daily heat (K·h)</div>
       <div class="colorbar-body">
-        <canvas class="colorbar-canvas" id="cb-heat-accum" width="20" height="180"></canvas>
+        <canvas class="colorbar-canvas" id="cb-heat-accum" width="20" height="160"></canvas>
         <div class="colorbar-labels" id="cb-heat-accum-labels"></div>
       </div>
     </div>
-    <div class="colorbar" id="cb-collector-wrap" style="display:none">
+    <div class="colorbar" id="cb-collector-wrap" style="display: none">
       <div class="colorbar-title">Collector score (K·h·conv)</div>
       <div class="colorbar-body">
-        <canvas class="colorbar-canvas" id="cb-collector" width="20" height="180"></canvas>
+        <canvas class="colorbar-canvas" id="cb-collector" width="20" height="160"></canvas>
         <div class="colorbar-labels" id="cb-collector-labels"></div>
       </div>
     </div>
-    <div class="colorbar" id="cb-trigger-wrap" style="display:none">
+    <div class="colorbar" id="cb-trigger-wrap" style="display: none">
       <div class="colorbar-title">Trigger factor</div>
       <div class="colorbar-body">
-        <canvas class="colorbar-canvas" id="cb-trigger" width="20" height="180"></canvas>
+        <canvas class="colorbar-canvas" id="cb-trigger" width="20" height="160"></canvas>
         <div class="colorbar-labels" id="cb-trigger-labels"></div>
       </div>
     </div>
   </div>
 
   <script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
-  }
-}
-</script>
+    {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+        }
+      }
+    </script>
 
   <script type="module">
-    import * as THREE from 'three';
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import * as THREE from "three";
+    import {
+      OrbitControls
+    } from "three/addons/controls/OrbitControls.js";
 
     // ─── Scene setup ───────────────────────────────────────────────────────────
-    const container = document.getElementById('canvas-container');
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const container = document.getElementById("canvas-container");
+    const renderer = new THREE.WebGLRenderer({
+      antialias: true
+    });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
@@ -683,7 +410,12 @@
     scene.background = new THREE.Color(0x040810);
     scene.fog = new THREE.Fog(0x040810, 8000, 18000);
 
-    const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 10, 30000);
+    const camera = new THREE.PerspectiveCamera(
+      55,
+      window.innerWidth / window.innerHeight,
+      10,
+      30000,
+    );
     camera.position.set(0, -2500, 2500);
     camera.up.set(0, 0, 1);
 
@@ -710,7 +442,7 @@
     sun.shadow.camera.bottom = -5500;
     sun.shadow.camera.near = 100;
     sun.shadow.camera.far = 18000;
-    sun.shadow.bias = -0.002;   // prevents shadow acne on large terrain
+    sun.shadow.bias = -0.002; // prevents shadow acne on large terrain
     scene.add(sun);
 
     // ─── Data ──────────────────────────────────────────────────────────────────
@@ -721,15 +453,18 @@
     // ─── IndexedDB helper ───────────────────────────────────────────────────────
     function idbGet() {
       return new Promise((resolve) => {
-        const req = indexedDB.open('paragliding', 1);
-        req.onupgradeneeded = e => e.target.result.createObjectStore('sim');
+        const req = indexedDB.open("paragliding", 1);
+        req.onupgradeneeded = (e) => e.target.result.createObjectStore("sim");
         req.onerror = () => resolve(null);
-        req.onsuccess = e => {
+        req.onsuccess = (e) => {
           const db = e.target.result;
-          if (!db.objectStoreNames.contains('sim')) { resolve(null); return; }
-          const tx = db.transaction('sim', 'readwrite');
-          const store = tx.objectStore('sim');
-          const getReq = store.get('latest');
+          if (!db.objectStoreNames.contains("sim")) {
+            resolve(null);
+            return;
+          }
+          const tx = db.transaction("sim", "readwrite");
+          const store = tx.objectStore("sim");
+          const getReq = store.get("latest");
           getReq.onsuccess = () => {
             const raw = getReq.result;
             try {
@@ -746,23 +481,19 @@
     // ─── Load simulation data ───────────────────────────────────────────────────
     async function loadData() {
       try {
-        // Prefer simulation result saved by simulate.html (via IndexedDB)
+        // Prefer simulation result saved by thermal-simulation.html (via IndexedDB)
         let simJson = await idbGet();
         if (!simJson) {
-          const simResp = await fetch('../data/simulation.json');
-          if (!simResp.ok) throw new Error(`simulation.json: HTTP ${simResp.status}`);
+          const simResp = await fetch("../data/simulation.json");
+          if (!simResp.ok)
+            throw new Error(`simulation.json: HTTP ${simResp.status}`);
           simJson = await simResp.json();
         }
 
-        const [modesResp, settingsResp, cmapsResp] = await Promise.all([
-          fetch('modes.json'),
-          fetch('settings.json'),
-          fetch('colormaps.json'),
-        ]);
-        if (!modesResp.ok) throw new Error(`modes.json: HTTP ${modesResp.status}`);
-        if (!settingsResp.ok) throw new Error(`settings.json: HTTP ${settingsResp.status}`);
-        if (!cmapsResp.ok) throw new Error(`colormaps.json: HTTP ${cmapsResp.status}`);
-        simData = simJson;  // either from IndexedDB (simulate.html) or data/simulation.json
+        const [modesResp] = await Promise.all([fetch("presets.json")]);
+        if (!modesResp.ok)
+          throw new Error(`presets.json: HTTP ${modesResp.status}`);
+        simData = simJson; // either from IndexedDB (thermal-simulation.html) or data/simulation.json
         DALR_JS = simData.dalr ?? 0.0098;
         // Derive HTOP_MAX from the actual data: max thermal top at standard ELR (6.5 K/km)
         {
@@ -772,66 +503,257 @@
             let maxDT = 0;
             for (const sc of simData.scenarios)
               for (const row of sc.ground_temp_anomaly)
-                for (const v of row) if (v > maxDT) maxDT = v;
+                for (const v of row)
+                  if (v > maxDT) maxDT = v;
             const rawMax = maxDT / dLapseRef;
             HTOP_MAX = Math.max(500, Math.ceil(rawMax / 500) * 500);
           }
         }
         window._modesData = await modesResp.json();
-        window._settingsData = await settingsResp.json();
-        window._colormapsData = await cmapsResp.json();
-        document.getElementById('loading').style.display = 'none';
+        window._colormapsData = {
+          elevation: [{
+              t: 0.0,
+              color: "#21591f"
+            },
+            {
+              t: 0.18,
+              color: "#407a2e"
+            },
+            {
+              t: 0.38,
+              color: "#6b6633"
+            },
+            {
+              t: 0.55,
+              color: "#7a5938"
+            },
+            {
+              t: 0.72,
+              color: "#948575"
+            },
+            {
+              t: 0.88,
+              color: "#bfb8b3"
+            },
+            {
+              t: 1.0,
+              color: "#ebe8eb"
+            },
+          ],
+          thermal: [{
+              t: 0.0,
+              color: "#000000"
+            },
+            {
+              t: 0.33,
+              color: "#ff0000"
+            },
+            {
+              t: 0.67,
+              color: "#ffff00"
+            },
+            {
+              t: 1.0,
+              color: "#ffffff"
+            },
+          ],
+          albedo: [{
+              t: 0.0,
+              color: "#004fc7"
+            },
+            {
+              t: 0.5,
+              color: "#f0b34f"
+            },
+            {
+              t: 1.0,
+              color: "#f04200"
+            },
+          ],
+          slope: [{
+              t: 0.0,
+              color: "#00a114"
+            },
+            {
+              t: 0.5,
+              color: "#db6414"
+            },
+            {
+              t: 1.0,
+              color: "#ff00c7"
+            },
+          ],
+          "heat-accum": [{
+              t: 0.0,
+              color: "#0a0520"
+            },
+            {
+              t: 0.2,
+              color: "#6a0050"
+            },
+            {
+              t: 0.45,
+              color: "#c00000"
+            },
+            {
+              t: 0.7,
+              color: "#ff6200"
+            },
+            {
+              t: 0.88,
+              color: "#ffd700"
+            },
+            {
+              t: 1.0,
+              color: "#ffffff"
+            },
+          ],
+          "thermal-top": [{
+              t: 0.0,
+              color: "#000011"
+            },
+            {
+              t: 0.2,
+              color: "#2d1b69"
+            },
+            {
+              t: 0.4,
+              color: "#1d4ed8"
+            },
+            {
+              t: 0.6,
+              color: "#06b6d4"
+            },
+            {
+              t: 0.8,
+              color: "#eab308"
+            },
+            {
+              t: 1.0,
+              color: "#dc2626"
+            },
+          ],
+          trigger: [{
+              t: 0.0,
+              color: "#050010"
+            },
+            {
+              t: 0.25,
+              color: "#3a0a60"
+            },
+            {
+              t: 0.5,
+              color: "#008860"
+            },
+            {
+              t: 0.75,
+              color: "#b8d800"
+            },
+            {
+              t: 1.0,
+              color: "#ffff90"
+            },
+          ],
+          collector: [{
+              t: 0.0,
+              color: "#000818"
+            },
+            {
+              t: 0.25,
+              color: "#003060"
+            },
+            {
+              t: 0.5,
+              color: "#0066aa"
+            },
+            {
+              t: 0.75,
+              color: "#00ccdd"
+            },
+            {
+              t: 1.0,
+              color: "#ccffff"
+            },
+          ],
+        };
+        document.getElementById("loading").style.display = "none";
         init();
       } catch (e) {
-        document.getElementById('loading').innerHTML =
+        document.getElementById("loading").innerHTML =
           `<div style="color:#f66">Failed to load data<br><small>${e.message}</small><br><br>
-       <small>Run the simulation first (<a href="simulate" style="color:#7eb8ff">simulate.html</a>), or serve from project root:<br>
-       <code>python -m http.server 8000</code></small></div>`;
+       <small>Run the simulation first (<a href="thermal-simulation" style="color:#7eb8ff">thermal-simulation.html</a>).</small></div>`;
       }
     }
 
     // ─── Terrain mesh ───────────────────────────────────────────────────────────
-    let terrainZMin = 0, terrainZMax = 1;
+    let terrainZMin = 0,
+      terrainZMax = 1;
 
     function buildTerrain(terrainData) {
-      if (terrainMesh) { scene.remove(terrainMesh); terrainMesh.geometry.dispose(); }
+      if (terrainMesh) {
+        scene.remove(terrainMesh);
+        terrainMesh.geometry.dispose();
+      }
 
-      const { x_extent, y_extent } = terrainData;
+      const {
+        x_extent,
+        y_extent
+      } = terrainData;
 
       // Use high-res mesh if available (AWS Terrarium ~7 m), else fall back to sim grid (30 m)
-      const hasMesh = terrainData.mesh_elevation && terrainData.mesh_nx && terrainData.mesh_ny;
-      const elev = hasMesh ? terrainData.mesh_elevation : terrainData.elevation;
+      const hasMesh =
+        terrainData.mesh_elevation &&
+        terrainData.mesh_nx &&
+        terrainData.mesh_ny;
+      const elev = hasMesh ?
+        terrainData.mesh_elevation :
+        terrainData.elevation;
       const nx = hasMesh ? terrainData.mesh_nx : terrainData.nx;
       const ny = hasMesh ? terrainData.mesh_ny : terrainData.ny;
-      if (hasMesh) console.log(`Using high-res mesh: ${nx}×${ny} vertices (~${terrainData.mesh_dx?.toFixed(0)} m)`);
+      if (hasMesh)
+        console.log(
+          `Using high-res mesh: ${nx}×${ny} vertices (~${terrainData.mesh_dx?.toFixed(0)} m)`,
+        );
 
       const geom = new THREE.PlaneGeometry(
         x_extent[1] - x_extent[0],
         y_extent[1] - y_extent[0],
-        nx - 1, ny - 1
+        nx - 1,
+        ny - 1,
       );
 
       const pos = geom.attributes.position;
       for (let j = 0; j < ny; j++)
-        for (let i = 0; i < nx; i++)
-          pos.setZ(j * nx + i, elev[j][i]);
+        for (let i = 0; i < nx; i++) pos.setZ(j * nx + i, elev[j][i]);
       pos.needsUpdate = true;
       geom.computeVertexNormals();
 
-      terrainZMin = Infinity; terrainZMax = -Infinity;
+      terrainZMin = Infinity;
+      terrainZMax = -Infinity;
       for (let i = 0; i < pos.count; i++) {
         const z = pos.getZ(i);
         if (z < terrainZMin) terrainZMin = z;
         if (z > terrainZMax) terrainZMax = z;
       }
 
-      geom.setAttribute('color', new THREE.BufferAttribute(new Float32Array(pos.count * 3), 3));
+      geom.setAttribute(
+        "color",
+        new THREE.BufferAttribute(new Float32Array(pos.count * 3), 3),
+      );
 
-      const mat = new THREE.MeshLambertMaterial({ vertexColors: true, transparent: true, opacity: 0.8 });
+      const mat = new THREE.MeshLambertMaterial({
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+      });
       window._terrainMat = mat;
 
       terrainMesh = new THREE.Mesh(geom, mat);
-      terrainMesh.position.set((x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0);
+      terrainMesh.position.set(
+        (x_extent[0] + x_extent[1]) / 2,
+        -(y_extent[0] + y_extent[1]) / 2,
+        0,
+      );
       terrainMesh.receiveShadow = true;
       scene.add(terrainMesh);
 
@@ -853,25 +775,37 @@
     function sampleColormap(stops, t) {
       if (!stops || stops.length === 0) return [0, 0, 0];
       t = Math.max(0, Math.min(1, t));
-      let lo = stops[0], hi = stops[stops.length - 1];
+      let lo = stops[0],
+        hi = stops[stops.length - 1];
       for (let i = 0; i < stops.length - 1; i++) {
-        if (t <= stops[i + 1].t) { lo = stops[i]; hi = stops[i + 1]; break; }
+        if (t <= stops[i + 1].t) {
+          lo = stops[i];
+          hi = stops[i + 1];
+          break;
+        }
       }
-      const s = (hi.t === lo.t) ? 0 : (t - lo.t) / (hi.t - lo.t);
+      const s = hi.t === lo.t ? 0 : (t - lo.t) / (hi.t - lo.t);
       const [r0, g0, b0] = hexToRgb01(lo.color);
       const [r1, g1, b1] = hexToRgb01(hi.color);
       return [r0 + s * (r1 - r0), g0 + s * (g1 - g0), b0 + s * (b1 - b0)];
     }
 
     // Generic colorbar: pixel-by-pixel from the same sampleColormap — guaranteed match.
-    function drawColorbar(canvasId, labelsId, cmapName, minVal, maxVal, fmtFn) {
+    function drawColorbar(
+      canvasId,
+      labelsId,
+      cmapName,
+      minVal,
+      maxVal,
+      fmtFn,
+    ) {
       const stops = (window._colormapsData || {})[cmapName];
       if (!stops) return;
       const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       const img = ctx.createImageData(canvas.width, canvas.height);
       for (let py = 0; py < canvas.height; py++) {
-        const t = 1 - py / (canvas.height - 1);   // top = maxVal
+        const t = 1 - py / (canvas.height - 1); // top = maxVal
         const [r, g, b] = sampleColormap(stops, t);
         for (let px = 0; px < canvas.width; px++) {
           const idx = (py * canvas.width + px) * 4;
@@ -883,10 +817,10 @@
       }
       ctx.putImageData(img, 0, 0);
       const labelsDiv = document.getElementById(labelsId);
-      labelsDiv.innerHTML = '';
+      labelsDiv.innerHTML = "";
       for (let k = 0; k <= 5; k++) {
         const val = maxVal - (k / 5) * (maxVal - minVal);
-        const span = document.createElement('span');
+        const span = document.createElement("span");
         span.textContent = fmtFn(val);
         labelsDiv.appendChild(span);
       }
@@ -900,28 +834,47 @@
       for (let i = 0; i < pos.count; i++) {
         const t = (pos.getZ(i) - terrainZMin) / (terrainZMax - terrainZMin);
         const [r, g, b] = sampleColormap(stops, t);
-        arr[i * 3] = r; arr[i * 3 + 1] = g; arr[i * 3 + 2] = b;
+        arr[i * 3] = r;
+        arr[i * 3 + 1] = g;
+        arr[i * 3 + 2] = b;
       }
       terrainMesh.geometry.attributes.color.needsUpdate = true;
     }
 
     function drawElevationColorbar() {
-      drawColorbar('cb-elevation', 'cb-elevation-labels', 'elevation',
-        terrainZMin, terrainZMax, v => v.toFixed(0) + ' m');
+      drawColorbar(
+        "cb-elevation",
+        "cb-elevation-labels",
+        "elevation",
+        terrainZMin,
+        terrainZMax,
+        (v) => v.toFixed(0) + " m",
+      );
     }
 
     // ─── Heatmap overlay ────────────────────────────────────────────────────────
     let heatmapMesh = null;
 
     function buildHeatmap(terrainData) {
-      if (heatmapMesh) { scene.remove(heatmapMesh); heatmapMesh.geometry.dispose(); heatmapMesh.material.dispose(); }
+      if (heatmapMesh) {
+        scene.remove(heatmapMesh);
+        heatmapMesh.geometry.dispose();
+        heatmapMesh.material.dispose();
+      }
 
-      const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+      const {
+        nx,
+        ny,
+        elevation,
+        x_extent,
+        y_extent
+      } = terrainData;
 
       const geom = new THREE.PlaneGeometry(
         x_extent[1] - x_extent[0],
         y_extent[1] - y_extent[0],
-        nx - 1, ny - 1
+        nx - 1,
+        ny - 1,
       );
 
       // Match terrain elevation, lifted 3m to avoid z-fighting
@@ -932,7 +885,7 @@
       pos.needsUpdate = true;
 
       const colors = new Float32Array(pos.count * 3);
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
       const mat = new THREE.MeshBasicMaterial({
         vertexColors: true,
@@ -948,7 +901,7 @@
       heatmapMesh.position.set(
         (x_extent[0] + x_extent[1]) / 2,
         -(y_extent[0] + y_extent[1]) / 2,
-        0
+        0,
       );
       scene.add(heatmapMesh);
     }
@@ -974,7 +927,9 @@
       const T = simData.terrain;
       const dT = sc.ground_temp_anomaly;
       const stops = (window._colormapsData || {}).thermal || [];
-      const threshold = parseFloat(document.getElementById('trigger-threshold').value);
+      const threshold = parseFloat(
+        document.getElementById("trigger-threshold").value,
+      );
       const maxDT = globalMaxDT || 1;
 
       const arr = heatmapMesh.geometry.attributes.color.array;
@@ -983,11 +938,20 @@
           const idx = (j * T.nx + i) * 3;
           const dT_eff = Math.max(0, dT[j][i] - threshold);
           const [r, g, b] = sampleColormap(stops, dT_eff / maxDT);
-          arr[idx] = r; arr[idx + 1] = g; arr[idx + 2] = b;
+          arr[idx] = r;
+          arr[idx + 1] = g;
+          arr[idx + 2] = b;
         }
       }
       heatmapMesh.geometry.attributes.color.needsUpdate = true;
-      drawColorbar('cb-thermal', 'cb-thermal-labels', 'thermal', 0, maxDT, v => v.toFixed(1) + ' K');
+      drawColorbar(
+        "cb-thermal",
+        "cb-thermal-labels",
+        "thermal",
+        0,
+        maxDT,
+        (v) => v.toFixed(1) + " K",
+      );
     }
 
     // ─── Sun object ──────────────────────────────────────────────────────────────
@@ -997,33 +961,38 @@
     const SUN_R = 7500; // distance from terrain centre to place sun sphere
 
     function sunWorldPos(azDeg, elDeg, terrainCentreZ) {
-      const az = azDeg * Math.PI / 180;
-      const el = elDeg * Math.PI / 180;
+      const az = (azDeg * Math.PI) / 180;
+      const el = (elDeg * Math.PI) / 180;
       return new THREE.Vector3(
         SUN_R * Math.sin(az) * Math.cos(el),
-        SUN_R * Math.cos(az) * Math.cos(el),     // North → Three.js Y
-        terrainCentreZ + SUN_R * Math.sin(el)
+        SUN_R * Math.cos(az) * Math.cos(el), // North → Three.js Y
+        terrainCentreZ + SUN_R * Math.sin(el),
       );
     }
 
     function buildSunObject() {
       // Sphere
       const geo = new THREE.SphereGeometry(160, 16, 16);
-      const mat = new THREE.MeshBasicMaterial({ color: 0xffee88 });
+      const mat = new THREE.MeshBasicMaterial({
+        color: 0xffee88
+      });
       sunSphere = new THREE.Mesh(geo, mat);
       scene.add(sunSphere);
 
       // Soft glow (larger transparent sphere around it)
       const glowGeo = new THREE.SphereGeometry(320, 16, 16);
       const glowMat = new THREE.MeshBasicMaterial({
-        color: 0xffcc44, transparent: true, opacity: 0.18,
-        blending: THREE.AdditiveBlending, depthWrite: false,
+        color: 0xffcc44,
+        transparent: true,
+        opacity: 0.18,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
       });
       sunGlow = new THREE.Mesh(glowGeo, glowMat);
       scene.add(sunGlow);
 
       // HTML label
-      sunLabelDiv = document.createElement('div');
+      sunLabelDiv = document.createElement("div");
       sunLabelDiv.style.cssText = `
     position: absolute; pointer-events: none;
     background: rgba(10,15,30,0.75); border: 1px solid #ffcc44;
@@ -1031,7 +1000,7 @@
     padding: 2px 7px; border-radius: 4px; white-space: nowrap;
     transform: translate(-50%, -130%);
   `;
-      document.getElementById('canvas-container').appendChild(sunLabelDiv);
+      document.getElementById("canvas-container").appendChild(sunLabelDiv);
     }
 
     function updateSunObject(scenarioIndex) {
@@ -1055,12 +1024,27 @@
     let albedoMesh = null;
 
     function buildAlbedoOverlay(terrainData) {
-      if (albedoMesh) { scene.remove(albedoMesh); albedoMesh.geometry.dispose(); albedoMesh.material.dispose(); }
+      if (albedoMesh) {
+        scene.remove(albedoMesh);
+        albedoMesh.geometry.dispose();
+        albedoMesh.material.dispose();
+      }
       if (!terrainData.thermal_factor) return;
 
-      const { nx, ny, elevation, x_extent, y_extent, thermal_factor } = terrainData;
+      const {
+        nx,
+        ny,
+        elevation,
+        x_extent,
+        y_extent,
+        thermal_factor
+      } =
+      terrainData;
       const geom = new THREE.PlaneGeometry(
-        x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+        x_extent[1] - x_extent[0],
+        y_extent[1] - y_extent[0],
+        nx - 1,
+        ny - 1,
       );
       const pos = geom.attributes.position;
       for (let j = 0; j < ny; j++)
@@ -1069,7 +1053,8 @@
       pos.needsUpdate = true;
 
       // Compute range
-      let minTF = Infinity, maxTF = -Infinity;
+      let minTF = Infinity,
+        maxTF = -Infinity;
       for (let j = 0; j < ny; j++)
         for (let i = 0; i < nx; i++) {
           const v = thermal_factor[j][i];
@@ -1082,37 +1067,69 @@
         for (let i = 0; i < nx; i++) {
           const idx = (j * nx + i) * 3;
           const t = (thermal_factor[j][i] - minTF) / (maxTF - minTF);
-          const [r, g, b] = sampleColormap((window._colormapsData || {}).albedo || [], t);
-          colors[idx] = r; colors[idx + 1] = g; colors[idx + 2] = b;
+          const [r, g, b] = sampleColormap(
+            (window._colormapsData || {}).albedo || [],
+            t,
+          );
+          colors[idx] = r;
+          colors[idx + 1] = g;
+          colors[idx + 2] = b;
         }
       }
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
       const mat = new THREE.MeshBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0,
-        depthWrite: false, depthTest: false,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        depthTest: false,
       });
       window._albedoMat = mat;
 
       albedoMesh = new THREE.Mesh(geom, mat);
       albedoMesh.position.set(
-        (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+        (x_extent[0] + x_extent[1]) / 2,
+        -(y_extent[0] + y_extent[1]) / 2,
+        0,
       );
       scene.add(albedoMesh);
-      drawColorbar('cb-albedo', 'cb-albedo-labels', 'albedo', minTF, maxTF, v => v.toFixed(2));
+      drawColorbar(
+        "cb-albedo",
+        "cb-albedo-labels",
+        "albedo",
+        minTF,
+        maxTF,
+        (v) => v.toFixed(2),
+      );
     }
 
     // ─── Slope overlay ────────────────────────────────────────────────────────────
     let slopeMesh = null;
     let slopeMax = 45;
-    let slopeDegData = null;   // saved for point queries
+    let slopeDegData = null; // saved for point queries
 
     function buildSlopeOverlay(terrainData) {
-      if (slopeMesh) { scene.remove(slopeMesh); slopeMesh.geometry.dispose(); slopeMesh.material.dispose(); }
+      if (slopeMesh) {
+        scene.remove(slopeMesh);
+        slopeMesh.geometry.dispose();
+        slopeMesh.material.dispose();
+      }
 
-      const { nx, ny, elevation, x_extent, y_extent, dx, dy } = terrainData;
+      const {
+        nx,
+        ny,
+        elevation,
+        x_extent,
+        y_extent,
+        dx,
+        dy
+      } = terrainData;
       const geom = new THREE.PlaneGeometry(
-        x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+        x_extent[1] - x_extent[0],
+        y_extent[1] - y_extent[0],
+        nx - 1,
+        ny - 1,
       );
       const pos = geom.attributes.position;
       for (let j = 0; j < ny; j++)
@@ -1126,11 +1143,16 @@
       slopeMax = 0;
       for (let j = 0; j < ny; j++) {
         for (let i = 0; i < nx; i++) {
-          const i0 = Math.max(0, i - 1), i1 = Math.min(nx - 1, i + 1);
-          const j0 = Math.max(0, j - 1), j1 = Math.min(ny - 1, j + 1);
-          const dzdx = (elevation[j][i1] - elevation[j][i0]) / ((i1 - i0) * dx);
-          const dzdy = (elevation[j1][i] - elevation[j0][i]) / ((j1 - j0) * dy);
-          const s = Math.atan(Math.sqrt(dzdx * dzdx + dzdy * dzdy)) * 180 / Math.PI;
+          const i0 = Math.max(0, i - 1),
+            i1 = Math.min(nx - 1, i + 1);
+          const j0 = Math.max(0, j - 1),
+            j1 = Math.min(ny - 1, j + 1);
+          const dzdx =
+            (elevation[j][i1] - elevation[j][i0]) / ((i1 - i0) * dx);
+          const dzdy =
+            (elevation[j1][i] - elevation[j0][i]) / ((j1 - j0) * dy);
+          const s =
+            (Math.atan(Math.sqrt(dzdx * dzdx + dzdy * dzdy)) * 180) / Math.PI;
           slopeDeg[j * nx + i] = s;
           if (s > slopeMax) slopeMax = s;
         }
@@ -1141,36 +1163,68 @@
         for (let i = 0; i < nx; i++) {
           const idx = (j * nx + i) * 3;
           const t = slopeDeg[j * nx + i] / slopeMax;
-          const [r, g, b] = sampleColormap((window._colormapsData || {}).slope || [], t);
-          colors[idx] = r; colors[idx + 1] = g; colors[idx + 2] = b;
+          const [r, g, b] = sampleColormap(
+            (window._colormapsData || {}).slope || [],
+            t,
+          );
+          colors[idx] = r;
+          colors[idx + 1] = g;
+          colors[idx + 2] = b;
         }
       }
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
       const mat = new THREE.MeshBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0,
-        depthWrite: false, depthTest: false,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        depthTest: false,
       });
       window._slopeMat = mat;
 
       slopeMesh = new THREE.Mesh(geom, mat);
       slopeMesh.position.set(
-        (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+        (x_extent[0] + x_extent[1]) / 2,
+        -(y_extent[0] + y_extent[1]) / 2,
+        0,
       );
       scene.add(slopeMesh);
-      drawColorbar('cb-slope', 'cb-slope-labels', 'slope', 0, slopeMax, v => v.toFixed(0) + '°');
+      drawColorbar(
+        "cb-slope",
+        "cb-slope-labels",
+        "slope",
+        0,
+        slopeMax,
+        (v) => v.toFixed(0) + "°",
+      );
     }
 
     // ─── Trigger zones overlay (static — terrain convexity + land-cover boundary) ─
     let triggerMesh = null;
 
     function buildTriggerOverlay(terrainData) {
-      if (triggerMesh) { scene.remove(triggerMesh); triggerMesh.geometry.dispose(); triggerMesh.material.dispose(); }
+      if (triggerMesh) {
+        scene.remove(triggerMesh);
+        triggerMesh.geometry.dispose();
+        triggerMesh.material.dispose();
+      }
       if (!terrainData.trigger_factor) return;
 
-      const { nx, ny, elevation, x_extent, y_extent, trigger_factor } = terrainData;
+      const {
+        nx,
+        ny,
+        elevation,
+        x_extent,
+        y_extent,
+        trigger_factor
+      } =
+      terrainData;
       const geom = new THREE.PlaneGeometry(
-        x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+        x_extent[1] - x_extent[0],
+        y_extent[1] - y_extent[0],
+        nx - 1,
+        ny - 1,
       );
       const pos = geom.attributes.position;
       for (let j = 0; j < ny; j++)
@@ -1184,24 +1238,32 @@
         for (let i = 0; i < nx; i++) {
           const idx = (j * nx + i) * 3;
           const [r, g, b] = sampleColormap(stops, trigger_factor[j][i]);
-          colors[idx] = r; colors[idx + 1] = g; colors[idx + 2] = b;
+          colors[idx] = r;
+          colors[idx + 1] = g;
+          colors[idx + 2] = b;
         }
       }
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
       const mat = new THREE.MeshBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0,
-        depthWrite: false, depthTest: false,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        depthTest: false,
       });
       window._triggerMat = mat;
 
       triggerMesh = new THREE.Mesh(geom, mat);
       triggerMesh.position.set(
-        (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+        (x_extent[0] + x_extent[1]) / 2,
+        -(y_extent[0] + y_extent[1]) / 2,
+        0,
       );
       scene.add(triggerMesh);
-      drawColorbar('cb-trigger', 'cb-trigger-labels', 'trigger', 0, 1,
-        v => v.toFixed(2));
+      drawColorbar("cb-trigger", "cb-trigger-labels", "trigger", 0, 1, (v) =>
+        v.toFixed(2),
+      );
     }
 
     // ─── Collecting zones overlay ─────────────────────────────────────────────────
@@ -1218,9 +1280,18 @@
         collectorMesh.material.dispose();
       }
       if (!terrainData.convergence) return;
-      const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+      const {
+        nx,
+        ny,
+        elevation,
+        x_extent,
+        y_extent
+      } = terrainData;
       const geom = new THREE.PlaneGeometry(
-        x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+        x_extent[1] - x_extent[0],
+        y_extent[1] - y_extent[0],
+        nx - 1,
+        ny - 1,
       );
       const pos = geom.attributes.position;
       for (let j = 0; j < ny; j++)
@@ -1228,15 +1299,20 @@
           pos.setZ(j * nx + i, elevation[j][i] + 14);
       pos.needsUpdate = true;
       const colors = new Float32Array(nx * ny * 3);
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
       const mat = new THREE.MeshBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0,
-        depthWrite: false, depthTest: false,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        depthTest: false,
       });
       window._collectorMat = mat;
       collectorMesh = new THREE.Mesh(geom, mat);
       collectorMesh.position.set(
-        (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+        (x_extent[0] + x_extent[1]) / 2,
+        -(y_extent[0] + y_extent[1]) / 2,
+        0,
       );
       scene.add(collectorMesh);
     }
@@ -1245,7 +1321,9 @@
       if (!collectorMesh || !simData) return;
       const T = simData.terrain;
       if (!T.convergence) return;
-      const threshold = parseFloat(document.getElementById('trigger-threshold').value);
+      const threshold = parseFloat(
+        document.getElementById("trigger-threshold").value,
+      );
       const intervalH = (simData.interval_min || 30) / 60;
       const stops = (window._colormapsData || {}).collector || [];
 
@@ -1271,39 +1349,61 @@
       const arr = collectorMesh.geometry.attributes.color.array;
       for (let k = 0; k < T.ny * T.nx; k++) {
         const [r, g, b] = sampleColormap(stops, score[k] / maxScore);
-        arr[k * 3] = r; arr[k * 3 + 1] = g; arr[k * 3 + 2] = b;
+        arr[k * 3] = r;
+        arr[k * 3 + 1] = g;
+        arr[k * 3 + 2] = b;
       }
       collectorMesh.geometry.attributes.color.needsUpdate = true;
-      drawColorbar('cb-collector', 'cb-collector-labels', 'collector',
-        0, maxScore, v => v.toFixed(2));
+      drawColorbar(
+        "cb-collector",
+        "cb-collector-labels",
+        "collector",
+        0,
+        maxScore,
+        (v) => v.toFixed(2),
+      );
     }
 
     // ─── Neutral shading overlay (Lambert — responds to directional light) ────────
     let neutralMesh = null;
 
     function buildNeutralOverlay(terrainData) {
-      if (neutralMesh) { scene.remove(neutralMesh); neutralMesh.geometry.dispose(); neutralMesh.material.dispose(); }
+      if (neutralMesh) {
+        scene.remove(neutralMesh);
+        neutralMesh.geometry.dispose();
+        neutralMesh.material.dispose();
+      }
 
-      const { x_extent, y_extent } = terrainData;
+      const {
+        x_extent,
+        y_extent
+      } = terrainData;
       // Use high-res mesh for normals so shading matches the visual terrain exactly
-      const hasMesh = terrainData.mesh_elevation && terrainData.mesh_nx && terrainData.mesh_ny;
-      const elev = hasMesh ? terrainData.mesh_elevation : terrainData.elevation;
+      const hasMesh =
+        terrainData.mesh_elevation &&
+        terrainData.mesh_nx &&
+        terrainData.mesh_ny;
+      const elev = hasMesh ?
+        terrainData.mesh_elevation :
+        terrainData.elevation;
       const nx = hasMesh ? terrainData.mesh_nx : terrainData.nx;
       const ny = hasMesh ? terrainData.mesh_ny : terrainData.ny;
 
       const geom = new THREE.PlaneGeometry(
-        x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+        x_extent[1] - x_extent[0],
+        y_extent[1] - y_extent[0],
+        nx - 1,
+        ny - 1,
       );
       const pos = geom.attributes.position;
       for (let j = 0; j < ny; j++)
-        for (let i = 0; i < nx; i++)
-          pos.setZ(j * nx + i, elev[j][i] + 1);
+        for (let i = 0; i < nx; i++) pos.setZ(j * nx + i, elev[j][i] + 1);
       pos.needsUpdate = true;
       geom.computeVertexNormals();
 
       // MeshLambertMaterial: lit by the directional sun — slopes facing away go dark
       const mat = new THREE.MeshLambertMaterial({
-        color: 0xc8b89a,          // warm limestone/sandstone tone
+        color: 0xc8b89a, // warm limestone/sandstone tone
         transparent: true,
         opacity: 0,
         depthWrite: false,
@@ -1313,7 +1413,9 @@
       neutralMesh = new THREE.Mesh(geom, mat);
       neutralMesh.receiveShadow = true;
       neutralMesh.position.set(
-        (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+        (x_extent[0] + x_extent[1]) / 2,
+        -(y_extent[0] + y_extent[1]) / 2,
+        0,
       );
       scene.add(neutralMesh);
     }
@@ -1322,11 +1424,24 @@
     let shadowMesh = null;
 
     function buildShadowOverlay(terrainData) {
-      if (shadowMesh) { scene.remove(shadowMesh); shadowMesh.geometry.dispose(); shadowMesh.material.dispose(); }
+      if (shadowMesh) {
+        scene.remove(shadowMesh);
+        shadowMesh.geometry.dispose();
+        shadowMesh.material.dispose();
+      }
 
-      const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+      const {
+        nx,
+        ny,
+        elevation,
+        x_extent,
+        y_extent
+      } = terrainData;
       const geom = new THREE.PlaneGeometry(
-        x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+        x_extent[1] - x_extent[0],
+        y_extent[1] - y_extent[0],
+        nx - 1,
+        ny - 1,
       );
       const pos = geom.attributes.position;
       for (let j = 0; j < ny; j++)
@@ -1336,7 +1451,7 @@
 
       // Vertex colors: lit = (1,1,1) = multiply by 1 (invisible), shadow = (dark,dark,dark)
       const colors = new Float32Array(nx * ny * 3).fill(1);
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
       const mat = new THREE.MeshBasicMaterial({
         vertexColors: true,
@@ -1346,9 +1461,11 @@
       });
 
       shadowMesh = new THREE.Mesh(geom, mat);
-      shadowMesh.renderOrder = 10;  // render after all overlays so MultiplyBlending darkens them
+      shadowMesh.renderOrder = 10; // render after all overlays so MultiplyBlending darkens them
       shadowMesh.position.set(
-        (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+        (x_extent[0] + x_extent[1]) / 2,
+        -(y_extent[0] + y_extent[1]) / 2,
+        0,
       );
       scene.add(shadowMesh);
     }
@@ -1360,15 +1477,17 @@
       const mask = sc.shadow_mask;
       if (!mask) return;
 
-      const darkness = parseFloat(document.getElementById('shadow-darkness').value);
+      const darkness = parseFloat(
+        document.getElementById("shadow-darkness").value,
+      );
       const litVal = 1.0;
-      const shadVal = 1.0 - darkness * 0.75;   // max 75 % darkening at slider = 1
+      const shadVal = 1.0 - darkness * 0.75; // max 75 % darkening at slider = 1
 
       const arr = shadowMesh.geometry.attributes.color.array;
       for (let j = 0; j < T.ny; j++) {
         for (let i = 0; i < T.nx; i++) {
           const idx = (j * T.nx + i) * 3;
-          const v = mask[j * T.nx + i] ? shadVal : litVal;  // flat 1-D array
+          const v = mask[j * T.nx + i] ? shadVal : litVal; // flat 1-D array
           arr[idx] = arr[idx + 1] = arr[idx + 2] = v;
         }
       }
@@ -1378,17 +1497,30 @@
     // ─── Thermal top overlay ─────────────────────────────────────────────────────
     // Computed in JS from ground_temp_anomaly + ELR slider — no Python re-run needed.
     // h_top(i,j) = dT(i,j) / (DALR − ELR)   [metres AGL]
-    let DALR_JS = 0.0098;   // K/m — set from simData.dalr after load; fallback to physical constant
-    let HTOP_MAX = 3000;     // m — colormap ceiling; derived from data max dT after load
+    let DALR_JS = 0.0098; // K/m — set from simData.dalr after load; fallback to physical constant
+    let HTOP_MAX = 3000; // m — colormap ceiling; derived from data max dT after load
 
     let thermalTopMesh = null;
 
     function buildThermalTopOverlay(terrainData) {
-      if (thermalTopMesh) { scene.remove(thermalTopMesh); thermalTopMesh.geometry.dispose(); thermalTopMesh.material.dispose(); }
+      if (thermalTopMesh) {
+        scene.remove(thermalTopMesh);
+        thermalTopMesh.geometry.dispose();
+        thermalTopMesh.material.dispose();
+      }
 
-      const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+      const {
+        nx,
+        ny,
+        elevation,
+        x_extent,
+        y_extent
+      } = terrainData;
       const geom = new THREE.PlaneGeometry(
-        x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+        x_extent[1] - x_extent[0],
+        y_extent[1] - y_extent[0],
+        nx - 1,
+        ny - 1,
       );
       const pos = geom.attributes.position;
       for (let j = 0; j < ny; j++)
@@ -1397,17 +1529,22 @@
       pos.needsUpdate = true;
 
       const colors = new Float32Array(nx * ny * 3);
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
       const mat = new THREE.MeshBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0,
-        depthWrite: false, depthTest: false,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        depthTest: false,
       });
       window._thermalTopMat = mat;
 
       thermalTopMesh = new THREE.Mesh(geom, mat);
       thermalTopMesh.position.set(
-        (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+        (x_extent[0] + x_extent[1]) / 2,
+        -(y_extent[0] + y_extent[1]) / 2,
+        0,
       );
       scene.add(thermalTopMesh);
     }
@@ -1417,12 +1554,14 @@
       const sc = simData.scenarios[scenarioIndex];
       const T = simData.terrain;
       const dT = sc.ground_temp_anomaly;
-      const ELR = parseFloat(document.getElementById('elr').value) / 1000;  // K/km → K/m
-      const threshold = parseFloat(document.getElementById('trigger-threshold').value);
+      const ELR = parseFloat(document.getElementById("elr").value) / 1000; // K/km → K/m
+      const threshold = parseFloat(
+        document.getElementById("trigger-threshold").value,
+      );
       const dLapse = DALR_JS - ELR;
-      if (dLapse <= 0) return;  // neutral/unstable atmosphere — no finite thermal top
+      if (dLapse <= 0) return; // neutral/unstable atmosphere — no finite thermal top
 
-      const stops = (window._colormapsData || {})['thermal-top'] || [];
+      const stops = (window._colormapsData || {})["thermal-top"] || [];
       const arr = thermalTopMesh.geometry.attributes.color.array;
 
       for (let j = 0; j < T.ny; j++) {
@@ -1431,12 +1570,20 @@
           const dT_eff = Math.max(0, dT[j][i] - threshold);
           const hTop = dT_eff > 0 ? dT_eff / dLapse : 0;
           const [r, g, b] = sampleColormap(stops, hTop / HTOP_MAX);
-          arr[idx] = r; arr[idx + 1] = g; arr[idx + 2] = b;
+          arr[idx] = r;
+          arr[idx + 1] = g;
+          arr[idx + 2] = b;
         }
       }
       thermalTopMesh.geometry.attributes.color.needsUpdate = true;
-      drawColorbar('cb-thermal-top', 'cb-thermal-top-labels', 'thermal-top',
-        0, HTOP_MAX, v => v.toFixed(0) + ' m');
+      drawColorbar(
+        "cb-thermal-top",
+        "cb-thermal-top-labels",
+        "thermal-top",
+        0,
+        HTOP_MAX,
+        (v) => v.toFixed(0) + " m",
+      );
     }
 
     // ─── Daily heat accumulation overlay ─────────────────────────────────────────
@@ -1451,9 +1598,18 @@
         heatAccumMesh.geometry.dispose();
         heatAccumMesh.material.dispose();
       }
-      const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+      const {
+        nx,
+        ny,
+        elevation,
+        x_extent,
+        y_extent
+      } = terrainData;
       const geom = new THREE.PlaneGeometry(
-        x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+        x_extent[1] - x_extent[0],
+        y_extent[1] - y_extent[0],
+        nx - 1,
+        ny - 1,
       );
       const pos = geom.attributes.position;
       for (let j = 0; j < ny; j++)
@@ -1461,15 +1617,20 @@
           pos.setZ(j * nx + i, elevation[j][i] + 12);
       pos.needsUpdate = true;
       const colors = new Float32Array(nx * ny * 3);
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
       const mat = new THREE.MeshBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0,
-        depthWrite: false, depthTest: false,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
+        depthTest: false,
       });
       window._heatAccumMat = mat;
       heatAccumMesh = new THREE.Mesh(geom, mat);
       heatAccumMesh.position.set(
-        (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+        (x_extent[0] + x_extent[1]) / 2,
+        -(y_extent[0] + y_extent[1]) / 2,
+        0,
       );
       scene.add(heatAccumMesh);
     }
@@ -1477,9 +1638,11 @@
     function updateHeatAccumColors() {
       if (!heatAccumMesh || !simData) return;
       const T = simData.terrain;
-      const threshold = parseFloat(document.getElementById('trigger-threshold').value);
+      const threshold = parseFloat(
+        document.getElementById("trigger-threshold").value,
+      );
       const intervalH = (simData.interval_min || 30) / 60;
-      const stops = (window._colormapsData || {})['heat-accum'] || [];
+      const stops = (window._colormapsData || {})["heat-accum"] || [];
 
       const accum = new Float32Array(T.ny * T.nx);
       for (const sc of simData.scenarios) {
@@ -1498,11 +1661,19 @@
       const arr = heatAccumMesh.geometry.attributes.color.array;
       for (let k = 0; k < T.ny * T.nx; k++) {
         const [r, g, b] = sampleColormap(stops, accum[k] / maxAccum);
-        arr[k * 3] = r; arr[k * 3 + 1] = g; arr[k * 3 + 2] = b;
+        arr[k * 3] = r;
+        arr[k * 3 + 1] = g;
+        arr[k * 3 + 2] = b;
       }
       heatAccumMesh.geometry.attributes.color.needsUpdate = true;
-      drawColorbar('cb-heat-accum', 'cb-heat-accum-labels', 'heat-accum',
-        0, maxAccum, v => v.toFixed(1) + ' K·h');
+      drawColorbar(
+        "cb-heat-accum",
+        "cb-heat-accum-labels",
+        "heat-accum",
+        0,
+        maxAccum,
+        (v) => v.toFixed(1) + " K·h",
+      );
     }
 
     // ─── Orographic flow arrows ──────────────────────────────────────────────────
@@ -1518,25 +1689,44 @@
     let pickMesh = null;
 
     function buildPickMesh(terrainData) {
-      if (pickMesh) { scene.remove(pickMesh); pickMesh.geometry.dispose(); pickMesh.material.dispose(); }
-      const { nx, ny, elevation, x_extent, y_extent } = terrainData;
+      if (pickMesh) {
+        scene.remove(pickMesh);
+        pickMesh.geometry.dispose();
+        pickMesh.material.dispose();
+      }
+      const {
+        nx,
+        ny,
+        elevation,
+        x_extent,
+        y_extent
+      } = terrainData;
       const geom = new THREE.PlaneGeometry(
-        x_extent[1] - x_extent[0], y_extent[1] - y_extent[0], nx - 1, ny - 1
+        x_extent[1] - x_extent[0],
+        y_extent[1] - y_extent[0],
+        nx - 1,
+        ny - 1,
       );
       const pos = geom.attributes.position;
       for (let j = 0; j < ny; j++)
-        for (let i = 0; i < nx; i++)
-          pos.setZ(j * nx + i, elevation[j][i]);
+        for (let i = 0; i < nx; i++) pos.setZ(j * nx + i, elevation[j][i]);
       pos.needsUpdate = true;
-      pickMesh = new THREE.Mesh(geom, new THREE.MeshBasicMaterial({ visible: false }));
+      pickMesh = new THREE.Mesh(
+        geom,
+        new THREE.MeshBasicMaterial({
+          visible: false
+        }),
+      );
       pickMesh.position.set(
-        (x_extent[0] + x_extent[1]) / 2, -(y_extent[0] + y_extent[1]) / 2, 0
+        (x_extent[0] + x_extent[1]) / 2,
+        -(y_extent[0] + y_extent[1]) / 2,
+        0,
       );
       scene.add(pickMesh);
     }
 
     let flowArrows = null;
-    const FLOW_SCALE = 25;  // world units (metres) per K of smoothed flow magnitude
+    const FLOW_SCALE = 25; // world units (metres) per K of smoothed flow magnitude
 
     function buildFlowArrows(terrainData) {
       if (flowArrows) {
@@ -1545,28 +1735,37 @@
         flowArrows.material.dispose();
         flowArrows = null;
       }
-      if (!simData || !simData.scenarios[0] || !simData.scenarios[0].u_surface) return;
+      if (
+        !simData ||
+        !simData.scenarios[0] ||
+        !simData.scenarios[0].u_surface
+      )
+        return;
 
       const T = terrainData;
       const step = T.arrow_step || 8;
 
       // Build the index lists — same formula used in Python export
-      const jIdx = [], iIdx = [];
+      const jIdx = [],
+        iIdx = [];
       for (let j = Math.floor(step / 2); j < T.ny; j += step) jIdx.push(j);
       for (let i = Math.floor(step / 2); i < T.nx; i += step) iIdx.push(i);
       window._flowJIndices = jIdx;
       window._flowIIndices = iIdx;
 
       const numArrows = jIdx.length * iIdx.length;
-      const positions = new Float32Array(numArrows * 6 * 3);  // 6 verts × 3 floats
+      const positions = new Float32Array(numArrows * 6 * 3); // 6 verts × 3 floats
       const colors = new Float32Array(numArrows * 6 * 3);
 
       const geom = new THREE.BufferGeometry();
-      geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      geom.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+      geom.setAttribute("color", new THREE.BufferAttribute(colors, 3));
 
       const mat = new THREE.LineBasicMaterial({
-        vertexColors: true, transparent: true, opacity: 0, depthWrite: false,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0,
+        depthWrite: false,
       });
       window._flowMat = mat;
 
@@ -1580,11 +1779,13 @@
       if (!sc.u_surface || !sc.v_surface) return;
 
       const T = simData.terrain;
-      const threshold = parseFloat(document.getElementById('trigger-threshold').value);
+      const threshold = parseFloat(
+        document.getElementById("trigger-threshold").value,
+      );
       const jIdx = window._flowJIndices;
       const iIdx = window._flowIIndices;
-      const U = sc.u_surface;   // [jj][ii], eastward K
-      const V = sc.v_surface;   // [jj][ii], southward K
+      const U = sc.u_surface; // [jj][ii], eastward K
+      const V = sc.v_surface; // [jj][ii], southward K
       const dT = sc.ground_temp_anomaly;
       const stops = (window._colormapsData || {}).thermal || [];
 
@@ -1592,7 +1793,7 @@
 
       const pos = flowArrows.geometry.attributes.position.array;
       const col = flowArrows.geometry.attributes.color.array;
-      let vi = 0;  // vertex counter
+      let vi = 0; // vertex counter
 
       for (let jj = 0; jj < jIdx.length; jj++) {
         const j = jIdx[jj];
@@ -1614,12 +1815,19 @@
 
           // Color by threshold-adjusted dT at this cell
           const dT_eff = Math.max(0, dT[j][i] - threshold);
-          const [cr, cg, cb] = sampleColormap(stops, maxDT > 0 ? dT_eff / maxDT : 0);
+          const [cr, cg, cb] = sampleColormap(
+            stops,
+            maxDT > 0 ? dT_eff / maxDT : 0,
+          );
 
           // Helper: write one vertex
           function writeVert(px, py) {
-            pos[vi * 3] = px; pos[vi * 3 + 1] = py; pos[vi * 3 + 2] = wz;
-            col[vi * 3] = cr; col[vi * 3 + 1] = cg; col[vi * 3 + 2] = cb;
+            pos[vi * 3] = px;
+            pos[vi * 3 + 1] = py;
+            pos[vi * 3 + 2] = wz;
+            col[vi * 3] = cr;
+            col[vi * 3 + 1] = cg;
+            col[vi * 3 + 2] = cb;
             vi++;
           }
 
@@ -1629,21 +1837,30 @@
 
           if (shaftLen < 0.5) {
             // Degenerate (zero-flow) arrow — collapse head wings to same point
-            writeVert(wx, wy); writeVert(wx, wy);
-            writeVert(wx, wy); writeVert(wx, wy);
+            writeVert(wx, wy);
+            writeVert(wx, wy);
+            writeVert(wx, wy);
+            writeVert(wx, wy);
           } else {
             // Arrow-head wings: ±25° from backward direction at tip
-            const ang = 25 * Math.PI / 180;
-            const ux = dx_w / shaftLen, uy = dy_w / shaftLen;  // unit forward
-            const headLen = Math.min(shaftLen * 0.40, 80);
+            const ang = (25 * Math.PI) / 180;
+            const ux = dx_w / shaftLen,
+              uy = dy_w / shaftLen; // unit forward
+            const headLen = Math.min(shaftLen * 0.4, 80);
             // Rotate unit-backward (−ux, −uy) by ±ang
-            const lx = tx + headLen * (-ux * Math.cos(ang) + uy * Math.sin(ang));
-            const ly = ty + headLen * (-ux * Math.sin(ang) - uy * Math.cos(ang));
-            const rx = tx + headLen * (-ux * Math.cos(ang) - uy * Math.sin(ang));
-            const ry = ty + headLen * (ux * Math.sin(ang) - uy * Math.cos(ang));
+            const lx =
+              tx + headLen * (-ux * Math.cos(ang) + uy * Math.sin(ang));
+            const ly =
+              ty + headLen * (-ux * Math.sin(ang) - uy * Math.cos(ang));
+            const rx =
+              tx + headLen * (-ux * Math.cos(ang) - uy * Math.sin(ang));
+            const ry =
+              ty + headLen * (ux * Math.sin(ang) - uy * Math.cos(ang));
 
-            writeVert(tx, ty); writeVert(lx, ly);
-            writeVert(tx, ty); writeVert(rx, ry);
+            writeVert(tx, ty);
+            writeVert(lx, ly);
+            writeVert(tx, ty);
+            writeVert(rx, ry);
           }
         }
       }
@@ -1654,18 +1871,103 @@
 
     // ─── Waypoint markers ────────────────────────────────────────────────────────
     const MARKER_CONFIG = {
-      landing: { color: 0x00ff88, label: '▼ Landing', poleColor: 0x00cc66 },
-      takeoff: { color: 0xff8800, label: '▲ Take-off', poleColor: 0xcc6600 },
+      landing: {
+        color: 0x00ff88,
+        label: "▼ Landing",
+        poleColor: 0x00cc66
+      },
+      takeoff: {
+        color: 0xff8800,
+        label: "▲ Take-off",
+        poleColor: 0xcc6600
+      },
     };
 
     const markerSprites = [];
 
+    // ─── North Arrow ────────────────────────────────────────────────────────────
+    const northArrowObjects = [];
+
+    function buildNorthArrow() {
+      northArrowObjects.forEach((o) => {
+        scene.remove(o);
+        if (o.material?.map) o.material.map.dispose();
+      });
+      northArrowObjects.length = 0;
+
+      const T = simData.terrain;
+      const xw = T.x_extent[1] - T.x_extent[0];
+      const yh = T.y_extent[1] - T.y_extent[0];
+      const cx = (T.x_extent[0] + T.x_extent[1]) / 2;
+      const cy = -(T.y_extent[0] + T.y_extent[1]) / 2;
+
+      const halfH = yh;
+      const shaftHalfW = xw * 0.055;
+      const headHalfW = xw * 0.14;
+      const headH = halfH * 0.4;
+      const bboxW = headHalfW * 2;
+      const bboxH = halfH * 2;
+
+      const CW = 512,
+        CH = Math.round((CW * bboxH) / bboxW);
+      const cv = document.createElement("canvas");
+      cv.width = CW;
+      cv.height = CH;
+      const ctx = cv.getContext("2d");
+
+      function tc(x, y) {
+        return [(x / bboxW + 0.5) * CW, (0.5 - y / bboxH) * CH];
+      }
+
+      const pts = [
+        [-shaftHalfW, -halfH],
+        [shaftHalfW, -halfH],
+        [shaftHalfW, halfH - headH],
+        [headHalfW, halfH - headH],
+        [0, halfH],
+        [-headHalfW, halfH - headH],
+        [-shaftHalfW, halfH - headH],
+      ];
+      ctx.beginPath();
+      ctx.moveTo(...tc(pts[0][0], pts[0][1]));
+      for (let i = 1; i < pts.length; i++)
+        ctx.lineTo(...tc(pts[i][0], pts[i][1]));
+      ctx.closePath();
+      ctx.fillStyle = "rgba(238,34,34,0.55)";
+      ctx.fill();
+
+      const shaftCY = (-halfH + halfH - headH) / 2;
+      const [tx, ty] = tc(0, shaftCY);
+      const fontSize = Math.round(CW * ((2 * shaftHalfW) / bboxW) * 0.42);
+      ctx.font = `bold ${fontSize}px 'Segoe UI', sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.shadowColor = "rgba(0,0,0,0.95)";
+      ctx.shadowBlur = fontSize * 0.3;
+      ctx.fillStyle = "rgb(238,34,34)";
+      ctx.fillText("North", tx, ty);
+
+      const texture = new THREE.CanvasTexture(cv);
+      const mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(bboxW, bboxH),
+        new THREE.MeshBasicMaterial({
+          map: texture,
+          transparent: true,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        }),
+      );
+      mesh.position.set(cx, cy, terrainZMin - 500);
+      scene.add(mesh);
+      northArrowObjects.push(mesh);
+    }
+
     function buildMarkers(markersData) {
       // Remove old markers
-      markerSprites.forEach(s => scene.remove(s));
+      markerSprites.forEach((s) => scene.remove(s));
       markerSprites.length = 0;
 
-      markersData.forEach(m => {
+      markersData.forEach((m) => {
         const cfg = MARKER_CONFIG[m.type];
         if (!cfg) return;
 
@@ -1674,35 +1976,45 @@
         // Vertical pole
         const poleH = 120;
         const poleGeo = new THREE.CylinderGeometry(4, 4, poleH, 8);
-        const poleMat = new THREE.MeshLambertMaterial({ color: cfg.poleColor });
+        const poleMat = new THREE.MeshBasicMaterial({
+          color: cfg.poleColor,
+          depthTest: false,
+          transparent: true,
+        });
         const pole = new THREE.Mesh(poleGeo, poleMat);
         // CylinderGeometry is Y-up; we rotate so it stands along Z
         pole.rotation.x = Math.PI / 2;
         pole.position.set(m.x, -m.y, elevation + poleH / 2);
+        pole.renderOrder = 10;
         scene.add(pole);
         markerSprites.push(pole);
 
         // Flag / cone on top
         const coneGeo = new THREE.ConeGeometry(40, 80, 12);
-        const coneMat = new THREE.MeshLambertMaterial({ color: cfg.color });
+        const coneMat = new THREE.MeshBasicMaterial({
+          color: cfg.color,
+          depthTest: false,
+          transparent: true,
+        });
         const cone = new THREE.Mesh(coneGeo, coneMat);
-        cone.rotation.x = Math.PI / 2;  // point upward along Z
+        cone.rotation.x = Math.PI / 2; // point upward along Z
         cone.position.set(m.x, -m.y, elevation + poleH + 40);
+        cone.renderOrder = 10;
         scene.add(cone);
         markerSprites.push(cone);
 
         // HTML label overlay (positioned each frame in animate)
-        const div = document.createElement('div');
+        const div = document.createElement("div");
         div.style.cssText = `
       position: absolute; pointer-events: none;
-      background: rgba(10,15,30,0.82); border: 1px solid ${cfg.color === 0x00ff88 ? '#00ff88' : '#ff8800'};
-      color: ${cfg.color === 0x00ff88 ? '#00ff88' : '#ff8800'};
+      background: rgba(10,15,30,0.82); border: 1px solid ${cfg.color === 0x00ff88 ? "#00ff88" : "#ff8800"};
+      color: ${cfg.color === 0x00ff88 ? "#00ff88" : "#ff8800"};
       font-size: 12px; font-weight: bold; font-family: 'Segoe UI', sans-serif;
       padding: 3px 8px; border-radius: 4px; white-space: nowrap;
       transform: translate(-50%, -100%); margin-top: -8px;
     `;
         div.textContent = `${cfg.label}  ${elevation.toFixed(0)}m`;
-        document.getElementById('canvas-container').appendChild(div);
+        document.getElementById("canvas-container").appendChild(div);
 
         // Store world position for projection each frame
         cone._labelDiv = div;
@@ -1712,18 +2024,17 @@
 
     function updateMarkerLabels() {
       const objs = [...markerSprites, ...(clickMarker || [])];
-      objs.forEach(obj => {
+      objs.forEach((obj) => {
         if (!obj._labelDiv) return;
         const pos = obj._worldPos.clone().project(camera);
         const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
         const y = (-pos.y * 0.5 + 0.5) * window.innerHeight;
-        obj._labelDiv.style.left = x + 'px';
-        obj._labelDiv.style.top = y + 'px';
+        obj._labelDiv.style.left = x + "px";
+        obj._labelDiv.style.top = y + "px";
         // Hide if behind camera
-        obj._labelDiv.style.display = pos.z > 1 ? 'none' : 'block';
+        obj._labelDiv.style.display = pos.z > 1 ? "none" : "block";
       });
     }
-
 
     // ─── Init ───────────────────────────────────────────────────────────────────
     function init() {
@@ -1736,6 +2047,7 @@
         buildHeatmap(simData.terrain);
         updateHeatmapColors(0);
         buildMarkers(simData.markers || []);
+        buildNorthArrow();
         buildAlbedoOverlay(simData.terrain);
         buildSlopeOverlay(simData.terrain);
         buildTriggerOverlay(simData.terrain);
@@ -1752,47 +2064,54 @@
         updateHeatAccumColors();
         updateCollectorColors();
         updateFlowArrows(0);
-        applySettings();
         buildmodeButtons();
         // Apply first mode values + visibility silently
         if (window._modesData && window._modesData.length > 0) {
           const firstMode = window._modesData[0];
-          for (const [id, val] of Object.entries(firstMode.sliders)) setSlider(id, val);
+          for (const [id, val] of Object.entries(firstMode.sliders))
+            setSlider(id, val);
           applySliderVisibility(firstMode);
         }
         buildTimeSlider();
-      } catch (e) { console.error('init() error:', e); }
+      } catch (e) {
+        console.error("init() error:", e);
+      }
       animate();
     }
 
     // ─── modes ──────────────────────────────────────────────────────────────────
     function markModified() {
-      const active = document.querySelector('.mode-btn.active');
-      if (active) active.classList.add('modified');
+      const active = document.querySelector(".tab-btn.active");
+      if (active) active.classList.add("modified");
     }
 
     // Show only the control-groups listed in mode.sliders_visible; hide the rest.
     function applySliderVisibility(mode) {
       const visible = new Set(mode.sliders_visible || []);
-      document.querySelectorAll('.control-group[data-for]').forEach(group => {
-        group.style.display = visible.has(group.dataset.for) ? '' : 'none';
-      });
+      document
+        .querySelectorAll(".control-group[data-for]")
+        .forEach((group) => {
+          group.style.display = visible.has(group.dataset.for) ? "" : "none";
+        });
     }
 
     function buildmodeButtons() {
       const modes = window._modesData || [];
-      const container = document.getElementById('mode-buttons');
-      container.innerHTML = '';
+      const container = document.getElementById("preset-buttons");
+      container.innerHTML = "";
 
       modes.forEach((mode, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'mode-btn' + (i === 0 ? ' active' : '');
+        const btn = document.createElement("button");
+        btn.className = "tab-btn" + (i === 0 ? " active" : "");
         btn.textContent = mode.label;
-        btn.title = mode.tip || '';
+        btn.title = mode.tip || "";
         btn.onclick = () => {
-          document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active', 'modified'));
-          btn.classList.add('active');
-          for (const [id, val] of Object.entries(mode.sliders)) setSlider(id, val);
+          document
+            .querySelectorAll(".tab-btn")
+            .forEach((b) => b.classList.remove("active", "modified"));
+          btn.classList.add("active");
+          for (const [id, val] of Object.entries(mode.sliders))
+            setSlider(id, val);
           applySliderVisibility(mode);
         };
         container.appendChild(btn);
@@ -1800,16 +2119,17 @@
     }
 
     function buildTimeSlider() {
-      const slider = document.getElementById('time-slider');
+      const slider = document.getElementById("time-slider");
       slider.max = simData.scenarios.length - 1;
       slider.value = 0;
 
       function applyScenario(i) {
         currentScenario = i;
         const sc = simData.scenarios[i];
-        document.getElementById('time-display').textContent = sc.local_time || sc.name;
-        document.getElementById('sun-pos-info').textContent =
-          `az ${sc.sun_azimuth.toFixed(0)}°  ·  el ${sc.sun_elevation.toFixed(0)}°  ·  ${simData.simulation_date || ''}`;
+        document.getElementById("time-display").textContent =
+          sc.local_time || sc.name;
+        document.getElementById("sun-pos-info").textContent =
+          `az ${sc.sun_azimuth.toFixed(0)}°  ·  el ${sc.sun_elevation.toFixed(0)}°  ·  ${simData.simulation_date || ""}`;
         updateHeatmapColors(i);
         updateSunObject(i);
         updateShadowColors(i);
@@ -1818,118 +2138,182 @@
         if (_lastGi !== null) drawPlumeProfile(_lastGi, _lastGj);
       }
 
-      slider.addEventListener('input', e => applyScenario(parseInt(e.target.value)));
+      slider.addEventListener("input", (e) =>
+        applyScenario(parseInt(e.target.value)),
+      );
       applyScenario(0);
     }
 
     // ─── UI controls ─────────────────────────────────────────────────────────
-    function fmt(el, v) { return v.toFixed(parseInt(el.dataset.decimals ?? '2')); }
+    function fmt(el, v) {
+      return v.toFixed(parseInt(el.dataset.decimals ?? "2"));
+    }
 
-    document.getElementById('terrain-opacity').addEventListener('input', e => {
+    document
+      .getElementById("terrain-opacity")
+      .addEventListener("input", (e) => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("terrain-opacity-val").textContent = fmt(
+          e.target,
+          v,
+        );
+        if (window._terrainMat) window._terrainMat.opacity = v;
+        document.getElementById("cb-elevation-wrap").style.display =
+          v > 0 ? "block" : "none";
+      });
+    document
+      .getElementById("heatmap-opacity")
+      .addEventListener("input", (e) => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("heatmap-opacity-val").textContent = fmt(
+          e.target,
+          v,
+        );
+        if (window._heatmapMat) window._heatmapMat.opacity = v;
+        document.getElementById("cb-thermal-wrap").style.display =
+          v > 0 ? "block" : "none";
+      });
+    document
+      .getElementById("ambient-intensity")
+      .addEventListener("input", (e) => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("ambient-intensity-val").textContent = fmt(
+          e.target,
+          v,
+        );
+        ambientLight.intensity = v;
+      });
+    document
+      .getElementById("sun-intensity")
+      .addEventListener("input", (e) => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("sun-intensity-val").textContent = fmt(
+          e.target,
+          v,
+        );
+        sun.intensity = v;
+      });
+    document
+      .getElementById("albedo-opacity")
+      .addEventListener("input", (e) => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("albedo-opacity-val").textContent = fmt(
+          e.target,
+          v,
+        );
+        if (window._albedoMat) window._albedoMat.opacity = v;
+        document.getElementById("cb-albedo-wrap").style.display =
+          v > 0 ? "block" : "none";
+      });
+    document
+      .getElementById("slope-opacity")
+      .addEventListener("input", (e) => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("slope-opacity-val").textContent = fmt(
+          e.target,
+          v,
+        );
+        if (window._slopeMat) window._slopeMat.opacity = v;
+        document.getElementById("cb-slope-wrap").style.display =
+          v > 0 ? "block" : "none";
+      });
+    document
+      .getElementById("neutral-opacity")
+      .addEventListener("input", (e) => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("neutral-opacity-val").textContent = fmt(
+          e.target,
+          v,
+        );
+        if (window._neutralMat) window._neutralMat.opacity = v;
+      });
+    document
+      .getElementById("shadow-darkness")
+      .addEventListener("input", (e) => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("shadow-darkness-val").textContent = fmt(
+          e.target,
+          v,
+        );
+        updateShadowColors(currentScenario);
+      });
+    document
+      .getElementById("thermal-top-opacity")
+      .addEventListener("input", (e) => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("thermal-top-opacity-val").textContent = fmt(
+          e.target,
+          v,
+        );
+        if (window._thermalTopMat) window._thermalTopMat.opacity = v;
+        document.getElementById("cb-thermal-top-wrap").style.display =
+          v > 0 ? "block" : "none";
+      });
+    document.getElementById("elr").addEventListener("input", (e) => {
       const v = parseFloat(e.target.value);
-      document.getElementById('terrain-opacity-val').textContent = fmt(e.target, v);
-      if (window._terrainMat) window._terrainMat.opacity = v;
-      document.getElementById('cb-elevation-wrap').style.display = v > 0 ? 'block' : 'none';
-    });
-    document.getElementById('heatmap-opacity').addEventListener('input', e => {
-      const v = parseFloat(e.target.value);
-      document.getElementById('heatmap-opacity-val').textContent = fmt(e.target, v);
-      if (window._heatmapMat) window._heatmapMat.opacity = v;
-      document.getElementById('cb-thermal-wrap').style.display = v > 0 ? 'block' : 'none';
-    });
-    document.getElementById('ambient-intensity').addEventListener('input', e => {
-      const v = parseFloat(e.target.value);
-      document.getElementById('ambient-intensity-val').textContent = fmt(e.target, v);
-      ambientLight.intensity = v;
-    });
-    document.getElementById('sun-intensity').addEventListener('input', e => {
-      const v = parseFloat(e.target.value);
-      document.getElementById('sun-intensity-val').textContent = fmt(e.target, v);
-      sun.intensity = v;
-    });
-    document.getElementById('albedo-opacity').addEventListener('input', e => {
-      const v = parseFloat(e.target.value);
-      document.getElementById('albedo-opacity-val').textContent = fmt(e.target, v);
-      if (window._albedoMat) window._albedoMat.opacity = v;
-      document.getElementById('cb-albedo-wrap').style.display = v > 0 ? 'block' : 'none';
-    });
-    document.getElementById('slope-opacity').addEventListener('input', e => {
-      const v = parseFloat(e.target.value);
-      document.getElementById('slope-opacity-val').textContent = fmt(e.target, v);
-      if (window._slopeMat) window._slopeMat.opacity = v;
-      document.getElementById('cb-slope-wrap').style.display = v > 0 ? 'block' : 'none';
-    });
-    document.getElementById('neutral-opacity').addEventListener('input', e => {
-      const v = parseFloat(e.target.value);
-      document.getElementById('neutral-opacity-val').textContent = fmt(e.target, v);
-      if (window._neutralMat) window._neutralMat.opacity = v;
-    });
-    document.getElementById('shadow-darkness').addEventListener('input', e => {
-      const v = parseFloat(e.target.value);
-      document.getElementById('shadow-darkness-val').textContent = fmt(e.target, v);
-      updateShadowColors(currentScenario);
-    });
-    document.getElementById('thermal-top-opacity').addEventListener('input', e => {
-      const v = parseFloat(e.target.value);
-      document.getElementById('thermal-top-opacity-val').textContent = fmt(e.target, v);
-      if (window._thermalTopMat) window._thermalTopMat.opacity = v;
-      document.getElementById('cb-thermal-top-wrap').style.display = v > 0 ? 'block' : 'none';
-    });
-    document.getElementById('elr').addEventListener('input', e => {
-      const v = parseFloat(e.target.value);
-      document.getElementById('elr-val').textContent = fmt(e.target, v);
+      document.getElementById("elr-val").textContent = fmt(e.target, v);
       updateThermalTopColors(currentScenario);
       if (_lastGi !== null) drawPlumeProfile(_lastGi, _lastGj);
     });
-    document.getElementById('trigger-threshold').addEventListener('input', e => {
+    document
+      .getElementById("trigger-threshold")
+      .addEventListener("input", (e) => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("trigger-threshold-val").textContent = fmt(
+          e.target,
+          v,
+        );
+        updateHeatmapColors(currentScenario);
+        updateThermalTopColors(currentScenario);
+        updateHeatAccumColors();
+        updateCollectorColors();
+        updateFlowArrows(currentScenario);
+        if (_lastGi !== null) drawPlumeProfile(_lastGi, _lastGj);
+      });
+    document
+      .getElementById("heat-accum-opacity")
+      .addEventListener("input", (e) => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("heat-accum-opacity-val").textContent = fmt(
+          e.target,
+          v,
+        );
+        if (window._heatAccumMat) window._heatAccumMat.opacity = v;
+        document.getElementById("cb-heat-accum-wrap").style.display =
+          v > 0 ? "block" : "none";
+      });
+    document
+      .getElementById("collector-opacity")
+      .addEventListener("input", (e) => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("collector-opacity-val").textContent = fmt(
+          e.target,
+          v,
+        );
+        if (window._collectorMat) window._collectorMat.opacity = v;
+        document.getElementById("cb-collector-wrap").style.display =
+          v > 0 ? "block" : "none";
+      });
+    document.getElementById("flow-opacity").addEventListener("input", (e) => {
       const v = parseFloat(e.target.value);
-      document.getElementById('trigger-threshold-val').textContent = fmt(e.target, v);
-      updateHeatmapColors(currentScenario);
-      updateThermalTopColors(currentScenario);
-      updateHeatAccumColors();
-      updateCollectorColors();
-      updateFlowArrows(currentScenario);
-      if (_lastGi !== null) drawPlumeProfile(_lastGi, _lastGj);
-    });
-    document.getElementById('heat-accum-opacity').addEventListener('input', e => {
-      const v = parseFloat(e.target.value);
-      document.getElementById('heat-accum-opacity-val').textContent = fmt(e.target, v);
-      if (window._heatAccumMat) window._heatAccumMat.opacity = v;
-      document.getElementById('cb-heat-accum-wrap').style.display = v > 0 ? 'block' : 'none';
-    });
-    document.getElementById('collector-opacity').addEventListener('input', e => {
-      const v = parseFloat(e.target.value);
-      document.getElementById('collector-opacity-val').textContent = fmt(e.target, v);
-      if (window._collectorMat) window._collectorMat.opacity = v;
-      document.getElementById('cb-collector-wrap').style.display = v > 0 ? 'block' : 'none';
-    });
-    document.getElementById('flow-opacity').addEventListener('input', e => {
-      const v = parseFloat(e.target.value);
-      document.getElementById('flow-opacity-val').textContent = fmt(e.target, v);
+      document.getElementById("flow-opacity-val").textContent = fmt(
+        e.target,
+        v,
+      );
       if (window._flowMat) window._flowMat.opacity = v;
     });
-    document.getElementById('trigger-opacity').addEventListener('input', e => {
-      const v = parseFloat(e.target.value);
-      document.getElementById('trigger-opacity-val').textContent = fmt(e.target, v);
-      if (window._triggerMat) window._triggerMat.opacity = v;
-      document.getElementById('cb-trigger-wrap').style.display = v > 0 ? 'block' : 'none';
-    });
-
-    // ─── Settings (min/max/step/decimals from settings.json) ─────────────────────
-    function applySettings() {
-      const settings = window._settingsData;
-      if (!settings) return;
-      window._settingmode = true;
-      for (const [id, cfg] of Object.entries(settings)) {
-        const el = document.getElementById(id);
-        if (!el) continue;
-        if (cfg.min !== undefined) el.min = cfg.min;
-        if (cfg.max !== undefined) el.max = cfg.max;
-        if (cfg.step !== undefined) el.step = cfg.step;
-        if (cfg.decimals !== undefined) el.dataset.decimals = cfg.decimals;
-      }
-      window._settingmode = false;
-    }
+    document
+      .getElementById("trigger-opacity")
+      .addEventListener("input", (e) => {
+        const v = parseFloat(e.target.value);
+        document.getElementById("trigger-opacity-val").textContent = fmt(
+          e.target,
+          v,
+        );
+        if (window._triggerMat) window._triggerMat.opacity = v;
+        document.getElementById("cb-trigger-wrap").style.display =
+          v > 0 ? "block" : "none";
+      });
 
     // ─── Slider helpers ───────────────────────────────────────────────────────────
     // Flag: true while setSlider is programmatically changing a value,
@@ -1939,25 +2323,33 @@
     function setSlider(id, val) {
       window._settingmode = true;
       const el = document.getElementById(id);
-      if (el) { el.value = val; el.dispatchEvent(new Event('input')); }
+      if (el) {
+        el.value = val;
+        el.dispatchEvent(new Event("input"));
+      }
       window._settingmode = false;
     }
 
     // Any manual slider interaction → shade the active mode to show it's been modified
-    document.addEventListener('input', e => {
-      if (e.target.type === 'range' && !window._settingmode) markModified();
-    }, true /* capture phase — fires before individual listeners */);
+    document.addEventListener(
+      "input",
+      (e) => {
+        if (e.target.type === "range" && !window._settingmode) markModified();
+      },
+      true /* capture phase — fires before individual listeners */ ,
+    );
 
     // ─── Point inspection ────────────────────────────────────────────────────────
     const raycaster = new THREE.Raycaster();
     const _mouse = new THREE.Vector2();
-    const infoPanel = document.getElementById('info-panel');
-    let _mouseDownX = 0, _mouseDownY = 0;
-    let clickMarker = null;   // 3D marker at the last clicked point
+    const infoPanel = document.getElementById("info-panel");
+    let _mouseDownX = 0,
+      _mouseDownY = 0;
+    let clickMarker = null; // 3D marker at the last clicked point
 
     function buildClickMarker(x, y, z, elevM) {
       if (clickMarker) {
-        clickMarker.forEach(m => {
+        clickMarker.forEach((m) => {
           scene.remove(m);
           if (m._labelDiv) m._labelDiv.remove();
         });
@@ -1967,20 +2359,30 @@
 
       const pole = new THREE.Mesh(
         new THREE.CylinderGeometry(4, 4, poleH, 8),
-        new THREE.MeshLambertMaterial({ color })
+        new THREE.MeshBasicMaterial({
+          color,
+          depthTest: false,
+          transparent: true,
+        }),
       );
       pole.rotation.x = Math.PI / 2;
       pole.position.set(x, y, z + poleH / 2);
+      pole.renderOrder = 10;
 
       const cone = new THREE.Mesh(
         new THREE.ConeGeometry(40, 80, 12),
-        new THREE.MeshLambertMaterial({ color })
+        new THREE.MeshBasicMaterial({
+          color,
+          depthTest: false,
+          transparent: true,
+        }),
       );
       cone.rotation.x = Math.PI / 2;
       cone.position.set(x, y, z + poleH + 40);
+      cone.renderOrder = 10;
 
       // HTML label
-      const div = document.createElement('div');
+      const div = document.createElement("div");
       div.style.cssText = `
     position: absolute; pointer-events: none;
     background: rgba(10,15,30,0.82); border: 1px solid #4488ff;
@@ -1989,8 +2391,8 @@
     padding: 3px 8px; border-radius: 4px; white-space: nowrap;
     transform: translate(-50%, -100%); margin-top: -8px;
   `;
-      div.textContent = `▶ Selected ${elevM !== undefined ? elevM.toFixed(0) + 'm' : ''}`;
-      document.getElementById('canvas-container').appendChild(div);
+      div.textContent = `▶ Selected ${elevM !== undefined ? elevM.toFixed(0) + "m" : ""}`;
+      document.getElementById("canvas-container").appendChild(div);
       cone._labelDiv = div;
       cone._worldPos = new THREE.Vector3(x, y, z + poleH + 90);
 
@@ -1998,7 +2400,9 @@
       clickMarker = [pole, cone];
     }
 
-    let _lastGi = null, _lastGj = null, _lastPt = null;
+    let _lastGi = null,
+      _lastGj = null,
+      _lastPt = null;
 
     // ─── Thermal plume profile ────────────────────────────────────────────────────
     // Width encodes vertical speed (buoyancy, simple parcel theory, no entrainment):
@@ -2008,9 +2412,9 @@
     // Temperature: linear decay dT(z) = dT_eff·(1−z/H)  — used for fill colour.
     // H = thermal top AGL = dT_eff / (DALR − ELR)
     function drawPlumeProfile(gi, gj) {
-      const plumeSection = document.getElementById('plume-section');
-      const canvas = document.getElementById('plume-canvas');
-      const labelsEl = document.getElementById('plume-alt-labels');
+      const plumeSection = document.getElementById("plume-section");
+      const canvas = document.getElementById("plume-canvas");
+      const labelsEl = document.getElementById("plume-alt-labels");
       if (!canvas || !simData) return;
 
       // T0: interpolate diurnal profile by scenario local_time, fall back to scalar T0
@@ -2018,60 +2422,79 @@
       const elev = simData.terrain.elevation[gj][gi];
       let T0_ref;
       if (simData.T0_diurnal) {
-        const [hh, mm] = sc.local_time.split(':').map(Number);
+        const [hh, mm] = sc.local_time.split(":").map(Number);
         const h = hh + mm / 60;
-        const h0 = Math.floor(h) % 24, h1 = (h0 + 1) % 24;
-        T0_ref = simData.T0_diurnal[h0] * (1 - h % 1) + simData.T0_diurnal[h1] * (h % 1);
+        const h0 = Math.floor(h) % 24,
+          h1 = (h0 + 1) % 24;
+        T0_ref =
+          simData.T0_diurnal[h0] * (1 - (h % 1)) +
+          simData.T0_diurnal[h1] * (h % 1);
       } else {
         T0_ref = simData.T0 ?? 293.15;
       }
-      const T0_local = T0_ref - DALR_JS * (elev - terrainZMin);  // adjust for cell altitude
+      const T0_local = T0_ref - DALR_JS * (elev - terrainZMin); // adjust for cell altitude
       const G_OVER_T0 = 9.81 / T0_local;
       const T = simData.terrain;
-      const dT0 = simData.scenarios[currentScenario].ground_temp_anomaly[gj][gi];
-      const ELR = parseFloat(document.getElementById('elr').value) / 1000;
+      const dT0 =
+        simData.scenarios[currentScenario].ground_temp_anomaly[gj][gi];
+      const ELR = parseFloat(document.getElementById("elr").value) / 1000;
       const dLapse = DALR_JS - ELR;
-      const threshold = parseFloat(document.getElementById('trigger-threshold').value);
+      const threshold = parseFloat(
+        document.getElementById("trigger-threshold").value,
+      );
       const dT_eff = Math.max(0, dT0 - threshold);
-      const zTop = (dLapse > 0 && dT_eff > 0) ? dT_eff / dLapse : 0;
+      const zTop = dLapse > 0 && dT_eff > 0 ? dT_eff / dLapse : 0;
 
       // Fixed Y axis (MSL) — same regardless of which cell is selected
       // Bottom = lowest terrain point on map, top = highest terrain + tallest thermal
-      const zAxisMax = (dLapse > 0 && globalMaxDT > threshold)
-        ? Math.max(0, globalMaxDT - threshold) / dLapse
-        : (zTop > 0 ? zTop : 1000);
+      const zAxisMax =
+        dLapse > 0 && globalMaxDT > threshold ?
+        Math.max(0, globalMaxDT - threshold) / dLapse :
+        zTop > 0 ?
+        zTop :
+        1000;
       const axisBottom = terrainZMin;
       const axisTop = terrainZMax + zAxisMax;
       const axisSpan = axisTop - axisBottom;
 
       // Helper: MSL altitude → canvas Y pixel
-      const altToY = alt => PAD_TOP + (1 - (alt - axisBottom) / axisSpan) * drawH;
+      const altToY = (alt) =>
+        PAD_TOP + (1 - (alt - axisBottom) / axisSpan) * drawH;
 
-      const ctx = canvas.getContext('2d');
-      const W = canvas.width, H = canvas.height;
-      const PAD_TOP = 8, PAD_BTM = 4, PAD_LR = 4;
+      const ctx = canvas.getContext("2d");
+      const W = canvas.width,
+        H = canvas.height;
+      const PAD_TOP = 8,
+        PAD_BTM = 4,
+        PAD_LR = 4;
       const drawH = H - PAD_TOP - PAD_BTM;
       const cx = W / 2;
 
       ctx.clearRect(0, 0, W, H);
 
       // Background
-      ctx.fillStyle = 'rgba(8,12,24,0.9)';
+      ctx.fillStyle = "rgba(8,12,24,0.9)";
       ctx.fillRect(0, 0, W, H);
 
       // Grid lines at round MSL altitudes
-      ctx.strokeStyle = 'rgba(80,120,160,0.2)';
+      ctx.strokeStyle = "rgba(80,120,160,0.2)";
       ctx.lineWidth = 1;
       const gridStep = Math.pow(10, Math.floor(Math.log10(axisSpan / 4)));
       const gridStart = Math.ceil(axisBottom / gridStep) * gridStep;
       for (let alt = gridStart; alt <= axisTop; alt += gridStep) {
         const y = altToY(alt);
-        ctx.beginPath(); ctx.moveTo(PAD_LR, y); ctx.lineTo(W - PAD_LR, y); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(PAD_LR, y);
+        ctx.lineTo(W - PAD_LR, y);
+        ctx.stroke();
       }
 
       // Centre axis
-      ctx.strokeStyle = 'rgba(80,120,160,0.4)';
-      ctx.beginPath(); ctx.moveTo(cx, PAD_TOP); ctx.lineTo(cx, PAD_TOP + drawH); ctx.stroke();
+      ctx.strokeStyle = "rgba(80,120,160,0.4)";
+      ctx.beginPath();
+      ctx.moveTo(cx, PAD_TOP);
+      ctx.lineTo(cx, PAD_TOP + drawH);
+      ctx.stroke();
 
       const stops = (window._colormapsData || {}).thermal || [];
 
@@ -2086,11 +2509,11 @@
         // Width = w(z)/w_max = 2·√(zFrac·(1−zFrac)), so the outline IS the speed profile.
         for (let py = 0; py < drawH; py++) {
           const altMSL = axisTop - (py / drawH) * axisSpan;
-          const z_agl = altMSL - elev;              // AGL from this cell's ground
-          if (z_agl <= 0 || z_agl > zTop) continue;  // below ground or above ceiling
+          const z_agl = altMSL - elev; // AGL from this cell's ground
+          if (z_agl <= 0 || z_agl > zTop) continue; // below ground or above ceiling
           const zFrac = z_agl / zTop;
           const dTz = dT_eff * (1 - zFrac);
-          const rFrac = 2 * Math.sqrt(zFrac * (1 - zFrac));  // = w(z)/w_max
+          const rFrac = 2 * Math.sqrt(zFrac * (1 - zFrac)); // = w(z)/w_max
           const rPx = rMaxPx * rFrac;
           const [r, g, b] = sampleColormap(stops, dTz / (globalMaxDT || 1));
           ctx.fillStyle = `rgba(${(r * 255) | 0},${(g * 255) | 0},${(b * 255) | 0},0.85)`;
@@ -2099,70 +2522,83 @@
 
         // w_max label at the widest point (zFrac = 0.5, i.e. mid-height)
         const peakY = altToY(elev + zTop * 0.5);
-        ctx.fillStyle = 'rgba(220,240,255,0.95)';
-        ctx.font = 'bold 10px monospace';
-        ctx.textAlign = 'center';
+        ctx.fillStyle = "rgba(220,240,255,0.95)";
+        ctx.font = "bold 10px monospace";
+        ctx.textAlign = "center";
         ctx.fillText(`↑ ${w_max.toFixed(1)} m/s`, cx, peakY - 4);
 
         // Thermal ceiling dashed line
         const ceilY = altToY(elev + zTop);
         ctx.setLineDash([3, 3]);
-        ctx.strokeStyle = 'rgba(180,220,255,0.6)';
+        ctx.strokeStyle = "rgba(180,220,255,0.6)";
         ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(PAD_LR, ceilY); ctx.lineTo(W - PAD_LR, ceilY); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(PAD_LR, ceilY);
+        ctx.lineTo(W - PAD_LR, ceilY);
+        ctx.stroke();
         ctx.setLineDash([]);
-        ctx.fillStyle = 'rgba(180,220,255,0.8)';
-        ctx.font = '9px monospace';
-        ctx.textAlign = 'left';
+        ctx.fillStyle = "rgba(180,220,255,0.8)";
+        ctx.font = "9px monospace";
+        ctx.textAlign = "left";
         ctx.fillText(`${(elev + zTop).toFixed(0)} m`, PAD_LR + 2, ceilY - 2);
-        ctx.fillStyle = 'rgba(120,160,200,0.6)';
+        ctx.fillStyle = "rgba(120,160,200,0.6)";
         ctx.fillText(`+${zTop.toFixed(0)} AGL`, PAD_LR + 2, ceilY + 8);
       } else {
-        ctx.fillStyle = 'rgba(80,100,120,0.7)';
-        ctx.font = '11px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('No thermal', cx, PAD_TOP + drawH / 2);
+        ctx.fillStyle = "rgba(80,100,120,0.7)";
+        ctx.font = "11px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("No thermal", cx, PAD_TOP + drawH / 2);
       }
 
       // Ground level dotted line for this cell
       const groundY = altToY(elev);
       ctx.setLineDash([2, 4]);
-      ctx.strokeStyle = 'rgba(140,180,100,0.7)';
+      ctx.strokeStyle = "rgba(140,180,100,0.7)";
       ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(PAD_LR, groundY); ctx.lineTo(W - PAD_LR, groundY); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(PAD_LR, groundY);
+      ctx.lineTo(W - PAD_LR, groundY);
+      ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = 'rgba(140,180,100,0.8)';
-      ctx.font = '9px monospace';
-      ctx.textAlign = 'right';
+      ctx.fillStyle = "rgba(140,180,100,0.8)";
+      ctx.font = "9px monospace";
+      ctx.textAlign = "right";
       ctx.fillText(`${elev.toFixed(0)} m`, W - PAD_LR - 2, groundY - 2);
 
       // Altitude labels on left (fixed MSL axis)
-      labelsEl.innerHTML = '';
+      labelsEl.innerHTML = "";
       const nLabels = 5;
       for (let k = 0; k <= nLabels; k++) {
-        const span = document.createElement('span');
+        const span = document.createElement("span");
         span.textContent = (axisTop - (k / nLabels) * axisSpan).toFixed(0);
         labelsEl.appendChild(span);
       }
 
-      plumeSection.style.display = '';
+      plumeSection.style.display = "";
     }
 
     function updateInfoPanel(pt, gi, gj) {
-      _lastGi = gi; _lastGj = gj; _lastPt = pt;
+      _lastGi = gi;
+      _lastGj = gj;
+      _lastPt = pt;
       const T = simData.terrain;
       const elev = T.elevation[gj][gi];
-      const tf = T.thermal_factor ? T.thermal_factor[gj][gi].toFixed(2) : '—';
-      const dT = simData.scenarios[currentScenario].ground_temp_anomaly[gj][gi];
-      const slope = slopeDegData ? slopeDegData[gj * T.nx + gi].toFixed(1) : '—';
+      const tf = T.thermal_factor ? T.thermal_factor[gj][gi].toFixed(2) : "—";
+      const dT =
+        simData.scenarios[currentScenario].ground_temp_anomaly[gj][gi];
+      const slope = slopeDegData ?
+        slopeDegData[gj * T.nx + gi].toFixed(1) :
+        "—";
       const scName = simData.scenarios[currentScenario].name;
 
       const R = 6371000;
-      const lat = T.projection_origin.lat - (-pt.y) * 180 / (Math.PI * R);
-      const lon = T.projection_origin.lon + pt.x * 180 / (Math.PI * R * Math.cos(T.projection_origin.lat * Math.PI / 180));
+      const lat = T.projection_origin.lat - (-pt.y * 180) / (Math.PI * R);
+      const lon =
+        T.projection_origin.lon +
+        (pt.x * 180) /
+        (Math.PI * R * Math.cos((T.projection_origin.lat * Math.PI) / 180));
 
-      document.getElementById('info-rows').innerHTML = `
-    <h3>Selected point</h3>
+      document.getElementById("info-rows").innerHTML = `
     <div class="info-coords">${lat.toFixed(5)}° N &nbsp; ${lon.toFixed(5)}° E</div>
     <div class="info-row"><span class="info-label">Elevation</span>      <span class="info-val">${elev.toFixed(0)} m</span></div>
     <div class="info-row"><span class="info-label">Slope</span>          <span class="info-val">${slope}°</span></div>
@@ -2170,16 +2606,18 @@
     <div class="info-row"><span class="info-label">Thermal ΔT</span>     <span class="info-val">${dT.toFixed(1)} K</span></div>
     <div class="info-row"><span class="info-label">Scenario</span>       <span class="info-val">${scName}</span></div>
   `;
-      infoPanel.style.display = 'block';
+      infoPanel.style.display = "block";
       drawPlumeProfile(gi, gj);
     }
 
-    renderer.domElement.addEventListener('mousedown', e => {
-      _mouseDownX = e.clientX; _mouseDownY = e.clientY;
+    renderer.domElement.addEventListener("mousedown", (e) => {
+      _mouseDownX = e.clientX;
+      _mouseDownY = e.clientY;
     });
 
-    renderer.domElement.addEventListener('click', e => {
-      if (Math.hypot(e.clientX - _mouseDownX, e.clientY - _mouseDownY) > 5) return;
+    renderer.domElement.addEventListener("click", (e) => {
+      if (Math.hypot(e.clientX - _mouseDownX, e.clientY - _mouseDownY) > 5)
+        return;
       if (!terrainMesh || !simData) return;
 
       const rect = renderer.domElement.getBoundingClientRect();
@@ -2189,8 +2627,14 @@
       raycaster.setFromCamera(_mouse, camera);
       const hits = raycaster.intersectObject(pickMesh);
       if (!hits.length) {
-        infoPanel.style.display = 'none';
-        if (clickMarker) { clickMarker.forEach(m => { scene.remove(m); if (m._labelDiv) m._labelDiv.remove(); }); clickMarker = null; }
+        infoPanel.style.display = "none";
+        if (clickMarker) {
+          clickMarker.forEach((m) => {
+            scene.remove(m);
+            if (m._labelDiv) m._labelDiv.remove();
+          });
+          clickMarker = null;
+        }
         return;
       }
 
@@ -2211,9 +2655,9 @@
       const projected = sunSphere.position.clone().project(camera);
       const x = (projected.x * 0.5 + 0.5) * window.innerWidth;
       const y = (-projected.y * 0.5 + 0.5) * window.innerHeight;
-      sunLabelDiv.style.left = x + 'px';
-      sunLabelDiv.style.top = y + 'px';
-      sunLabelDiv.style.display = projected.z > 1 ? 'none' : 'block';
+      sunLabelDiv.style.left = x + "px";
+      sunLabelDiv.style.top = y + "px";
+      sunLabelDiv.style.display = projected.z > 1 ? "none" : "block";
     }
 
     function animate() {
@@ -2225,13 +2669,31 @@
     }
 
     // Resize
-    window.addEventListener('resize', () => {
+    window.addEventListener("resize", () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
     loadData();
+
+    // Nav dropdown touch support
+    document.querySelectorAll(".nav-dropdown-btn").forEach(function(btn) {
+      btn.addEventListener("click", function(e) {
+        var dd = btn.closest(".nav-dropdown");
+        var isOpen = dd.classList.contains("open");
+        document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+          d.classList.remove("open");
+        });
+        if (!isOpen) dd.classList.add("open");
+        e.stopPropagation();
+      });
+    });
+    document.addEventListener("click", function() {
+      document.querySelectorAll(".nav-dropdown.open").forEach(function(d) {
+        d.classList.remove("open");
+      });
+    });
   </script>
 </body>
 
