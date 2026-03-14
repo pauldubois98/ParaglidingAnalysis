@@ -162,6 +162,18 @@
       color: #a0c8e8;
     }
 
+    .btn.set-btn {
+      background: rgba(30, 180, 100, 0.22);
+      border-color: rgba(30, 200, 100, 0.55);
+      color: #50e898;
+    }
+
+    .btn.set-btn:hover {
+      background: rgba(30, 180, 100, 0.38);
+      border-color: rgba(30, 200, 100, 0.8);
+      color: #80ffb0;
+    }
+
     /* ── Size info (read-only) ── */
     .info-row {
       display: flex;
@@ -437,22 +449,7 @@
     </div><!-- /panel-body -->
 
     <div id="panel-footer">
-      <button class="btn" id="btn-simulate"
-        style="background:rgba(30,180,100,0.18);border-color:rgba(30,200,100,0.5);color:#50e898">
-        Run simulation with this area
-      </button>
-      <button class="btn" id="btn-simulate-advanced"
-        style="background:rgba(30,180,200,0.18);border-color:rgba(30,200,100,0.5);color:#50e898">
-        Run NS simulation with this area
-      </button>
-      <button class="btn" id="btn-simulate-dynamic-advanced"
-        style="background:rgba(30,180,200,0.18);border-color:rgba(30,200,100,0.5);color:#50e898">
-        Run dynamic NS simulation with this area
-      </button>
-      <button class="btn" id="btn-simulate-dynamic"
-        style="background:rgba(30,180,200,0.18);border-color:rgba(30,200,100,0.5);color:#50e898">
-        Run dynamic simulation with this area
-      </button>
+      <button class="btn set-btn" id="btn-set-area">Set area and markers</button>
     </div>
   </div>
 
@@ -498,6 +495,8 @@
       catch (e) { return null; }
     }
 
+    function setAreaReady(_ready) { }
+
     // ── Defaults ──────────────────────────────────────────────────────────────────
     const DEFAULTS = {
       bbox: {
@@ -539,13 +538,13 @@
       const ll = takeoffMarker.getLatLng();
       setField('in-to-lat', ll.lat, 8);
       setField('in-to-lon', ll.lng, 8);
-      saveAreaState();
+      setAreaReady(false);
     });
     landingMarker.on('dragend', () => {
       const ll = landingMarker.getLatLng();
       setField('in-la-lat', ll.lat, 8);
       setField('in-la-lon', ll.lng, 8);
-      saveAreaState();
+      setAreaReady(false);
     });
 
     // ── Rectangles ────────────────────────────────────────────────────────────────
@@ -625,6 +624,7 @@
     applyBbox(_saved?.bbox || DEFAULTS.bbox);
     applyTakeoff((_saved?.takeoff || DEFAULTS.takeoff).lat, (_saved?.takeoff || DEFAULTS.takeoff).lon);
     applyLanding((_saved?.landing || DEFAULTS.landing).lat, (_saved?.landing || DEFAULTS.landing).lon);
+    if (_saved) setAreaReady(true);
 
     // ── Live field editing → update rect ─────────────────────────────────────────
     ['in-min-lat', 'in-max-lat', 'in-min-lon', 'in-max-lon'].forEach(id => {
@@ -633,21 +633,23 @@
         const b = bboxFromFields();
         if (b.min_lat < b.max_lat && b.min_lon < b.max_lon && [b.min_lat, b.max_lat, b.min_lon, b.max_lon].every(v => !isNaN(v))) {
           setSelRect(b);
-          saveAreaState();
         }
+        setAreaReady(false);
       });
     });
 
     ['in-to-lat', 'in-to-lon'].forEach(id => {
       document.getElementById(id).addEventListener('input', () => {
         const lat = getField('in-to-lat'), lon = getField('in-to-lon');
-        if (!isNaN(lat) && !isNaN(lon)) { takeoffMarker.setLatLng([lat, lon]); saveAreaState(); }
+        if (!isNaN(lat) && !isNaN(lon)) { takeoffMarker.setLatLng([lat, lon]); }
+        setAreaReady(false);
       });
     });
     ['in-la-lat', 'in-la-lon'].forEach(id => {
       document.getElementById(id).addEventListener('input', () => {
         const lat = getField('in-la-lat'), lon = getField('in-la-lon');
-        if (!isNaN(lat) && !isNaN(lon)) { landingMarker.setLatLng([lat, lon]); saveAreaState(); }
+        if (!isNaN(lat) && !isNaN(lon)) { landingMarker.setLatLng([lat, lon]); }
+        setAreaReady(false);
       });
     });
 
@@ -689,6 +691,7 @@
       applyTakeoff(DEFAULTS.takeoff.lat, DEFAULTS.takeoff.lon);
       applyLanding(DEFAULTS.landing.lat, DEFAULTS.landing.lon);
       map.fitBounds([[DEFAULTS.bbox.min_lat, DEFAULTS.bbox.min_lon], [DEFAULTS.bbox.max_lat, DEFAULTS.bbox.max_lon]], { padding: [40, 40] });
+      setAreaReady(false);
       setStatus('Reset to default Arbas values.');
     });
 
@@ -749,7 +752,7 @@
         }
         applyBbox(b);
         exitDraw();
-        saveAreaState();
+        setAreaReady(false);
         setStatus('Bbox set. Edit the fields to fine-tune the coordinates.');
       }
     });
@@ -761,7 +764,7 @@
         if (placeMode === 'takeoff') applyTakeoff(e.latlng.lat, e.latlng.lng);
         else applyLanding(e.latlng.lat, e.latlng.lng);
         exitPlace();
-        saveAreaState();
+        setAreaReady(false);
         return;
       }
       // Touch two-tap bbox draw
@@ -785,7 +788,7 @@
           }
           applyBbox(b);
           exitDraw();
-          saveAreaState();
+          setAreaReady(false);
           setStatus('Bbox set. Edit the fields to fine-tune the coordinates.');
         }
       }
@@ -821,26 +824,12 @@
       { padding: [40, 40] }
     );
 
-    // ── Go to simulate.html (state already persisted via localStorage) ────────────
-    document.getElementById('btn-simulate').addEventListener('click', () => {
+    // ── Set area and markers ──────────────────────────────────────────────────────
+    document.getElementById('btn-set-area').addEventListener('click', () => {
       saveAreaState();
-      window.location.href = 'simulate';
+      setAreaReady(true);
+      showToast('Area and markers saved.');
     });
-
-    document.getElementById('btn-simulate-advanced').addEventListener('click', () => {
-      saveAreaState();
-      window.location.href = 'simulate-advanced';
-    });
-
-    document.getElementById('btn-simulate-dynamic-advanced').addEventListener('click', () => {
-      saveAreaState();
-      window.location.href = 'simulate-dynamic-advanced';
-    });
-    document.getElementById('btn-simulate-dynamic').addEventListener('click', () => {
-      saveAreaState();
-      window.location.href = 'simulate-dynamic';
-    });
-
   </script>
   <script>
     // Nav dropdown touch support
