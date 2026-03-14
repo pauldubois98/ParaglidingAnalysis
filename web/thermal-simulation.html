@@ -49,40 +49,40 @@
 
 <body class="sim-page">
   <nav id="header-nav">
-    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt="" /><span>Home</span></a>
+    <a href="air-flow" class="nav-logo"><img src="icons/favicon.svg" alt="" /><span>Home</span></a>
     <div class="nav-sep"></div>
-    <a href="area" class="nav-link">Area</a>
+    <a href="flow-area-selection" class="nav-link">Area</a>
     <div class="nav-sep"></div>
     <div class="nav-dropdown">
       <button class="nav-dropdown-btn nav-active">Thermal</button>
       <div class="nav-dropdown-menu">
-        <a href="simulate" class="nav-dropdown-item nav-active">Simulate</a>
-        <a href="view" class="nav-dropdown-item">View</a>
-        <a href="about" class="nav-dropdown-item">About</a>
+        <a href="thermal-simulation" class="nav-dropdown-item nav-active">Simulate</a>
+        <a href="thermal-view" class="nav-dropdown-item">View</a>
+        <a href="thermal-about" class="nav-dropdown-item">About</a>
       </div>
     </div>
     <div class="nav-dropdown">
       <button class="nav-dropdown-btn">Thermal NS</button>
       <div class="nav-dropdown-menu">
-        <a href="simulate-advanced" class="nav-dropdown-item">Simulate</a>
-        <a href="view-advanced" class="nav-dropdown-item">View</a>
-        <a href="about-advanced" class="nav-dropdown-item">About</a>
+        <a href="thermal-ns-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="thermal-ns-view" class="nav-dropdown-item">View</a>
+        <a href="thermal-flow-about" class="nav-dropdown-item">About</a>
       </div>
     </div>
     <div class="nav-dropdown">
       <button class="nav-dropdown-btn">Wind</button>
       <div class="nav-dropdown-menu">
-        <a href="simulate-dynamic" class="nav-dropdown-item">Simulate</a>
-        <a href="view-dynamic" class="nav-dropdown-item">View</a>
-        <a href="about-dynamic" class="nav-dropdown-item">About</a>
+        <a href="wind-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="wind-view" class="nav-dropdown-item">View</a>
+        <a href="wind-flow-about" class="nav-dropdown-item">About</a>
       </div>
     </div>
     <div class="nav-dropdown">
       <button class="nav-dropdown-btn">Wind NS</button>
       <div class="nav-dropdown-menu">
-        <a href="simulate-dynamic-advanced" class="nav-dropdown-item">Simulate</a>
-        <a href="view-dynamic-advanced" class="nav-dropdown-item">View</a>
-        <a href="about-dynamic-advanced" class="nav-dropdown-item">About</a>
+        <a href="wind-ns-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="wind-ns-view" class="nav-dropdown-item">View</a>
+        <a href="wind-ns-about" class="nav-dropdown-item">About</a>
       </div>
     </div>
   </nav>
@@ -819,7 +819,7 @@
         }
       })();
       if (!saved) {
-        location.href = "area";
+        location.href = "flow-area-selection";
       } else {
         if (saved.bbox) {
           setVal("min_lat", saved.bbox.min_lat);
@@ -3234,7 +3234,7 @@
         // Serialize to JSON string before storing — avoids structured-clone issues
         // with large or complex objects and guarantees the data is always readable.
         await idbPut(JSON.stringify(simResult));
-        window.location.href = "view";
+        window.location.href = "thermal-view";
       } catch (e) {
         log(
           `Could not save to IndexedDB (${e.message}). Try downloading the JSON and placing it at data/simulation.json.`,

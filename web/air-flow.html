@@ -41,6 +41,7 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
+      filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%);
     }
 
     header h1 {
@@ -294,40 +295,40 @@
 
 <body>
   <nav id="header-nav">
-    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt="" /><span>Home</span></a>
+    <a href="air-flow" class="nav-logo"><img src="icons/favicon.svg" alt="" /><span>Home</span></a>
     <div class="nav-sep"></div>
-    <a href="area" class="nav-link">Area</a>
+    <a href="flow-area-selection" class="nav-link">Area</a>
     <div class="nav-sep"></div>
     <div class="nav-dropdown">
       <button class="nav-dropdown-btn">Thermal</button>
       <div class="nav-dropdown-menu">
-        <a href="simulate" class="nav-dropdown-item">Simulate</a>
-        <a href="view" class="nav-dropdown-item">View</a>
-        <a href="about" class="nav-dropdown-item">About</a>
+        <a href="thermal-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="thermal-view" class="nav-dropdown-item">View</a>
+        <a href="thermal-about" class="nav-dropdown-item">About</a>
       </div>
     </div>
     <div class="nav-dropdown">
       <button class="nav-dropdown-btn">Thermal NS</button>
       <div class="nav-dropdown-menu">
-        <a href="simulate-advanced" class="nav-dropdown-item">Simulate</a>
-        <a href="view-advanced" class="nav-dropdown-item">View</a>
-        <a href="about-advanced" class="nav-dropdown-item">About</a>
+        <a href="thermal-ns-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="thermal-ns-view" class="nav-dropdown-item">View</a>
+        <a href="thermal-flow-about" class="nav-dropdown-item">About</a>
       </div>
     </div>
     <div class="nav-dropdown">
       <button class="nav-dropdown-btn">Wind</button>
       <div class="nav-dropdown-menu">
-        <a href="simulate-dynamic" class="nav-dropdown-item">Simulate</a>
-        <a href="view-dynamic" class="nav-dropdown-item">View</a>
-        <a href="about-dynamic" class="nav-dropdown-item">About</a>
+        <a href="wind-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="wind-view" class="nav-dropdown-item">View</a>
+        <a href="wind-flow-about" class="nav-dropdown-item">About</a>
       </div>
     </div>
     <div class="nav-dropdown">
       <button class="nav-dropdown-btn">Wind NS</button>
       <div class="nav-dropdown-menu">
-        <a href="simulate-dynamic-advanced" class="nav-dropdown-item">Simulate</a>
-        <a href="view-dynamic-advanced" class="nav-dropdown-item">View</a>
-        <a href="about-dynamic-advanced" class="nav-dropdown-item">About</a>
+        <a href="wind-ns-simulation" class="nav-dropdown-item">Simulate</a>
+        <a href="wind-ns-view" class="nav-dropdown-item">View</a>
+        <a href="wind-ns-about" class="nav-dropdown-item">About</a>
       </div>
     </div>
   </nav>
@@ -343,9 +344,10 @@
 
     <!-- ── Step 0: Area ── -->
     <div class="area-wrap">
-      <a href="area" class="area-card">
+      <a href="flow-area-selection" class="area-card">
         <div class="area-icon">
           <img src="icons/favicon-area1.svg" data-icon="area" data-count="5" alt="" />
+          <!-- <img src="icons/favicon-area1.svg" data-icon="flow-area-selection" data-count="5" alt="" /> -->
         </div>
         <div class="area-text">
           <div class="area-title">Step 0 — Select Area</div>
@@ -387,9 +389,9 @@
           index · shadow mask · sun elevation
         </div>
         <div class="wf-links">
-          <a href="simulate" class="wf-link primary">Simulate</a>
-          <a href="view" class="wf-link">View</a>
-          <a href="about" class="wf-link">About</a>
+          <a href="thermal-simulation" class="wf-link primary">Simulate</a>
+          <a href="thermal-view" class="wf-link">View</a>
+          <a href="thermal-about" class="wf-link">About</a>
         </div>
       </div>
 
@@ -417,9 +419,9 @@
           w · convergence · cross-section slices
         </div>
         <div class="wf-links">
-          <a href="simulate-advanced" class="wf-link primary">Simulate</a>
-          <a href="view-advanced" class="wf-link">View</a>
-          <a href="about-advanced" class="wf-link">About</a>
+          <a href="thermal-ns-simulation" class="wf-link primary">Simulate</a>
+          <a href="thermal-ns-view" class="wf-link">View</a>
+          <a href="thermal-flow-about" class="wf-link">About</a>
         </div>
       </div>
     </div>
@@ -457,9 +459,9 @@
           number · vorticity · flow depth
         </div>
         <div class="wf-links">
-          <a href="simulate-dynamic" class="wf-link primary">Simulate</a>
-          <a href="view-dynamic" class="wf-link">View</a>
-          <a href="about-dynamic" class="wf-link">About</a>
+          <a href="wind-simulation" class="wf-link primary">Simulate</a>
+          <a href="wind-view" class="wf-link">View</a>
+          <a href="wind-flow-about" class="wf-link">About</a>
         </div>
       </div>
 
@@ -490,9 +492,9 @@
           · vertical wind · pressure · vorticity
         </div>
         <div class="wf-links">
-          <a href="simulate-dynamic-advanced" class="wf-link primary">Simulate</a>
-          <a href="view-dynamic-advanced" class="wf-link">View</a>
-          <a href="about-dynamic-advanced" class="wf-link">About</a>
+          <a href="wind-ns-simulation" class="wf-link primary">Simulate</a>
+          <a href="wind-ns-view" class="wf-link">View</a>
+          <a href="wind-ns-about" class="wf-link">About</a>
         </div>
       </div>
     </div>
