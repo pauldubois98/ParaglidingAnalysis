@@ -27,21 +27,6 @@
       display: block;
     }
 
-    .section-title {
-      font-size: 9px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      color: #3a6080;
-      margin: 12px 0 6px;
-      border-bottom: 1px solid rgba(100, 160, 255, 0.1);
-      padding-bottom: 3px;
-    }
-
-    .section-title:first-child {
-      margin-top: 0;
-    }
-
     .control-group {
       margin-bottom: 12px;
     }
@@ -174,36 +159,6 @@
       margin: 0 auto 12px;
     }
 
-    #info-panel {
-      position: absolute;
-      top: 8px;
-      left: 16px;
-      width: 240px;
-      background: rgba(10, 15, 30, 0.85);
-      border: 1px solid rgba(100, 160, 255, 0.3);
-      border-radius: 12px;
-      padding: 14px;
-      font-size: 12px;
-      color: #c8d8e8;
-      backdrop-filter: blur(8px);
-      display: none;
-      z-index: 10;
-    }
-
-    #info-panel h3 {
-      font-size: 13px;
-      color: #7eb8ff;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 4px;
-    }
-
-    #info-panel .info-coords {
-      font-size: 10px;
-      color: #7eb8ff;
-      margin-bottom: 10px;
-    }
-
     #plume-section {
       margin-top: 12px;
       border-top: 1px solid rgba(100, 160, 255, 0.15);
@@ -243,29 +198,6 @@
     }
 
 
-
-    /* ── Panel toggle button ── */
-    #panel-toggle {
-      position: absolute;
-      top: 52px;
-      right: 8px;
-      z-index: 1002;
-      background: rgba(10, 15, 30, 0.88);
-      border: 1px solid rgba(100, 160, 255, 0.35);
-      border-radius: 12px;
-      color: #7eb8ff;
-      padding: 9px 14px;
-      font-size: 15px;
-      line-height: 1;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      transition: background 0.15s, right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    #panel-toggle:active {
-      background: rgba(30, 55, 100, 0.7);
-    }
-
     @media (max-width: 768px) {
       #panel-toggle.open {
         right: 8px;
@@ -289,20 +221,20 @@
 
 <body>
   <div id="canvas-container">
-    <div id="info-panel">
-      <h3>Selected point</h3>
-      <div id="info-rows"></div>
-      <div id="plume-section" style="display:none">
-        <h4>Thermal plume profile</h4>
-        <div id="plume-wrap">
-          <div id="plume-alt-labels"></div>
-          <canvas id="plume-canvas" width="180" height="360"></canvas>
-        </div>
-      </div>
-    </div>
     <div id="loading">
       <div class="spinner"></div>
       <div>Loading simulation data...</div>
+    </div>
+  </div>
+  <div id="info-panel">
+    <h3>Selected point</h3>
+    <div id="info-rows"></div>
+    <div id="plume-section" style="display:none">
+      <h4>Thermal plume profile</h4>
+      <div id="plume-wrap">
+        <div id="plume-alt-labels"></div>
+        <canvas id="plume-canvas" width="180" height="360"></canvas>
+      </div>
     </div>
   </div>
 

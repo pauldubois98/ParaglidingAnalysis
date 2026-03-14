@@ -53,19 +53,6 @@
     #panel-header h2 { font-size: 13px; margin: 0; }
     #panel-footer { padding: 10px 16px 13px; gap: 6px; }
 
-    .section-title {
-      font-size: 10px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.3px;
-      color: #3a6080;
-      margin: 14px 0 8px;
-    }
-
-    .section-title:first-of-type {
-      margin-top: 0;
-    }
-
     /* ── Editable coord fields ── */
     .coord-grid {
       display: grid;
@@ -291,27 +278,7 @@
     }
 
     /* ── Mobile panel toggle button ── */
-    #panel-toggle {
-      display: none;
-      position: absolute;
-      top: 52px;
-      right: 16px;
-      z-index: 1002;
-      background: rgba(10, 15, 30, 0.88);
-      border: 1px solid rgba(100, 160, 255, 0.35);
-      border-radius: 10px;
-      color: #7eb8ff;
-      padding: 9px 14px;
-      font-size: 15px;
-      line-height: 1;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      transition: background 0.15s;
-    }
-
-    #panel-toggle:active {
-      background: rgba(30, 55, 100, 0.7);
-    }
+    #panel-toggle { display: none; }
 
     @media (max-width: 768px) {
       #panel-toggle {
