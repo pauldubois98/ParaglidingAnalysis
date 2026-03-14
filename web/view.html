@@ -193,12 +193,12 @@
 
     <div class="control-group" data-for="ambient-intensity">
       <label>Ambient light <span id="ambient-intensity-val">2.0</span></label>
-      <input type="range" id="ambient-intensity" min="0" max="6" step="0.1" value="2.0" data-decimals="1">
+      <input type="range" id="ambient-intensity" min="0" max="25" step="0.1" value="2.0" data-decimals="1">
     </div>
 
     <div class="control-group" data-for="sun-intensity">
       <label>Sun intensity <span id="sun-intensity-val">3.0</span></label>
-      <input type="range" id="sun-intensity" min="0" max="8" step="0.1" value="3.0" data-decimals="1">
+      <input type="range" id="sun-intensity" min="0" max="10" step="0.1" value="3.0" data-decimals="1">
     </div>
 
     <div class="control-group" data-for="terrain-opacity">
@@ -470,12 +470,10 @@
           simJson = await simResp.json();
         }
 
-        const [modesResp, settingsResp] = await Promise.all([
+        const [modesResp] = await Promise.all([
           fetch('presets.json'),
-          fetch('settings.json'),
         ]);
         if (!modesResp.ok) throw new Error(`presets.json: HTTP ${modesResp.status}`);
-        if (!settingsResp.ok) throw new Error(`settings.json: HTTP ${settingsResp.status}`);
         simData = simJson;  // either from IndexedDB (simulate.html) or data/simulation.json
         DALR_JS = simData.dalr ?? 0.0098;
         // Derive HTOP_MAX from the actual data: max thermal top at standard ELR (6.5 K/km)
@@ -492,7 +490,6 @@
           }
         }
         window._modesData = await modesResp.json();
-        window._settingsData = await settingsResp.json();
         window._colormapsData = {"elevation":[{"t":0.00,"color":"#21591f"},{"t":0.18,"color":"#407a2e"},{"t":0.38,"color":"#6b6633"},{"t":0.55,"color":"#7a5938"},{"t":0.72,"color":"#948575"},{"t":0.88,"color":"#bfb8b3"},{"t":1.00,"color":"#ebe8eb"}],"thermal":[{"t":0.00,"color":"#000000"},{"t":0.33,"color":"#ff0000"},{"t":0.67,"color":"#ffff00"},{"t":1.00,"color":"#ffffff"}],"albedo":[{"t":0.00,"color":"#004fc7"},{"t":0.50,"color":"#f0b34f"},{"t":1.00,"color":"#f04200"}],"slope":[{"t":0.00,"color":"#00a114"},{"t":0.50,"color":"#db6414"},{"t":1.00,"color":"#ff00c7"}],"heat-accum":[{"t":0.00,"color":"#0a0520"},{"t":0.20,"color":"#6a0050"},{"t":0.45,"color":"#c00000"},{"t":0.70,"color":"#ff6200"},{"t":0.88,"color":"#ffd700"},{"t":1.00,"color":"#ffffff"}],"thermal-top":[{"t":0.00,"color":"#000011"},{"t":0.20,"color":"#2d1b69"},{"t":0.40,"color":"#1d4ed8"},{"t":0.60,"color":"#06b6d4"},{"t":0.80,"color":"#eab308"},{"t":1.00,"color":"#dc2626"}],"trigger":[{"t":0.00,"color":"#050010"},{"t":0.25,"color":"#3a0a60"},{"t":0.50,"color":"#008860"},{"t":0.75,"color":"#b8d800"},{"t":1.00,"color":"#ffff90"}],"collector":[{"t":0.00,"color":"#000818"},{"t":0.25,"color":"#003060"},{"t":0.50,"color":"#0066aa"},{"t":0.75,"color":"#00ccdd"},{"t":1.00,"color":"#ccffff"}]};
         document.getElementById('loading').style.display = 'none';
         init();
@@ -1526,7 +1523,6 @@
         updateHeatAccumColors();
         updateCollectorColors();
         updateFlowArrows(0);
-        applySettings();
         buildmodeButtons();
         // Apply first mode values + visibility silently
         if (window._modesData && window._modesData.length > 0) {
@@ -1688,22 +1684,6 @@
       if (window._triggerMat) window._triggerMat.opacity = v;
       document.getElementById('cb-trigger-wrap').style.display = v > 0 ? 'block' : 'none';
     });
-
-    // ─── Settings (min/max/step/decimals from settings.json) ─────────────────────
-    function applySettings() {
-      const settings = window._settingsData;
-      if (!settings) return;
-      window._settingmode = true;
-      for (const [id, cfg] of Object.entries(settings)) {
-        const el = document.getElementById(id);
-        if (!el) continue;
-        if (cfg.min !== undefined) el.min = cfg.min;
-        if (cfg.max !== undefined) el.max = cfg.max;
-        if (cfg.step !== undefined) el.step = cfg.step;
-        if (cfg.decimals !== undefined) el.dataset.decimals = cfg.decimals;
-      }
-      window._settingmode = false;
-    }
 
     // ─── Slider helpers ───────────────────────────────────────────────────────────
     // Flag: true while setSlider is programmatically changing a value,
