@@ -788,10 +788,14 @@
       const geom = new THREE.PlaneGeometry(xw, yh, nx - 1, ny - 1);
       const pos = geom.attributes.position;
 
-      // Elevate overlay to terrain surface + small offset
+      // Elevate overlay to terrain surface + small offset.
+      // Use terrainElevAt (bilinear from mesh_elevation) instead of T.elevation,
+      // because T.elevation is built with wrong stride when sim grid ≠ terrain grid.
       for (let j = 0; j < ny; j++) {
         for (let i = 0; i < nx; i++) {
-          pos.setZ(j * nx + i, T.elevation[j][i] * Zs + 3);
+          const wx = T.x_extent[0] + i * xw / (nx - 1);
+          const wy = T.y_extent[1] - j * yh / (ny - 1);
+          pos.setZ(j * nx + i, terrainElevAt(wx, wy) * Zs + 3);
         }
       }
       pos.needsUpdate = true;
