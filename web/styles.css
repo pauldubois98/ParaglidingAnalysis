@@ -19,6 +19,11 @@ body {
   font-family: 'Segoe UI', sans-serif;
 }
 
+canvas { display: block; }
+
+.hide,
+.hidden { display: none; }
+
 /* ================================================================
    Navigation bar  (identical across all pages)
    ================================================================ */
@@ -466,6 +471,43 @@ ul li {
   overflow: hidden;
 }
 
+body.sim-page {
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  color: #e0e8f0;
+}
+
+body.sim-page input[type="number"],
+body.sim-page input[type="date"],
+body.sim-page input[type="text"],
+body.sim-page input[type="range"] {
+  width: 100%;
+  background: rgba(100, 160, 255, 0.07);
+  border: 1px solid rgba(100, 160, 255, 0.2);
+  border-radius: 5px;
+  color: #e0e8f0;
+  font-size: 12px;
+  padding: 5px 8px;
+  outline: none;
+  margin-bottom: 2px;
+}
+
+body.sim-page input[type="number"]:focus,
+body.sim-page input[type="date"]:focus {
+  border-color: rgba(100, 160, 255, 0.5);
+}
+
+body.sim-page input[type="range"] {
+  padding: 4px 2px;
+}
+
+input[type="range"] {
+  width: 100%;
+  accent-color: #7eb8ff;
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
   #sim-ui-panel {
     border-radius: 0;
@@ -693,6 +735,12 @@ ul li {
   background: rgba(30, 55, 100, 0.7);
 }
 
+@media (max-width: 768px) {
+  #panel-toggle.open {
+    right: 8px;
+  }
+}
+
 /* ================================================================
    #info-panel  (all 4 view pages)
    ================================================================ */
@@ -777,7 +825,9 @@ ul li {
   border-radius: 3px;
 }
 
-#plots-area {
+#plots-area,
+#sim-plots-area,
+#plots-area-sim {
   display: none;
   flex-direction: row;
   gap: 10px;
@@ -870,6 +920,33 @@ ul li {
 .footer-row {
   display: flex;
   gap: 6px;
+}
+
+/* ================================================================
+   Compass widget  (simulate-dynamic + simulate-dynamic-advanced)
+   ================================================================ */
+
+#compass-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+#compass-svg {
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+#compass-readout {
+  font-size: 11px;
+  color: #99b8d0;
+  line-height: 1.7;
+}
+
+#compass-readout strong {
+  color: #7eb8ff;
+  font-size: 14px;
 }
 
 input:disabled {
@@ -1062,6 +1139,37 @@ input[type="checkbox"] {
 }
 
 /* ================================================================
+   Toggle row / button  (view-dynamic + view-dynamic-advanced)
+   ================================================================ */
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #99b8d0;
+  margin-bottom: 8px;
+}
+
+.toggle-btn {
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 10px;
+  border: 1px solid rgba(100, 160, 255, .25);
+  color: #4a6888;
+  background: transparent;
+  cursor: pointer;
+  transition: .15s;
+}
+
+.toggle-btn.on {
+  color: #7eb8ff;
+  border-color: rgba(100, 160, 255, .6);
+  background: rgba(100, 160, 255, .12);
+}
+
+/* ================================================================
    View pages — colorbar  (view-dynamic + view-dynamic-advanced)
    ================================================================ */
 
@@ -1101,6 +1209,60 @@ input[type="checkbox"] {
   flex-direction: column;
   justify-content: space-between;
   height: 160px;
+  font-size: 9px;
+  color: #99b8d0;
+  line-height: 1;
+}
+
+/* ================================================================
+   View pages — colorbar classes  (view + view-advanced)
+   ================================================================ */
+
+#colorbars {
+  position: absolute;
+  bottom: 20px;
+  left: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+  max-width: 500px;
+}
+
+.colorbar {
+  background: rgba(10, 15, 30, 0.82);
+  border: 1px solid rgba(100, 160, 255, 0.2);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.colorbar.show {
+  display: block;
+}
+
+.colorbar-title {
+  text-align: center;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #7eb8ff;
+  font-size: 10px;
+}
+
+.colorbar-body {
+  display: flex;
+  gap: 5px;
+  align-items: stretch;
+}
+
+.colorbar-canvas {
+  border-radius: 3px;
+  border: 1px solid rgba(100, 160, 255, 0.15);
+}
+
+.colorbar-labels {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   font-size: 9px;
   color: #99b8d0;
   line-height: 1;
