@@ -315,7 +315,7 @@
         <div class="grid-2">
           <div>
             <label class="field-label">K_release (h⁻¹)</label>
-            <input type="number" id="k_release" step="0.05" min="0" max="2" value="0.3">
+            <input type="number" id="k_release" step="0.05" min="0" max="2" value="0.5">
           </div>
           <div>
             <label class="field-label">Threshold (K)</label>
@@ -329,7 +329,7 @@
         <div class="grid-2">
           <div>
             <label class="field-label">V_advect_max (m/h)</label>
-            <input type="number" id="v_advect_max" step="50" min="50" max="3000" value="1000">
+            <input type="number" id="v_advect_max" step="50" min="50" max="3000" value="1500">
           </div>
           <div>
             <label class="field-label">Ref slope</label>
@@ -657,7 +657,7 @@
 
     tryRestoreFromIdb().catch(() => { });
 
-    // ── Load defaults from config.json ───────────────────────────────
+    // ── Load defaults
     function setVal(id, v) {
       const el = document.getElementById(id);
       if (el) el.value = v;
@@ -674,27 +674,9 @@
       }
     }
 
-    fetch('config.json').then(r => r.json()).then(cfg => {
-      setVal('sim_date', new Date().toISOString().slice(0, 10));
-      setVal('tz_offset', cfg.simulation.tz_offset);
-      setVal('interval_min', cfg.simulation.interval_min);
-      setVal('min_elevation', cfg.simulation.min_elevation_deg);
-      setVal('era5_window', cfg.heating.era5_window_days);
-      setVal('diffuse_frac', cfg.heating.diffuse_fraction);
-      setVal('elr', cfg.heating.elr_per_km);
-      setVal('tau_hours', cfg.heating.tau_hours);
-      setVal('k_release', cfg.release.k_release);
-      setVal('release_threshold', cfg.release.release_threshold);
-      setVal('v_advect_max', cfg.advection.v_advect_max);
-      setVal('ref_slope', cfg.advection.ref_slope);
-      setVal('k_collect', cfg.advection.k_collect ?? 1.0);
-      setVal('arrow_step', cfg.output.arrow_step);
-      setVal('domainH', cfg.simulation.domain_height_m);
-
-      // Initialize weather mode after config loads
-      updateWeatherMode();
-      validateDate();
-    }).catch(e => console.warn('config.json not loaded:', e));
+    setVal('sim_date', new Date().toISOString().slice(0, 10));
+    updateWeatherMode();
+    validateDate();
 
     // ═══════════════════════════════════════════════════════════════════
     //  COORDINATE HELPERS
