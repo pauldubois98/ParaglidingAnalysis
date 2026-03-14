@@ -453,8 +453,21 @@ ul li {
 }
 
 /* ================================================================
+   #sim-ui-panel — simulate pages: flex-column sidebar
+   ================================================================ */
+
+#sim-ui-panel {
+  background: rgba(10, 15, 30, 0.88);
+  border: 1px solid rgba(100, 160, 255, 0.3);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ================================================================
    #ui-panel — view pages: absolute slide-in overlay
-   Simulate pages restore position/transform locally.
    ================================================================ */
 
 #ui-panel {
