@@ -1,0 +1,456 @@
+/* ================================================================
+   Shared stylesheet — paragliding air flow simulator
+   All pages link this file. Page-specific rules stay inline.
+   ================================================================ */
+
+/* ── Reset ── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Base ── */
+body {
+  background: #0a0f1a;
+  color: #c8d8e8;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+/* ================================================================
+   Navigation bar  (identical across all pages)
+   ================================================================ */
+
+#header-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 2px;
+  background: rgba(6, 10, 20, 0.92);
+  border-bottom: 1px solid rgba(100, 160, 255, 0.12);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 9px;
+  margin-right: 4px;
+  color: #7eb8ff;
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.nav-logo img {
+  width: 18px;
+  height: 18px;
+  filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%);
+}
+
+.nav-logo:hover {
+  background: rgba(100, 160, 255, 0.1);
+}
+
+.nav-sep {
+  width: 1px;
+  height: 18px;
+  background: rgba(100, 160, 255, 0.12);
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+.nav-link {
+  padding: 5px 10px;
+  color: #4a6888;
+  text-decoration: none;
+  font-size: 12px;
+  border-radius: 6px;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-link:hover {
+  color: #90b8d8;
+  background: rgba(100, 160, 255, 0.08);
+}
+
+.nav-link.nav-active {
+  color: #7eb8ff;
+  background: rgba(100, 160, 255, 0.1);
+  font-weight: 500;
+}
+
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  color: #4a6888;
+  font-size: 12px;
+  font-family: inherit;
+  border-radius: 6px;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-dropdown-btn::after {
+  content: '▾';
+  font-size: 9px;
+  opacity: 0.6;
+}
+
+.nav-dropdown:hover .nav-dropdown-btn,
+.nav-dropdown-btn:hover {
+  color: #90b8d8;
+  background: rgba(100, 160, 255, 0.08);
+}
+
+.nav-dropdown-btn.nav-active {
+  color: #7eb8ff;
+  background: rgba(100, 160, 255, 0.1);
+  font-weight: 500;
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 120px;
+  background: rgba(8, 14, 28, 0.97);
+  border: 1px solid rgba(100, 160, 255, 0.18);
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.15s, transform 0.15s;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  z-index: 100;
+}
+
+.nav-dropdown:hover .nav-dropdown-menu,
+.nav-dropdown.open .nav-dropdown-menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.nav-dropdown-item {
+  padding: 6px 10px;
+  color: #4a6888;
+  text-decoration: none;
+  font-size: 12px;
+  border-radius: 5px;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-dropdown-item:hover {
+  color: #90b8d8;
+  background: rgba(100, 160, 255, 0.08);
+}
+
+.nav-dropdown-item.nav-active {
+  color: #7eb8ff;
+  background: rgba(100, 160, 255, 0.1);
+  font-weight: 500;
+}
+
+/* ================================================================
+   Document pages  (about.html, about-advanced.html, etc.)
+   ================================================================ */
+
+.doc-page body {
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* Apply document typography when body carries .doc class
+   OR use the simpler approach: about pages set font-size on body
+   via a one-line inline <style>. The rules below are scoped to
+   elements that only appear inside about-page markup. */
+
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 64px 24px 80px;
+}
+
+h1 {
+  font-size: 24px;
+  color: #7eb8ff;
+  margin-bottom: 6px;
+}
+
+.subtitle {
+  color: #4a7090;
+  font-size: 14px;
+  margin-bottom: 48px;
+}
+
+h2 {
+  font-size: 17px;
+  color: #7eb8ff;
+  margin: 40px 0 12px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(100, 160, 255, 0.15);
+}
+
+h3 {
+  font-size: 14px;
+  color: #90c8e8;
+  margin: 22px 0 8px;
+  font-weight: 600;
+}
+
+p {
+  margin-bottom: 12px;
+  color: #a8c0d4;
+}
+
+/* ── Equation block ── */
+.eq {
+  font-family: 'Courier New', monospace;
+  background: rgba(100, 160, 255, 0.07);
+  border-left: 3px solid rgba(100, 160, 255, 0.3);
+  padding: 10px 16px;
+  margin: 12px 0;
+  border-radius: 0 6px 6px 0;
+  color: #c8e0ff;
+  font-size: 13px;
+  line-height: 1.8;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ── Inline code ── */
+code {
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  background: rgba(100, 160, 255, 0.1);
+  padding: 1px 5px;
+  border-radius: 3px;
+  color: #a0d0ff;
+}
+
+/* ── Parameter table ── */
+.param-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+}
+
+.param-table th {
+  text-align: left;
+  padding: 7px 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #4a6888;
+  border-bottom: 1px solid rgba(100, 160, 255, 0.15);
+}
+
+.param-table td {
+  padding: 7px 10px;
+  border-bottom: 1px solid rgba(100, 160, 255, 0.07);
+  vertical-align: top;
+  font-size: 13px;
+}
+
+.param-table tr:last-child td {
+  border-bottom: none;
+}
+
+.param-table td:first-child {
+  color: #7eb8ff;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.param-table td:nth-child(2) {
+  color: #7a9ab0;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.param-table td:nth-child(3) {
+  color: #a8c0d4;
+}
+
+/* ── Land-cover table ── */
+.lc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 14px 0;
+  font-size: 13px;
+}
+
+.lc-table th {
+  text-align: left;
+  padding: 6px 10px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #4a6888;
+  border-bottom: 1px solid rgba(100, 160, 255, 0.15);
+}
+
+.lc-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(100, 160, 255, 0.07);
+  color: #a8c0d4;
+}
+
+.lc-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ── Land-cover colour swatch ── */
+.lc-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+/* ── Info / warning boxes ── */
+.box {
+  background: rgba(100, 160, 255, 0.05);
+  border: 1px solid rgba(100, 160, 255, 0.15);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0;
+}
+
+.box.note {
+  border-color: rgba(255, 60, 60, 0.3);
+  background: rgba(255, 30, 30, 0.05);
+}
+
+.box.note li {
+  color: #c06060;
+}
+
+.box.warn {
+  border-color: rgba(255, 180, 60, 0.3);
+  background: rgba(255, 160, 30, 0.05);
+}
+
+.box.warn li {
+  color: #c09060;
+}
+
+/* ── Numbered step ── */
+.step {
+  display: flex;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.step-num {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(100, 160, 255, 0.2);
+  color: #7eb8ff;
+  font-size: 11px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.step-body {
+  flex: 1;
+  color: #a8c0d4;
+}
+
+/* ── Lists ── */
+ul {
+  padding-left: 20px;
+  margin-bottom: 12px;
+}
+
+ul li {
+  margin-bottom: 5px;
+  color: #a8c0d4;
+}
+
+/* ================================================================
+   Responsive
+   ================================================================ */
+
+/* Nav — compact on small screens */
+@media (max-width: 480px) {
+  .nav-logo span {
+    display: none;
+  }
+
+  .nav-link,
+  .nav-dropdown-btn {
+    padding: 5px 7px;
+    font-size: 11px;
+  }
+}
+
+/* Document pages */
+@media (max-width: 768px) {
+  .page {
+    padding: 52px 16px 60px;
+  }
+
+  h1 { font-size: 20px; }
+  h2 { font-size: 15px; }
+  h3 { font-size: 13px; }
+
+  .param-table,
+  .lc-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .page { padding: 48px 10px 40px; }
+  h1 { font-size: 17px; }
+  h2 { font-size: 13px; letter-spacing: 0.5px; margin: 32px 0 14px; }
+  h3 { font-size: 12px; }
+  p, li { font-size: 13px; line-height: 1.6; }
+  .eq { font-size: 11px; padding: 10px 12px; }
+  .step { gap: 8px; }
+}
+
+
+
