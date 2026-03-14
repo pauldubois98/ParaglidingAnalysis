@@ -502,11 +502,39 @@
         logFn(`Fetching typical weather: 5-year ERA5 average around ${dateStr}…`);
         return await fetchERA5dT(lat, lon, dateStr, windowDays);
       } else if (mode === 'exact') {
-        // Fetch only the exact date's ERA5 data
+        // Fetch only the exact date's ERA5 data, with adjacent-day fallback
         logFn(`Fetching exact weather: ERA5 data for ${dateStr} (past date)…`);
         const result = await fetchERA5dTExact(lat, lon, dateStr, windowDays, tzOffset);
-        logFn(`Exact: ${result.records.length} observations collected.`, 'success');
-        return result;
+        if (result.records.length > 0) {
+          logFn(`Exact: ${result.records.length} observations collected.`, 'success');
+          return result;
+        }
+        // Try next day
+        const nextDate = new Date(dateStr + 'T12:00:00Z');
+        nextDate.setDate(nextDate.getDate() + 1);
+        const nextDateStr = nextDate.toISOString().slice(0, 10);
+        logFn(`No clear-sky data for ${dateStr} — trying next day (${nextDateStr})…`, 'warn');
+        try {
+          const nextResult = await fetchERA5dTExact(lat, lon, nextDateStr, windowDays, tzOffset);
+          if (nextResult.records.length > 0) {
+            logFn(`Fallback: ${nextResult.records.length} observations from ${nextDateStr}.`, 'warn');
+            return nextResult;
+          }
+        } catch (e) { logFn(`Next-day fetch failed: ${e.message}`, 'warn'); }
+        // Try previous day
+        const prevDate = new Date(dateStr + 'T12:00:00Z');
+        prevDate.setDate(prevDate.getDate() - 1);
+        const prevDateStr = prevDate.toISOString().slice(0, 10);
+        logFn(`No data for ${nextDateStr} — trying previous day (${prevDateStr})…`, 'warn');
+        try {
+          const prevResult = await fetchERA5dTExact(lat, lon, prevDateStr, windowDays, tzOffset);
+          if (prevResult.records.length > 0) {
+            logFn(`Fallback: ${prevResult.records.length} observations from ${prevDateStr}.`, 'warn');
+            return prevResult;
+          }
+        } catch (e) { logFn(`Prev-day fetch failed: ${e.message}`, 'warn'); }
+        logFn(`No ERA5 data for ${dateStr} or adjacent days — will use manual max_heat.`, 'warn');
+        return { records: [], diurnal: Array(24).fill(null) };
       }
       return { records: [], diurnal: Array(24).fill(null) };
     }
