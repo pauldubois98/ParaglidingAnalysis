@@ -1,5 +1,32 @@
 [
   {
+    "label": "Satellite",
+    "tip": "Real aerial imagery draped over the terrain",
+    "sliders_visible": [
+      "time-slider",
+      "satellite-opacity",
+      "shadow-darkness"
+    ],
+    "sliders": {
+      "terrain-opacity": 0,
+      "satellite-opacity": 0.95,
+      "heatmap-opacity": 0,
+      "albedo-opacity": 0,
+      "slope-opacity": 0,
+      "neutral-opacity": 0,
+      "thermal-top-opacity": 0,
+      "heat-accum-opacity": 0,
+      "flow-opacity": 0,
+      "trigger-opacity": 0,
+      "collector-opacity": 0,
+      "ambient-intensity": 2.0,
+      "sun-intensity": 3.0,
+      "shadow-darkness": 0.60,
+      "elr": 6.5,
+      "trigger-threshold": 1.5
+    }
+  },
+  {
     "label": "Elevation",
     "tip": "Terrain coloured by altitude, no overlays",
     "sliders_visible": [
@@ -10,21 +37,22 @@
       "sun-intensity"
     ],
     "sliders": {
-      "terrain-opacity":     0.95,
-      "heatmap-opacity":     0,
-      "albedo-opacity":      0,
-      "slope-opacity":       0,
-      "neutral-opacity":     0,
+      "terrain-opacity": 0.95,
+      "satellite-opacity": 0,
+      "heatmap-opacity": 0,
+      "albedo-opacity": 0,
+      "slope-opacity": 0,
+      "neutral-opacity": 0,
       "thermal-top-opacity": 0,
-      "heat-accum-opacity":  0,
-      "flow-opacity":        0,
-      "trigger-opacity":     0,
-      "collector-opacity":   0,
-      "ambient-intensity":   2.0,
-      "sun-intensity":       3.0,
-      "shadow-darkness":     0.70,
-      "elr":                 6.5,
-      "trigger-threshold":   1.5
+      "heat-accum-opacity": 0,
+      "flow-opacity": 0,
+      "trigger-opacity": 0,
+      "collector-opacity": 0,
+      "ambient-intensity": 2.0,
+      "sun-intensity": 3.0,
+      "shadow-darkness": 0.70,
+      "elr": 6.5,
+      "trigger-threshold": 1.5
     }
   },
   {
@@ -38,21 +66,22 @@
       "sun-intensity"
     ],
     "sliders": {
-      "terrain-opacity":     0,
-      "heatmap-opacity":     0,
-      "albedo-opacity":      0,
-      "slope-opacity":       0,
-      "neutral-opacity":     0.9,
+      "terrain-opacity": 0,
+      "satellite-opacity": 0,
+      "heatmap-opacity": 0,
+      "albedo-opacity": 0,
+      "slope-opacity": 0,
+      "neutral-opacity": 0.9,
       "thermal-top-opacity": 0,
-      "heat-accum-opacity":  0,
-      "flow-opacity":        0,
-      "trigger-opacity":     0,
-      "collector-opacity":   0,
-      "ambient-intensity":   0.25,
-      "sun-intensity":       7.0,
-      "shadow-darkness":     0.85,
-      "elr":                 6.5,
-      "trigger-threshold":   1.5
+      "heat-accum-opacity": 0,
+      "flow-opacity": 0,
+      "trigger-opacity": 0,
+      "collector-opacity": 0,
+      "ambient-intensity": 0.25,
+      "sun-intensity": 7.0,
+      "shadow-darkness": 0.85,
+      "elr": 6.5,
+      "trigger-threshold": 1.5
     }
   },
   {
@@ -65,21 +94,22 @@
       "elr"
     ],
     "sliders": {
-      "terrain-opacity":     0,
-      "heatmap-opacity":     0.95,
-      "albedo-opacity":      0,
-      "slope-opacity":       0,
-      "neutral-opacity":     0,
+      "terrain-opacity": 0,
+      "satellite-opacity": 0,
+      "heatmap-opacity": 0.95,
+      "albedo-opacity": 0,
+      "slope-opacity": 0,
+      "neutral-opacity": 0,
       "thermal-top-opacity": 0,
-      "heat-accum-opacity":  0,
-      "flow-opacity":        0,
-      "trigger-opacity":     0,
-      "collector-opacity":   0,
-      "ambient-intensity":   2.0,
-      "sun-intensity":       3.0,
-      "shadow-darkness":     0,
-      "elr":                 6.5,
-      "trigger-threshold":   1.5
+      "heat-accum-opacity": 0,
+      "flow-opacity": 0,
+      "trigger-opacity": 0,
+      "collector-opacity": 0,
+      "ambient-intensity": 2.0,
+      "sun-intensity": 3.0,
+      "shadow-darkness": 0,
+      "elr": 6.5,
+      "trigger-threshold": 1.5
     }
   },
   {
@@ -92,21 +122,22 @@
       "elr"
     ],
     "sliders": {
-      "terrain-opacity":     0,
-      "heatmap-opacity":     0,
-      "albedo-opacity":      0,
-      "slope-opacity":       0,
-      "neutral-opacity":     0.5,
+      "terrain-opacity": 0,
+      "satellite-opacity": 0,
+      "heatmap-opacity": 0,
+      "albedo-opacity": 0,
+      "slope-opacity": 0,
+      "neutral-opacity": 0.5,
       "thermal-top-opacity": 0,
-      "heat-accum-opacity":  0,
-      "flow-opacity":        0.95,
-      "trigger-opacity":     0,
-      "collector-opacity":   0,
-      "ambient-intensity":   2.0,
-      "sun-intensity":       3.0,
-      "shadow-darkness":     0,
-      "elr":                 6.5,
-      "trigger-threshold":   1.5
+      "heat-accum-opacity": 0,
+      "flow-opacity": 0.95,
+      "trigger-opacity": 0,
+      "collector-opacity": 0,
+      "ambient-intensity": 2.0,
+      "sun-intensity": 3.0,
+      "shadow-darkness": 0,
+      "elr": 6.5,
+      "trigger-threshold": 1.5
     }
   },
   {
@@ -119,21 +150,22 @@
       "elr"
     ],
     "sliders": {
-      "terrain-opacity":     0,
-      "heatmap-opacity":     0,
-      "albedo-opacity":      0,
-      "slope-opacity":       0,
-      "neutral-opacity":     0,
+      "terrain-opacity": 0,
+      "satellite-opacity": 0,
+      "heatmap-opacity": 0,
+      "albedo-opacity": 0,
+      "slope-opacity": 0,
+      "neutral-opacity": 0,
       "thermal-top-opacity": 0.85,
-      "heat-accum-opacity":  0,
-      "flow-opacity":        0,
-      "trigger-opacity":     0,
-      "collector-opacity":   0,
-      "ambient-intensity":   2.0,
-      "sun-intensity":       3.0,
-      "shadow-darkness":     0,
-      "elr":                 6.5,
-      "trigger-threshold":   1.5
+      "heat-accum-opacity": 0,
+      "flow-opacity": 0,
+      "trigger-opacity": 0,
+      "collector-opacity": 0,
+      "ambient-intensity": 2.0,
+      "sun-intensity": 3.0,
+      "shadow-darkness": 0,
+      "elr": 6.5,
+      "trigger-threshold": 1.5
     }
   },
   {
@@ -145,21 +177,22 @@
       "elr"
     ],
     "sliders": {
-      "terrain-opacity":     0,
-      "heatmap-opacity":     0,
-      "albedo-opacity":      0,
-      "slope-opacity":       0,
-      "neutral-opacity":     0,
+      "terrain-opacity": 0,
+      "satellite-opacity": 0,
+      "heatmap-opacity": 0,
+      "albedo-opacity": 0,
+      "slope-opacity": 0,
+      "neutral-opacity": 0,
       "thermal-top-opacity": 0,
-      "heat-accum-opacity":  0.90,
-      "flow-opacity":        0,
-      "trigger-opacity":     0,
-      "collector-opacity":   0,
-      "ambient-intensity":   0,
-      "sun-intensity":       0,
-      "shadow-darkness":     0,
-      "elr":                 6.5,
-      "trigger-threshold":   1.5
+      "heat-accum-opacity": 0.90,
+      "flow-opacity": 0,
+      "trigger-opacity": 0,
+      "collector-opacity": 0,
+      "ambient-intensity": 0,
+      "sun-intensity": 0,
+      "shadow-darkness": 0,
+      "elr": 6.5,
+      "trigger-threshold": 1.5
     }
   },
   {
@@ -170,21 +203,22 @@
       "trigger-threshold"
     ],
     "sliders": {
-      "terrain-opacity":     0,
-      "heatmap-opacity":     0,
-      "albedo-opacity":      0,
-      "slope-opacity":       0,
-      "neutral-opacity":     0,
+      "terrain-opacity": 0,
+      "satellite-opacity": 0,
+      "heatmap-opacity": 0,
+      "albedo-opacity": 0,
+      "slope-opacity": 0,
+      "neutral-opacity": 0,
       "thermal-top-opacity": 0,
-      "heat-accum-opacity":  0,
-      "flow-opacity":        0,
-      "trigger-opacity":     0,
-      "collector-opacity":   0.90,
-      "ambient-intensity":   0,
-      "sun-intensity":       0,
-      "shadow-darkness":     0,
-      "elr":                 6.5,
-      "trigger-threshold":   1.5
+      "heat-accum-opacity": 0,
+      "flow-opacity": 0,
+      "trigger-opacity": 0,
+      "collector-opacity": 0.90,
+      "ambient-intensity": 0,
+      "sun-intensity": 0,
+      "shadow-darkness": 0,
+      "elr": 6.5,
+      "trigger-threshold": 1.5
     }
   },
   {
@@ -195,21 +229,22 @@
       "trigger-threshold"
     ],
     "sliders": {
-      "terrain-opacity":     0,
-      "heatmap-opacity":     0,
-      "albedo-opacity":      0,
-      "slope-opacity":       0,
-      "neutral-opacity":     0,
+      "terrain-opacity": 0,
+      "satellite-opacity": 0,
+      "heatmap-opacity": 0,
+      "albedo-opacity": 0,
+      "slope-opacity": 0,
+      "neutral-opacity": 0,
       "thermal-top-opacity": 0,
-      "heat-accum-opacity":  0,
-      "flow-opacity":        0,
-      "trigger-opacity":     0.85,
-      "collector-opacity":   0,
-      "ambient-intensity":   0,
-      "sun-intensity":       0,
-      "shadow-darkness":     0,
-      "elr":                 6.5,
-      "trigger-threshold":   1.5
+      "heat-accum-opacity": 0,
+      "flow-opacity": 0,
+      "trigger-opacity": 0.85,
+      "collector-opacity": 0,
+      "ambient-intensity": 0,
+      "sun-intensity": 0,
+      "shadow-darkness": 0,
+      "elr": 6.5,
+      "trigger-threshold": 1.5
     }
   },
   {
@@ -221,21 +256,22 @@
       "shadow-darkness"
     ],
     "sliders": {
-      "terrain-opacity":     0,
-      "heatmap-opacity":     0,
-      "albedo-opacity":      0.75,
-      "slope-opacity":       0,
-      "neutral-opacity":     0,
+      "terrain-opacity": 0,
+      "satellite-opacity": 0,
+      "heatmap-opacity": 0,
+      "albedo-opacity": 0.75,
+      "slope-opacity": 0,
+      "neutral-opacity": 0,
       "thermal-top-opacity": 0,
-      "heat-accum-opacity":  0,
-      "flow-opacity":        0,
-      "trigger-opacity":     0,
-      "collector-opacity":   0,
-      "ambient-intensity":   0,
-      "sun-intensity":       0,
-      "shadow-darkness":     0.7,
-      "elr":                 6.5,
-      "trigger-threshold":   1.5
+      "heat-accum-opacity": 0,
+      "flow-opacity": 0,
+      "trigger-opacity": 0,
+      "collector-opacity": 0,
+      "ambient-intensity": 0,
+      "sun-intensity": 0,
+      "shadow-darkness": 0.7,
+      "elr": 6.5,
+      "trigger-threshold": 1.5
     }
   },
   {
@@ -247,21 +283,22 @@
       "shadow-darkness"
     ],
     "sliders": {
-      "terrain-opacity":     0,
-      "heatmap-opacity":     0,
-      "albedo-opacity":      0,
-      "slope-opacity":       0.75,
-      "neutral-opacity":     0,
+      "terrain-opacity": 0,
+      "satellite-opacity": 0,
+      "heatmap-opacity": 0,
+      "albedo-opacity": 0,
+      "slope-opacity": 0.75,
+      "neutral-opacity": 0,
       "thermal-top-opacity": 0,
-      "heat-accum-opacity":  0,
-      "flow-opacity":        0,
-      "trigger-opacity":     0,
-      "collector-opacity":   0,
-      "ambient-intensity":   0,
-      "sun-intensity":       0,
-      "shadow-darkness":     0.70,
-      "elr":                 6.5,
-      "trigger-threshold":   1.5
+      "heat-accum-opacity": 0,
+      "flow-opacity": 0,
+      "trigger-opacity": 0,
+      "collector-opacity": 0,
+      "ambient-intensity": 0,
+      "sun-intensity": 0,
+      "shadow-darkness": 0.70,
+      "elr": 6.5,
+      "trigger-threshold": 1.5
     }
   }
 ]
