@@ -1340,7 +1340,7 @@
 
         if (!simData) {
           loadingEl.innerHTML = `<div style="color:#f66;text-align:center">No wind simulation found.<br><br>
-         <a href="wind-simulation" style="color:#7eb8ff">Run the SWE simulation first</a></div>`;
+         <a href="wind-simulation.html" style="color:#7eb8ff">Run the wind simulation first.</a></div>`;
           return;
         }
 
@@ -1366,16 +1366,13 @@
         const p = simData.params;
 
         await loadPresets();
-      } catch (e) {
-        console.error("view-dynamic load error:", e);
-        loadingMsg.textContent = `Error: ${e.message}`;
-        loadingMsg.style.color = "#f66";
-        // Don't return — fall through to finally so the overlay is hidden
-        // and whatever was built remains visible.
-      } finally {
-        // Always hide the overlay so the Three.js canvas is reachable.
         document.getElementById("ui-panel").classList.add("open");
         loadingEl.style.display = "none";
+      } catch (e) {
+        console.error("view-dynamic load error:", e);
+        loadingEl.innerHTML =
+          `<div style="color:#f66">Failed to load wind data<br><small>${e.message}</small><br><br>
+       <small>Run the wind simulation first (<a href="wind-simulation.html" style="color:#7eb8ff">Simulate wind</a>)</small></div>`;
       }
     }
 

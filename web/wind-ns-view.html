@@ -2034,11 +2034,10 @@
         const p = simData.params;
         console.log("NS3D params:", p);
       } catch (err) {
-        document.getElementById("loading-msg").textContent =
-          `Error: ${err.message}`;
-        document.getElementById("loading-spinner").style.borderTopColor =
-          "#cc4444";
         console.error(err);
+        document.getElementById("loading").innerHTML =
+          `<div style="color:#f66">Failed to load NS3D data<br><small>${err.message}</small><br><br>
+       <small>Run the NS3D simulation first (<a href="wind-ns-simulation.html" style="color:#7eb8ff">Simulate NS3D</a>)</small></div>`;
       }
     }
 
