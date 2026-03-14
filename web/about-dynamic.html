@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
+  <title>Wind Flow — About</title>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #0a0f1a;
+      color: #c8d8e8;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    /* ── Header nav ── */
+    #header-nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 44px;
+      z-index: 3000;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 2px;
+      background: rgba(6, 10, 20, 0.92);
+      border-bottom: 1px solid rgba(100, 160, 255, 0.12);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 9px;
+      margin-right: 4px;
+      color: #7eb8ff;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .nav-logo img {
+      width: 18px;
+      height: 18px;
+      filter: invert(74%) sepia(44%) saturate(578%) hue-rotate(183deg) brightness(105%) contrast(96%);
+    }
+
+    .nav-logo:hover {
+      background: rgba(100, 160, 255, 0.1);
+    }
+
+    .nav-sep {
+      width: 1px;
+      height: 18px;
+      background: rgba(100, 160, 255, 0.12);
+      margin: 0 2px;
+      flex-shrink: 0;
+    }
+
+    .nav-link {
+      padding: 5px 10px;
+      color: #4a6888;
+      text-decoration: none;
+      font-size: 12px;
+      border-radius: 6px;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-link:hover {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, 0.08);
+    }
+
+    .nav-link.nav-active {
+      color: #7eb8ff;
+      background: rgba(100, 160, 255, 0.1);
+      font-weight: 500;
+    }
+
+    .nav-dropdown {
+      position: relative;
+    }
+
+    .nav-dropdown-btn {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      color: #4a6888;
+      font-size: 12px;
+      font-family: inherit;
+      border-radius: 6px;
+      white-space: nowrap;
+      background: none;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-dropdown-btn::after {
+      content: '▾';
+      font-size: 9px;
+      opacity: 0.6;
+    }
+
+    .nav-dropdown:hover .nav-dropdown-btn,
+    .nav-dropdown-btn:hover {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, 0.08);
+    }
+
+    .nav-dropdown-btn.nav-active {
+      color: #7eb8ff;
+      background: rgba(100, 160, 255, 0.1);
+      font-weight: 500;
+    }
+
+    .nav-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 120px;
+      background: rgba(8, 14, 28, 0.97);
+      border: 1px solid rgba(100, 160, 255, 0.18);
+      border-radius: 8px;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-4px);
+      transition: opacity 0.15s, transform 0.15s;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 100;
+    }
+
+    .nav-dropdown:hover .nav-dropdown-menu,
+    .nav-dropdown.open .nav-dropdown-menu {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .nav-dropdown-item {
+      padding: 6px 10px;
+      color: #4a6888;
+      text-decoration: none;
+      font-size: 12px;
+      border-radius: 5px;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-dropdown-item:hover {
+      color: #90b8d8;
+      background: rgba(100, 160, 255, 0.08);
+    }
+
+    .nav-dropdown-item.nav-active {
+      color: #7eb8ff;
+      background: rgba(100, 160, 255, 0.1);
+      font-weight: 500;
+    }
+
+    .page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 64px 24px 80px;
+    }
+
+    h1 {
+      font-size: 24px;
+      color: #7eb8ff;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: #4a7090;
+      font-size: 14px;
+      margin-bottom: 48px;
+    }
+
+    h2 {
+      font-size: 17px;
+      color: #7eb8ff;
+      margin: 40px 0 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid rgba(100, 160, 255, 0.15);
+    }
+
+    h3 {
+      font-size: 14px;
+      color: #90c8e8;
+      margin: 22px 0 8px;
+      font-weight: 600;
+    }
+
+    p {
+      margin-bottom: 12px;
+      color: #a8c0d4;
+    }
+
+    .eq {
+      font-family: 'Courier New', monospace;
+      background: rgba(100, 160, 255, 0.07);
+      border-left: 3px solid rgba(100, 160, 255, 0.3);
+      padding: 10px 16px;
+      margin: 12px 0;
+      border-radius: 0 6px 6px 0;
+      color: #c8e0ff;
+      font-size: 13px;
+      line-height: 1.8;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    code {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      background: rgba(100, 160, 255, 0.1);
+      padding: 1px 5px;
+      border-radius: 3px;
+      color: #a0d0ff;
+    }
+
+    .param-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+    }
+
+    .param-table th {
+      text-align: left;
+      padding: 7px 10px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #4a6888;
+      border-bottom: 1px solid rgba(100, 160, 255, 0.15);
+    }
+
+    .param-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid rgba(100, 160, 255, 0.07);
+      vertical-align: top;
+      font-size: 13px;
+    }
+
+    .param-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .param-table td:first-child {
+      color: #7eb8ff;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .param-table td:nth-child(2) {
+      color: #7a9ab0;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .param-table td:nth-child(3) {
+      color: #a8c0d4;
+    }
+
+    .box {
+      background: rgba(100, 160, 255, 0.05);
+      border: 1px solid rgba(100, 160, 255, 0.15);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 16px 0;
+    }
+
+    .box.note {
+      border-color: rgba(255, 60, 60, 0.3);
+      background: rgba(255, 30, 30, 0.05);
+    }
+
+    .box.note li {
+      color: #c06060;
+    }
+
+    .box.warn {
+      border-color: rgba(255, 180, 60, 0.3);
+      background: rgba(255, 160, 30, 0.05);
+    }
+
+    .box.warn li {
+      color: #c09060;
+    }
+
+    .step {
+      display: flex;
+      gap: 12px;
+      margin: 8px 0;
+    }
+
+    .step-num {
+      flex-shrink: 0;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: rgba(100, 160, 255, 0.2);
+      color: #7eb8ff;
+      font-size: 11px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .step-body {
+      flex: 1;
+      color: #a8c0d4;
+    }
+
+    ul {
+      padding-left: 20px;
+      margin-bottom: 12px;
+    }
+
+    ul li {
+      margin-bottom: 5px;
+      color: #a8c0d4;
+    }
+
+    @media (max-width: 768px) {
+      .page {
+        padding: 52px 16px 60px;
+      }
+
+      h1 { font-size: 20px; }
+      h2 { font-size: 15px; }
+      h3 { font-size: 13px; }
+
+      .param-table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .page { padding: 48px 10px 40px; }
+      h1 { font-size: 17px; }
+      h2 { font-size: 13px; letter-spacing: 0.5px; margin: 32px 0 14px; }
+      h3 { font-size: 12px; }
+      p, li { font-size: 13px; line-height: 1.6; }
+      .eq { font-size: 11px; padding: 10px 12px; }
+      .step { gap: 8px; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav id="header-nav">
+    <a href="home" class="nav-logo"><img src="icons/favicon.svg" alt=""><span>Home</span></a>
+    <div class="nav-sep"></div>
+    <a href="area" class="nav-link">Area</a>
+    <div class="nav-sep"></div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Thermal</button>
+      <div class="nav-dropdown-menu">
+        <a href="simulate" class="nav-dropdown-item">Simulate</a>
+        <a href="view" class="nav-dropdown-item">View</a>
+        <a href="about" class="nav-dropdown-item">About</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Thermal NS</button>
+      <div class="nav-dropdown-menu">
+        <a href="simulate-advanced" class="nav-dropdown-item">Simulate</a>
+        <a href="view-advanced" class="nav-dropdown-item">View</a>
+        <a href="about-advanced" class="nav-dropdown-item">About</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn nav-active">Wind</button>
+      <div class="nav-dropdown-menu">
+        <a href="simulate-dynamic" class="nav-dropdown-item">Simulate</a>
+        <a href="view-dynamic" class="nav-dropdown-item">View</a>
+        <a href="about-dynamic" class="nav-dropdown-item nav-active">About</a>
+      </div>
+    </div>
+    <div class="nav-dropdown">
+      <button class="nav-dropdown-btn">Wind NS</button>
+      <div class="nav-dropdown-menu">
+        <a href="simulate-dynamic-advanced" class="nav-dropdown-item">Simulate</a>
+        <a href="view-dynamic-advanced" class="nav-dropdown-item">View</a>
+        <a href="about-dynamic-advanced" class="nav-dropdown-item">About</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <h1>Wind Flow Simulation — Technical Documentation</h1>
+    <p class="subtitle">2D Shallow Water Equations solver for orographic wind analysis over real terrain</p>
+
+    <!-- ─ OVERVIEW ─ -->
+    <h2>Overview</h2>
+    <p>
+      The Wind Flow simulation solves the 2D <strong>Shallow Water Equations (SWE)</strong> to model
+      how a horizontal wind interacts with terrain. The atmosphere is approximated as a single
+      layer of fluid with a free surface, flowing over an orographic (terrain) floor. Where the
+      terrain rises, the fluid layer thins; where the terrain is lower, the layer is deeper. This
+      reduced-gravity hydraulic analogy captures terrain-blocking, orographic lifting, lee-side
+      acceleration, and hydraulic jumps — the main mechanisms that shape wind patterns relevant
+      to paragliding site analysis.
+    </p>
+    <p>
+      The simulation runs entirely in the browser using a Web Worker on a 2D grid aligned with
+      the terrain bounding box. It is fast (seconds to a few minutes) and does not require a
+      3D pressure solve. Elevation data is fetched from Terrarium tiles; no land cover is used
+      in this model.
+    </p>
+
+    <!-- ─ PHYSICS ─ -->
+    <h2>Physics Modelled</h2>
+
+    <h3>1. Shallow Water Equations (SWE)</h3>
+    <p>
+      The atmosphere is treated as a single, vertically integrated layer of depth <code>h</code>
+      flowing over terrain of elevation <code>Z</code>. The free-surface height is
+      <code>η = h + Z</code>. The governing equations in conservative form are:
+    </p>
+    <div class="eq">Continuity:
+  ∂h/∂t = −∂(h·U)/∂x − ∂(h·V)/∂y
+
+Momentum (U):
+  ∂U/∂t = −U·∂U/∂x − V·∂U/∂y − g'·∂η/∂x − C_d·|u|·U/h + ν·∇²U
+
+Momentum (V):
+  ∂V/∂t = −U·∂V/∂x − V·∂V/∂y − g'·∂η/∂y − C_d·|u|·V/h + ν·∇²V
+
+where  η = h + Z  (free-surface elevation)
+       |u| = √(U² + V²)  (wind speed)
+       ∇²  = ∂²/∂x² + ∂²/∂y²  (2D Laplacian)</div>
+    <p>
+      The four physical terms in each momentum equation are:
+    </p>
+    <ul>
+      <li><strong>Advection</strong> — <code>U·∂U/∂x + V·∂U/∂y</code>: the fluid carries its own
+        momentum. Causes flow to accelerate through constrictions (mountain passes).</li>
+      <li><strong>Free-surface pressure gradient</strong> — <code>g'·∂η/∂x</code>: drives flow from
+        high to low free-surface. The terrain slope <code>∂Z/∂x</code> is included via η, so flow is
+        deflected around or over ridges.</li>
+      <li><strong>Bottom drag</strong> — <code>C_d·|u|·U/h</code>: quadratic friction from the
+        terrain surface, opposing the flow. Stronger where the layer is thin or flow is fast.</li>
+      <li><strong>Turbulent viscosity</strong> — <code>ν·∇²U</code>: diffuses momentum laterally,
+        smoothing velocity gradients and preventing sharp shocks from going numerically unstable.</li>
+    </ul>
+
+    <h3>2. Reduced gravity</h3>
+    <p>
+      The parameter <code>g'</code> (reduced gravity) replaces the true gravitational acceleration
+      <code>g = 9.81 m/s²</code>. In the full atmosphere, a density contrast Δρ/ρ between the
+      flowing layer and the air above it gives <code>g' = g · Δρ/ρ</code>. In practice,
+      <code>g'</code> controls the speed of gravity waves in the layer:
+    </p>
+    <div class="eq">c = √(g' · h)  [gravity wave phase speed]</div>
+    <p>
+      A small <code>g'</code> (e.g. 0.2 m/s²) mimics a weakly stratified interface — waves travel
+      slowly and the flow responds gradually to terrain. A large <code>g'</code> (e.g. 2 m/s²)
+      stiffens the free surface, causing the layer to behave more like a rigid-lid flow with
+      faster pressure adjustment.
+    </p>
+
+    <h3>3. Orographic lifting and vertical wind</h3>
+    <p>
+      Although the SWE is 2D, a proxy for the vertical wind velocity is derived from terrain-forced
+      lifting and flow convergence:
+    </p>
+    <div class="eq">w_vert = U·∂Z/∂x + V·∂Z/∂y − h·(∂U/∂x + ∂V/∂y)
+           ↑ orographic lifting       ↑ convergence-driven ascent</div>
+    <p>
+      The first term is the kinematic uplift: wind hitting a rising slope must go upward.
+      The second term is the convergence: where horizontal flow converges (∂U/∂x + ∂V/∂y &lt; 0),
+      mass is forced upward. Positive <code>w_vert</code> (red in the viewer) indicates rising air —
+      the primary indicator for orographic thermals and ridge lift.
+    </p>
+
+    <h3>4. Froude number</h3>
+    <p>
+      The Froude number distinguishes two flow regimes analogous to sub-sonic / super-sonic in gas dynamics:
+    </p>
+    <div class="eq">Fr = |u| / √(g' · h)</div>
+    <p>
+      <strong>Fr &lt; 1</strong> (sub-critical): disturbances can propagate upstream. Flow smoothly
+      adjusts to terrain; typical upwind of a ridge.<br>
+      <strong>Fr &gt; 1</strong> (super-critical): disturbances cannot travel upstream. Flow accelerates
+      through passes and over crests, producing hydraulic jumps on the lee side — violent,
+      turbulent transitions where super-critical flow suddenly decelerates. In the real atmosphere
+      this corresponds to mountain wave / rotor conditions.
+    </p>
+
+    <h3>5. Vorticity</h3>
+    <p>
+      The 2D vertical vorticity measures local rotation in the horizontal wind field:
+    </p>
+    <div class="eq">ζ = ∂V/∂x − ∂U/∂y</div>
+    <p>
+      Positive ζ (red) is cyclonic (counter-clockwise); negative ζ (blue) is anticyclonic. Strong
+      vorticity patches appear at the edges of mountain wakes, behind ridges, and in the shear
+      layers surrounding accelerated jets. High vorticity is associated with turbulence.
+    </p>
+
+    <!-- ─ NUMERICAL METHOD ─ -->
+    <h2>Numerical Method</h2>
+
+    <p>
+      The SWE are integrated with an <strong>explicit finite-difference scheme</strong> (forward Euler
+      in time, second-order central differences in space), stabilised by a CFL time-step condition.
+    </p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <b>Time step (CFL condition)</b> — chosen adaptively each step to keep the scheme stable:
+        <br><code>dt = CFL · min(dx, dy) / max(c_est, 0.1)</code><br>
+        where <code>c_est = |u|_max + √(g'·H₀)</code> is the fastest signal speed in the domain
+        (advection + gravity wave). CFL is typically 0.3–0.5.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <b>Continuity — conservative flux divergence</b> — the depth update uses the conservative
+        form to guarantee exact mass conservation:
+        <br><code>h_new = h − dt · [∂(hU)/∂x + ∂(hV)/∂y]</code><br>
+        Fluxes are computed with central differences on the interior.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <b>Momentum — upwind advection</b> — the advection terms use first-order upwind differences
+        (one-sided based on the local flow direction) to prevent non-physical oscillations:
+        <br>
+        If <code>U &gt; 0</code>: <code>∂U/∂x ≈ (U[i] − U[i−1]) / dx</code> (backward difference)<br>
+        If <code>U &lt; 0</code>: <code>∂U/∂x ≈ (U[i+1] − U[i]) / dx</code> (forward difference)
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <b>Pressure gradient</b> — the free-surface gradient uses central differences:
+        <br><code>−g' · (η[i+1,j] − η[i−1,j]) / (2·dx)</code><br>
+        where <code>η = h + Z</code> is evaluated at the current time level.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body">
+        <b>Drag and diffusion</b> — applied to the intermediate velocity after advection and
+        pressure. Drag is quadratic in speed; diffusion uses the standard 5-point Laplacian stencil.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body">
+        <b>Wet/dry masking</b> — cells where <code>h &lt; h_min</code> are treated as dry
+        (terrain-blocked). Velocities are zeroed and fluxes are suppressed to avoid division by
+        near-zero depth and to represent complete terrain blocking.
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-body">
+        <b>Boundary conditions</b> — inflow edges (where wind enters the domain) are held at
+        <code>h = H₀ − Z</code>, <code>U = U_in</code>, <code>V = V_in</code>. Outflow edges
+        use Neumann conditions (copy the interior value), allowing fluid to leave freely.
+      </div>
+    </div>
+
+    <!-- ─ BOUNDARY CONDITIONS ─ -->
+    <h2>Boundary Conditions</h2>
+    <p>
+      The wind direction determines which edges are inflow and which are outflow. For a wind
+      with eastward component <code>U_in &gt; 0</code>, the left (west) edge is inflow and the
+      right (east) edge is outflow. Both conditions are applied simultaneously for oblique winds.
+    </p>
+    <table class="param-table">
+      <tr>
+        <th>Edge</th>
+        <th>Condition</th>
+        <th>Applied when</th>
+      </tr>
+      <tr>
+        <td>Left (West)</td>
+        <td>Inflow: h = H₀−Z, U = U_in, V = V_in</td>
+        <td>U_in &gt; 0</td>
+      </tr>
+      <tr>
+        <td>Right (East)</td>
+        <td>Inflow: h = H₀−Z, U = U_in, V = V_in</td>
+        <td>U_in &lt; 0</td>
+      </tr>
+      <tr>
+        <td>Top (North)</td>
+        <td>Inflow: h = H₀−Z, U = U_in, V = V_in</td>
+        <td>V_in &lt; 0</td>
+      </tr>
+      <tr>
+        <td>Bottom (South)</td>
+        <td>Inflow: h = H₀−Z, U = U_in, V = V_in</td>
+        <td>V_in &gt; 0</td>
+      </tr>
+      <tr>
+        <td>Any outflow edge</td>
+        <td>Neumann: copy from interior neighbour</td>
+        <td>Opposite sign of above</td>
+      </tr>
+    </table>
+
+    <!-- ─ PARAMETERS ─ -->
+    <h2>Parameters and Their Effects</h2>
+
+    <h3>Wind input</h3>
+    <table class="param-table">
+      <tr>
+        <th>Parameter</th>
+        <th>Typical range</th>
+        <th>Effect</th>
+      </tr>
+      <tr>
+        <td>Wind direction</td>
+        <td>0–360°</td>
+        <td>Compass bearing the wind comes <em>from</em>. Determines which domain edges are inflow.
+          Changes which slopes are windward (orographic lift) and which are lee (sink/rotors).</td>
+      </tr>
+      <tr>
+        <td>Wind speed (U_in, V_in)</td>
+        <td>0–30 m/s</td>
+        <td>Inflow velocity magnitude. Stronger wind → faster flow, larger Froude number, stronger
+          orographic lifting and more pronounced hydraulic jumps. Too strong with low ν may cause
+          instability.</td>
+      </tr>
+    </table>
+
+    <h3>Layer physics</h3>
+    <table class="param-table">
+      <tr>
+        <th>Parameter</th>
+        <th>Typical range</th>
+        <th>Effect</th>
+      </tr>
+      <tr>
+        <td>H₀ (layer depth)</td>
+        <td>500–3000 m</td>
+        <td>Undisturbed atmospheric layer depth. Mountains taller than H₀ completely block the
+          flow (h → 0, terrain-blocked). A shallow H₀ makes more of the terrain protruding and
+          emphasises blocking effects. A deep H₀ allows flow to pass over most terrain.</td>
+      </tr>
+      <tr>
+        <td>g' (reduced gravity)</td>
+        <td>0.1–2.0 m/s²</td>
+        <td>Controls the gravity wave speed <code>c = √(g'·h)</code> and thus the Froude number
+          regime. Small g' → slow wave propagation, flow is more easily blocked and deflected
+          around obstacles. Large g' → stiff free surface, flow adjusts rapidly,
+          fewer blocking effects. Also sets the transition wind speed for hydraulic jumps.</td>
+      </tr>
+      <tr>
+        <td>C_d (bottom drag)</td>
+        <td>0–0.05</td>
+        <td>Quadratic friction coefficient. Decelerates the flow proportional to speed².
+          Higher drag → flow slows faster downstream of ridges, wake zones are wider,
+          jet acceleration through passes is damped. Zero drag allows unphysical indefinite
+          acceleration.</td>
+      </tr>
+      <tr>
+        <td>ν (viscosity)</td>
+        <td>0–2000 m²/s</td>
+        <td>Turbulent (eddy) viscosity. Diffuses lateral velocity gradients. Acts as a
+          numerical stabiliser and physical proxy for sub-grid turbulence. Too low: sharp
+          shocks may become unstable. Too high: flow features are over-smoothed and
+          fine-scale patterns are lost.</td>
+      </tr>
+    </table>
+
+    <h3>Numerical settings</h3>
+    <table class="param-table">
+      <tr>
+        <th>Parameter</th>
+        <th>Typical range</th>
+        <th>Effect</th>
+      </tr>
+      <tr>
+        <td>CFL</td>
+        <td>0.2–0.5</td>
+        <td>Courant number controlling the time-step size. Smaller → more stable but slower
+          (more steps per second of simulated time). Values above 0.5 risk numerical instability
+          with explicit upwind schemes.</td>
+      </tr>
+      <tr>
+        <td>h_min</td>
+        <td>0.1–5 m</td>
+        <td>Wet/dry threshold. Cells with h below this are treated as completely blocked terrain.
+          Too large: shallow-but-valid flow is incorrectly suppressed. Too small: near-zero h
+          causes division instability in the drag term.</td>
+      </tr>
+      <tr>
+        <td>NX, NY (grid)</td>
+        <td>32–256</td>
+        <td>Horizontal resolution. Finer grids resolve narrower terrain features (passes,
+          gullies) and produce sharper gradients. Runtime scales as NX·NY per step.</td>
+      </tr>
+    </table>
+
+    <!-- ─ OUTPUT FIELDS ─ -->
+    <h2>Output Fields</h2>
+
+    <table class="param-table">
+      <tr>
+        <th>Field</th>
+        <th>Symbol</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>Wind speed</td>
+        <td>|u| = √(U²+V²)</td>
+        <td>Horizontal wind speed at the layer. Blue→cyan→yellow gradient. Acceleration through
+          mountain passes and deceleration in wakes are clearly visible.</td>
+      </tr>
+      <tr>
+        <td>Vertical wind</td>
+        <td>w_vert</td>
+        <td>Proxy for vertical velocity (orographic uplift + convergence). Red = rising air
+          (windward slopes, convergence zones). Blue = sinking air (lee slopes, divergence).
+          Most directly relevant to paragliding ridge and thermal soaring.</td>
+      </tr>
+      <tr>
+        <td>Froude number</td>
+        <td>Fr = |u|/√(g'·h)</td>
+        <td>Blue (Fr &lt; 0.5, sub-critical) → yellow (Fr ≈ 1, critical) → red (Fr &gt; 1,
+          super-critical). Red zones indicate locations prone to hydraulic jumps and strong
+          turbulence on the lee side.</td>
+      </tr>
+      <tr>
+        <td>Flow depth</td>
+        <td>h</td>
+        <td>Layer thickness. Thin (dark) where terrain is high; deep (bright) over valleys.
+          Zero/near-zero indicates terrain-blocked cells.</td>
+      </tr>
+      <tr>
+        <td>Vorticity</td>
+        <td>ζ = ∂V/∂x − ∂U/∂y</td>
+        <td>Red = cyclonic rotation; blue = anticyclonic. Marks shear layers at the edges
+          of mountain wakes and along the flanks of jets.</td>
+      </tr>
+      <tr>
+        <td>Elevation</td>
+        <td>Z(x, y)</td>
+        <td>Terrain height for spatial reference, overlaid with a hillshade.</td>
+      </tr>
+    </table>
+
+    <!-- ─ SIMPLIFICATIONS ─ -->
+    <h2>Simplifications</h2>
+    <div class="box warn">
+      <ul>
+        <li><strong>Single layer (depth-integrated)</strong>: the vertical structure of the atmosphere
+          is collapsed into one layer depth h. There is no wind shear with height, no vertical
+          profile, and no interaction between atmospheric layers.</li>
+        <li><strong>Hydrostatic pressure</strong>: pressure is purely hydrostatic (g'·η). Non-hydrostatic
+          effects (important in steep terrain with fast flow) are absent.</li>
+        <li><strong>Reduced gravity</strong>: g' is a tunable proxy for the density contrast between
+          the flowing layer and the air above — it does not correspond to a specific atmospheric
+          layer without careful calibration.</li>
+        <li><strong>No vertical wind profile</strong>: the inflow is uniform with height; logarithmic
+          boundary layer effects are not modelled.</li>
+        <li><strong>Upwind advection (1st order)</strong>: numerically diffusive; sharp fronts
+          (shocks) are smeared over 2–3 cells.</li>
+        <li><strong>Explicit time stepping</strong>: the CFL condition forces small time steps at
+          high wind speeds or fine resolution, making the simulation slower than semi-Lagrangian
+          schemes.</li>
+        <li><strong>Uniform bottom drag</strong>: C_d is the same everywhere regardless of land
+          cover or terrain roughness.</li>
+      </ul>
+    </div>
+
+    <!-- ─ LIMITATIONS ─ -->
+    <h2>Limitations</h2>
+    <div class="box note">
+      <ul>
+        <li><strong>No thermal effects</strong> — the simulation is purely dynamical. No solar
+          heating, no buoyancy, no convective thermals. Temperature is absent from the model.</li>
+        <li><strong>No 3D turbulence</strong> — turbulence is parameterised by a single constant
+          lateral viscosity ν. The complex 3D turbulent structure of mountain wakes (rotors,
+          eddies) is not resolved.</li>
+        <li><strong>No atmospheric stratification</strong> — there is no stable stratification
+          or inversion layer. The reduced gravity g' is a crude proxy but does not capture
+          the full physics of a stratified atmosphere (gravity waves, wave breaking, critical
+          layers).</li>
+        <li><strong>No Coriolis effect</strong> — negligible for domains &lt; 50 km but formally
+          absent.</li>
+        <li><strong>No moisture</strong> — clouds, precipitation, and latent heat release are
+          not modelled.</li>
+        <li><strong>Steady inflow</strong> — the inflow wind speed and direction are constant
+          in time. Gusts, diurnal variation, and mesoscale variability are not represented.</li>
+        <li><strong>No valley channelling detail</strong> — fine-scale channelling in narrow
+          valleys may be under-resolved at typical grid spacings (200–500 m per cell).</li>
+      </ul>
+    </div>
+
+    <!-- ─ TIPS ─ -->
+    <h2>Tips for Useful Results</h2>
+    <ul>
+      <li>Set <code>H₀</code> to the height of the atmospheric boundary layer or the ridge height
+        you want to block — typically 800–2000 m.</li>
+      <li>Start with <code>g' ≈ 0.5 m/s²</code> and adjust until the Froude number map shows
+        sub-critical flow upwind of ridges (Fr &lt; 1, blue), transitioning to super-critical
+        on the crests (Fr ≈ 1, yellow). This is the most physically meaningful regime.</li>
+      <li>Increase <code>ν</code> if the simulation becomes visually noisy or velocity spikes appear.
+        Decrease it for sharper, more realistic gradients on coarser grids.</li>
+      <li>The <strong>vertical wind</strong> map is the most directly actionable output for
+        paragliding: red patches on windward slopes indicate orographic lift zones.</li>
+      <li>The <strong>Froude number</strong> map identifies hazardous lee-side zones (Fr &gt; 1)
+        where hydraulic jumps and mechanical turbulence are likely.</li>
+      <li>Allow at least 200–500 time steps before reading results — the flow needs time to reach
+        a quasi-steady state after the uniform initial condition.</li>
+    </ul>
+
+  </div>
+
+  <script>
+    document.querySelectorAll('.nav-dropdown-btn').forEach(function(btn) {
+      btn.addEventListener('click', function(e) {
+        var dd = btn.closest('.nav-dropdown');
+        var isOpen = dd.classList.contains('open');
+        document.querySelectorAll('.nav-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
+        if (!isOpen) dd.classList.add('open');
+        e.stopPropagation();
+      });
+    });
+    document.addEventListener('click', function() {
+      document.querySelectorAll('.nav-dropdown.open').forEach(function(d) { d.classList.remove('open'); });
+    });
+  </script>
+
+</body>
+</html>
