@@ -50,7 +50,7 @@ class Handler(SimpleHTTPRequestHandler):
             self._handle_proxy()
         elif self.path == '/web/' or self.path == '/web':
             self.send_response(301)
-            self.send_header('Location', '/web/home')
+            self.send_header('Location', '/web/air-flow')
             self.end_headers()
         else:
             # Serve extensionless URLs by trying <path>.html
