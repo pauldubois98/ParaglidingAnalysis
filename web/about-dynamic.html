@@ -442,6 +442,44 @@
       in this model.
     </p>
 
+    <!-- ─ PIPELINE ─ -->
+    <h2>Pipeline Overview</h2>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body"><strong>Fetch terrain</strong> — AWS Terrarium RGB-encoded tiles are downloaded for the
+        bounding box, decoded to metres, and bilinearly resampled to the NX × NY simulation grid.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body"><strong>Build 2D grid with elevation</strong> — the terrain height Z(i,j) is stored per cell.
+        The undisturbed layer depth at each cell is initialised to <code>h = H₀ − Z</code>. Cells where
+        <code>H₀ − Z ≤ h_min</code> are immediately treated as dry (terrain-blocked).</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body"><strong>Initialise flow field</strong> — the velocity is set uniformly to the inflow
+        values (U_in, V_in) everywhere. The free-surface height η = h + Z is computed from the initial h.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body"><strong>Time-march SWE</strong> — the solver steps forward in time: adaptive CFL time step →
+        continuity (conservative flux divergence) → upwind momentum advection → free-surface pressure gradient →
+        bottom drag → turbulent diffusion → wet/dry masking → boundary conditions. Repeated until the flow reaches
+        a quasi-steady state.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body"><strong>Compute derived fields</strong> — at each saved frame: wind speed |u|, Froude number
+        Fr = |u| / √(g'·h), vertical wind proxy w_vert = U·∂Z/∂x + V·∂Z/∂y − h·div(u,v), and vorticity
+        ζ = ∂V/∂x − ∂U/∂y are computed from the current (h, U, V) state.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body"><strong>Export to IndexedDB</strong> — snapshots of all fields are stored in the browser's
+        IndexedDB as the simulation runs, enabling the viewer to display them without waiting for the full run.</div>
+    </div>
+
     <!-- ─ PHYSICS ─ -->
     <h2>Physics Modelled</h2>
 
@@ -835,6 +873,29 @@ where  η = h + Z  (free-surface elevation)
           valleys may be under-resolved at typical grid spacings (200–500 m per cell).</li>
       </ul>
     </div>
+
+    <!-- ─ DATA SOURCES ─ -->
+    <h2>Data Sources</h2>
+    <table class="param-table">
+      <tr><th>Dataset</th><th>Used for</th><th>Source</th><th>Resolution</th></tr>
+      <tr>
+        <td>Elevation</td>
+        <td>Terrain height Z(i,j), layer depth initialisation, orographic lifting</td>
+        <td>AWS Terrain Tiles — Terrarium RGB encoding (IGN RGE Alti for France)</td>
+        <td>~7 m (zoom 14)</td>
+      </tr>
+      <tr>
+        <td>Simulation output</td>
+        <td>Snapshots of h, U, V and derived fields read by the viewer</td>
+        <td>Browser IndexedDB (written by the Web Worker, read by the viewer)</td>
+        <td>—</td>
+      </tr>
+    </table>
+    <p>
+      Elevation tiles use the Terrarium RGB encoding: <code>elevation = R×256 + G + B/256 − 32768</code> metres,
+      delivered in Web Mercator (EPSG:3857) and reprojected to WGS84 before use.
+      No land cover data is used — surface roughness is represented by the uniform drag coefficient C_d.
+    </p>
 
     <!-- ─ TIPS ─ -->
     <h2>Tips for Useful Results</h2>

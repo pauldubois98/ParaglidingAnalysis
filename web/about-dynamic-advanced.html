@@ -505,6 +505,51 @@
       cell's land-cover roughness length.
     </p>
 
+    <!-- ─ PIPELINE ─ -->
+    <h2>Pipeline Overview</h2>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body"><strong>Fetch terrain</strong> — AWS Terrarium RGB-encoded tiles are downloaded for the
+        bounding box, decoded to metres, and bilinearly resampled to the NX × NY simulation grid.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body"><strong>Fetch land cover</strong> — ESA WorldCover 2021 COG GeoTIFF is fetched for the
+        bounding box and resampled to the grid. Each cell is assigned an aerodynamic roughness length <code>z₀</code>
+        from the WorldCover class. A slope-based heuristic is used as fallback when the file is unavailable.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body"><strong>Build 3D grid and solid mask</strong> — the NX × NY × NZ Cartesian grid is
+        constructed above the terrain base. Each cell is flagged solid if its centre lies below the terrain surface;
+        fluid otherwise. Per-column roughness lengths are stored for the log-profile boundary condition.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body"><strong>Initialise velocity with log profile</strong> — every fluid cell is given an
+        initial velocity following the logarithmic profile anchored to the inflow speed at <code>z_ref</code>
+        above the local terrain surface. Pressure is initialised to zero everywhere.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body"><strong>Time-march NS</strong> — the solver steps forward: adaptive time step (advective + diffusive CFL) →
+        semi-Lagrangian advection → explicit diffusion → apply boundary conditions → compute divergence →
+        Jacobi pressure Poisson iterations → velocity projection → re-apply boundary conditions. Repeated until
+        the flow reaches a quasi-steady state.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body"><strong>Compute surface fields</strong> — at each saved frame: surface wind speed
+        √(U²+V²), vertical wind W, kinematic pressure P, and horizontal vorticity ∂V/∂x − ∂U/∂y are extracted
+        from the lowest fluid cell above each terrain column.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-body"><strong>Export to IndexedDB</strong> — snapshots of the 2D surface fields and the full
+        3D velocity and pressure arrays are stored in the browser's IndexedDB, from where the viewer reads them.</div>
+    </div>
+
     <!-- ─ PHYSICS ─ -->
     <h2>Physics Modelled</h2>
 
@@ -1004,6 +1049,36 @@
               under-represented.</li>
           </ul>
         </div>
+
+        <!-- ─ DATA SOURCES ─ -->
+        <h2>Data Sources</h2>
+        <table class="param-table">
+          <tr><th>Dataset</th><th>Used for</th><th>Source</th><th>Resolution</th></tr>
+          <tr>
+            <td>Elevation</td>
+            <td>Terrain mesh, solid mask, height above ground for log profile</td>
+            <td>AWS Terrain Tiles — Terrarium RGB encoding (IGN RGE Alti for France)</td>
+            <td>~7 m (zoom 14)</td>
+          </tr>
+          <tr>
+            <td>Land cover</td>
+            <td>Aerodynamic roughness length z₀ per cell</td>
+            <td>ESA WorldCover 2021 (Cloud-Optimised GeoTIFF)</td>
+            <td>10 m</td>
+          </tr>
+          <tr>
+            <td>Simulation output</td>
+            <td>3D velocity/pressure fields and 2D surface maps read by the viewer</td>
+            <td>Browser IndexedDB (written by the Web Worker, read by the viewer)</td>
+            <td>—</td>
+          </tr>
+        </table>
+        <p>
+          Elevation tiles use the Terrarium RGB encoding: <code>elevation = R×256 + G + B/256 − 32768</code> metres,
+          delivered in Web Mercator (EPSG:3857) and reprojected to WGS84 before use.
+          ESA WorldCover is fetched as a Cloud-Optimised GeoTIFF (COG) — only the portion covering the bounding box
+          is downloaded via HTTP range requests.
+        </p>
 
         <!-- ─ TIPS ─ -->
         <h2>Tips for Useful Results</h2>

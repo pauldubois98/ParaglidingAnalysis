@@ -506,6 +506,57 @@
       the first fluid cell above the surface.
     </p>
 
+    <!-- ─ PIPELINE ─ -->
+    <h2>Pipeline Overview</h2>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body"><strong>Fetch terrain</strong> — AWS Terrarium RGB-encoded tiles are downloaded at the chosen zoom level,
+        decoded to metres, and bilinearly resampled to the NX × NY simulation grid.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body"><strong>Fetch land cover</strong> — ESA WorldCover 2021 COG GeoTIFF is fetched for the bounding box,
+        resampled to the grid, and converted to per-cell thermal factor <code>tf</code> and time constant <code>τ</code>.
+        A slope-based heuristic is used as fallback when the file is unavailable.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body"><strong>ERA5 calibration</strong> — Open-Meteo archive API is queried for historical 2 m air
+        temperature and surface temperature at the site centre. The median clear-sky midday surface–air difference is used
+        to set <code>max_heat</code>, or the user can override it manually.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body"><strong>Build 3D grid and solid mask</strong> — the NX × NY × NZ Cartesian grid is constructed.
+        Each cell is flagged solid if its centre lies below the terrain surface; fluid otherwise. The first fluid cell
+        above each terrain column is identified for surface heat-flux injection.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-body"><strong>Compute solar heating maps</strong> — for each scenario time step, solar geometry,
+        terrain shadow ray-casting, land-cover factors, and atmospheric transmittance are combined to produce the
+        per-cell surface heat flux <code>Q_Ks(x,y)</code> that drives the simulation at that scenario time.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-body"><strong>Spin-up</strong> — the solver is advanced for the configured number of spin-up steps
+        before the first snapshot, allowing convective motions to develop from the initially quiescent (zero-velocity)
+        field.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">7</div>
+      <div class="step-body"><strong>Scenario loop</strong> — for each output time step the corresponding heat flux is
+        applied, then the NS solver runs the configured number of steps: Smagorinsky viscosity → semi-Lagrangian
+        advection → explicit diffusion → buoyancy → stratification → surface flux → Red-Black SOR pressure → projection.
+        2D surface fields and 3D cross-section slices are snapshotted.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">8</div>
+      <div class="step-body"><strong>Export to IndexedDB</strong> — all scenario snapshots plus static fields (elevation,
+        land-cover map) are packed and stored in the browser's IndexedDB, from where the Three.js viewer reads them.</div>
+    </div>
+
     <!-- ─ PHYSICS MODELLED ─ -->
     <h2>Physics Modelled</h2>
 
@@ -1096,6 +1147,48 @@
           to the exploitable thermal column.</td>
       </tr>
     </table>
+
+    <!-- ─ DATA SOURCES ─ -->
+    <h2>Data Sources</h2>
+    <table class="param-table">
+      <tr><th>Dataset</th><th>Used for</th><th>Source</th><th>Resolution</th></tr>
+      <tr>
+        <td>Elevation</td>
+        <td>Terrain mesh, solid mask, surface-flux injection point</td>
+        <td>AWS Terrain Tiles — Terrarium RGB encoding (IGN RGE Alti for France)</td>
+        <td>~7 m (zoom 14)</td>
+      </tr>
+      <tr>
+        <td>Land cover</td>
+        <td>Thermal factor tf, time constant τ per cell</td>
+        <td>ESA WorldCover 2021 (Cloud-Optimised GeoTIFF)</td>
+        <td>10 m</td>
+      </tr>
+      <tr>
+        <td>Calibration temperature</td>
+        <td>max_heat scale factor</td>
+        <td>ERA5 reanalysis via Open-Meteo archive API</td>
+        <td>~28 km</td>
+      </tr>
+      <tr>
+        <td>Sun position</td>
+        <td>Solar azimuth and elevation at each scenario time</td>
+        <td>Computed from lat/lon/date/time (astronomical formula)</td>
+        <td>—</td>
+      </tr>
+      <tr>
+        <td>Simulation output</td>
+        <td>Scenario snapshots read by the viewer</td>
+        <td>Browser IndexedDB (written by the Web Worker, read by the viewer)</td>
+        <td>—</td>
+      </tr>
+    </table>
+    <p>
+      Elevation tiles use the Terrarium RGB encoding: <code>elevation = R×256 + G + B/256 − 32768</code> metres,
+      delivered in Web Mercator (EPSG:3857) and reprojected to WGS84 before use.
+      ESA WorldCover is fetched as a Cloud-Optimised GeoTIFF (COG) — only the portion covering the bounding box
+      is downloaded via HTTP range requests, avoiding full-file downloads.
+    </p>
 
     <!-- ─ TIPS ─ -->
     <h2>Tips for Realistic Results</h2>
