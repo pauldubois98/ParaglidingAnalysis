@@ -2347,6 +2347,8 @@
       simResult = null;
       document.getElementById("plots-area").style.display = "none";
       setProgress(0);
+      document.getElementById("btn-fetch").disabled = true;
+      document.getElementById("btn-sim").disabled = true;
 
       try {
         const bbox = {
