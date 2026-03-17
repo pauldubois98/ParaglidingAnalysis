@@ -132,10 +132,6 @@
       margin-bottom: 6px;
     }
 
-    .btn:last-child {
-      margin-bottom: 0;
-    }
-
     .btn:hover {
       background: rgba(60, 110, 180, 0.4);
       color: #d0e8ff;
@@ -476,12 +472,23 @@
     <!-- /panel-body -->
 
     <div id="panel-footer">
-      <button class="btn set-btn" id="btn-set-area">
-        Set area and markers
-      </button>
-      <button class="btn reset" id="btn-share">
-        Copy share link
-      </button>
+      <div class="footer-row">
+        <button class="btn set-btn" id="btn-set-area">
+          Set
+        </button>
+        <button class="btn" id="btn-share">
+          Copy link
+        </button>
+      </div>
+      <!-- <div class="section-title" style="margin-top: 10px">Simulations</div> -->
+      <div class="footer-row">
+        <a href="thermal-simulation" class="btn">Thermal</a>
+        <a href="thermal-ns-simulation" class="btn">Thermal NS</a>
+      </div>
+      <div class="footer-row">
+        <a href="wind-simulation" class="btn">Wind</a>
+        <a href="wind-ns-simulation" class="btn">Wind NS</a>
+      </div>
     </div>
   </div>
 
