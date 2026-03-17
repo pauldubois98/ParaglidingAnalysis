@@ -438,6 +438,7 @@
     // ═══════════════════════════════════════════════════════════════════
 
     let _stopRequested = false;
+    let _weatherSkipResolve = null;
     const yieldUI = async () => {
       await new Promise((r) => setTimeout(r, 0));
       if (_stopRequested) throw new Error("__STOPPED__");
@@ -2407,7 +2408,7 @@
           sim.ny,
         );
 
-        // ── Fetch weather calibration data ───────────────────────────────
+        // ── Fetch weather calibration data (non-blocking) ────────────────
         setStatus("Fetching weather calibration data…");
         const dateStr = document.getElementById("sim_date").value;
         const windowDays = parseInt(
@@ -2416,40 +2417,45 @@
         const centerLat = (bbox.min_lat + bbox.max_lat) / 2;
         const centerLon = (bbox.min_lon + bbox.max_lon) / 2;
         const weatherMode = getWeatherMode();
-
-        if (!validateDate()) {
-          throw new Error(
-            "Invalid date for selected weather mode. Please correct the date.",
-          );
-        }
-
-        log(`Fetching ${weatherMode} weather data for ${dateStr}…`);
         const tzOffsetFetch = parseInt(
           document.getElementById("tz_offset").value,
         );
-        const {
-          records: era5Records,
-          diurnal: era5Diurnal
-        } =
-        await fetchWeatherData(
-          centerLat,
-          centerLon,
-          dateStr,
-          weatherMode,
-          windowDays,
-          (msg, level) => log(msg, level),
-          tzOffsetFetch,
-        );
-        if (era5Records.length) {
-          log(
-            `Weather data: ${era5Records.length} clear-sky midday observations collected.`,
-            "success",
-          );
+        let era5Records = [], era5Diurnal = Array(24).fill(null);
+        if (!validateDate()) {
+          log("Invalid date for weather mode — skipping weather fetch, using manual max_heat.", "warn");
+          document.getElementById("era5_auto").checked = false;
         } else {
-          log(
-            "Weather data: no data returned — max_heat will use manual/fallback value.",
-            "warn",
-          );
+          document.getElementById("btn-stop").disabled = false;
+          try {
+            log(`Fetching ${weatherMode} weather data for ${dateStr}…`);
+            const skipPromise = new Promise(r => { _weatherSkipResolve = r; });
+            const result = await Promise.race([
+              fetchWeatherData(centerLat, centerLon, dateStr, weatherMode, windowDays,
+                (msg, level) => log(msg, level), tzOffsetFetch),
+              skipPromise,
+            ]);
+            _weatherSkipResolve = null;
+            if (result) {
+              ({ records: era5Records, diurnal: era5Diurnal } = result);
+              if (era5Records.length) {
+                log(
+                  `Weather data: ${era5Records.length} clear-sky midday observations collected.`,
+                  "success",
+                );
+              } else {
+                document.getElementById("era5_auto").checked = false;
+                log("Weather data: no data returned — max_heat will use manual/fallback value.", "warn");
+              }
+            } else {
+              document.getElementById("era5_auto").checked = false;
+              log("Weather fetch skipped — using manual max_heat.", "warn");
+            }
+          } catch (e) {
+            _weatherSkipResolve = null;
+            document.getElementById("era5_auto").checked = false;
+            log(`Weather fetch failed: ${e.message} — using manual max_heat.`, "warn");
+          }
+          document.getElementById("btn-stop").disabled = true;
         }
         setProgress(0.98);
         renderERA5Plot(document.getElementById("plot-era5"), era5Records);
@@ -2480,7 +2486,12 @@
     // ═══════════════════════════════════════════════════════════════════
 
     function stopSim() {
-      _stopRequested = true;
+      if (_weatherSkipResolve) {
+        _weatherSkipResolve();
+        _weatherSkipResolve = null;
+      } else {
+        _stopRequested = true;
+      }
       document.getElementById("btn-stop").disabled = true;
     }
 

@@ -3057,29 +3057,38 @@
         const tzOffsetFetch = parseInt(
           document.getElementById("tz_offset").value,
         );
-        if (!validateDate())
-          throw new Error("Invalid date for selected weather mode.");
-        const {
-          records: era5Records,
-          diurnal: era5Diurnal
-        } =
-        await fetchWeatherData(
-          centerLat,
-          centerLon,
-          dateStr,
-          weatherMode,
-          windowDays,
-          (msg) => log(msg),
-          tzOffsetFetch,
-        );
-        if (era5Records.length) {
-          log(
-            `Weather: ${era5Records.length} clear-sky midday observations.`,
-            "success",
-          );
-        } else {
+        let era5Records = [], era5Diurnal = Array(24).fill(null);
+        if (!validateDate()) {
+          log("Invalid date for weather mode — skipping weather fetch, using manual max_heat.", "warn");
           document.getElementById("era5_auto").checked = false;
-          log("Weather: no data — will use fallback max_heat.", "warn");
+        } else {
+          document.getElementById("btn-stop").disabled = false;
+          try {
+            const skipPromise = new Promise(r => { _weatherSkipResolve = r; });
+            const result = await Promise.race([
+              fetchWeatherData(centerLat, centerLon, dateStr, weatherMode, windowDays,
+                (msg) => log(msg), tzOffsetFetch),
+              skipPromise,
+            ]);
+            _weatherSkipResolve = null;
+            if (result) {
+              ({ records: era5Records, diurnal: era5Diurnal } = result);
+              if (era5Records.length) {
+                log(`Weather: ${era5Records.length} clear-sky midday observations.`, "success");
+              } else {
+                document.getElementById("era5_auto").checked = false;
+                log("Weather: no data — will use fallback max_heat.", "warn");
+              }
+            } else {
+              document.getElementById("era5_auto").checked = false;
+              log("Weather fetch skipped — using manual max_heat.", "warn");
+            }
+          } catch (e) {
+            _weatherSkipResolve = null;
+            document.getElementById("era5_auto").checked = false;
+            log(`Weather fetch failed: ${e.message} — using manual max_heat.`, "warn");
+          }
+          document.getElementById("btn-stop").disabled = true;
         }
         setProgress(0.98);
         renderERA5Plot(document.getElementById("plot-era5"), era5Records);
@@ -3108,11 +3117,15 @@
     //  MAIN PIPELINE: RUN NS SIMULATION
     // ═══════════════════════════════════════════════════════════════════
     let _activeWorker = null;
+    let _weatherSkipResolve = null;
 
     function stopSim() {
-      if (_activeWorker) _activeWorker.postMessage({
-        type: "stop"
-      });
+      if (_weatherSkipResolve) {
+        _weatherSkipResolve();
+        _weatherSkipResolve = null;
+      } else if (_activeWorker) {
+        _activeWorker.postMessage({ type: "stop" });
+      }
       document.getElementById("btn-stop").disabled = true;
     }
 
