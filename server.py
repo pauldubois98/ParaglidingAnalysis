@@ -7,7 +7,7 @@ browser can reach external APIs (open-meteo ERA5, ESA WorldCover COG)
 without hitting CORS restrictions.
 
 Usage:
-    python server.py          # serves on port 8000
+    python server.py          # serves on port 4000
     python server.py 9000     # custom port
 """
 
@@ -17,7 +17,7 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from socketserver import ThreadingMixIn
 import requests
 
-PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8000
+PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 4000
 
 # Allowlist: only proxy these hosts (security guard for local dev)
 ALLOWED_HOSTS = {
