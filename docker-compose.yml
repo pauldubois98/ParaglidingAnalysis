@@ -7,8 +7,12 @@ services:
     restart: unless-stopped
     networks:
       - venerqueserver
+      - ionosserver
 
 networks:
   venerqueserver:
     external: true
     name: venerqueserver-network
+  ionosserver:
+    external: true
+    name: ionos-internal
