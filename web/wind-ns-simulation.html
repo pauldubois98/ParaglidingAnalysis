@@ -1683,8 +1683,8 @@
           dx,
           dy
         } = terrainData;
-        const nx2 = Math.round(nx / 2)+1;
-        const ny2 = Math.round(ny / 2)+1;
+        const nx2 = Math.round(nx / 2) + 1;
+        const ny2 = Math.round(ny / 2) + 1;
         const dx2 = dx * 2;
         const dy2 = dx * 2;
         log(
@@ -1934,8 +1934,8 @@
     function applyPreset(name) {
       const s = (v) => v; // shorthand
       if (name === "coarse") {
-        const nx = terrainData ? Math.round(terrainData.nx / 2)+1 : 40;
-        const ny = terrainData ? Math.round(terrainData.ny / 2)+1 : 40;
+        const nx = terrainData ? Math.round(terrainData.nx / 2) + 1 : 40;
+        const ny = terrainData ? Math.round(terrainData.ny / 2) + 1 : 40;
         document.getElementById("sim_nx").value = nx;
         document.getElementById("sim_ny").value = ny;
         document.getElementById("nz").value = 20;

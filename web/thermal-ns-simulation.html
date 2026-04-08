@@ -3057,14 +3057,17 @@
         const tzOffsetFetch = parseInt(
           document.getElementById("tz_offset").value,
         );
-        let era5Records = [], era5Diurnal = Array(24).fill(null);
+        let era5Records = [],
+          era5Diurnal = Array(24).fill(null);
         if (!validateDate()) {
           log("Invalid date for weather mode — skipping weather fetch, using manual max_heat.", "warn");
           document.getElementById("era5_auto").checked = false;
         } else {
           document.getElementById("btn-stop").disabled = false;
           try {
-            const skipPromise = new Promise(r => { _weatherSkipResolve = r; });
+            const skipPromise = new Promise(r => {
+              _weatherSkipResolve = r;
+            });
             const result = await Promise.race([
               fetchWeatherData(centerLat, centerLon, dateStr, weatherMode, windowDays,
                 (msg) => log(msg), tzOffsetFetch),
@@ -3072,7 +3075,10 @@
             ]);
             _weatherSkipResolve = null;
             if (result) {
-              ({ records: era5Records, diurnal: era5Diurnal } = result);
+              ({
+                records: era5Records,
+                diurnal: era5Diurnal
+              } = result);
               if (era5Records.length) {
                 log(`Weather: ${era5Records.length} clear-sky midday observations.`, "success");
               } else {
@@ -3124,7 +3130,9 @@
         _weatherSkipResolve();
         _weatherSkipResolve = null;
       } else if (_activeWorker) {
-        _activeWorker.postMessage({ type: "stop" });
+        _activeWorker.postMessage({
+          type: "stop"
+        });
       }
       document.getElementById("btn-stop").disabled = true;
     }

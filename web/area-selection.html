@@ -512,24 +512,39 @@
       if (!bboxStr) return null;
       const [minLat, maxLat, minLon, maxLon] = bboxStr.split(",").map(Number);
       if ([minLat, maxLat, minLon, maxLon].some(isNaN)) return null;
-      const result = { bbox: { min_lat: minLat, max_lat: maxLat, min_lon: minLon, max_lon: maxLon } };
+      const result = {
+        bbox: {
+          min_lat: minLat,
+          max_lat: maxLat,
+          min_lon: minLon,
+          max_lon: maxLon
+        }
+      };
       const toStr = p.get("to");
       if (toStr) {
         const [lat, lon] = toStr.split(",").map(Number);
-        if (!isNaN(lat) && !isNaN(lon)) result.takeoff = { lat, lon };
+        if (!isNaN(lat) && !isNaN(lon)) result.takeoff = {
+          lat,
+          lon
+        };
       }
       const laStr = p.get("la");
       if (laStr) {
         const [lat, lon] = laStr.split(",").map(Number);
-        if (!isNaN(lat) && !isNaN(lon)) result.landing = { lat, lon };
+        if (!isNaN(lat) && !isNaN(lon)) result.landing = {
+          lat,
+          lon
+        };
       }
       return result;
     }
 
     function buildShareUrl() {
       const b = bboxFromFields();
-      const toLat = getField("in-to-lat"), toLon = getField("in-to-lon");
-      const laLat = getField("in-la-lat"), laLon = getField("in-la-lon");
+      const toLat = getField("in-to-lat"),
+        toLon = getField("in-to-lon");
+      const laLat = getField("in-la-lat"),
+        laLon = getField("in-la-lon");
       const bbox = `${b.min_lat.toFixed(6)},${b.max_lat.toFixed(6)},${b.min_lon.toFixed(6)},${b.max_lon.toFixed(6)}`;
       const to = `${toLat.toFixed(6)},${toLon.toFixed(6)}`;
       const la = `${laLat.toFixed(6)},${laLon.toFixed(6)}`;
@@ -564,7 +579,9 @@
       }
     }
 
-    function setAreaReady(_ready) { saveAreaState(); }
+    function setAreaReady(_ready) {
+      saveAreaState();
+    }
 
     // ── Defaults ──────────────────────────────────────────────────────────────────
     const DEFAULTS = {
@@ -750,7 +767,12 @@
     }
 
     function fitMapToBbox(b) {
-      map.fitBounds([[b.min_lat, b.min_lon], [b.max_lat, b.max_lon]], { padding: [40, 40] });
+      map.fitBounds([
+        [b.min_lat, b.min_lon],
+        [b.max_lat, b.max_lon]
+      ], {
+        padding: [40, 40]
+      });
     }
 
     if (_saved) {
@@ -760,10 +782,16 @@
       setStatus("Requesting your location…");
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const lat = pos.coords.latitude, lon = pos.coords.longitude;
+          const lat = pos.coords.latitude,
+            lon = pos.coords.longitude;
           const d = 0.03;
           const km1 = 1 / 111; // ~1 km in degrees latitude
-          const bbox = { min_lat: lat - d, max_lat: lat + d, min_lon: lon - d * 1.4, max_lon: lon + d * 1.4 };
+          const bbox = {
+            min_lat: lat - d,
+            max_lat: lat + d,
+            min_lon: lon - d * 1.4,
+            max_lon: lon + d * 1.4
+          };
           applyBbox(bbox);
           applyTakeoff(lat + km1, lon);
           applyLanding(lat - km1, lon);
@@ -774,8 +802,9 @@
           applyState(DEFAULTS);
           fitMapToBbox(DEFAULTS.bbox);
           setStatus('Location unavailable — showing default area. Use "Draw bbox" or edit the fields.');
+        }, {
+          timeout: 8000
         },
-        { timeout: 8000 },
       );
     } else {
       applyState(DEFAULTS);
