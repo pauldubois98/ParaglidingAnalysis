@@ -171,18 +171,6 @@
       color: #a0c8e8;
     }
 
-    .btn.set-btn {
-      background: rgba(30, 180, 100, 0.22);
-      border-color: rgba(30, 200, 100, 0.55);
-      color: #50e898;
-    }
-
-    .btn.set-btn:hover {
-      background: rgba(30, 180, 100, 0.38);
-      border-color: rgba(30, 200, 100, 0.8);
-      color: #80ffb0;
-    }
-
     /* ── Size info (read-only) ── */
     .info-row {
       display: flex;
@@ -473,9 +461,6 @@
 
     <div id="panel-footer">
       <div class="footer-row">
-        <button class="btn set-btn" id="btn-set-area">
-          Set
-        </button>
         <button class="btn" id="btn-share">
           Copy link
         </button>
@@ -579,7 +564,7 @@
       }
     }
 
-    function setAreaReady(_ready) {}
+    function setAreaReady(_ready) { saveAreaState(); }
 
     // ── Defaults ──────────────────────────────────────────────────────────────────
     const DEFAULTS = {
@@ -1093,13 +1078,6 @@
     } else if (!navigator.geolocation) {
       fitMapToBbox(DEFAULTS.bbox);
     }
-
-    // ── Set area and markers ──────────────────────────────────────────────────────
-    document.getElementById("btn-set-area").addEventListener("click", () => {
-      saveAreaState();
-      setAreaReady(true);
-      showToast("Area and markers saved.");
-    });
 
     // ── Copy share link ───────────────────────────────────────────────────────────
     document.getElementById("btn-share").addEventListener("click", () => {
